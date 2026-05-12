@@ -1,0 +1,770 @@
+﻿
+================================================================================
+DOC: Senior Architect Interview Prep.docx  (total lines: 511)
+================================================================================
+[Normal] Senior Software Architect
+[Normal] Interview Preparation Guide
+[Normal] ───────────────────────────────────────────────────────
+[Normal] • Core Architecture Fundamentals• Microservices (Deep Dive)• OpenShift Routing &amp; Load Balancing• OpenShift
+[Normal] 1. CORE ARCHITECTURE FUNDAMENTALS
+[Normal] A Senior Architect must demonstrate mastery of foundational principles and know when and why to apply each pat
+[Normal] 1.1 Key Principles
+[ListBullet] CAP Theorem – Consistency, Availability, Partition Tolerance (pick any 2 in a distributed system)
+[ListBullet] SOLID – Single Responsibility, Open/Closed, Liskov, Interface Segregation, Dependency Inversion
+[ListBullet] 12-Factor App – methodology for building scalable, maintainable SaaS applications
+[ListBullet] DRY / KISS / YAGNI – avoid repetition, keep it simple, don't over-engineer
+[ListBullet] Conway's Law – system architecture mirrors communication structure of the organisation
+[Normal] 1.2 Architecture Styles
+[Normal] Style
+[Normal] Best For
+[Normal] Trade-offs
+[Normal] Monolith
+[Normal] Small teams, rapid MVP
+[Normal] Hard to scale independently; tight coupling
+[Normal] Microservices
+[Normal] Large teams, independent deployability
+[Normal] Distributed complexity; network overhead
+[Normal] Event-Driven
+[Normal] Async workflows, high throughput
+[Normal] Eventual consistency; harder to debug
+[Normal] Serverless
+[Normal] Bursty / unpredictable workloads
+[Normal] Cold starts; vendor lock-in
+[Normal] CQRS+Event Src
+[Normal] Audit trails, complex domains
+[Normal] Complexity; read/write model sync
+[Normal] 1.3 Design Patterns to Know
+[Normal] Creational / Structural
+[ListBullet] Factory, Abstract Factory, Builder, Singleton (use sparingly)
+[ListBullet] Adapter, Facade, Decorator, Proxy
+[Normal] Distributed Systems
+[ListBullet] Saga Pattern – manage distributed transactions without 2PC
+[ListBullet] Strangler Fig – incremental migration from monolith to microservices
+[ListBullet] Sidecar – offload cross-cutting concerns (logging, tracing) to companion process
+[ListBullet] Anti-Corruption Layer – protect domain model when integrating legacy systems
+[ListBullet] Bulkhead – isolate failures so one service doesn't sink the fleet
+[Normal] 1.4 High Availability &amp; Fault Tolerance
+[ListBullet] Active-Active vs Active-Passive failover
+[ListBullet] RPO (Recovery Point Objective) vs RTO (Recovery Time Objective)
+[ListBullet] Chaos Engineering – deliberately inject failures (Netflix Simian Army, LitmusChaos)
+[ListBullet] Graceful degradation – serve reduced functionality rather than hard failure
+[Normal] 💡 Interview Tip: Always frame your answers around trade-offs. Never say 'X is always better than Y' — say 'X i
+[Normal] 2. MICROSERVICES – DEEP DIVE
+[Normal] 2.1 Decomposition Strategies
+[ListBullet] Domain-Driven Design (DDD) – identify Bounded Contexts; each becomes a service
+[ListBullet] Subdomain types: Core (competitive differentiator), Supporting, Generic
+[ListBullet] Aggregates – cluster of related entities with a single root; don't split aggregates across services
+[ListBullet] Service granularity: too fine = chatty network; too coarse = monolith-in-disguise
+[Normal] 2.2 Communication Patterns
+[Normal] Pattern
+[Normal] Protocol
+[Normal] Use When
+[Normal] Sync request/reply
+[Normal] REST / gRPC
+[Normal] Immediate response required (user-facing reads)
+[Normal] Async messaging
+[Normal] Kafka / RabbitMQ
+[Normal] Decoupled workflows, high throughput
+[Normal] GraphQL
+[Normal] HTTP
+[Normal] Flexible queries; multiple clients with diff needs
+[Normal] Service Mesh (Istio)
+[Normal] mTLS + sidecar
+[Normal] Cross-cutting: observability, auth, retries at infra level
+[Normal] 2.3 Resilience Patterns
+[Normal] Circuit Breaker (Resilience4j / Hystrix)
+[ListBullet] CLOSED → OPEN (after N failures) → HALF-OPEN (test probe) → CLOSED
+[ListBullet] Prevents cascade failures; gives downstream time to recover
+[Normal] Other Patterns
+[ListBullet] Retry with exponential backoff + jitter – avoid thundering herd
+[ListBullet] Timeout – never wait indefinitely; set per-call and overall deadlines
+[ListBullet] Rate Limiting – protect services from being overwhelmed
+[ListBullet] Bulkhead – separate thread pools per downstream; failure in one doesn't starve others
+[ListBullet] Fallback – return cached/default data when dependency is unavailable
+[Normal] 2.4 Data Management
+[Normal] ⚠️ Key Concept: Each microservice must own its data store. Sharing databases couples services and defeats the 
+[ListBullet] Database-per-service: each service chooses the right storage (SQL, NoSQL, Graph, Time-series)
+[ListBullet] API Composition – aggregate data from multiple services in a BFF or API Gateway
+[ListBullet] CQRS – separate read (Query) and write (Command) models for complex domains
+[ListBullet] Event Sourcing – persist state as immutable event log; derive current state by replaying events
+[Normal] Distributed Transactions – Saga Pattern
+[Normal] Saga Type
+[Normal] Mechanism
+[Normal] Best For
+[Normal] Choreography
+[Normal] Services emit and react to events (no central coordinator)
+[Normal] Simple flows; loosely coupled
+[Normal] Orchestration
+[Normal] Central orchestrator directs each step and handles rollback
+[Normal] Complex flows; easier to visualise
+[Normal] 2.5 Observability (The Three Pillars)
+[ListBullet] Logs – structured JSON logs; centralise with ELK Stack (Elasticsearch, Logstash, Kibana)
+[ListBullet] Metrics – Prometheus scrapes metrics; Grafana dashboards; alert on SLOs
+[ListBullet] Traces – OpenTelemetry instrumentation → Jaeger / Zipkin for distributed request tracing
+[ListBullet] Correlation IDs – inject at edge; propagate through every service for end-to-end tracing
+[Normal] 2.6 Security
+[ListBullet] mTLS between services (via Istio / service mesh) – mutual authentication
+[ListBullet] OAuth2 / OIDC at API Gateway; JWT propagation internally
+[ListBullet] Secrets management – Vault, Kubernetes Secrets (encrypted at rest), external secrets operator
+[ListBullet] Principle of least privilege – each service has minimal permissions
+[Normal] 💡 Interview Tip: Expect: 'How do you handle distributed transactions?' Answer: Saga (choreography for simple, 
+[Normal] 3. OPENSHIFT – ROUTING &amp; LOAD BALANCING
+[Normal] 3.1 OpenShift Router vs Kubernetes Ingress
+[Normal] Feature
+[Normal] OpenShift Route
+[Normal] Kubernetes Ingress
+[Normal] Object type
+[Normal] Route (OpenShift-native)
+[Normal] Ingress (K8s standard)
+[Normal] Default controller
+[Normal] HAProxy Router
+[Normal] Various (NGINX, Traefik, etc.)
+[Normal] TLS termination
+[Normal] Edge / Passthrough / Re-encrypt
+[Normal] TLS via Secret annotation
+[Normal] Weight-based routing
+[Normal] Native (route weights)
+[Normal] Via annotations (controller-specific)
+[Normal] Wildcard routes
+[Normal] Supported natively
+[Normal] Controller-dependent
+[Normal] 3.2 TLS Termination Modes
+[ListBullet] Edge – TLS terminates at the router; internal traffic is plain HTTP
+[ListBullet] Passthrough – TLS passes all the way to the pod; router cannot inspect traffic
+[ListBullet] Re-encrypt – router terminates TLS, re-encrypts for pod; full encryption end-to-end
+[Normal] 3.3 Service Types &amp; Load Balancing
+[Normal] Service Type
+[Normal] Scope
+[Normal] Use Case
+[Normal] ClusterIP
+[Normal] Internal only
+[Normal] Service-to-service communication
+[Normal] NodePort
+[Normal] External via node IP:port
+[Normal] Dev/test; not for production
+[Normal] LoadBalancer
+[Normal] External via cloud LB
+[Normal] Production external access (cloud providers)
+[Normal] ExternalName
+[Normal] DNS alias
+[Normal] Access external services via K8s DNS
+[Normal] Load Balancing Algorithms
+[ListBullet] Round Robin (default) – requests distributed evenly across pods
+[ListBullet] Least Connections – route to pod with fewest active connections
+[ListBullet] Session Affinity (Sticky Sessions) – route same client to same pod via cookie/IP hash
+
+================================================================================
+DOC: react-interview-guide.docx  (total lines: 445)
+================================================================================
+[Normal] REACT
+[Normal] Interview Preparation Guide
+[Normal] </w:pBdr><w:spacing w:after="40"/><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:cs="Ar
+[Normal] Covering: Fundamentals • Hooks • Internals • Node.js • Vite • TypeScript • Patterns
+[Heading1] 1. React Fundamentals
+[Heading2] 1.1 What is React?
+[Normal] React is a JavaScript library (not a framework) created by Facebook (Meta) in 2013 for building user interface
+[Normal] Key Characteristics
+[ListParagraph] Declarative: You describe WHAT the UI should look like, React handles HOW to update the DOM.
+[ListParagraph] Component-Based: UI is divided into small, reusable, isolated pieces called components.
+[ListParagraph] Unidirectional Data Flow: Data flows from parent to child via props, making the app predictable and easier to 
+[Normal] Example
+[Normal] </w:pBdr><w:shd w:fill="F1F5F9" w:val="clear"/><w:spacing w:after="0" w:before="0" w:line="276"/><w:ind w:left
+[Normal] function Welcome({ name }) {
+[Normal] return &lt;h1&gt;Hello, {name}!&lt;/h1&gt;;
+[Normal] }
+[Normal] // React figures out how to update the DOM efficiently
+[Heading2] 1.2 What is JSX?
+[Normal] JSX (JavaScript XML) is a syntax extension that lets you write HTML-like code inside JavaScript. It is NOT val
+[Normal] JSX to JavaScript Transformation
+[Normal] </w:pBdr><w:shd w:fill="F1F5F9" w:val="clear"/><w:spacing w:after="0" w:before="0" w:line="276"/><w:ind w:left
+[Normal] const el = &lt;h1 className=&quot;title&quot;&gt;Hello&lt;/h1&gt;;
+[Normal] // What Babel compiles it to:
+[Normal] const el = React.createElement(&apos;h1&apos;, { className: &apos;title&apos; }, &apos;Hello&apos;);
+[Normal] Rules of JSX
+[ListParagraph] Must return a single root element (use &lt;&gt; Fragment if needed)
+[ListParagraph] Use className instead of class
+[ListParagraph] Use camelCase for attributes: onClick, onChange
+[ListParagraph] JavaScript expressions go inside {curly braces}
+[ListParagraph] Self-close tags: &lt;img /&gt;, &lt;br /&gt;
+[Heading2] 1.3 Components: Functional vs Class
+[Normal] Functional Components (Modern — use these)
+[Normal] </w:pBdr><w:shd w:fill="F1F5F9" w:val="clear"/><w:spacing w:after="0" w:before="0" w:line="276"/><w:ind w:left
+[Normal] const [count, setCount] = useState(0);
+[Normal] return (
+[Normal] &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+[Normal] Clicked {count} times
+[Normal] &lt;/button&gt;
+[Normal] );
+[Normal] }
+[Normal] Class Components (Legacy — know for interviews)
+[Normal] </w:pBdr><w:shd w:fill="F1F5F9" w:val="clear"/><w:spacing w:after="0" w:before="0" w:line="276"/><w:ind w:left
+[Normal] state = { count: 0 };
+[Normal] render() {
+[Normal] return (
+[Normal] &lt;button onClick={() =&gt;
+[Normal] this.setState({ count: this.state.count + 1 })}&gt;
+[Normal] Clicked {this.state.count} times
+[Normal] &lt;/button&gt;
+[Normal] );
+[Normal] }
+[Normal] }
+[Normal] ✅ Why Functional Components Won
+[Normal] Simpler syntax, hooks for state/effects, easier to test, no ‘this’ binding issues, better performance with Rea
+[Heading2] 1.4 Props vs State
+[Normal] Feature
+[Normal] Props
+[Normal] State
+[Normal] Owner
+[Normal] Parent component
+[Normal] Component itself
+[Normal] Mutable?
+[Normal] ❌ Read-only
+[Normal] ✅ Can update via setter
+[Normal] Direction
+[Normal] Parent → Child
+[Normal] Internal
+[Normal] Re-render?
+[Normal] When parent re-renders
+[Normal] When setState is called
+[Normal] </w:pBdr><w:shd w:fill="F1F5F9" w:val="clear"/><w:spacing w:after="0" w:before="0" w:line="276"/><w:ind w:left
+[Normal] const [user, setUser] = useState(&quot;Alice&quot;); // STATE
+[Normal] return &lt;Child name={user} /&gt;;               // PROP
+[Normal] }
+[Normal] function Child({ name }) {
+[Normal] // &apos;name&apos; is a PROP — cannot modify it
+[Normal] return &lt;p&gt;Hello, {name}&lt;/p&gt;;
+[Normal] }
+[Normal] Golden Rule
+[Normal] If data changes over time and affects rendering, it’s state. If it’s received from a parent, it’s a prop.
+[Heading2] 1.5 Conditional Rendering &amp; Lists
+[Normal] React uses plain JavaScript for conditional rendering — no special template syntax:
+[Normal] </w:pBdr><w:shd w:fill="F1F5F9" w:val="clear"/><w:spacing w:after="0" w:before="0" w:line="276"/><w:ind w:left
+[Normal] if (!isLoggedIn) return &lt;LoginPage /&gt;;
+[Normal] return (
+[Normal] &lt;div&gt;
+[Normal] {isAdmin ? &lt;AdminPanel /&gt; : &lt;UserPanel /&gt;}
+[Normal] {notifications.length &gt; 0 &amp;&amp; &lt;Badge count={notifications.length} /&gt;}
+[Normal] &lt;/div&gt;
+[Normal] );
+[Normal] }
+[Normal] ⚠️ Gotcha with &amp;&amp; Operator
+[Normal] Avoid {count &amp;&amp; &lt;Component /&gt;}. If count = 0, it renders “0” on screen. Use {count &gt; 0 &amp;&
+[Normal] Lists and Keys
+[Normal] </w:pBdr><w:shd w:fill="F1F5F9" w:val="clear"/><w:spacing w:after="0" w:before="0" w:line="276"/><w:ind w:left
+[Normal] return (
+[Normal] &lt;ul&gt;
+[Normal] {todos.map(todo =&gt; (
+[Normal] &lt;li key={todo.id}&gt;{todo.text}&lt;/li&gt;  // ✅ Unique, stable ID
+[Normal] ))}
+[Normal] &lt;/ul&gt;
+[Normal] );
+[Normal] }
+[Normal] // ❌ NEVER use index as key if list can reorder
+[Normal] // ❌ NEVER use Math.random() as key
+[Heading1] 2. React Hooks (Deep Dive)
+[Heading2] 2.1 useState — State Management
+[Normal] const [state, setState] = useState(initialValue);
+[Normal] Key Behaviours
+[ListParagraph] Functional update: When new state depends on old state, use setState(prev =&gt; prev + 1)
+[ListParagraph] Lazy initialization: Pass a function to useState for expensive initial computations: useState(() =&gt; compute
+[ListParagraph] Batching: Multiple setState calls in the same event handler are batched into a single re-render.
+[Normal] ⚠️ Objects &amp; Arrays — Always Create New References
+[Normal] user.name = “Bob”; setUser(user) won’t trigger a re-render. Use setUser({ ...user, name: “Bob” }) to create a 
+[Heading2] 2.2 useEffect — Side Effects
+[Normal] </w:pBdr><w:shd w:fill="F1F5F9" w:val="clear"/><w:spacing w:after="0" w:before="0" w:line="276"/><w:ind w:left
+[Normal] // EFFECT runs after render
+[Normal] return () =&gt; { /* CLEANUP before next effect or unmount */ };
+[Normal] }, [dependencies]);
+[Normal] Dependency Array Controls When It Runs
+[Normal] Dependency
+[Normal] Behaviour
+[Normal] useEffect(() =&gt; { ... })
+[Normal] Runs after EVERY render (usually wrong)
+[Normal] useEffect(() =&gt; { ... }, [])
+[Normal] Runs ONCE on mount only
+[Normal] useEffect(() =&gt; { ... }, [id])
+[Normal] Runs when ‘id’ changes
+[Normal] Real-World Example: API Fetch with Cleanup
+[Normal] </w:pBdr><w:shd w:fill="F1F5F9" w:val="clear"/><w:spacing w:after="0" w:before="0" w:line="276"/><w:ind w:left
+[Normal] let cancelled = false;
+[Normal] async function fetchUser() {
+[Normal] const res = await fetch(`/api/users/${id}`);
+[Normal] const data = await res.json();
+[Normal] if (!cancelled) setUser(data);
+[Normal] }
+[Normal] fetchUser();
+[Normal] return () =&gt; { cancelled = true; }; // Prevent race conditions
+[Normal] }, [id]);
+[Heading2] 2.3 useRef — Persistent Mutable Value
+[Normal] useRef holds a mutable value that does NOT cause re-renders when changed. Two main uses:
+[ListParagraph] DOM Access: Get a reference to a DOM element (e.g., focus an input).
+[ListParagraph] Persist values: Store interval IDs, previous values, or any mutable value across renders without triggering re
+[Normal] </w:pBdr><w:shd w:fill="F1F5F9" w:val="clear"/><w:spacing w:after="0" w:before="0" w:line="276"/><w:ind w:left
+[Normal] const inputRef = useRef(null);
+[Normal] const focusInput = () =&gt; inputRef.current.focus();
+[Normal] return &lt;input ref={inputRef} /&gt;;
+[Normal] }
+[Heading2] 2.4 useMemo &amp; useCallback — Performance
+[Normal] useMemo caches a computed VALUE. useCallback caches a FUNCTION reference.
+
+================================================================================
+DOC: Python Advanced Features Reference.docx  (total lines: 877)
+================================================================================
+[Normal] Python
+[Normal] Advanced Features &amp; Ecosystem
+[Normal] Decorators • Generators • Async/Await • Context Managers • Dunder Methods
+[Normal] Duck Typing • Metaprogramming • GIL • Testing • Data Science Ecosystem
+[Normal] 2026 Edition
+[Normal] Table of Contents
+[Heading1] 1. Advanced Language Features
+[Normal] Python offers powerful features beyond the basics that enable expressive, concise, and high-performance code. 
+[Heading2] 1.1 Comprehensions
+[Normal] # List comprehension
+[Normal] squares = [x**2 for x in range(10) if x % 2 == 0]
+[Normal] # Dict comprehension
+[Normal] word_lengths = {w: len(w) for w in [&apos;hello&apos;, &apos;world&apos;, &apos;python&apos;]}
+[Normal] # Set comprehension
+[Normal] unique_lengths = {len(w) for w in words}
+[Normal] # Nested comprehension (matrix flatten)
+[Normal] flat = [x for row in matrix for x in row]
+[Normal] # Generator expression (lazy, memory-efficient)
+[Normal] total = sum(x**2 for x in range(1_000_000))  # no list created
+[Heading2] 1.2 Unpacking &amp; Starred Expressions
+[Normal] # Extended unpacking
+[Normal] first, *middle, last = [1, 2, 3, 4, 5]  # middle = [2, 3, 4]
+[Normal] # Dict merging (Python 3.9+)
+[Normal] merged = {**defaults, **user_config}  # user_config overrides
+[Normal] merged = defaults | user_config       # same, cleaner
+[Normal] # Function argument unpacking
+[Normal] def greet(name, age): ...
+[Normal] data = {&apos;name&apos;: &apos;Alice&apos;, &apos;age&apos;: 30}
+[Normal] greet(**data)  # equivalent to greet(name=&apos;Alice&apos;, age=30)
+[Heading2] 1.3 Walrus Operator (:=)
+[Normal] The walrus operator assigns a value to a variable as part of an expression (Python 3.8+).
+[Normal] # Avoid calling expensive function twice
+[Normal] if (n := len(data)) &gt; 100:
+[Normal] print(f&apos;Too long: {n} items&apos;)
+[Normal] # In while loops
+[Normal] while chunk := file.read(8192):
+[Normal] process(chunk)
+[Normal] # In list comprehensions
+[Normal] results = [y for x in data if (y := transform(x)) is not None]
+[Heading2] 1.4 Structural Pattern Matching (match/case)
+[Normal] Python 3.10+ introduced match/case for powerful pattern matching with destructuring.
+[Normal] match command:
+[Normal] case {&apos;action&apos;: &apos;buy&apos;, &apos;item&apos;: item, &apos;qty&apos;: int(qty)}:
+[Normal] buy(item, qty)
+[Normal] case {&apos;action&apos;: &apos;sell&apos;, &apos;item&apos;: item}:
+[Normal] sell(item)
+[Normal] case {&apos;action&apos;: action}:
+[Normal] print(f&apos;Unknown action: {action}&apos;)
+[Normal] # With guards
+[Normal] match point:
+[Normal] case Point(x, y) if x == y:
+[Normal] print(&apos;On diagonal&apos;)
+[Normal] case Point(x, y):
+[Normal] print(f&apos;({x}, {y})&apos;)
+[Heading2] 1.5 Slots, Dataclasses &amp; NamedTuples
+[Normal] from dataclasses import dataclass, field
+[Normal] @dataclass(frozen=True, slots=True)  # immutable + memory-efficient
+[Normal] class Point:
+[Normal] x: float
+[Normal] y: float
+[Normal] label: str = &apos;origin&apos;
+[Normal] tags: list[str] = field(default_factory=list)
+[Normal] @property
+[Normal] def distance(self) -&gt; float:
+[Normal] return (self.x**2 + self.y**2) ** 0.5
+[Normal] # NamedTuple (lighter alternative)
+[Normal] from typing import NamedTuple
+[Normal] class Color(NamedTuple):
+[Normal] r: int
+[Normal] g: int
+[Normal] b: int
+[Normal] slots=True
+[Normal] Adding slots=True to dataclasses (Python 3.10+) uses __slots__ instead of __dict__, reducing memory by 30-40% 
+[Heading1] 2. Decorators
+[Normal] A decorator is a function that takes another function and returns a modified version. They are the primary mec
+[Heading2] 2.1 Basic Decorator
+[Normal] import functools
+[Normal] def timer(func):
+[Normal] @functools.wraps(func)  # preserves __name__, __doc__
+[Normal] def wrapper(*args, **kwargs):
+[Normal] import time
+[Normal] start = time.perf_counter()
+[Normal] result = func(*args, **kwargs)
+[Normal] elapsed = time.perf_counter() - start
+[Normal] print(f&apos;{func.__name__} took {elapsed:.4f}s&apos;)
+[Normal] return result
+[Normal] return wrapper
+[Normal] @timer
+[Normal] def slow_function():
+[Normal] import time; time.sleep(1)
+[Normal] return &apos;done&apos;
+[Heading2] 2.2 Decorator with Arguments
+[Normal] def retry(max_attempts=3, exceptions=(Exception,)):
+[Normal] def decorator(func):
+[Normal] @functools.wraps(func)
+[Normal] def wrapper(*args, **kwargs):
+[Normal] for attempt in range(1, max_attempts + 1):
+[Normal] try:
+[Normal] return func(*args, **kwargs)
+[Normal] except exceptions as e:
+[Normal] if attempt == max_attempts:
+[Normal] raise
+[Normal] print(f&apos;Attempt {attempt} failed: {e}&apos;)
+[Normal] return wrapper
+[Normal] return decorator
+[Normal] @retry(max_attempts=5, exceptions=(ConnectionError, TimeoutError))
+[Normal] async def fetch_data(url): ...
+[Heading2] 2.3 Class-Based Decorator
+[Normal] class CacheResult:
+[Normal] def __init__(self, func):
+[Normal] functools.update_wrapper(self, func)
+[Normal] self.func = func
+[Normal] self.cache = {}
+[Normal] def __call__(self, *args):
+[Normal] if args not in self.cache:
+[Normal] self.cache[args] = self.func(*args)
+[Normal] return self.cache[args]
+[Normal] @CacheResult
+[Normal] def fibonacci(n):
+[Normal] if n &lt; 2: return n
+[Normal] return fibonacci(n-1) + fibonacci(n-2)
+[Heading2] 2.4 Built-in Decorators
+[Normal] Decorator
+[Normal] Module
+[Normal] Purpose
+[Normal] @property
+[Normal] builtins
+[Normal] Getter/setter/deleter for computed attributes
+[Normal] @staticmethod
+[Normal] builtins
+[Normal] Method with no self/cls parameter
+[Normal] @classmethod
+[Normal] builtins
+[Normal] Method receives class (cls) not instance
+[Normal] @functools.wraps
+[Normal] functools
+[Normal] Preserve wrapped function metadata
+[Normal] @functools.lru_cache
+[Normal] functools
+[Normal] Memoize with LRU eviction (maxsize)
+[Normal] @functools.cache
+[Normal] functools
+[Normal] Unbounded memoization (Python 3.9+)
+[Normal] @functools.singledispatch
+[Normal] functools
+[Normal] Function overloading by first arg type
+[Normal] @dataclasses.dataclass
+[Normal] dataclasses
+[Normal] Auto-generate __init__, __repr__, __eq__
+[Normal] @abc.abstractmethod
+
+================================================================================
+DOC: load-balancing-openshift-guide.docx  (total lines: 699)
+================================================================================
+[Normal] Complete Guide to
+[Normal] API &amp; Traffic Load Balancing
+[Normal] In and Around OpenShift
+[Normal] </w:pBdr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:cs="Arial" w:eastAsia="Arial" w
+[Normal] Technical Reference Document
+[Normal] April 2026
+[Heading1] Table of Contents
+[Heading1] 1. API &amp; Traffic Load Balancing Fundamentals
+[Heading2] 1.1 What is Load Balancing?
+[Normal] Load balancing is the process of distributing incoming network traffic across multiple backend servers or serv
+[Normal] Without load balancing, a single server handles all traffic. If that server crashes or becomes overloaded, the
+[Heading2] 1.2 OSI Layer Classification
+[Normal] Load balancers operate at different layers of the OSI (Open Systems Interconnection) model. Understanding thes
+[Normal] Layer
+[Normal] Name
+[Normal] How It Works
+[Normal] Examples
+[Normal] Layer 4
+[Normal] Transport (TCP/UDP)
+[Normal] Routes based on IP address and port number. Does not inspect packet content. Fastest.
+[Normal] IPVS, Keepalived/LVS, HAProxy (TCP mode), AWS NLB
+[Normal] Layer 7
+[Normal] Application (HTTP)
+[Normal] Inspects HTTP headers, URL paths, cookies, and content. Enables intelligent routing decisions like path-based,
+[Normal] HAProxy (HTTP mode), NGINX, Envoy Proxy, OpenShift Router, Istio VirtualService
+[Heading2] 1.3 Load Balancing Algorithms
+[Normal] These are the core algorithms used by load balancers to decide which backend server receives each request:
+[Normal] Algorithm
+[Normal] How It Works
+[Normal] Best For
+[Normal] Round Robin
+[Normal] Requests distributed sequentially to each server in order. Server 1, then 2, then 3, repeat.
+[Normal] Servers with similar capacity. Simple, predictable distribution.
+[Normal] Weighted Round Robin
+[Normal] Like round robin, but servers receive traffic proportional to their assigned weight. A server with weight 3 ge
+[Normal] Heterogeneous server capacities. Gradual traffic shifting during deployments.
+[Normal] Least Connections
+[Normal] Sends new requests to the server currently handling the fewest active connections.
+[Normal] Long-lived connections like WebSockets, database connections, or LDAP sessions.
+[Normal] Source IP Hash
+[Normal] Hashes the client IP address to deterministically map each client to a specific server. Same client always rea
+[Normal] Session affinity / sticky sessions without cookies. Stateful applications.
+[Normal] Random
+[Normal] Randomly selects a backend server for each request. Statistically even distribution at scale.
+[Normal] Large-scale deployments. Default in OpenShift Router for non-passthrough routes.
+[Normal] Least Response Time
+[Normal] Routes to the server with the fastest measured response time. Requires active monitoring.
+[Normal] Performance-sensitive APIs. Geographically distributed backends.
+[Heading1] 2. Load Balancing Inside OpenShift
+[Normal] OpenShift provides multiple layers of load balancing built into the platform. Each layer operates at a differe
+[Heading2] 2.1 Kubernetes Service (ClusterIP) — Internal L4
+[Normal] This is the most fundamental load balancing mechanism. When you create a Kubernetes Service of type ClusterIP,
+[Normal] ┌─────────────────────────────────────────────┐
+[Normal] │   Kubernetes Service (ClusterIP)            │
+[Normal] │   my-api-service:8080                       │
+[Normal] │                                             │
+[Normal] │   ┌──────┐  ┌──────┐  ┌──────┐             │
+[Normal] │   │ Pod  │  │ Pod  │  │ Pod  │             │
+[Normal] │   │  #1  │  │  #2  │  │  #3  │             │
+[Normal] │   └──────┘  └──────┘  └──────┘             │
+[Normal] └─────────────────────────────────────────────┘
+[Normal] kube-proxy / OVN-Kubernetes rules
+[Normal] distribute traffic randomly across all pods
+[Normal] Example YAML:
+[Normal] apiVersion: v1
+[Normal] kind: Service
+[Normal] metadata:
+[Normal] name: my-api
+[Normal] spec:
+[Normal] selector:
+[Normal] app: my-api
+[Normal] ports:
+[Normal] - port: 8080
+[Normal] targetPort: 8080
+[Normal] type: ClusterIP
+[Normal] Key characteristics: traffic only reachable within the cluster, no external access. For external exposure, you
+[Heading2] 2.2 OpenShift Routes — L7 Ingress Load Balancing
+[Normal] The OpenShift Router is an HAProxy-based ingress controller that runs on infrastructure or worker nodes. It pr
+[Normal] The router supports three load balancing algorithms that can be set per-route via annotations:
+[Normal] Algorithm
+[Normal] Annotation Value
+[Normal] Default For
+[Normal] roundrobin
+[Normal] haproxy.router.openshift.io/balance: roundrobin
+[Normal] Not default. Best for weighted A/B deployments.
+[Normal] leastconn
+[Normal] haproxy.router.openshift.io/balance: leastconn
+[Normal] Long-lived connections (LDAP, SQL, WebSockets).
+[Normal] source
+[Normal] haproxy.router.openshift.io/balance: source
+[Normal] Default for TLS passthrough routes. Session stickiness.
+[Normal] random
+[Normal] (default - no annotation needed)
+[Normal] Default for edge and re-encrypt routes in OCP 4.x.
+[Normal] Example — Route with weighted traffic split (A/B testing):
+[Normal] apiVersion: route.openshift.io/v1
+[Normal] kind: Route
+[Normal] metadata:
+[Normal] name: my-api
+[Normal] annotations:
+[Normal] haproxy.router.openshift.io/balance: roundrobin
+[Normal] spec:
+[Normal] host: my-api.apps.example.com
+[Normal] to:
+[Normal] kind: Service
+[Normal] name: my-api-v1
+[Normal] weight: 90            # 90% of traffic
+[Normal] alternateBackends:
+[Normal] - kind: Service
+[Normal] name: my-api-v2
+[Normal] weight: 10          # 10% of traffic
+[Normal] CLI shortcut for setting weights:
+[Normal] # Set 80/20 split
+[Normal] oc set route-backends my-api my-api-v1=80 my-api-v2=20
+[Normal] # Check current backends
+[Normal] oc set route-backends my-api
+[Heading2] 2.3 OpenShift Service Mesh (Istio) — Advanced L7
+[Normal] OpenShift Service Mesh, based on Istio, provides the most powerful and fine-grained traffic management. It wor
+[Normal] Istio Control Plane (istiod)
+[Normal] |          |          |
+[Normal] config push  config push  config push
+[Normal] |          |          |
+[Normal] +----------+ +----------+ +----------+
+[Normal] |  Pod A   | |  Pod B   | |  Pod C   |
+[Normal] | +------+ | | +------+ | | +------+ |
+[Normal] | |Envoy | | | |Envoy | | | |Envoy | |
+[Normal] | |Proxy | | | |Proxy | | | |Proxy | |
+[Normal] | +------+ | | +------+ | | +------+ |
+[Normal] | |  App | | | |  App | | | |  App | |
+[Normal] | +------+ | | +------+ | | +------+ |
+[Normal] +----------+ +----------+ +----------+
+[Normal] All traffic passes through Envoy
+[Normal] Service Mesh capabilities for load balancing:
+[ListParagraph] Weighted traffic splitting: Route percentages of traffic to different service versions (canary, A/B).
+[ListParagraph] Header-based routing: Route based on HTTP headers (user-agent, custom headers, cookies).
+[ListParagraph] Load balancing algorithms: ROUND_ROBIN, LEAST_CONN, RANDOM, PASSTHROUGH per DestinationRule.
+[ListParagraph] Circuit breaking: Prevent cascading failures by limiting connections to unhealthy services.
+[ListParagraph] Fault injection: Inject delays or errors to test resilience.
+[ListParagraph] Traffic mirroring: Send a copy of live traffic to a test service without affecting production.
+[ListParagraph] Retries and timeouts: Automatic retries with configurable backoff and deadline.
+[Normal] Example — VirtualService with 90/10 weighted split:
+[Normal] apiVersion: networking.istio.io/v1alpha3
+[Normal] kind: VirtualService
+[Normal] metadata:
+[Normal] name: my-api
+[Normal] spec:
+[Normal] hosts:
+[Normal] - my-api
+[Normal] http:
+[Normal] - route:
+
+================================================================================
+DOC: autoscaling-openshift-guide.docx  (total lines: 673)
+================================================================================
+[Normal] Complete Guide to
+[Normal] Autoscaling in OpenShift
+[Normal] Horizontal | Vertical | Custom Metrics | Node Scaling
+[Normal] </w:pBdr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:cs="Arial" w:eastAsia="Arial" w
+[Normal] Technical Reference Document  •  April 2026
+[Heading1] Table of Contents
+[Heading1] 1. Scaling Fundamentals
+[Normal] Scaling is the process of adjusting compute resources to match application demand. In a containerised platform
+[Heading2] 1.1 Horizontal vs Vertical Scaling
+[Normal] Aspect
+[Normal] Horizontal Scaling
+[Normal] Vertical Scaling
+[Normal] What changes
+[Normal] Number of pod instances (replicas). Adding/removing copies of the application.
+[Normal] CPU and memory allocated to existing pods. Making each instance bigger/smaller.
+[Normal] Direction
+[Normal] Scale Out (add replicas) / Scale In (remove replicas).
+[Normal] Scale Up (add resources) / Scale Down (reduce resources).
+[Normal] Best for
+[Normal] Stateless applications, web APIs, microservices. Traffic-driven workloads.
+[Normal] Stateful apps, databases, single-threaded workloads, right-sizing resource requests.
+[Normal] Disruption
+[Normal] None — new pods are added alongside existing ones.
+[Normal] Pod must be restarted with new resource values (VPA evicts the pod).
+[Normal] OpenShift tool
+[Normal] HPA, KEDA, Knative, manual oc scale.
+[Normal] VPA Operator.
+[Heading2] 1.2 Node-Level Scaling
+[Normal] Beyond pods, OpenShift can also scale the cluster infrastructure itself by adding or removing worker nodes. Th
+[Normal] COMPLETE AUTOSCALING LAYERS IN OPENSHIFT
+[Normal] Layer 1: Pod Replicas (Horizontal)             Layer 2: Pod Resources (Vertical)
+[Normal] +----------------------------------+           +----------------------------------+
+[Normal] |  HPA / KEDA / Knative            |           |  VPA Operator                    |
+[Normal] |                                  |           |                                  |
+[Normal] |  Scales: number of pod replicas   |           |  Scales: CPU &amp; memory per pod    |
+[Normal] |  Trigger: CPU, memory, custom     |           |  Trigger: historical usage data  |
+[Normal] |           metrics, concurrency    |           |  Action: evicts + recreates pods  |
+[Normal] +----------------------------------+           +----------------------------------+
+[Normal] Layer 3: Cluster Nodes (Infrastructure)
+[Normal] +--------------------------------------------------------------+
+[Normal] |  Cluster Autoscaler + Machine Autoscaler                      |
+[Normal] |                                                              |
+[Normal] |  Scales: number of worker nodes (VMs)                        |
+[Normal] |  Trigger: pods in Pending state (no schedulable node)         |
+[Normal] |  Action: adds/removes Machines from MachineSets              |
+[Normal] +--------------------------------------------------------------+
+[Heading1] 2. Horizontal Pod Autoscaler (HPA)
+[Normal] The HPA is built into OpenShift and Kubernetes. It periodically queries the metrics API (every 15 seconds by d
+[Normal] HPA Control Loop
+[Normal] +-------------+        +------------------+        +----------------+
+[Normal] |  Metrics    | -----&gt; |  HPA Controller  | -----&gt; | Deployment /   |
+[Normal] |  Server     |  CPU,  |  (every 15s)     | scale  | ReplicaSet     |
+[Normal] | (resource   |  Mem   |                  | up/down|                |
+[Normal] |  metrics)   |        |  desiredReplicas |        | replicas: N    |
+[Normal] +-------------+        |  = ceil(current  |        +----------------+
+[Normal] |  / target * cur) |
+[Normal] +------------------+
+[Heading3] 2.1 Supported Metrics
+[ListParagraph] CPU Utilization: Percentage of requested CPU used. Most common. Works via oc autoscale command.
+[ListParagraph] Memory Utilization: Percentage of requested memory used. Requires YAML definition (no CLI shortcut). Memory mu
+[Heading3] 2.2 Prerequisites
+[Normal] Your pods MUST have resource requests defined. HPA computes utilisation as a percentage of the requested value
+[Normal] # Pod spec with resource requests (REQUIRED for HPA)
+[Normal] containers:
+[Normal] - name: my-api
+[Normal] image: my-registry/my-api:latest
+[Normal] resources:
+[Normal] requests:
+[Normal] cpu: 200m        # HPA calculates: actual_cpu / 200m
+[Normal] memory: 256Mi    # HPA calculates: actual_mem / 256Mi
+[Normal] limits:
+[Normal] cpu: 1000m
+[Normal] memory: 512Mi
+[Heading3] 2.3 Example: CLI
+[Normal] # Scale between 2 and 10 pods, targeting 70% CPU utilisation
+[Normal] oc autoscale deployment/my-api --min=2 --max=10 --cpu-percent=70
+[Normal] # Check HPA status
+[Normal] oc get hpa
+[Normal] oc describe hpa my-api
+[Heading3] 2.4 Example: YAML (CPU + Memory)
+[Normal] apiVersion: autoscaling/v2
+[Normal] kind: HorizontalPodAutoscaler
+[Normal] metadata:
+[Normal] name: my-api-hpa
+[Normal] spec:
+[Normal] scaleTargetRef:
+[Normal] apiVersion: apps/v1
+[Normal] kind: Deployment
+[Normal] name: my-api
+[Normal] minReplicas: 2
+[Normal] maxReplicas: 10
+[Normal] metrics:
+[Normal] - type: Resource
+[Normal] resource:
+[Normal] name: cpu
+[Normal] target:
+[Normal] type: Utilization
+[Normal] averageUtilization: 70
+[Normal] - type: Resource
+[Normal] resource:
+[Normal] name: memory
+[Normal] target:
+[Normal] type: Utilization
+[Normal] averageUtilization: 80
+[Normal] behavior:
+[Normal] scaleDown:
+[Normal] stabilizationWindowSeconds: 300    # Wait 5 min before scaling down
+[Normal] policies:
+[Normal] - type: Percent
+[Normal] value: 10
+[Normal] periodSeconds: 60              # Remove max 10% of pods per minute
+[Normal] scaleUp:
+[Normal] stabilizationWindowSeconds: 0
+[Normal] policies:
+[Normal] - type: Percent
+[Normal] value: 100
+[Normal] periodSeconds: 15              # Can double pods every 15s
+[Normal] Limitations: HPA only supports CPU and memory natively. It cannot scale to zero (minimum is 1 replica). It can
+[Heading1] 3. Vertical Pod Autoscaler (VPA)
+[Normal] The VPA Operator automatically adjusts the CPU and memory resource requests (and limits) for pods based on his
+[Normal] VPA Components
+[Normal] +---------------+     +--------------+     +-------------------+
+[Normal] |  VPA          |     |  VPA         |     |  VPA Admission    |
+[Normal] |  Recommender  |     |  Updater     |     |  Controller       |
+[Normal] |               |     |              |     |                   |
+[Normal] | Analyses      |     | Evicts pods  |     | Sets correct      |
+[Normal] | historical &amp;  |     | with wrong   |     | resource requests |
+[Normal] | current usage |     | resource     |     | on new pods       |
+[Normal] | -&gt; generates  |     | values       |     | before admission  |
+[Normal] | optimal values|     |              |     | to node           |
+[Normal] +---------------+     +--------------+     +-------------------+
+[Heading2] 3.1 Update Modes
+[Normal] Mode
+[Normal] Behaviour
+[Normal] Use Case
+[Normal] Off
+[Normal] Only generates recommendations. Does not modify pods. Dry-run mode.
+[Normal] Assess recommendations before enabling. Production auditing.
+[Normal] Initial
+[Normal] Sets resources only on newly created pods. Does not restart existing pods.
+[Normal] Gradual adoption. Applies to new deployments only.
+[Normal] Auto
+[Normal] Evicts and recreates pods with updated resource values. Full automation.
+[Normal] Non-critical workloads where brief restarts are acceptable.
+[Normal] Recreate
+[Normal] Same as Auto. Evicts pods so controllers recreate them with new values.
+[Normal] Same as Auto. Functionally identical.
+[Heading2] 3.2 Example: VPA Configuration
+[Normal] apiVersion: autoscaling.k8s.io/v1
+[Normal] kind: VerticalPodAutoscaler

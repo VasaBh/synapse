@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Decision Guide — Which Approach to Use? – Load Balancing</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../load-balancing.html">Load Balancing</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Decision Guide — Which Approach to Use?</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Load Balancing</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-api-traffic-load-balancing-fundamentals.html">API &amp; Traffic Load Balancing Fundamentals</a></li>
+        <li><a href="04-2-load-balancing-inside-openshift.html">Load Balancing Inside OpenShift</a></li>
+        <li><a href="05-3-load-balancing-outside-openshift-external.html">Load Balancing Outside OpenShift (External)</a></li>
+        <li><a href="06-4-how-to-use-external-load-balancers-with-openshift.html">How to Use External Load Balancers WITH OpenShift</a></li>
+        <li><a href="07-5-canary-deployments-in-openshift.html">Canary Deployments in OpenShift</a></li>
+        <li><a href="08-6-load-balancing-between-production-and-cobdr-environments.html">Load Balancing Between Production and COB/DR Environments</a></li>
+        <li><a href="09-7-complete-load-balancing-stack-end-to-end.html">Complete Load Balancing Stack — End-to-End</a></li>
+        <li class="active"><a href="10-8-decision-guide-which-approach-to-use.html" class="active">Decision Guide — Which Approach to Use?</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>8. Decision Guide — Which Approach to Use?</h1>
+<div class="table-wrap"><table>
+  <tr><th>Requirement</th><th>Recommended Approach</th><th>Complexity</th></tr>
+  <tr><td>Basic internal service distribution</td><td>Kubernetes Service (ClusterIP) - already built-in</td><td>Low - zero config needed</td></tr>
+  <tr><td>External access to HTTP services</td><td>OpenShift Route (oc expose)</td><td>Low - single YAML</td></tr>
+  <tr><td>Simple A/B testing or Blue/Green</td><td>OpenShift Route with weighted backends</td><td>Low - CLI commands</td></tr>
+  <tr><td>Canary with header-based routing</td><td>Service Mesh (Istio VirtualService)</td><td>Medium - requires mesh install</td></tr>
+  <tr><td>Automated progressive delivery</td><td>Argo Rollouts + Service Mesh or Routes</td><td>Medium - GitOps tooling</td></tr>
+  <tr><td>External non-HTTP services (DB, MQ)</td><td>MetalLB (on-prem) or cloud LoadBalancer</td><td>Medium - network config</td></tr>
+  <tr><td>HA cluster entry point</td><td>External LB (F5/HAProxy) or cloud NLB</td><td>Medium - infra setup</td></tr>
+  <tr><td>Cross-site failover (Prod to COB)</td><td>GSLB (F5 GTM / Route 53 / Azure TM)</td><td>High - DNS + health checks</td></tr>
+  <tr><td>Active-Active multi-site</td><td>GSLB + bidirectional data replication</td><td>High - complex data sync</td></tr>
+</table></div>
+<p>— End of Document —</p>
+      </article>
+
+      <nav class="page-nav">
+        <a href="09-7-complete-load-balancing-stack-end-to-end.html">&#8592; Complete Load Balancing Stack — End-to-End</a>
+        <span class="spacer"></span>
+        
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

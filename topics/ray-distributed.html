@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ray Distributed Platform &#8212; Complete Reference Guide 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e;
+  --ink2: #3d3d5c;
+  --ink3: #6b6b8a;
+  --bg: #ffffff;
+  --bg2: #f4f3f0;
+  --bg3: #eae8e4;
+  --accent: #2563eb;
+  --accent2: #1d4ed8;
+  --accent-bg: #eff6ff;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --amber: #d97706;
+  --amber-bg: #fffbeb;
+  --rose: #e11d48;
+  --rose-bg: #fff1f2;
+  --purple: #7c3aed;
+  --purple-bg: #f5f3ff;
+  --teal: #0d9488;
+  --teal-bg: #f0fdfa;
+  --coral: #ea580c;
+  --coral-bg: #fff7ed;
+  --border: #e2e0dc;
+  --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+
+@media print {
+  body { font-size: 10pt; }
+  .no-print { display: none !important; }
+  .page-break { page-break-before: always; }
+  .card { break-inside: avoid; }
+  pre { font-size: 8pt; }
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+.cover {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center;
+  background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #0f0f2e 100%);
+  color: white; padding: 4rem 2rem; position: relative; overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 25% 40%, rgba(124,58,237,0.2) 0%, transparent 55%),
+              radial-gradient(ellipse at 75% 60%, rgba(6,182,212,0.12) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(37,99,235,0.1) 0%, transparent 40%);
+}
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 750px; }
+.cover h1 span { background: linear-gradient(135deg, #c4b5fd, #67e8f9); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 640px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 700px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card-green { border-left: 3px solid var(--green); }
+.card-purple { border-left: 3px solid var(--purple); }
+.card-amber { border-left: 3px solid var(--amber); }
+.card-teal { border-left: 3px solid var(--teal); }
+.card-coral { border-left: 3px solid var(--coral); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout-teal { background: var(--teal-bg); border-left: 3px solid var(--teal); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+@media (max-width: 860px) { .three-col { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .three-col { grid-template-columns: 1fr; } }
+
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+.diagram { background: #1e293b; border-radius: 10px; padding: 1.5rem; margin: 1rem 0; overflow-x: auto; }
+.diagram pre { background: none; border: none; color: #e2e8f0; font-size: 0.77rem; margin: 0; line-height: 1.55; }
+
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+
+@media (max-width: 1100px) { .sidebar { display: none; } }
+@media (max-width: 600px) { .cover h1 { font-size: 2.2rem; } }
+</style>
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">&#8592; All Topics</a>
+  <h1>Interview Preparation Guide</h1>
+</header>
+
+<div class="topic-page">
+  <aside class="sidebar">
+    <p class="sidebar-title">Ray Distributed Platform</p>
+    <nav><ul>
+      <li><a href="#s1"><span class="toc-num">01</span>Architecture &amp; Core Concepts</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>Ray Tasks</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>Ray Actors</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>Object Store &amp; Memory</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>Ray Serve</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>Ray Data</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>Ray Train</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>Ray Tune</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>KubeRay on OpenShift</a></li>
+      <li><a href="#s10"><span class="toc-num">10</span>Production Patterns &amp; Observability</a></li>
+    </ul></nav>
+  </aside>
+
+  <div class="main-scroll">
+
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference &#8212; April 2026</div>
+  <h1>Ray <span>Distributed Platform</span></h1>
+  <p class="cover-sub">Tasks, Actors, Object Store, Ray Serve, Ray Data, Ray Train, Ray Tune, and KubeRay on OpenShift &#8212; the definitive guide to building production distributed systems in Python.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">ray.remote</span>
+    <span class="cover-tag">Actors</span>
+    <span class="cover-tag">Object Store</span>
+    <span class="cover-tag">Ray Serve</span>
+    <span class="cover-tag">@serve.batch</span>
+    <span class="cover-tag">Ray Data</span>
+    <span class="cover-tag">Ray Train</span>
+    <span class="cover-tag">Ray Tune</span>
+    <span class="cover-tag">KubeRay</span>
+    <span class="cover-tag">Plasma</span>
+    <span class="cover-tag">GCS</span>
+  </div>
+  <div class="cover-date">v1.0 &#8212; Last updated April 2026</div>
+</div>
+
+<div class="container">
+
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <div class="toc-grid">
+    <a href="#s1" class="toc-item"><span class="toc-num">01</span><span class="toc-label">Ray Architecture &amp; Core Concepts</span></a>
+    <a href="#s2" class="toc-item"><span class="toc-num">02</span><span class="toc-label">Ray Tasks &#8212; Parallel Remote Functions</span></a>
+    <a href="#s3" class="toc-item"><span class="toc-num">03</span><span class="toc-label">Ray Actors &#8212; Stateful Distributed Workers</span></a>
+    <a href="#s4" class="toc-item"><span class="toc-num">04</span><span class="toc-label">Object Store &amp; Memory Model</span></a>
+    <a href="#s5" class="toc-item"><span class="toc-num">05</span><span class="toc-label">Ray Serve &#8212; Production ML Serving</span></a>
+    <a href="#s6" class="toc-item"><span class="toc-num">06</span><span class="toc-label">Ray Data &#8212; Distributed Data Processing</span></a>
+    <a href="#s7" class="toc-item"><span class="toc-num">07</span><span class="toc-label">Ray Train &#8212; Distributed ML Training</span></a>
+    <a href="#s8" class="toc-item"><span class="toc-num">08</span><span class="toc-label">Ray Tune &#8212; Hyperparameter Optimisation</span></a>
+    <a href="#s9" class="toc-item"><span class="toc-num">09</span><span class="toc-label">KubeRay on OpenShift / Kubernetes</span></a>
+    <a href="#s10" class="toc-item"><span class="toc-num">10</span><span class="toc-label">Production Patterns &amp; Observability</span></a>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 1                                                      -->
+<!-- ============================================================ -->
+<div id="s1" class="section page-break">
+  <div class="section-num">SECTION 01</div>
+  <h2 class="section-title">Ray Architecture &amp; Core Concepts</h2>
+  <p class="lead">Ray is an open-source distributed computing framework that lets you scale Python code from a laptop to a cluster of thousands of nodes with minimal code changes. It underpins many of the largest ML platforms in production (Uber, Shopify, Instacart, Anyscale).</p>
+
+  <h3>Why Ray Exists</h3>
+  <p>Python's GIL prevents true CPU parallelism within a process. Multiprocessing works on one machine but doesn't span nodes. Dask is great for dataframes but not general compute. Celery is task-queue oriented, not computation-graph oriented. Ray fills the gap: a general distributed runtime for Python that scales from 1 core to 10,000 nodes with a single API.</p>
+
+  <h3>The Ray Cluster Architecture</h3>
+  <div class="diagram">
+    <pre>
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │                         RAY CLUSTER                                 │
+  │                                                                     │
+  │  ┌──────────────────────────────────────────────────────────────┐  │
+  │  │                      HEAD NODE                                │  │
+  │  │                                                               │  │
+  │  │  ┌─────────────┐  ┌──────────────┐  ┌───────────────────┐  │  │
+  │  │  │ GCS Server  │  │  Raylet      │  │  Driver (your     │  │  │
+  │  │  │ (Global     │  │  (Scheduler  │  │  Python script /  │  │  │
+  │  │  │  Control    │  │  + Object    │  │  Jupyter / API)   │  │  │
+  │  │  │  Store)     │  │  Manager)    │  │                   │  │  │
+  │  │  └─────────────┘  └──────────────┘  └───────────────────┘  │  │
+  │  │  ┌─────────────────────────────┐                            │  │
+  │  │  │   Plasma Object Store       │  (shared memory, 0-copy)   │  │
+  │  │  └─────────────────────────────┘                            │  │
+  │  └──────────────────────────────────────────────────────────────┘  │
+  │                                                                     │
+  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
+  │  │  WORKER NODE │  │  WORKER NODE │  │  WORKER NODE │             │
+  │  │              │  │              │  │    (GPU)     │             │
+  │  │  Raylet      │  │  Raylet      │  │  Raylet      │             │
+  │  │  Workers x8  │  │  Workers x8  │  │  Workers x4  │             │
+  │  │  Plasma Store│  │  Plasma Store│  │  Plasma Store│             │
+  │  └──────────────┘  └──────────────┘  └──────────────┘             │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  GCS = Global Control Store (cluster metadata, actor locations, object directory)
+  Raylet = per-node scheduler + node manager + object manager
+  Plasma = shared-memory object store (zero-copy reads between processes)
+    </pre>
+  </div>
+
+  <h3>Key Components Explained</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>GCS (Global Control Store)</h4>
+      <p>Redis-backed central registry. Stores actor locations, object metadata, cluster topology. All scheduling decisions reference GCS. Single point of truth for the cluster.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Raylet</h4>
+      <p>Per-node daemon combining: (1) <strong>Node Manager</strong> — tracks local workers, handles resource requests; (2) <strong>Object Manager</strong> — transfers objects between nodes when needed.</p>
+    </div>
+    <div class="card card-purple">
+      <h4>Plasma Object Store</h4>
+      <p>Shared-memory segment on each node. Objects stored here are readable by all local workers at zero-copy cost (no serialisation/deserialisation for same-node reads).</p>
+    </div>
+    <div class="card card-green">
+      <h4>Worker Process</h4>
+      <p>Python process executing tasks or hosting an actor. Spawned lazily. Each worker is single-threaded; concurrency comes from having many workers across nodes.</p>
+    </div>
+    <div class="card card-teal">
+      <h4>Driver</h4>
+      <p>The Python script that calls <code>ray.init()</code> and submits tasks/actors. The driver does not execute tasks itself — it orchestrates. Can run anywhere that can reach the head node.</p>
+    </div>
+    <div class="card card-amber">
+      <h4>Dashboard</h4>
+      <p>Built-in web UI at port 8265. Shows cluster utilisation, task timelines, actor states, memory usage, and job logs. Essential for debugging performance.</p>
+    </div>
+  </div>
+
+  <h3>Ray Ecosystem — The AI Runtime</h3>
+  <div class="diagram">
+    <pre>
+  ┌──────────────────────────────────────────────────────────────────┐
+  │                    RAY AI RUNTIME                                │
+  ├──────────────┬───────────────┬──────────────┬───────────────────┤
+  │  Ray Serve   │   Ray Train   │   Ray Tune   │    Ray Data       │
+  │  (inference) │  (training)   │  (HPO)       │  (preprocessing)  │
+  ├──────────────┴───────────────┴──────────────┴───────────────────┤
+  │                    Ray Core                                      │
+  │            Tasks  |  Actors  |  Object Store                    │
+  ├──────────────────────────────────────────────────────────────────┤
+  │                    Ray Cluster Runtime                           │
+  │            KubeRay  |  AWS  |  GCP  |  Azure  |  Bare Metal     │
+  └──────────────────────────────────────────────────────────────────┘
+    </pre>
+  </div>
+
+  <h3>Initialising Ray</h3>
+  <pre>import ray
+
+# Local (single machine) — auto-detects CPU/GPU count
+ray.init()
+
+# Connect to existing cluster
+ray.init(address="ray://head-node-ip:10001")
+
+# Kubernetes (KubeRay)
+ray.init(address="auto")  # reads RAY_ADDRESS from environment
+
+# With explicit resource limits
+ray.init(
+    num_cpus=16,
+    num_gpus=2,
+    object_store_memory=4 * 1024**3,  # 4GB for Plasma store
+    _system_config={"max_io_workers": 4}
+)
+
+# Check cluster state
+print(ray.cluster_resources())
+# {'CPU': 64.0, 'GPU': 8.0, 'memory': 429496729600.0, 'node:10.0.0.1': 1.0}
+print(ray.available_resources())</pre>
+
+  <h3>Resource Model</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Resource Type</th><th>Declaration</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>CPU</td><td><code>num_cpus=1</code></td><td>Logical CPUs; fractional allowed (0.1 for lightweight tasks)</td></tr>
+        <tr><td>GPU</td><td><code>num_gpus=1</code></td><td>Physical GPUs; fractional (0.5 = share GPU between 2 actors)</td></tr>
+        <tr><td>Memory</td><td><code>memory=1e9</code></td><td>Soft limit; Ray will warn but not hard-enforce</td></tr>
+        <tr><td>Custom</td><td><code>resources={"TPU": 1}</code></td><td>Arbitrary labels; useful for node selection (e.g., "high-memory")</td></tr>
+        <tr><td>Object store memory</td><td>Cluster-level setting</td><td>Shared Plasma memory; spills to disk if exceeded</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2                                                      -->
+<!-- ============================================================ -->
+<div id="s2" class="section page-break">
+  <div class="section-num">SECTION 02</div>
+  <h2 class="section-title">Ray Tasks &#8212; Parallel Remote Functions</h2>
+  <p class="lead">A Ray task is any Python function annotated with <code>@ray.remote</code>. Calling it with <code>.remote()</code> submits it to the cluster immediately and returns an <code>ObjectRef</code> (future) — execution happens in a worker process, potentially on a different machine.</p>
+
+  <h3>Basic Task Pattern</h3>
+  <pre>import ray
+import time
+
+ray.init()
+
+@ray.remote
+def process_record(record: dict) -> dict:
+    """This runs in a worker process — may be on any cluster node."""
+    time.sleep(0.1)  # simulate I/O or compute
+    return {"id": record["id"], "result": record["value"] * 2}
+
+# Sequential (slow): ~1000 * 0.1s = 100s
+# results = [process_record(r) for r in records]
+
+# Parallel with Ray: ~0.1s (all submitted at once)
+futures = [process_record.remote(r) for r in records]
+results = ray.get(futures)  # blocks until all complete</pre>
+
+  <h3>Task Execution Model</h3>
+  <div class="diagram">
+    <pre>
+  Driver Process
+  ─────────────
+  future_1 = process_record.remote(rec_1)   ──▶ Task submitted to Raylet
+  future_2 = process_record.remote(rec_2)   ──▶ Task submitted to Raylet
+  future_3 = process_record.remote(rec_3)   ──▶ Task submitted to Raylet
+  ...                                            (non-blocking, returns immediately)
+  results = ray.get([future_1, future_2, ...])   ──▶ Driver BLOCKS here
+
+                        ┌─── Node A ──────────────────┐
+  Raylet (Scheduler) ───┤  Worker 1: process_record(1)│
+                        │  Worker 2: process_record(2)│
+                        └─────────────────────────────┘
+                        ┌─── Node B ──────────────────┐
+                        │  Worker 3: process_record(3)│
+                        └─────────────────────────────┘
+    </pre>
+  </div>
+
+  <h3>ray.wait() — Process Results as They Arrive</h3>
+  <pre># Don't block on ALL futures — process ready ones first
+# Prevents memory explosion when results are large
+
+futures = [expensive_task.remote(i) for i in range(1000)]
+
+completed_results = []
+while futures:
+    # Return up to 10 ready futures, wait max 1s
+    ready, futures = ray.wait(futures, num_returns=10, timeout=1.0)
+    batch = ray.get(ready)
+    completed_results.extend(batch)
+    print(f"Processed {len(completed_results)}/1000")
+
+# Pattern: streaming fan-in for large result sets</pre>
+
+  <h3>Task Dependencies — Automatic Pipelining</h3>
+  <pre>@ray.remote
+def load_data(path: str) -> list:
+    return read_parquet(path)
+
+@ray.remote
+def preprocess(data: list) -> list:
+    return [clean(r) for r in data]
+
+@ray.remote
+def train_model(features: list, labels: list) -> dict:
+    return fit(features, labels)
+
+# Pass ObjectRefs directly — Ray builds the dependency graph
+# Execution is pipelined: load -> preprocess -> split -> train (parallel)
+raw_ref     = load_data.remote("s3://bucket/data.parquet")
+clean_ref   = preprocess.remote(raw_ref)          # waits for load_data
+
+features_ref, labels_ref = split.remote(clean_ref) # waits for preprocess
+model_ref = train_model.remote(features_ref, labels_ref)
+
+# Ray infers: train waits for preprocess; preprocess waits for load
+# You never wrote a single await/join — the DAG is implicit</pre>
+
+  <h3>Retry and Fault Tolerance</h3>
+  <pre>@ray.remote(
+    max_retries=3,                  # retry failed tasks up to 3 times
+    retry_exceptions=[IOError, TimeoutError],  # only retry these
+    num_cpus=2,
+    memory=500 * 1024**2,          # 500MB memory hint
+)
+def fetch_and_process(url: str) -> dict:
+    resp = requests.get(url, timeout=30)
+    return parse(resp.json())</pre>
+
+  <h3>Fan-Out / Fan-In Pattern &#8212; Parallel Processing Pipeline</h3>
+  <pre>@ray.remote
+def map_chunk(chunk: list) -> list:
+    """Map phase: process one chunk independently."""
+    return [transform(item) for item in chunk]
+
+@ray.remote
+def reduce_results(partials: list) -> dict:
+    """Reduce phase: combine all partial results."""
+    return merge(partials)
+
+def parallel_map_reduce(data: list, chunk_size: int = 1000) -> dict:
+    chunks = [data[i:i+chunk_size] for i in range(0, len(data), chunk_size)]
+
+    # Fan-out: all chunks processed in parallel
+    partial_refs = [map_chunk.remote(chunk) for chunk in chunks]
+
+    # Fan-in: collect all results, then reduce
+    # Option 1: reduce on driver
+    partials = ray.get(partial_refs)
+    return merge(partials)
+
+    # Option 2: reduce on a worker (avoids sending all data back to driver)
+    # return ray.get(reduce_results.remote(partial_refs))</pre>
+
+  <h3>Task Resource Specification</h3>
+  <pre># Lightweight tasks — share CPUs
+@ray.remote(num_cpus=0.1)
+def lightweight_io_task(url): ...
+
+# GPU tasks — require specific hardware
+@ray.remote(num_gpus=1, num_cpus=4, memory=4 * 1024**3)
+def gpu_inference(batch): ...
+
+# Custom resource — ensures task runs on specific node type
+@ray.remote(resources={"high-memory-node": 1})
+def memory_intensive_task(data): ...
+
+# Dynamic override at call time (no need to change decorator)
+result = process.options(num_cpus=4, memory=2e9).remote(large_input)</pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3                                                      -->
+<!-- ============================================================ -->
+<div id="s3" class="section page-break">
+  <div class="section-num">SECTION 03</div>
+  <h2 class="section-title">Ray Actors &#8212; Stateful Distributed Workers</h2>
+  <p class="lead">Actors are long-lived Python objects running in dedicated worker processes. They maintain internal state across method calls — making them ideal for model servers, connection pools, rate limiters, and shared counters that multiple tasks need to access.</p>
+
+  <h3>Actor vs Task: When to Use Which</h3>
+  <div class="two-col">
+    <div class="card card-accent">
+      <h4>Use Tasks (stateless) when</h4>
+      <ul class="clean" style="margin-top:0.4rem">
+        <li>Pure function: same input always gives same output</li>
+        <li>No state to share between invocations</li>
+        <li>Embarrassingly parallel (batch processing, map-reduce)</li>
+        <li>Short-lived work that completes and goes away</li>
+      </ul>
+    </div>
+    <div class="card card-purple">
+      <h4>Use Actors (stateful) when</h4>
+      <ul class="clean" style="margin-top:0.4rem">
+        <li>Load an expensive model once, serve many requests</li>
+        <li>Maintain a connection pool (DB, Redis, HTTP)</li>
+        <li>Shared counter / rate limiter across tasks</li>
+        <li>Streaming processor that accumulates results</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Basic Actor</h3>
+  <pre>@ray.remote
+class ModelServer:
+    def __init__(self, model_path: str):
+        """Called once when actor is created — load heavy resources here."""
+        import torch
+        self.model = torch.load(model_path)
+        self.model.eval()
+        self.request_count = 0
+        print(f"Model loaded from {model_path}")
+
+    def predict(self, inputs: list) -> list:
+        """Called for every inference request."""
+        self.request_count += 1
+        with torch.no_grad():
+            tensors = torch.tensor(inputs)
+            outputs = self.model(tensors)
+            return outputs.tolist()
+
+    def get_stats(self) -> dict:
+        return {"total_requests": self.request_count}
+
+# Create actor — runs __init__ in a worker process
+server = ModelServer.remote("model.pt")  # returns ActorHandle immediately
+
+# Call methods — non-blocking, returns ObjectRef
+future = server.predict.remote([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+results = ray.get(future)
+
+# Actor persists — call it again without re-loading model
+future2 = server.predict.remote([[7.0, 8.0, 9.0]])
+
+stats = ray.get(server.get_stats.remote())
+print(stats)  # {"total_requests": 2}</pre>
+
+  <h3>Actor Pool &#8212; Parallel Model Serving</h3>
+  <div class="diagram">
+    <pre>
+  Without Actor Pool:          With ActorPool (parallel):
+  ─────────────────────        ──────────────────────────────────
+  One ModelServer actor        Four ModelServer actors
+  Handles requests serially    Round-robin across all 4
+
+  req1 ──▶ server ──▶ result1   req1 ──▶ server_0 ──▶ result1
+  req2 ──▶ server ──▶ result2   req2 ──▶ server_1 ──▶ result2
+  req3 ──▶ server ──▶ result3   req3 ──▶ server_2 ──▶ result3
+  ...                            req4 ──▶ server_3 ──▶ result4
+  (bottleneck)                   req5 ──▶ server_0 ──▶ result5
+                                 (4x throughput)
+    </pre>
+  </div>
+  <pre>from ray.util import ActorPool
+
+# Create a pool of 4 model server actors (spread across GPU nodes)
+pool = ActorPool([
+    ModelServer.options(num_gpus=1).remote("model.pt")
+    for _ in range(4)
+])
+
+# Submit work to pool — automatically load-balanced round-robin
+inputs_list = [batch_1, batch_2, batch_3, ..., batch_100]
+
+# map_unordered: submit all, yield results as they complete
+results = list(pool.map_unordered(lambda actor, x: actor.predict.remote(x), inputs_list))
+
+# map (ordered): preserves input order (slightly slower)
+results = list(pool.map(lambda a, x: a.predict.remote(x), inputs_list))</pre>
+
+  <h3>Named Actors &#8212; Singleton Services</h3>
+  <pre># Create a globally named actor — survives driver restarts if detached
+@ray.remote
+class RateLimiter:
+    def __init__(self, limit_per_second: int):
+        self.limit = limit_per_second
+        self.tokens = limit_per_second
+        self.last_refill = time.time()
+
+    def try_acquire(self, client_id: str) -> bool:
+        now = time.time()
+        elapsed = now - self.last_refill
+        self.tokens = min(self.limit, self.tokens + elapsed * self.limit)
+        self.last_refill = now
+        if self.tokens >= 1:
+            self.tokens -= 1
+            return True
+        return False
+
+# Create with name — any worker in cluster can find it
+limiter = RateLimiter.options(
+    name="global-rate-limiter",
+    lifetime="detached",    # persists after driver exits
+    num_cpus=0.1,
+).remote(limit_per_second=1000)
+
+# Any other driver or task retrieves the same actor by name
+limiter = ray.get_actor("global-rate-limiter")
+allowed = ray.get(limiter.try_acquire.remote("user-123"))</pre>
+
+  <h3>Actor Fault Tolerance</h3>
+  <pre>@ray.remote(
+    max_restarts=3,          # restart actor up to 3 times on crash
+    max_task_retries=2,      # retry failed method calls
+)
+class ReliableProcessor:
+    def __init__(self):
+        self.state = load_checkpoint()  # restore state on restart
+
+    def process(self, item):
+        result = do_work(item)
+        save_checkpoint(self.state)     # periodic checkpointing
+        return result</pre>
+
+  <h3>Async Actor Methods &#8212; Concurrency Within One Actor</h3>
+  <pre>import asyncio
+
+@ray.remote
+class AsyncModelServer:
+    """Async actor: handles multiple concurrent calls in one process via event loop."""
+
+    def __init__(self):
+        self.model = load_model()
+        self.semaphore = asyncio.Semaphore(10)  # max 10 concurrent inferences
+
+    async def predict(self, input_data: list) -> list:
+        async with self.semaphore:
+            # Non-blocking I/O can run concurrently inside one actor
+            preprocessed = await preprocess_async(input_data)
+            result = self.model.predict(preprocessed)   # sync GPU call
+            return result
+
+    async def health(self) -> dict:
+        return {"status": "ok", "model": self.model.name}
+
+# Async actor handles concurrency internally — no need for actor pool
+server = AsyncModelServer.options(max_concurrency=100).remote()
+futures = [server.predict.remote(inp) for inp in inputs]  # 100 concurrent calls</pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4                                                      -->
+<!-- ============================================================ -->
+<div id="s4" class="section page-break">
+  <div class="section-num">SECTION 04</div>
+  <h2 class="section-title">Object Store &amp; Memory Model</h2>
+  <p class="lead">Ray's Plasma object store is the memory backbone of the cluster. Understanding how objects move between processes and nodes is essential for writing efficient Ray code and diagnosing memory issues.</p>
+
+  <h3>The Plasma Object Store</h3>
+  <div class="diagram">
+    <pre>
+  NODE A                                  NODE B
+  ──────────────────────────────          ──────────────────────────
+  ┌──────────────────────────┐            ┌──────────────────────────┐
+  │   Worker 1  Worker 2     │            │   Worker 3  Worker 4     │
+  │      ↑          ↑        │            │      ↑          ↑        │
+  │      │ mmap     │ mmap   │            │      │          │        │
+  │      └──────────┘        │            │      └──────────┘        │
+  │  ┌───────────────────┐   │            │  ┌───────────────────┐   │
+  │  │  Plasma Store     │   │  ──copy──▶ │  │  Plasma Store     │   │
+  │  │  (shared memory)  │   │            │  │  (shared memory)  │   │
+  │  │  /dev/shm         │   │            │  │  /dev/shm         │   │
+  │  └───────────────────┘   │            │  └───────────────────┘   │
+  └──────────────────────────┘            └──────────────────────────┘
+
+  Same node: zero-copy mmap (microseconds, no serialisation)
+  Cross node: network copy (milliseconds, serialised via Arrow IPC)
+    </pre>
+  </div>
+
+  <h3>Object Lifecycle</h3>
+  <pre># Small objects (&lt; ~100KB): inlined in the task's return value
+# Large objects: stored in Plasma, referenced via ObjectRef
+
+@ray.remote
+def large_result() -> list:
+    return list(range(10_000_000))  # ~80MB — goes to Plasma automatically
+
+ref = large_result.remote()
+
+# ref is just a 20-byte ObjectRef (UUID)
+# The actual data sits in Plasma until ref is garbage collected
+result = ray.get(ref)  # fetch from Plasma — zero-copy if same node
+
+# Explicit put: place a Python object into Plasma from the driver
+large_array = np.random.rand(1_000_000)
+array_ref = ray.put(large_array)  # returns ObjectRef, no copy on same node
+
+# Pass ref to tasks — they read from Plasma directly (not through driver)
+futures = [process_slice.remote(array_ref, i, i+1000) for i in range(0, 1_000_000, 1000)]</pre>
+
+  <h3>Object Passing Patterns</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Pattern</th><th>How</th><th>When</th><th>Cost</th></tr></thead>
+      <tbody>
+        <tr><td>Inline value</td><td>Pass Python object directly</td><td>Small args (&lt;100KB)</td><td>Serialise/deserialise per task</td></tr>
+        <tr><td>ObjectRef</td><td>Pass ref from <code>ray.put()</code> or prior task</td><td>Large shared data</td><td>Zero-copy same node; network copy cross-node</td></tr>
+        <tr><td>Broadcast</td><td><code>ray.put()</code> once, pass ref to N tasks</td><td>Shared weights, lookup tables</td><td>One put + N zero-copy reads</td></tr>
+        <tr><td>Streaming</td><td>Ray Datasets pipeline</td><td>Data too large for memory</td><td>Streamed block by block</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Broadcast Pattern &#8212; Efficient Weight Sharing</h3>
+  <pre>import numpy as np
+
+# BAD: driver serialises model and sends to every task separately
+@ray.remote
+def predict_bad(model, input_data):  # model copied on every call
+    return model.predict(input_data)
+
+large_model = load_model()  # 500MB
+futures = [predict_bad.remote(large_model, inp) for inp in inputs]
+# 500MB × 1000 tasks = 500GB of network traffic — terrible
+
+# GOOD: put model once, share via ObjectRef
+model_ref = ray.put(large_model)   # 500MB stored once in Plasma
+futures = [predict_good.remote(model_ref, inp) for inp in inputs]
+# 500MB stored once, zero-copy reads on same node — excellent</pre>
+
+  <h3>Memory Pressure &amp; Object Spilling</h3>
+  <div class="callout callout-amber">
+    <strong>When Plasma is full</strong>
+    Ray automatically spills objects to disk (configurable path, e.g., <code>/tmp/ray/spill</code>) when Plasma memory is exhausted. Spilling adds ~10&#8211;100ms latency per object. To avoid spilling:
+    <ul class="clean" style="margin-top:0.5rem">
+      <li>Delete ObjectRefs you no longer need (<code>del ref</code> triggers GC)</li>
+      <li>Process large datasets with Ray Data pipelines (streaming, never materialises full dataset)</li>
+      <li>Use <code>ray.wait()</code> with small <code>num_returns</code> instead of collecting all at once</li>
+      <li>Increase <code>object_store_memory</code> in <code>ray.init()</code></li>
+    </ul>
+  </div>
+
+  <pre># Monitor object store usage
+import ray
+ray.init()
+
+# Check memory from driver
+print(ray.get_memory_info())
+
+# From Ray dashboard: http://localhost:8265 -> Memory tab
+# Shows per-object size, reference count, and which process holds refs</pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 5                                                      -->
+<!-- ============================================================ -->
+<div id="s5" class="section page-break">
+  <div class="section-num">SECTION 05</div>
+  <h2 class="section-title">Ray Serve &#8212; Production ML Serving</h2>
+  <p class="lead">Ray Serve is a scalable model serving library built on Ray Actors. It handles HTTP, replica management, autoscaling, request batching, and multi-model pipelines — all within the Ray cluster, no separate serving infrastructure required.</p>
+
+  <h3>Ray Serve Architecture</h3>
+  <div class="diagram">
+    <pre>
+  HTTP Request
+      │
+      ▼
+  ┌──────────────────────────────────────────────────────────────┐
+  │              RAY SERVE PROXY (on each node)                  │
+  │  HTTP server (uvicorn) receives requests                     │
+  │  Routes to correct deployment by path prefix                 │
+  └──────────────────────────────┬───────────────────────────────┘
+                                 │
+  ┌──────────────────────────────▼───────────────────────────────┐
+  │              SERVE CONTROLLER (Actor)                         │
+  │  Manages deployment lifecycle, scaling decisions              │
+  │  Tracks replica health, routes to least-loaded replica       │
+  └──────┬───────────────────────┬────────────────────┬──────────┘
+         │                       │                    │
+  ┌──────▼──────┐  ┌─────────────▼─────┐  ┌──────────▼──────────┐
+  │  Replica 0  │  │     Replica 1     │  │     Replica 2       │
+  │  (Actor)    │  │     (Actor)       │  │     (GPU Actor)     │
+  │  ModelV1    │  │     ModelV1       │  │     ModelV1         │
+  └─────────────┘  └───────────────────┘  └─────────────────────┘
+    </pre>
+  </div>
+
+  <h3>Complete Deployment Example</h3>
+  <pre>import ray
+from ray import serve
+from fastapi import FastAPI
+from pydantic import BaseModel
+import torch
+
+ray.init(address="auto")
+serve.start(detached=True, http_options={"host": "0.0.0.0", "port": 8000})
+
+app = FastAPI()
+
+class InferRequest(BaseModel):
+    text: str
+    max_tokens: int = 256
+
+class InferResponse(BaseModel):
+    output: str
+    latency_ms: float
+    replica_id: str
+
+@serve.deployment(
+    name="text-classifier",
+    num_replicas=4,
+    ray_actor_options={
+        "num_gpus": 0.5,    # two deployments can share one GPU
+        "num_cpus": 2,
+        "memory": 2 * 1024**3,
+    },
+    autoscaling_config={
+        "min_replicas": 2,
+        "max_replicas": 16,
+        "target_num_ongoing_requests_per_replica": 20,
+        "scale_up_delay_s": 5,
+        "scale_down_delay_s": 120,
+        "upscale_smoothing_factor": 1.0,
+        "downscale_smoothing_factor": 0.2,  # conservative scale-down
+    },
+    health_check_period_s=10,
+    health_check_timeout_s=30,
+    graceful_shutdown_timeout_s=20,
+)
+@serve.ingress(app)
+class TextClassifier:
+    def __init__(self):
+        from transformers import pipeline
+        self.classifier = pipeline("text-classification", device=0)
+        self.replica_id = serve.get_replica_context().replica_id
+
+    @app.post("/classify", response_model=InferResponse)
+    async def classify(self, request: InferRequest) -> InferResponse:
+        import time
+        start = time.perf_counter()
+        result = self.classifier(request.text)[0]
+        latency_ms = (time.perf_counter() - start) * 1000
+        return InferResponse(
+            output=f"{result['label']} ({result['score']:.3f})",
+            latency_ms=latency_ms,
+            replica_id=self.replica_id,
+        )
+
+    async def check_health(self):
+        """Called by Serve health checker every health_check_period_s."""
+        if not hasattr(self, 'classifier'):
+            raise RuntimeError("Model not loaded")
+
+# Deploy
+classifier_app = TextClassifier.bind()
+serve.run(classifier_app, route_prefix="/api/v1")
+print("Serving at http://localhost:8000/api/v1/classify")</pre>
+
+  <h3>Batching &#8212; GPU Throughput Maximiser</h3>
+  <div class="diagram">
+    <pre>
+  Without batching:                  With @serve.batch:
+  ─────────────────────────────      ────────────────────────────────────────
+  Request 1 ──▶ GPU call (1 item)    Request 1 ─┐
+  Request 2 ──▶ GPU call (1 item)    Request 2 ─┤
+  Request 3 ──▶ GPU call (1 item)    Request 3 ─┼──▶ GPU call (64 items) ──▶ 64 results
+  ...                                 Request 4 ─┤    (same latency as 1 item!)
+  GPU utilisation: ~5%               Request 5 ─┘
+                                     GPU utilisation: ~95%
+    </pre>
+  </div>
+  <pre>@serve.deployment(num_replicas=2, ray_actor_options={"num_gpus": 1})
+class BatchedClassifier:
+    def __init__(self):
+        self.model = load_model()
+
+    @serve.batch(
+        max_batch_size=64,       # accumulate up to 64 requests
+        batch_wait_timeout_s=0.05,  # wait max 50ms for a full batch
+    )
+    async def classify_batch(self, texts: list[str]) -> list[str]:
+        """Ray Serve calls this with a list of up to 64 inputs.
+        The batch is transparent to callers — each gets back their own result."""
+        results = self.model.predict_batch(texts)  # single GPU call
+        return [f"{r['label']}:{r['score']:.3f}" for r in results]
+
+    async def __call__(self, request: Request) -> dict:
+        text = (await request.json())["text"]
+        label = await self.classify_batch(text)  # auto-batched behind the scenes
+        return {"label": label}</pre>
+
+  <h3>Multi-Model Pipeline (Composition)</h3>
+  <pre># Chain multiple models: preprocessing ──▶ embedding ──▶ classifier
+@serve.deployment(num_replicas=4, ray_actor_options={"num_cpus": 2})
+class Preprocessor:
+    def __call__(self, text: str) -> list:
+        return tokenize(text)
+
+@serve.deployment(num_replicas=2, ray_actor_options={"num_gpus": 1})
+class EmbeddingModel:
+    def __init__(self):
+        self.model = load_embedding_model()
+    def __call__(self, tokens: list) -> list:
+        return self.model.encode(tokens).tolist()
+
+@serve.deployment(num_replicas=4, ray_actor_options={"num_cpus": 1})
+class Classifier:
+    def __init__(self, preprocessor, embedder):
+        self.preprocessor = preprocessor
+        self.embedder = embedder
+
+    async def __call__(self, request: Request) -> dict:
+        text = (await request.json())["text"]
+        tokens = await self.preprocessor.remote(text)      # calls Preprocessor replica
+        embedding = await self.embedder.remote(tokens)     # calls EmbeddingModel replica
+        label = self.head(embedding)
+        return {"label": label}
+
+    def head(self, embedding: list) -> str:
+        return "positive" if sum(embedding) > 0 else "negative"
+
+# Bind the DAG — Ray Serve infers the deployment graph
+preprocessor = Preprocessor.bind()
+embedder = EmbeddingModel.bind()
+classifier = Classifier.bind(preprocessor, embedder)
+
+serve.run(classifier, route_prefix="/")</pre>
+
+  <h3>Traffic Splitting for A/B Testing</h3>
+  <pre>from ray.serve.config import RoutePrefix
+
+# Route 20% of traffic to v2 canary
+@serve.deployment
+class Router:
+    def __init__(self, v1_handle, v2_handle):
+        self.v1 = v1_handle
+        self.v2 = v2_handle
+
+    async def __call__(self, request: Request) -> dict:
+        import random
+        if random.random() &lt; 0.2:
+            return await self.v2.remote(request)  # 20% canary
+        return await self.v1.remote(request)       # 80% stable
+
+v1 = ModelV1.bind()
+v2 = ModelV2.bind()
+router = Router.bind(v1, v2)
+serve.run(router)</pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 6                                                      -->
+<!-- ============================================================ -->
+<div id="s6" class="section page-break">
+  <div class="section-num">SECTION 06</div>
+  <h2 class="section-title">Ray Data &#8212; Distributed Data Processing</h2>
+  <p class="lead">Ray Data is a scalable data processing library for ML workloads — reading, transforming, and writing large datasets across the Ray cluster. It uses a streaming execution model that never materialises the full dataset in memory.</p>
+
+  <h3>Ray Data vs Spark vs Pandas</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Ray Data</th><th>Apache Spark</th><th>Pandas</th></tr></thead>
+      <tbody>
+        <tr><td>Scale</td><td>1GB &#8211; 100TB+</td><td>1TB &#8211; petabytes</td><td>&lt;10GB (RAM)</td></tr>
+        <tr><td>Execution</td><td>Streaming (lazy)</td><td>DAG (lazy)</td><td>Eager</td></tr>
+        <tr><td>ML integration</td><td>Native (Ray Train, Serve)</td><td>MLlib (limited)</td><td>None</td></tr>
+        <tr><td>GPU support</td><td>First-class</td><td>Limited</td><td>None</td></tr>
+        <tr><td>API style</td><td>Python-first</td><td>Scala/PySpark</td><td>DataFrame</td></tr>
+        <tr><td>Best for</td><td>ML preprocessing, inference at scale</td><td>Large ETL/analytics</td><td>Small data, exploration</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Reading Data</h3>
+  <pre>import ray
+
+# Read from various sources — returns a lazy Dataset
+ds_parquet = ray.data.read_parquet("s3://my-bucket/data/*.parquet")
+ds_csv     = ray.data.read_csv("/data/transactions.csv")
+ds_json    = ray.data.read_json("s3://bucket/events/*.jsonl")
+ds_images  = ray.data.read_images("/data/images/", size=(224, 224))
+ds_text    = ray.data.read_text("s3://bucket/documents/*.txt")
+
+# From an existing Python collection
+ds_from_list = ray.data.from_items([{"id": i, "value": i*2} for i in range(1_000_000)])
+ds_from_df   = ray.data.from_pandas(my_dataframe)
+
+# Check schema and size (without reading all data)
+print(ds_parquet.schema())
+print(ds_parquet.count())   # triggers full scan — avoid on huge datasets</pre>
+
+  <h3>Transformations</h3>
+  <pre>import ray
+from ray.data import Dataset
+
+# ---- Map: transform each row ----
+def extract_features(row: dict) -> dict:
+    return {
+        "id": row["id"],
+        "text_len": len(row["text"]),
+        "normalised": row["value"] / 100.0,
+        "label": 1 if row["score"] > 0.5 else 0
+    }
+
+ds = ray.data.read_parquet("s3://data/")
+transformed = ds.map(extract_features)  # lazy — not executed yet
+
+# ---- Map batches: batch processing (better GPU utilisation) ----
+def embed_batch(batch: dict) -> dict:
+    """batch["text"] is a list of strings."""
+    import numpy as np
+    texts = batch["text"]
+    embeddings = embedding_model.encode(texts)  # single model call for batch
+    return {"id": batch["id"], "embedding": embeddings.tolist()}
+
+embedded = ds.map_batches(
+    embed_batch,
+    batch_size=64,
+    num_gpus=1,               # each batch runs on 1 GPU worker
+    concurrency=4,            # 4 parallel GPU workers
+)
+
+# ---- Filter ----
+filtered = ds.filter(lambda row: row["score"] > 0.8)
+
+# ---- Flat map: one row -> many rows ----
+def split_sentences(row: dict) -> list[dict]:
+    return [{"id": f"{row['id']}_{i}", "sentence": s}
+            for i, s in enumerate(row["text"].split(". "))]
+
+sentences = ds.flat_map(split_sentences)
+
+# ---- GroupBy + Aggregate ----
+aggregated = (
+    ds
+    .groupby("category")
+    .agg(
+        ray.data.aggregate.Mean("score"),
+        ray.data.aggregate.Count(),
+        ray.data.aggregate.Max("value"),
+    )
+)</pre>
+
+  <h3>Streaming ML Preprocessing Pipeline</h3>
+  <div class="diagram">
+    <pre>
+  S3 Parquet files (1TB)
+         │
+         ▼  read_parquet (streaming blocks of 256MB)
+  ┌────────────┐
+  │  Block 1   │──▶ map(clean) ──▶ map_batches(embed, GPU) ──▶ write_parquet
+  └────────────┘
+  ┌────────────┐
+  │  Block 2   │──▶ map(clean) ──▶ map_batches(embed, GPU) ──▶ write_parquet
+  └────────────┘
+  ...
+  (Dataset fully pipelined — never holds more than N blocks in memory at once)
+    </pre>
+  </div>
+  <pre># Full preprocessing pipeline — executed streaming across the cluster
+pipeline = (
+    ray.data.read_parquet("s3://raw-data/")
+    .map(lambda row: {**row, "text": row["text"].lower().strip()})
+    .filter(lambda row: len(row["text"]) > 10)
+    .map_batches(
+        lambda batch: {
+            "id": batch["id"],
+            "embedding": embedding_model(batch["text"]),  # GPU batch call
+        },
+        batch_size=128,
+        num_gpus=1,
+        concurrency=8,      # 8 GPU workers processing in parallel
+    )
+    .write_parquet("s3://processed-data/", try_create_dir=True)
+)</pre>
+
+  <h3>Feeding Ray Data into Ray Train</h3>
+  <pre>from ray.train.torch import TorchTrainer
+from ray.train import ScalingConfig
+
+train_ds = ray.data.read_parquet("s3://data/train/")
+val_ds   = ray.data.read_parquet("s3://data/val/")
+
+trainer = TorchTrainer(
+    train_loop_per_worker=train_fn,
+    scaling_config=ScalingConfig(num_workers=8, use_gpu=True),
+    datasets={"train": train_ds, "val": val_ds},  # streamed to each worker
+)
+result = trainer.fit()</pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 7                                                      -->
+<!-- ============================================================ -->
+<div id="s7" class="section page-break">
+  <div class="section-num">SECTION 07</div>
+  <h2 class="section-title">Ray Train &#8212; Distributed ML Training</h2>
+  <p class="lead">Ray Train enables distributed training across multiple GPUs and nodes with minimal code changes to your existing PyTorch, TensorFlow, or HuggingFace training code. It handles worker coordination, checkpoint management, and fault tolerance automatically.</p>
+
+  <h3>Ray Train Architecture</h3>
+  <div class="diagram">
+    <pre>
+  Driver (orchestrator)
+       │
+       ├── Creates TorchTrainer
+       │         │
+       │         └── ScalingConfig: 8 workers, use_gpu=True
+       │
+       └── trainer.fit()
+                 │
+                 ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │                  TRAINING WORKERS                        │
+  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ...         │
+  │  │Worker 0  │  │Worker 1  │  │Worker 2  │              │
+  │  │GPU:0     │  │GPU:1     │  │GPU:2     │              │
+  │  │          │  │          │  │          │              │
+  │  │ DDP rank0│  │ DDP rank1│  │ DDP rank2│              │
+  │  └────┬─────┘  └────┬─────┘  └────┬─────┘              │
+  │       └──────────────┴──────────────┘                   │
+  │                AllReduce (NCCL)                          │
+  │              gradient synchronisation                    │
+  └─────────────────────────────────────────────────────────┘
+       │
+       ▼
+  Checkpoints, metrics → Ray Train Result Store
+    </pre>
+  </div>
+
+  <h3>PyTorch Distributed Training</h3>
+  <pre>import ray
+from ray.train.torch import TorchTrainer, prepare_model, prepare_data_loader
+from ray.train import ScalingConfig, Checkpoint, RunConfig, CheckpointConfig
+import torch
+import torch.nn as nn
+
+def train_loop_per_worker(config: dict):
+    """This function runs independently on every worker."""
+
+    # Ray Train wraps your model with DDP automatically
+    model = nn.Sequential(nn.Linear(784, 256), nn.ReLU(), nn.Linear(256, 10))
+    model = prepare_model(model)  # wraps with DistributedDataParallel
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=config["lr"])
+    criterion = nn.CrossEntropyLoss()
+
+    # Get the dataset shard for this worker
+    train_data = ray.train.get_dataset_shard("train")
+
+    for epoch in range(config["epochs"]):
+        total_loss = 0.0
+        for batch in train_data.iter_torch_batches(batch_size=config["batch_size"]):
+            X, y = batch["features"].cuda(), batch["labels"].cuda()
+            optimizer.zero_grad()
+            loss = criterion(model(X), y)
+            loss.backward()
+            optimizer.step()
+            total_loss += loss.item()
+
+        avg_loss = total_loss / len(train_data)
+
+        # Report metrics and checkpoints — Ray Train aggregates across workers
+        ray.train.report(
+            metrics={"epoch": epoch, "loss": avg_loss},
+            checkpoint=Checkpoint.from_dict({"model": model.state_dict(), "epoch": epoch})
+            if epoch % 5 == 0 else None,
+        )
+
+trainer = TorchTrainer(
+    train_loop_per_worker=train_loop_per_worker,
+    train_loop_config={"lr": 1e-3, "epochs": 50, "batch_size": 128},
+    scaling_config=ScalingConfig(
+        num_workers=8,           # 8 GPU workers
+        use_gpu=True,
+        resources_per_worker={"GPU": 1, "CPU": 4},
+    ),
+    run_config=RunConfig(
+        name="mnist-distributed",
+        storage_path="s3://ray-checkpoints/",
+        checkpoint_config=CheckpointConfig(num_to_keep=3),
+    ),
+    datasets={"train": train_ds, "val": val_ds},
+)
+
+result = trainer.fit()
+best_checkpoint = result.get_best_checkpoint(metric="loss", mode="min")
+print(f"Best loss: {result.metrics['loss']:.4f}")</pre>
+
+  <h3>HuggingFace Fine-Tuning with Ray Train</h3>
+  <pre>from ray.train.huggingface import TransformersTrainer
+from transformers import AutoModelForSequenceClassification, TrainingArguments
+
+def train_fn(config):
+    from transformers import Trainer
+
+    model = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
+    training_args = TrainingArguments(
+        output_dir="/tmp/model",
+        per_device_train_batch_size=16,
+        num_train_epochs=3,
+        fp16=True,              # mixed precision
+        deepspeed=config.get("deepspeed_config"),  # optional DeepSpeed ZeRO
+    )
+    train_dataset = ray.train.get_dataset_shard("train").to_torch()
+
+    trainer = Trainer(model=model, args=training_args, train_dataset=train_dataset)
+    trainer.train()
+
+trainer = TransformersTrainer(
+    train_loop_per_worker=train_fn,
+    scaling_config=ScalingConfig(num_workers=4, use_gpu=True),
+    datasets={"train": tokenised_ds},
+)</pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 8                                                      -->
+<!-- ============================================================ -->
+<div id="s8" class="section page-break">
+  <div class="section-num">SECTION 08</div>
+  <h2 class="section-title">Ray Tune &#8212; Hyperparameter Optimisation</h2>
+  <p class="lead">Ray Tune is a distributed hyperparameter optimisation library. It runs hundreds of training trials in parallel across the cluster, using intelligent search algorithms to find the best configuration in a fraction of the sequential search time.</p>
+
+  <h3>Tune Architecture</h3>
+  <div class="diagram">
+    <pre>
+  Tune Driver (TrialRunner)
+  ├── Search Algorithm (suggests configs)
+  │   e.g. BayesOpt, HyperBand, Optuna, BOHB
+  │
+  ├── Scheduler (decides which trials to pause/resume/stop)
+  │   e.g. ASHAScheduler (early stopping)
+  │
+  └── Trials (each is a Ray Actor)
+       ├── Trial 0: {lr: 1e-3, layers: 2}  ──▶ Worker GPU:0
+       ├── Trial 1: {lr: 5e-4, layers: 3}  ──▶ Worker GPU:1
+       ├── Trial 2: {lr: 1e-4, layers: 4}  ──▶ Worker GPU:2
+       ├── Trial 3: {lr: 2e-3, layers: 2}  ──▶ Worker GPU:3
+       └── ... (N trials in parallel)
+    </pre>
+  </div>
+
+  <h3>Basic Tune Example</h3>
+  <pre>from ray import tune
+from ray.tune.schedulers import ASHAScheduler
+from ray.tune.search.optuna import OptunaSearch
+
+def train_model(config: dict):
+    """Ray Tune calls this for each trial. Report metrics each epoch."""
+    model = build_model(
+        hidden_size=config["hidden_size"],
+        num_layers=config["num_layers"],
+        dropout=config["dropout"],
+    )
+    optimizer = torch.optim.Adam(model.parameters(), lr=config["lr"])
+
+    for epoch in range(config["max_epochs"]):
+        train_loss = run_epoch(model, optimizer, train_data)
+        val_accuracy = evaluate(model, val_data)
+
+        # Report to Tune — scheduler may stop poor-performing trials early
+        tune.report(
+            loss=train_loss,
+            accuracy=val_accuracy,
+            epoch=epoch,
+        )
+
+# Define search space
+search_space = {
+    "lr":          tune.loguniform(1e-5, 1e-2),
+    "hidden_size": tune.choice([64, 128, 256, 512]),
+    "num_layers":  tune.randint(1, 6),
+    "dropout":     tune.uniform(0.0, 0.5),
+    "batch_size":  tune.choice([32, 64, 128]),
+    "max_epochs":  10,
+}
+
+# ASHA: aggressively stop bad trials early (bracket-based)
+scheduler = ASHAScheduler(
+    metric="accuracy",
+    mode="max",
+    grace_period=2,          # run at least 2 epochs before stopping
+    reduction_factor=3,      # prune bottom 2/3 of trials each round
+)
+
+# Optuna Bayesian optimisation search (smarter than random)
+search = OptunaSearch(metric="accuracy", mode="max")
+
+tuner = tune.Tuner(
+    tune.with_resources(
+        train_model,
+        resources={"cpu": 2, "gpu": 1}  # per trial
+    ),
+    param_space=search_space,
+    tune_config=tune.TuneConfig(
+        num_samples=200,         # 200 trials total
+        scheduler=scheduler,
+        search_alg=search,
+    ),
+    run_config=tune.RunConfig(
+        name="hyperopt-run",
+        storage_path="s3://ray-results/",
+        stop={"training_iteration": 10, "accuracy": 0.99},
+    ),
+)
+
+results = tuner.fit()
+best = results.get_best_result(metric="accuracy", mode="max")
+print(f"Best config: {best.config}")
+print(f"Best accuracy: {best.metrics['accuracy']:.4f}")</pre>
+
+  <h3>Population-Based Training (PBT)</h3>
+  <pre>from ray.tune.schedulers import PopulationBasedTraining
+
+# PBT: evolve hyperparameters during training (like genetic algorithms)
+pbt = PopulationBasedTraining(
+    time_attr="training_iteration",
+    metric="accuracy",
+    mode="max",
+    perturbation_interval=5,        # every 5 epochs, exploit/explore
+    hyperparam_mutations={
+        "lr": tune.loguniform(1e-5, 1e-2),
+        "dropout": [0.0, 0.1, 0.2, 0.3],
+    },
+)
+# PBT periodically copies weights from top performers to bottom,
+# then mutates their hyperparameters — combines training + HPO</pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 9                                                      -->
+<!-- ============================================================ -->
+<div id="s9" class="section page-break">
+  <div class="section-num">SECTION 09</div>
+  <h2 class="section-title">KubeRay on OpenShift / Kubernetes</h2>
+  <p class="lead">KubeRay is the Kubernetes operator for Ray. It manages RayCluster, RayJob, and RayService custom resources, enabling Ray workloads to run natively on OpenShift with autoscaling, high availability, and GitOps-compatible declarative configuration.</p>
+
+  <h3>KubeRay Resource Types</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>RayCluster</h4>
+      <p>A persistent Ray cluster (head + worker nodes). Use for long-running interactive work, Ray Serve deployments, or shared cluster across teams.</p>
+    </div>
+    <div class="card card-purple">
+      <h4>RayJob</h4>
+      <p>Submit a batch Ray job that runs to completion. KubeRay creates the cluster, runs the job, then tears everything down. Cost-efficient for one-shot workloads.</p>
+    </div>
+    <div class="card card-green">
+      <h4>RayService</h4>
+      <p>Deploy Ray Serve on Kubernetes. KubeRay handles zero-downtime upgrades, health checks, and scaling of the Serve application.</p>
+    </div>
+  </div>
+
+  <h3>RayCluster Definition</h3>
+  <pre>apiVersion: ray.io/v1
+kind: RayCluster
+metadata:
+  name: production-ray-cluster
+  namespace: ml-platform
+spec:
+  rayVersion: "2.9.0"
+
+  headGroupSpec:
+    rayStartParams:
+      dashboard-host: "0.0.0.0"
+      num-cpus: "0"              # head does not run tasks
+    template:
+      spec:
+        containers:
+        - name: ray-head
+          image: rayproject/ray:2.9.0-gpu
+          resources:
+            requests: { cpu: "4", memory: "16Gi" }
+            limits:   { cpu: "8", memory: "32Gi" }
+          env:
+          - name: RAY_ENABLE_RECORD_ACTOR_TASK_LOGGING
+            value: "1"
+        serviceAccountName: ray-worker-sa
+
+  workerGroupSpecs:
+  # CPU worker group
+  - groupName: cpu-workers
+    replicas: 4
+    minReplicas: 2
+    maxReplicas: 20
+    rayStartParams:
+      num-cpus: "8"
+    template:
+      spec:
+        containers:
+        - name: ray-worker
+          image: rayproject/ray:2.9.0
+          resources:
+            requests: { cpu: "8", memory: "32Gi" }
+            limits:   { cpu: "8", memory: "32Gi" }
+
+  # GPU worker group
+  - groupName: gpu-workers
+    replicas: 2
+    minReplicas: 1
+    maxReplicas: 8
+    rayStartParams:
+      num-cpus: "4"
+      num-gpus: "1"
+    template:
+      metadata:
+        labels:
+          node-type: gpu
+      spec:
+        tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+        nodeSelector:
+          accelerator: nvidia-a100
+        containers:
+        - name: ray-worker
+          image: rayproject/ray:2.9.0-gpu
+          resources:
+            requests:
+              cpu: "4"
+              memory: "16Gi"
+              nvidia.com/gpu: "1"
+            limits:
+              nvidia.com/gpu: "1"</pre>
+
+  <h3>RayService &#8212; Ray Serve on OpenShift</h3>
+  <pre>apiVersion: ray.io/v1
+kind: RayService
+metadata:
+  name: text-classifier-service
+  namespace: ml-platform
+spec:
+  serveConfigV2: |
+    applications:
+    - name: classifier
+      route_prefix: /classify
+      import_path: myapp.deployment:classifier_app
+      runtime_env:
+        pip: ["transformers==4.38.0", "torch==2.2.0"]
+      deployments:
+      - name: TextClassifier
+        num_replicas: 4
+        ray_actor_options:
+          num_gpus: 1
+          num_cpus: 2
+        autoscaling_config:
+          min_replicas: 2
+          max_replicas: 16
+          target_num_ongoing_requests_per_replica: 20
+
+  rayClusterConfig:
+    rayVersion: "2.9.0"
+    headGroupSpec:
+      template:
+        spec:
+          containers:
+          - name: ray-head
+            image: my-registry/ray-serve-app:latest
+            resources:
+              requests: { cpu: "2", memory: "8Gi" }
+    workerGroupSpecs:
+    - groupName: gpu-workers
+      replicas: 4
+      template:
+        spec:
+          containers:
+          - name: ray-worker
+            image: my-registry/ray-serve-app:latest
+            resources:
+              requests:
+                cpu: "4"
+                memory: "16Gi"
+                nvidia.com/gpu: "1"</pre>
+
+  <h3>KEDA &#8212; Autoscale RayCluster Worker Pods</h3>
+  <pre>apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: ray-gpu-worker-scaler
+  namespace: ml-platform
+spec:
+  scaleTargetRef:
+    apiVersion: ray.io/v1
+    kind: RayCluster
+    name: production-ray-cluster
+    envSourceContainerName: ray-worker
+  minReplicaCount: 1
+  maxReplicaCount: 16
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus.monitoring:9090
+      metricName: ray_cluster_pending_tasks
+      query: sum(ray_pending_tasks{namespace="ml-platform"})
+      threshold: "10"   # scale up when >10 tasks waiting for workers</pre>
+
+  <h3>Connecting FastAPI to RayCluster</h3>
+  <pre># In your FastAPI pod (separate from Ray cluster)
+import ray
+from ray import serve
+
+# Connect to Ray cluster via service DNS
+ray.init(address="ray://production-ray-cluster-head-svc.ml-platform:10001")
+
+# Or using Ray Serve HTTP proxy
+import httpx
+
+async def call_serve_model(text: str) -> dict:
+    # Ray Serve runs its own HTTP server — call it directly
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            "http://production-ray-cluster-serve-svc:8000/classify",
+            json={"text": text},
+            timeout=30.0,
+        )
+        return resp.json()</pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 10                                                     -->
+<!-- ============================================================ -->
+<div id="s10" class="section page-break">
+  <div class="section-num">SECTION 10</div>
+  <h2 class="section-title">Production Patterns &amp; Observability</h2>
+  <p class="lead">Running Ray in production requires more than getting code to work on a laptop. This section covers the patterns, anti-patterns, debugging tools, and observability setups that distinguish toy deployments from production systems.</p>
+
+  <h3>Production Pattern 1 &#8212; Kafka &#8594; Ray Pipeline</h3>
+  <div class="diagram">
+    <pre>
+  FastAPI (Accepts requests, returns 202)
+      │
+      ▼ publish
+  Kafka Topic "inference-requests"
+      │
+      ▼ consume (16 partitions)
+  ┌──────────────────────────────────────────────────────────┐
+  │  Ray Actor: KafkaConsumerActor (per partition)           │
+  │  - Reads messages in batches                             │
+  │  - Submits ray tasks: infer.remote(batch)                │
+  │  - Commits offset only after ray.get(future) succeeds   │
+  └──────────────────────────────────────────────────────────┘
+      │
+      ▼ ray tasks fan-out
+  Ray Workers (GPU) -- batch inference
+      │
+      ▼ results
+  Redis (job_id -> result) + WebSocket push
+    </pre>
+  </div>
+  <pre>@ray.remote
+class KafkaConsumerActor:
+    def __init__(self, partition: int):
+        from aiokafka import AIOKafkaConsumer
+        self.consumer = AIOKafkaConsumer(
+            "inference-requests",
+            bootstrap_servers="kafka:9092",
+            group_id="ray-inference",
+            partition_assignment=[partition],
+        )
+        self.model_ref = ray.put(load_model())  # load once, broadcast
+
+    async def run(self):
+        await self.consumer.start()
+        async for msg in self.consumer:
+            batch = json.loads(msg.value)
+            result = await infer_task.remote(self.model_ref, batch)
+            await store_result(batch["job_id"], ray.get(result))
+            await self.consumer.commit()
+
+# One actor per Kafka partition — max parallelism without coordination
+consumers = [KafkaConsumerActor.options(name=f"consumer-{p}").remote(p)
+             for p in range(16)]
+[c.run.remote() for c in consumers]</pre>
+
+  <h3>Production Pattern 2 &#8212; Placement Groups for Co-location</h3>
+  <pre>from ray.util.placement_group import placement_group, placement_group_table
+from ray.util.scheduling_strategies import PlacementGroupSchedulingStrategy
+
+# Bundle: reserve GPU + CPU on the SAME node
+pg = placement_group(
+    bundles=[
+        {"GPU": 1, "CPU": 4},  # bundle 0: preprocessor + model on same node
+        {"GPU": 1, "CPU": 4},  # bundle 1: another model on same node
+    ],
+    strategy="STRICT_PACK",   # PACK=same node, SPREAD=different nodes
+)
+ray.get(pg.ready())  # wait until resources available
+
+# Schedule actors on specific bundles
+preprocessor = Preprocessor.options(
+    scheduling_strategy=PlacementGroupSchedulingStrategy(
+        placement_group=pg, placement_group_bundle_index=0
+    )
+).remote()
+
+model = Model.options(
+    scheduling_strategy=PlacementGroupSchedulingStrategy(
+        placement_group=pg, placement_group_bundle_index=0
+    )
+).remote()
+# Preprocessor and Model guaranteed to be on same node — no cross-node data transfer</pre>
+
+  <h3>Observability &#8212; Metrics, Tracing, Logging</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Ray Dashboard</h4>
+      <p>Built-in at <code>:8265</code>. Shows: cluster resource usage, actor states, task timelines (flame graph), memory per object, job logs. First place to look when debugging.</p>
+    </div>
+    <div class="card card-green">
+      <h4>Prometheus Metrics</h4>
+      <p>Ray exposes metrics at <code>:8080/metrics</code>. Key metrics: <code>ray_pending_tasks</code>, <code>ray_running_tasks</code>, <code>ray_object_store_memory</code>, <code>ray_num_running_actors</code>.</p>
+    </div>
+    <div class="card card-purple">
+      <h4>Task Timeline (Perfetto)</h4>
+      <p><code>ray.timeline()</code> exports a Chrome trace. Shows exactly when each task started, ended, and where it ran — essential for finding bottlenecks in pipelines.</p>
+    </div>
+    <div class="card card-teal">
+      <h4>Structured Logging</h4>
+      <p>Worker logs streamed to driver. Use <code>ray.util.worker_log</code> for structured output. In KubeRay: logs collected by Fluentd/Loki automatically.</p>
+    </div>
+  </div>
+
+  <pre># Custom application metrics in Ray
+from ray.util.metrics import Counter, Gauge, Histogram
+
+inference_counter = Counter("ray_inference_total", description="Total inference calls")
+latency_hist = Histogram("ray_inference_latency_ms", boundaries=[10, 50, 100, 500, 1000])
+queue_depth = Gauge("ray_inference_queue_depth")
+
+@ray.remote
+class InferenceActor:
+    def predict(self, inputs):
+        import time
+        start = time.perf_counter()
+        result = self.model(inputs)
+        latency_ms = (time.perf_counter() - start) * 1000
+
+        inference_counter.inc()
+        latency_hist.observe(latency_ms)
+        return result</pre>
+
+  <h3>Debugging Checklist</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Symptom</th><th>Likely Cause</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Tasks stuck in PENDING</td><td>Insufficient cluster resources; resource request too high</td><td>Check <code>ray.available_resources()</code>; reduce <code>num_cpus</code> per task</td></tr>
+        <tr><td>OOM on workers</td><td>Task produces large objects; Plasma full</td><td>Use <code>ray.wait()</code> to drain futures; stream with Ray Data; increase object store memory</td></tr>
+        <tr><td>Tasks running slowly</td><td>Serial bottleneck in driver; small tasks with high overhead</td><td>Batch small tasks; use <code>ray.timeline()</code> to find bottleneck</td></tr>
+        <tr><td>Actor crashed, not restarting</td><td><code>max_restarts=0</code> (default)</td><td>Set <code>max_restarts=-1</code> (infinite) or specific count</td></tr>
+        <tr><td>Cross-node is slow</td><td>Large objects transferred over network</td><td>Use <code>ray.put()</code> broadcast; use placement groups to co-locate producers/consumers</td></tr>
+        <tr><td>GPU not utilised</td><td>Single task at a time; no batching</td><td>Use <code>@serve.batch</code>; ensure <code>num_gpus=1</code> on tasks; Actor Pool with multiple GPU actors</td></tr>
+        <tr><td>Ray Serve 503 errors</td><td>All replicas overloaded; max_concurrent_queries hit</td><td>Increase <code>max_replicas</code> in autoscaling config; increase <code>target_num_ongoing_requests_per_replica</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Complete Reference: Key Patterns</h3>
+  <pre># Pattern summary — when to use what
+
+# 1. Embarrassingly parallel: Tasks
+results = ray.get([process.remote(x) for x in data])
+
+# 2. Stateful long-lived service: Actor
+server = ModelServer.options(name="model-v1", lifetime="detached").remote("model.pt")
+
+# 3. Shared heavy resource (broadcast): ray.put()
+model_ref = ray.put(large_model)
+results = ray.get([predict.remote(model_ref, x) for x in data])
+
+# 4. HTTP serving + autoscaling: Ray Serve
+@serve.deployment(autoscaling_config={...})
+class Service: ...
+serve.run(Service.bind())
+
+# 5. Large dataset preprocessing: Ray Data
+ray.data.read_parquet("s3://...").map_batches(fn, num_gpus=1).write_parquet("s3://...")
+
+# 6. Multi-GPU training: Ray Train
+TorchTrainer(train_fn, ScalingConfig(num_workers=8, use_gpu=True)).fit()
+
+# 7. Hyperparameter search: Ray Tune
+tune.Tuner(train_fn, param_space={...}, tune_config=TuneConfig(num_samples=200)).fit()
+
+# 8. Kubernetes: KubeRay RayCluster + RayService CRDs</pre>
+
+  <div class="pills">
+    <span class="pill pill-purple">@ray.remote</span>
+    <span class="pill pill-purple">ActorPool</span>
+    <span class="pill pill-blue">Plasma Object Store</span>
+    <span class="pill pill-blue">ray.put broadcast</span>
+    <span class="pill pill-green">Ray Serve batching</span>
+    <span class="pill pill-green">autoscaling_config</span>
+    <span class="pill pill-teal">Ray Data streaming</span>
+    <span class="pill pill-teal">map_batches GPU</span>
+    <span class="pill pill-amber">ASHAScheduler</span>
+    <span class="pill pill-coral">KubeRay RayService</span>
+  </div>
+
+  <div class="footer">Ray Distributed Platform &#183; Complete Reference Guide &#183; Interview Preparation &#183; April 2026</div>
+</div>
+
+</div><!-- /.container -->
+</div><!-- /.main-scroll -->
+</div><!-- /.topic-page -->
+
+<footer class="guide-footer">Interview Preparation Guide</footer>
+</body>
+</html>

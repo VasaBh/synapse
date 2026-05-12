@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What is NOT Possible — Limitations – Autoscaling</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../autoscaling.html">Autoscaling</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">What is NOT Possible — Limitations</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Autoscaling</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-scaling-fundamentals.html">Scaling Fundamentals</a></li>
+        <li><a href="04-2-horizontal-pod-autoscaler-hpa.html">Horizontal Pod Autoscaler (HPA)</a></li>
+        <li><a href="05-3-vertical-pod-autoscaler-vpa.html">Vertical Pod Autoscaler (VPA)</a></li>
+        <li><a href="06-4-custom-metrics-autoscaler-keda.html">Custom Metrics Autoscaler (KEDA)</a></li>
+        <li><a href="07-5-cluster-and-machine-autoscaler-node-scaling.html">Cluster and Machine Autoscaler (Node Scaling)</a></li>
+        <li><a href="08-6-openshift-serverless-knative-autoscaling.html">OpenShift Serverless (Knative) Autoscaling</a></li>
+        <li><a href="09-7-fastapi-publishing-metrics-for-autoscaling.html">FastAPI: Publishing Metrics for Autoscaling</a></li>
+        <li class="active"><a href="10-8-what-is-not-possible-limitations.html" class="active">What is NOT Possible — Limitations</a></li>
+        <li><a href="11-9-decision-guide-which-autoscaler-to-use.html">Decision Guide — Which Autoscaler to Use?</a></li>
+        <li><a href="12-10-end-to-end-autoscaling-architecture.html">End-to-End Autoscaling Architecture</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>8. What is NOT Possible — Limitations</h1>
+<div class="table-wrap"><table>
+  <tr><th>Limitation</th><th>Details</th><th>Workaround</th></tr>
+  <tr><td>VPA cannot resize pods in-place</td><td>Kubernetes in-place resize is alpha and unsupported in OpenShift. VPA must evict and recreate pods.</td><td>Use VPA &quot;Initial&quot; mode to avoid restarts. Accept brief disruptions with Auto mode.</td></tr>
+  <tr><td>HPA cannot scale to zero</td><td>HPA minimum is 1 replica. It will never remove the last pod.</td><td>Use KEDA (minReplicaCount: 0) or Knative (minScale: 0) for scale-to-zero.</td></tr>
+  <tr><td>HPA cannot use custom metrics natively</td><td>HPA only supports CPU/memory from the metrics server. Custom metrics need an adapter.</td><td>Use KEDA which acts as a metrics adapter and feeds external metrics to HPA.</td></tr>
+  <tr><td>Cluster Autoscaler requires Machine API</td><td>Only works on IPI (AWS, Azure, GCP, vSphere). Not on bare metal UPI.</td><td>On UPI bare metal, manually add/remove nodes. Or use assisted installer with MAPI.</td></tr>
+  <tr><td>VPA + HPA on same metric conflicts</td><td>Both try to control the same resource causing oscillation.</td><td>Use VPA for right-sizing + KEDA for custom-metric horizontal scaling.</td></tr>
+  <tr><td>No native HTTP-based autoscaling</td><td>OpenShift has no built-in way to scale on request rate without instrumentation.</td><td>Instrument app (Prometheus), use Knative, or use Istio/Envoy metrics with KEDA.</td></tr>
+  <tr><td>Scale-to-zero has cold-start latency</td><td>First request after idle must wait for pod startup (container pull, app init).</td><td>Set minScale: 1 for latency-sensitive APIs. Use readiness probes. Pre-warm with KEDA cron trigger.</td></tr>
+</table></div>
+      </article>
+
+      <nav class="page-nav">
+        <a href="09-7-fastapi-publishing-metrics-for-autoscaling.html">&#8592; FastAPI: Publishing Metrics for Autoscaling</a>
+        <span class="spacer"></span>
+        <a href="11-9-decision-guide-which-autoscaler-to-use.html">Decision Guide — Which Autoscaler to Use? &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

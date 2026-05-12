@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Load Balancing Between Production and COB/DR Environments – Load Balancing</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../load-balancing.html">Load Balancing</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Load Balancing Between Production and COB/DR Environments</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Load Balancing</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-api-traffic-load-balancing-fundamentals.html">API &amp; Traffic Load Balancing Fundamentals</a></li>
+        <li><a href="04-2-load-balancing-inside-openshift.html">Load Balancing Inside OpenShift</a></li>
+        <li><a href="05-3-load-balancing-outside-openshift-external.html">Load Balancing Outside OpenShift (External)</a></li>
+        <li><a href="06-4-how-to-use-external-load-balancers-with-openshift.html">How to Use External Load Balancers WITH OpenShift</a></li>
+        <li><a href="07-5-canary-deployments-in-openshift.html">Canary Deployments in OpenShift</a></li>
+        <li class="active"><a href="08-6-load-balancing-between-production-and-cobdr-environments.html" class="active">Load Balancing Between Production and COB/DR Environments</a></li>
+        <li><a href="09-7-complete-load-balancing-stack-end-to-end.html">Complete Load Balancing Stack — End-to-End</a></li>
+        <li><a href="10-8-decision-guide-which-approach-to-use.html">Decision Guide — Which Approach to Use?</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>6. Load Balancing Between Production and COB/DR Environments</h1>
+<p>When an organisation operates a Production OpenShift cluster and a separate COB (Continuity of Business) or DR (Disaster Recovery) OpenShift cluster, traffic must be intelligently routed between these environments. This is where Global Server Load Balancing (GSLB) comes into play.</p>
+<h3>6.1 Architecture Overview</h3>
+<pre><code>User / Client
+|
+DNS Request
+(api.mycompany.com)
+|
+v
++---------------------+
+|   GSLB / DNS Layer   |
+|  (F5 GTM / Route53 / |
+|  Azure Traffic Mgr)  |
++---------------------+
+/             \
+Active               Standby
+(normal)         (failover only)
+/                    \
+v                      v
++--------------------+   +--------------------+
+|  PRODUCTION SITE   |   |  COB / DR SITE     |
+|                    |   |                    |
+|  +------+------+  |   |  +------+------+  |
+|  |External LB  |  |   |  |External LB  |  |
+|  |(F5/HAProxy) |  |   |  |(F5/HAProxy) |  |
+|  +------+------+  |   |  +------+------+  |
+|         |         |   |         |         |
+|  +------v------+  |   |  +------v------+  |
+|  |  OpenShift  |  |   |  |  OpenShift  |  |
+|  |  Cluster    |  |   |  |  Cluster    |  |
+|  | (Workers,   |  |   |  | (Workers,   |  |
+|  |  Routers,   |  |   |  |  Routers,   |  |
+|  |  Pods)      |  |   |  |  Pods)      |  |
+|  +-------------+  |   |  +-------------+  |
++--------------------+   +--------------------+
+DC1 / Region A          DC2 / Region B</code></pre>
+<h3>6.2 GSLB — Global Server Load Balancing</h3>
+<p>GSLB operates at the DNS layer. When a client resolves a hostname, the GSLB-enabled DNS server makes an intelligent decision about which site IP to return, based on health checks, geographic proximity, site load, or configured policies. If the primary (Production) site becomes unhealthy, GSLB automatically returns the COB/DR site IP, achieving failover.</p>
+<p>How GSLB works step-by-step:</p>
+<ul>
+  <li>Client application makes a DNS query for api.mycompany.com.</li>
+  <li>DNS query reaches the GSLB authoritative name server.</li>
+  <li>GSLB checks health of both Production and COB sites via configured health monitors.</li>
+  <li>GSLB applies the configured algorithm (Active-Passive, Weighted, Geo-based).</li>
+  <li>GSLB returns the IP of the chosen healthy site to the client.</li>
+  <li>Client connects to that IP, reaching the External LB at the chosen site.</li>
+</ul>
+<h3>6.3 Deployment Models</h3>
+<div class="table-wrap"><table>
+  <tr><th>Model</th><th>Traffic Pattern</th><th>Data Sync</th><th>Use Case</th></tr>
+  <tr><td>Active-Passive</td><td>100% to Prod. COB receives 0% unless Prod fails. Failover can be automatic or manual.</td><td>Async replication is sufficient. COB data may be slightly behind.</td><td>Most common for Prod-COB. Simple, cost-effective. COB is warm standby.</td></tr>
+  <tr><td>Active-Active</td><td>Traffic split across both sites (e.g., 80/20, 50/50, or geo-based).</td><td>Near-real-time bidirectional sync required. Conflict resolution needed.</td><td>High availability. Better resource utilisation. Faster failover.</td></tr>
+  <tr><td>Active-Active (Geo)</td><td>Users routed to nearest site based on geographic proximity.</td><td>Same as Active-Active. Data sovereignty compliance may apply.</td><td>Global presence. Reduced latency. Regulatory compliance.</td></tr>
+</table></div>
+<h3>6.4 GSLB Tools for Prod-COB</h3>
+<div class="table-wrap"><table>
+  <tr><th>Tool</th><th>Type</th><th>Notes</th></tr>
+  <tr><td>F5 BIG-IP DNS (GTM)</td><td>Enterprise hardware/virtual</td><td>Industry standard. Tight integration with F5 LTM. Health monitors, topology records, Wide IPs.</td></tr>
+  <tr><td>Citrix NetScaler GSLB</td><td>Enterprise hardware/virtual</td><td>Uses MEP (Metrics Exchange Protocol) between sites. Supports up to 32 sites.</td></tr>
+  <tr><td>AWS Route 53</td><td>Cloud-native DNS</td><td>Health-check failover policies. Weighted, latency-based, geo routing.</td></tr>
+  <tr><td>Azure Traffic Manager</td><td>Cloud-native DNS</td><td>Priority, weighted, performance, and geographic routing methods.</td></tr>
+  <tr><td>Azure Front Door</td><td>Cloud-native L7 + CDN</td><td>Global L7 LB with CDN, WAF, and SSL offloading. Not DNS-only.</td></tr>
+  <tr><td>Cloudflare LB</td><td>Cloud-based</td><td>Global anycast network. Health checks, geo-steering, failover pools.</td></tr>
+  <tr><td>CoreDNS + Consul</td><td>Open source</td><td>DIY approach. CoreDNS resolves based on Consul service health. More operational effort.</td></tr>
+</table></div>
+<h3>6.5 Example: F5 GTM Active-Passive for Prod-COB</h3>
+<p>In this setup, F5 GTM (now called BIG-IP DNS) manages the DNS resolution for api.mycompany.com. Production pool has higher priority; COB pool is backup.</p>
+<pre><code># F5 GTM Configuration (Conceptual)
+# Step 1: Define Data Centers
+gtm datacenter DC-PROD { }
+gtm datacenter DC-COB { }
+# Step 2: Define Servers (the LTM/VIPs at each site)
+gtm server PROD-LTM {
+datacenter DC-PROD
+virtual-servers {
+prod-api-vip {
+destination 172.16.1.100:443
+}
+}
+}
+gtm server COB-LTM {
+datacenter DC-COB
+virtual-servers {
+cob-api-vip {
+destination 172.16.2.100:443
+}
+}
+}
+# Step 3: Define Pools
+gtm pool a prod-pool {
+load-balancing-mode global-availability
+members {
+PROD-LTM:prod-api-vip { order 0 }
+}
+monitor https_readyz
+}
+gtm pool a cob-pool {
+load-balancing-mode global-availability
+members {
+COB-LTM:cob-api-vip { order 0 }
+}
+monitor https_readyz
+}
+# Step 4: Define Wide IP (the DNS entry)
+gtm wideip a api.mycompany.com {
+pool-lb-mode global-availability
+pools {
+prod-pool { order 0 }      # Primary - always preferred
+cob-pool  { order 1 }      # Backup - used only if prod fails
+}
+}
+# Step 5: Health Monitor
+gtm monitor https https_readyz {
+interval 10
+timeout 30
+send &quot;GET /healthz/ready HTTP/1.1\r\nHost: api.mycompany.com\r\n\r\n&quot;
+recv &quot;200 OK&quot;
+}</code></pre>
+<h3>6.6 Canary Testing Between Prod and COB</h3>
+<p>Before a full DR test or to continuously validate COB readiness, you can use GSLB weighted routing to send a small percentage of live production traffic to the COB environment:</p>
+<pre><code>Canary Between Prod and COB
+GSLB DNS
+/         \
+95% /           \ 5%
+/             \
++--------+    +--------+
+|  PROD  |    |  COB   |
+| Cluster|    | Cluster|
++--------+    +--------+
+Phase 1: 95/5   (validate COB)
+Phase 2: 80/20  (stress test COB)
+Phase 3: 50/50  (full DR validation)
+Phase 4: 0/100  (complete failover test)</code></pre>
+<p>This approach provides:</p>
+<ul>
+  <li>Continuous validation: COB is constantly tested with real production traffic, not just synthetic tests.</li>
+  <li>Confidence: Before a planned DR test, you already know COB is handling live requests correctly.</li>
+  <li>Gradual failover: During planned maintenance on Prod, you can gradually shift traffic to COB rather than a sudden cutover.</li>
+</ul>
+<p>F5 GTM weighted configuration for canary between sites:</p>
+<pre><code># Weighted round-robin between Prod and COB
+gtm wideip a api.mycompany.com {
+pool-lb-mode ratio
+pools {
+prod-pool { ratio 95 }
+cob-pool  { ratio 5  }
+}
+}
+# AWS Route 53 equivalent:
+# Weighted routing policy records:
+#   api.mycompany.com -&gt; prod-alb.us-east-1.amazonaws.com  Weight: 95
+#   api.mycompany.com -&gt; cob-alb.eu-west-1.amazonaws.com   Weight: 5</code></pre>
+      </article>
+
+      <nav class="page-nav">
+        <a href="07-5-canary-deployments-in-openshift.html">&#8592; Canary Deployments in OpenShift</a>
+        <span class="spacer"></span>
+        <a href="09-7-complete-load-balancing-stack-end-to-end.html">Complete Load Balancing Stack — End-to-End &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

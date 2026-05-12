@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Decorators – Python</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../python.html">Python</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Decorators</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Python</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-1-advanced-language-features.html">Advanced Language Features</a></li>
+        <li class="active"><a href="03-2-decorators.html" class="active">Decorators</a></li>
+        <li><a href="04-3-generators.html">Generators</a></li>
+        <li><a href="05-4-async-await.html">Async / Await</a></li>
+        <li><a href="06-5-context-managers.html">Context Managers</a></li>
+        <li><a href="07-6-async-context-managers.html">Async Context Managers</a></li>
+        <li><a href="08-7-async-generators-their-uses.html">Async Generators &amp; Their Uses</a></li>
+        <li><a href="09-8-map-reduce-functional-programming.html">map, reduce &amp; Functional Programming</a></li>
+        <li><a href="10-9-dunder-magic-methods.html">Dunder (Magic) Methods</a></li>
+        <li><a href="11-10-duck-typing-protocols.html">Duck Typing &amp; Protocols</a></li>
+        <li><a href="12-11-python-data-science-ecosystem-libraries.html">Python Data Science &amp; Ecosystem Libraries</a></li>
+        <li><a href="13-12-metaprogramming.html">Metaprogramming</a></li>
+        <li><a href="14-13-testing.html">Testing</a></li>
+        <li><a href="15-14-async-io-libraries.html">Async I/O Libraries</a></li>
+        <li><a href="16-15-the-gil-global-interpreter-lock.html">The GIL (Global Interpreter Lock)</a></li>
+        <li><a href="17-16-quick-reference-cheatsheet.html">Quick Reference Cheatsheet</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>2. Decorators</h1>
+<p>A decorator is a function that takes another function and returns a modified version. They are the primary mechanism for cross-cutting concerns like logging, caching, authentication, and timing.</p>
+<h3>2.1 Basic Decorator</h3>
+<pre><code>import functools
+def timer(func):
+@functools.wraps(func)  # preserves __name__, __doc__
+def wrapper(*args, **kwargs):
+import time
+start = time.perf_counter()
+result = func(*args, **kwargs)
+elapsed = time.perf_counter() - start
+print(f'{func.__name__} took {elapsed:.4f}s')
+return result
+return wrapper
+@timer
+def slow_function():
+import time; time.sleep(1)
+return 'done'</code></pre>
+<h3>2.2 Decorator with Arguments</h3>
+<pre><code>def retry(max_attempts=3, exceptions=(Exception,)):
+def decorator(func):
+@functools.wraps(func)
+def wrapper(*args, **kwargs):
+for attempt in range(1, max_attempts + 1):
+try:
+return func(*args, **kwargs)
+except exceptions as e:
+if attempt == max_attempts:
+raise
+print(f'Attempt {attempt} failed: {e}')
+return wrapper
+return decorator
+@retry(max_attempts=5, exceptions=(ConnectionError, TimeoutError))
+async def fetch_data(url): ...</code></pre>
+<h3>2.3 Class-Based Decorator</h3>
+<pre><code>class CacheResult:
+def __init__(self, func):
+functools.update_wrapper(self, func)
+self.func = func
+self.cache = {}
+def __call__(self, *args):
+if args not in self.cache:
+self.cache[args] = self.func(*args)
+return self.cache[args]
+@CacheResult
+def fibonacci(n):
+if n &lt; 2: return n
+return fibonacci(n-1) + fibonacci(n-2)</code></pre>
+<h3>2.4 Built-in Decorators</h3>
+<div class="table-wrap"><table>
+  <tr><th>Decorator</th><th>Module</th><th>Purpose</th></tr>
+  <tr><td>@property</td><td>builtins</td><td>Getter/setter/deleter for computed attributes</td></tr>
+  <tr><td>@staticmethod</td><td>builtins</td><td>Method with no self/cls parameter</td></tr>
+  <tr><td>@classmethod</td><td>builtins</td><td>Method receives class (cls) not instance</td></tr>
+  <tr><td>@functools.wraps</td><td>functools</td><td>Preserve wrapped function metadata</td></tr>
+  <tr><td>@functools.lru_cache</td><td>functools</td><td>Memoize with LRU eviction (maxsize)</td></tr>
+  <tr><td>@functools.cache</td><td>functools</td><td>Unbounded memoization (Python 3.9+)</td></tr>
+  <tr><td>@functools.singledispatch</td><td>functools</td><td>Function overloading by first arg type</td></tr>
+  <tr><td>@dataclasses.dataclass</td><td>dataclasses</td><td>Auto-generate __init__, __repr__, __eq__</td></tr>
+  <tr><td>@abc.abstractmethod</td><td>abc</td><td>Force subclass to implement method</td></tr>
+  <tr><td>@contextlib.contextmanager</td><td>contextlib</td><td>Turn generator into context manager</td></tr>
+  <tr><td>@typing.overload</td><td>typing</td><td>Declare multiple type signatures</td></tr>
+</table></div>
+      </article>
+
+      <nav class="page-nav">
+        <a href="02-1-advanced-language-features.html">&#8592; Advanced Language Features</a>
+        <span class="spacer"></span>
+        <a href="04-3-generators.html">Generators &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

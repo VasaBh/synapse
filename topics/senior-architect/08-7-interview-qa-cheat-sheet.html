@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INTERVIEW Q&amp;A CHEAT SHEET – Senior Architect</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../senior-architect.html">Senior Architect</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">INTERVIEW Q&amp;A CHEAT SHEET</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Senior Architect</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-1-core-architecture-fundamentals.html">CORE ARCHITECTURE FUNDAMENTALS</a></li>
+        <li><a href="03-2-microservices-deep-dive.html">MICROSERVICES – DEEP DIVE</a></li>
+        <li><a href="04-3-openshift-routing-load-balancing.html">OPENSHIFT – ROUTING &amp; LOAD BALANCING</a></li>
+        <li><a href="05-4-openshift-horizontal-vertical-scaling.html">OPENSHIFT – HORIZONTAL &amp; VERTICAL SCALING</a></li>
+        <li><a href="06-5-mcp-model-context-protocol.html">MCP – MODEL CONTEXT PROTOCOL</a></li>
+        <li><a href="07-6-agentic-ai-architecture.html">AGENTIC AI ARCHITECTURE</a></li>
+        <li class="active"><a href="08-7-interview-qa-cheat-sheet.html" class="active">INTERVIEW Q&amp;A CHEAT SHEET</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>7. INTERVIEW Q&amp;A CHEAT SHEET</h1>
+<div class="table-wrap"><table>
+  <tr><th>Question</th><th>Key Points in Answer</th></tr>
+  <tr><td>How do you handle distributed transactions?</td><td>Saga pattern. Choreography (events) for simple flows; Orchestration (coordinator) for complex. Compensating transactions for rollback. Eventual consistency is accepted.</td></tr>
+  <tr><td>How would you implement zero-downtime deployment in OpenShift?</td><td>Blue-green via route switching, or rolling update with PodDisruptionBudget. Readiness probes ensure traffic only goes to ready pods. Health check gates before route flip.</td></tr>
+  <tr><td>HPA vs VPA — when to use each?</td><td>HPA for stateless/web services (add replicas). VPA for stateful/memory-bound (tune resources). Never run both on same CPU metric. Use KEDA for event-driven scale-to-zero.</td></tr>
+  <tr><td>How would you secure an MCP server in production?</td><td>OAuth2 auth, tool-level RBAC, input validation against JSON Schema, rate limiting, audit logging, sandboxed execution, human-in-the-loop for destructive tools.</td></tr>
+  <tr><td>How do you prevent an agent from looping or taking harmful actions?</td><td>Max iteration limit, timeout on every tool call, human checkpoints before irreversible actions, prefer reversible actions, scope-limited tool set, audit trail.</td></tr>
+  <tr><td>Design a system for 1M concurrent users.</td><td>CDN at edge, API Gateway, horizontally scaled stateless services (HPA), async processing via Kafka, read replicas + caching (Redis), observability stack, multi-region failover.</td></tr>
+  <tr><td>How do you migrate a monolith to microservices?</td><td>Strangler Fig pattern. Identify bounded contexts first. Extract high-value / high-change areas first. Use an anti-corruption layer. Run in parallel; dark-launch; feature flags.</td></tr>
+  <tr><td>What is the CAP theorem and how does it affect your design?</td><td>Can guarantee only 2 of: Consistency, Availability, Partition Tolerance. Distributed systems must tolerate partitions. Choose CP (banking) or AP (social feeds) based on business need.</td></tr>
+  <tr><td>How do you handle observability in microservices?</td><td>Three pillars: Logs (ELK), Metrics (Prometheus+Grafana), Traces (OpenTelemetry+Jaeger). Correlation IDs propagated across all services. Alert on SLOs not just raw metrics.</td></tr>
+  <tr><td>Explain OpenShift Route TLS modes.</td><td>Edge: TLS terminates at router, plain HTTP to pod. Passthrough: TLS goes all the way to pod. Re-encrypt: router terminates and re-encrypts. Choose Re-encrypt for highest security.</td></tr>
+</table></div>
+<p>Final Preparation Tips</p>
+<ul>
+  <li>Prepare 2–3 past projects with architectural decisions using STAR format (Situation, Task, Action, Result)</li>
+  <li>Be ready to whiteboard: draw sequence diagrams, deployment diagrams, data flow</li>
+  <li>Every answer: state the trade-off. 'This approach gives us X but costs us Y, which is acceptable because...'</li>
+  <li>For OpenShift questions: know oc commands and be comfortable discussing operator model</li>
+  <li>For AI/MCP questions: understand you are talking about emerging technology — show awareness of limitations and risks, not just capabilities</li>
+  <li>Read: OpenShift docs, Anthropic MCP spec (modelcontextprotocol.io), 12factor.net, Martin Fowler's microservices articles</li>
+</ul>
+<p>Good luck with your interview! ✦ Senior Software Architect Interview Preparation Guide</p>
+      </article>
+
+      <nav class="page-nav">
+        <a href="07-6-agentic-ai-architecture.html">&#8592; AGENTIC AI ARCHITECTURE</a>
+        <span class="spacer"></span>
+        
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

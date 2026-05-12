@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Physics &amp; Computing — Synapse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e; --ink2: #3d3d5c; --ink3: #6b6b8a;
+  --bg: #ffffff; --bg2: #f4f3f0; --bg3: #eae8e4;
+  --accent: #2563eb; --accent2: #1d4ed8; --accent-bg: #eff6ff;
+  --green: #059669; --green-bg: #ecfdf5;
+  --amber: #d97706; --amber-bg: #fffbeb;
+  --rose: #e11d48; --rose-bg: #fff1f2;
+  --purple: #7c3aed; --purple-bg: #f5f3ff;
+  --teal: #0d9488; --teal-bg: #f0fdfa;
+  --coral: #ea580c; --coral-bg: #fff7ed;
+  --quantum: #6d28d9; --quantum-bg: #f5f3ff;
+  --border: #e2e0dc; --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; display: flex; flex-direction: column; height: 100%; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+.cover {
+  min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+  align-items: center; text-align: center;
+  background: linear-gradient(160deg, #0a0a1a 0%, #12083a 40%, #0f1a2e 100%);
+  color: white; padding: 4rem 2rem; position: relative; overflow: hidden;
+}
+.cover::before {
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background:
+    radial-gradient(ellipse at 25% 40%, rgba(109,40,217,0.2) 0%, transparent 55%),
+    radial-gradient(ellipse at 75% 60%, rgba(37,99,235,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(13,148,136,0.1) 0%, transparent 45%);
+}
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #a78bfa, #38bdf8, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 620px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 700px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card-grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card-purple { border-left: 3px solid var(--purple); }
+.card-teal { border-left: 3px solid var(--teal); }
+.card-green { border-left: 3px solid var(--green); }
+.card-amber { border-left: 3px solid var(--amber); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+.card ul { font-size: 0.82rem; color: var(--ink3); margin: 0.4rem 0 0 1rem; line-height: 1.6; }
+
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+
+.diagram {
+  background: #0d1117; color: #a5d6ff;
+  border: 1px solid #30363d; border-radius: 10px;
+  padding: 1.4rem 1.6rem; margin: 1rem 0;
+  font-family: var(--mono); font-size: 0.76rem; line-height: 1.8;
+  white-space: pre; overflow-x: auto;
+}
+.diagram-light {
+  background: var(--bg2); color: var(--ink2);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 1.2rem 1.4rem; margin: 1rem 0;
+  font-family: var(--mono); font-size: 0.76rem; line-height: 1.8;
+  white-space: pre; overflow-x: auto;
+}
+.diagram-purple {
+  background: #1e1b4b; color: #c4b5fd;
+  border: 1px solid #4c1d95; border-radius: 10px;
+  padding: 1.4rem 1.6rem; margin: 1rem 0;
+  font-family: var(--mono); font-size: 0.76rem; line-height: 1.8;
+  white-space: pre; overflow-x: auto;
+}
+.diagram-teal {
+  background: #042f2e; color: #5eead4;
+  border: 1px solid #134e4a; border-radius: 10px;
+  padding: 1.4rem 1.6rem; margin: 1rem 0;
+  font-family: var(--mono); font-size: 0.76rem; line-height: 1.8;
+  white-space: pre; overflow-x: auto;
+}
+
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout-teal { background: var(--teal-bg); border-left: 3px solid var(--teal); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue   { background: var(--accent-bg); color: var(--accent2); }
+.pill-green  { background: var(--green-bg);  color: var(--green);  }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber  { background: var(--amber-bg);  color: var(--amber);  }
+.pill-teal   { background: var(--teal-bg);   color: var(--teal);   }
+.pill-coral  { background: var(--coral-bg);  color: var(--coral);  }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+
+.formula-box {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  border: 1px solid #4338ca; border-radius: 10px;
+  padding: 1.2rem 1.5rem; margin: 1rem 0;
+  font-family: var(--mono); font-size: 0.9rem;
+  color: #c7d2fe; text-align: center; line-height: 2;
+}
+.formula-box .formula-label { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: #818cf8; margin-bottom: 0.5rem; }
+.bloch-container { display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap; margin: 1rem 0; }
+.bloch-diagram { flex: 0 0 auto; }
+
+/* ── SVG diagram containers ─────────────────────────────────── */
+.svg-wrap { margin: 1rem 0; border-radius: 12px; overflow: hidden; }
+.svg-wrap svg { display: block; width: 100%; height: auto; }
+
+/* ── Five-pillar cards ──────────────────────────────────────── */
+.pillar-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+.pillar-card { border-radius: 12px; padding: 1.1rem 1rem; display: flex; flex-direction: column; gap: 0.45rem; }
+.pillar-card .p-icon { font-size: 1.6rem; }
+.pillar-card .p-num  { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 2px; text-transform: uppercase; opacity: 0.65; }
+.pillar-card .p-name { font-weight: 700; font-size: 0.9rem; }
+.pillar-card .p-body { font-size: 0.79rem; line-height: 1.55; opacity: 0.85; }
+.pillar-card.pc1 { background: #1e1b4b; color: #c4b5fd; border: 1px solid #4c1d95; }
+.pillar-card.pc2 { background: #042f2e; color: #5eead4; border: 1px solid #134e4a; }
+.pillar-card.pc3 { background: #0c1a2e; color: #93c5fd; border: 1px solid #1e3a5f; }
+.pillar-card.pc4 { background: #1a0a1e; color: #f0abfc; border: 1px solid #6b21a8; }
+.pillar-card.pc5 { background: #0f1a10; color: #86efac; border: 1px solid #166534; }
+
+/* ── Circuit SVG labels ─────────────────────────────────────── */
+.circuit-caption { font-family: var(--mono); font-size: 0.72rem; color: var(--ink3); margin: -0.5rem 0 0.5rem; text-align: center; }
+
+/* ── Architecture box diagrams ──────────────────────────────── */
+.arch-diagram { margin: 1rem 0; display: flex; flex-direction: column; gap: 0; }
+.arch-row { display: flex; justify-content: center; align-items: stretch; gap: 0.75rem; padding: 0.4rem 0; }
+.arch-box { border-radius: 8px; padding: 0.7rem 1rem; font-size: 0.78rem; font-weight: 600; text-align: center; flex: 1; max-width: 200px; line-height: 1.4; }
+.arch-arrow-down { text-align: center; color: #6366f1; font-size: 1.2rem; line-height: 1; }
+.arch-arrow-across { display: flex; align-items: center; color: #6366f1; font-size: 0.9rem; padding: 0 0.2rem; flex: 0; }
+.ab-indigo { background: #1e1b4b; color: #c4b5fd; border: 1px solid #4338ca; }
+.ab-teal   { background: #042f2e; color: #5eead4; border: 1px solid #0f766e; }
+.ab-blue   { background: #0c1a2e; color: #93c5fd; border: 1px solid #1d4ed8; }
+.ab-purple { background: #2d1b4e; color: #e9d5ff; border: 1px solid #7c3aed; }
+.ab-green  { background: #052e16; color: #86efac; border: 1px solid #15803d; }
+.ab-amber  { background: #1c1000; color: #fcd34d; border: 1px solid #b45309; }
+.arch-workers { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+.arch-worker  { border-radius: 8px; padding: 0.5rem 0.7rem; font-size: 0.72rem; text-align: center; background: #1e293b; color: #94a3b8; border: 1px solid #334155; min-width: 90px; }
+.arch-worker strong { display: block; color: #e2e8f0; font-size: 0.78rem; }
+
+/* ── Grover bar chart ───────────────────────────────────────── */
+.grover-chart { background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 1.4rem 1.6rem; margin: 1rem 0; }
+.grover-chart-title { font-family: var(--mono); font-size: 0.65rem; color: #6e7681; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.75rem; }
+
+/* ── Qubit scaling visual ───────────────────────────────────── */
+.qubit-scale { background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 1.2rem 1.6rem; margin: 1rem 0; }
+.qubit-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.3rem 0; border-bottom: 1px solid #1e2d3d; }
+.qubit-row:last-child { border-bottom: none; }
+.qubit-n { font-family: var(--mono); font-size: 0.75rem; color: #93c5fd; width: 60px; flex-shrink: 0; }
+.qubit-bar-wrap { flex: 1; height: 18px; background: #161b22; border-radius: 4px; overflow: hidden; }
+.qubit-bar { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #4c1d95, #7c3aed); }
+.qubit-label { font-family: var(--mono); font-size: 0.7rem; color: #8b949e; width: 220px; flex-shrink: 0; text-align: right; }
+
+/* ── Comparison panels ──────────────────────────────────────── */
+.compare-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; border: 1px solid #30363d; border-radius: 12px; overflow: hidden; margin: 1rem 0; background: #30363d; }
+.compare-panel { padding: 1.2rem 1.4rem; }
+.compare-panel.cp-dark  { background: #161b22; }
+.compare-panel.cp-purple { background: #1e1b4b; }
+.compare-panel h5 { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.75rem; color: #6e7681; }
+.compare-panel.cp-purple h5 { color: #a78bfa; }
+.cp-bit { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin: 0.5rem 0; }
+.cp-bubble { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-weight: 700; font-size: 1.2rem; }
+.cp-bubble.b0 { background: #0d419d; color: #79c0ff; border: 2px solid #1f6feb; }
+.cp-bubble.b1 { background: #6e1b1b; color: #ff7b72; border: 2px solid #da3633; }
+.cp-bubble.bq { background: linear-gradient(135deg, #1e1b4b, #0c1a2e); color: #c4b5fd; border: 2px solid #7c3aed; font-size: 0.7rem; text-align: center; line-height: 1.3; }
+.cp-or  { color: #8b949e; font-size: 0.8rem; font-weight: 600; }
+.cp-plus { color: #a78bfa; font-size: 1.1rem; font-weight: 700; }
+.cp-note { font-size: 0.75rem; color: #8b949e; text-align: center; margin-top: 0.5rem; font-family: var(--mono); }
+.cp-note.cn-purple { color: #a78bfa; }
+@media (max-width: 500px) { .compare-panels { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← Synapse</a>
+  <h1>Quantum Physics &amp; Quantum Computing</h1>
+</header>
+
+<div class="topic-page">
+  <aside class="sidebar">
+    <p class="sidebar-title">Quantum Computing</p>
+    <nav><ul>
+      <li><a href="#s1"><span class="toc-num">01</span>Quantum Physics Foundations</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>Qubits &amp; Quantum States</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>Quantum Gates &amp; Circuits</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>Key Quantum Algorithms</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>Quantum vs Classical</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>Hardware &amp; Platforms</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>Quantum-Inspired Distributed Systems</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>Interview Q&amp;A Cheat Sheet</a></li>
+    </ul></nav>
+  </aside>
+
+  <div class="main-scroll">
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference — May 2026</div>
+  <h1>Quantum Physics &amp; <span>Quantum Computing</span></h1>
+  <p class="cover-sub">From superposition and entanglement to quantum gates, Shor's algorithm, and applying quantum principles to design next-generation distributed computing frameworks.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">Superposition</span>
+    <span class="cover-tag">Entanglement</span>
+    <span class="cover-tag">Qubits</span>
+    <span class="cover-tag">Quantum Gates</span>
+    <span class="cover-tag">Shor's Algorithm</span>
+    <span class="cover-tag">Grover's Search</span>
+    <span class="cover-tag">Quantum Error Correction</span>
+    <span class="cover-tag">IBM Quantum</span>
+    <span class="cover-tag">Distributed Systems</span>
+    <span class="cover-tag">Quantum Networking</span>
+  </div>
+  <div class="cover-date">v1.0 — Last updated May 2026</div>
+</div>
+
+<div class="container">
+<div class="toc page-break">
+  <h2>Contents</h2>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">Quantum Physics Foundations</span></a>
+    <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">Qubits &amp; Quantum States</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">Quantum Gates &amp; Circuits</span></a>
+    <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">Key Quantum Algorithms</span></a>
+    <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">Quantum vs Classical Computing</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Hardware &amp; Platforms</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Quantum-Inspired Distributed Systems</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">Interview Q&amp;A Cheat Sheet</span></a>
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+<div class="section page-break" id="s1">
+  <div class="section-num">Section 01</div>
+  <h2 class="section-title">Quantum Physics Foundations</h2>
+  <p class="lead">Quantum mechanics describes nature at the smallest scales — atoms, photons, electrons. It is profoundly different from classical physics: particles exist in multiple states simultaneously, distant objects can be correlated in ways that defy classical intuition, and observation itself changes the system.</p>
+
+  <h3>The Five Core Principles</h3>
+
+  <div class="pillar-grid">
+    <div class="pillar-card pc1">
+      <span class="p-icon">🌀</span>
+      <span class="p-num">Pillar 01</span>
+      <span class="p-name">Superposition</span>
+      <span class="p-body">A qubit exists in ALL possible states simultaneously until measured. Classical coin: heads <em>or</em> tails. Quantum coin: heads <em>and</em> tails at once.</span>
+    </div>
+    <div class="pillar-card pc2">
+      <span class="p-icon">🔗</span>
+      <span class="p-num">Pillar 02</span>
+      <span class="p-name">Entanglement</span>
+      <span class="p-body">Two particles become correlated — measuring one instantly determines the other, regardless of distance. Einstein called it "spooky action at a distance."</span>
+    </div>
+    <div class="pillar-card pc3">
+      <span class="p-icon">〰️</span>
+      <span class="p-num">Pillar 03</span>
+      <span class="p-name">Interference</span>
+      <span class="p-body">Quantum paths amplify (constructive) or cancel (destructive) each other. Algorithms exploit this to boost correct answers and suppress wrong ones.</span>
+    </div>
+    <div class="pillar-card pc4">
+      <span class="p-icon">📍</span>
+      <span class="p-num">Pillar 04</span>
+      <span class="p-name">Measurement</span>
+      <span class="p-body">Observing a quantum state forces it to "choose" a definite classical value — irreversibly destroying superposition. The act of looking changes the system.</span>
+    </div>
+    <div class="pillar-card pc5">
+      <span class="p-icon">⚖️</span>
+      <span class="p-num">Pillar 05</span>
+      <span class="p-name">Uncertainty</span>
+      <span class="p-body">ΔxΔp ≥ ℏ/2 — position and momentum cannot both be precisely known. Fundamental, not a measurement limitation.</span>
+    </div>
+  </div>
+
+  <h3>Superposition — Deep Dive</h3>
+  <p>In classical computing a bit is either 0 or 1. A qubit lives in a <strong>linear superposition</strong> of both:</p>
+
+  <div class="formula-box">
+    <div class="formula-label">Quantum State Vector (Dirac / Bra-Ket Notation)</div>
+    |ψ⟩ = α|0⟩ + β|1⟩
+
+    where  |α|² + |β|² = 1   (probabilities sum to 1)
+
+    α, β ∈ ℂ  (complex amplitudes)
+
+    On measurement:  P(0) = |α|²,   P(1) = |β|²
+  </div>
+
+  <div class="compare-panels">
+    <div class="compare-panel cp-dark">
+      <h5>Classical Bit</h5>
+      <div class="cp-bit">
+        <div class="cp-bubble b0">0</div>
+        <span class="cp-or">OR</span>
+        <div class="cp-bubble b1">1</div>
+      </div>
+      <p class="cp-note">Always one definite value.<br>Reading it leaves it unchanged.</p>
+    </div>
+    <div class="compare-panel cp-purple">
+      <h5>Qubit — before measurement</h5>
+      <div class="cp-bit">
+        <div class="cp-bubble bq">α|0⟩<br>+<br>β|1⟩</div>
+        <span class="cp-plus">←</span>
+        <span style="color:#c4b5fd;font-size:0.78rem;line-height:1.5">Both states<br>simultaneously.<br>|α|²+|β|²=1</span>
+      </div>
+      <p class="cp-note cn-purple">Measurement collapses it:<br>P(0) = |α|²,  P(1) = |β|²</p>
+    </div>
+  </div>
+
+  <h3>Entanglement — Deep Dive</h3>
+  <p>When two qubits become entangled their quantum states cannot be described independently. The canonical entangled state is a <strong>Bell state</strong>:</p>
+
+  <div class="formula-box">
+    <div class="formula-label">Bell State (maximally entangled)</div>
+    |Φ⁺⟩ = (1/√2)(|00⟩ + |11⟩)
+
+    Measuring qubit A as 0  →  qubit B is instantly 0
+    Measuring qubit A as 1  →  qubit B is instantly 1
+
+    This correlation holds even when A and B are light-years apart.
+  </div>
+
+  <div class="diagram">ENTANGLEMENT COMMUNICATION PROTOCOL (Teleportation concept)
+
+  Alice                                   Bob
+  ───────                                 ───────
+  |ψ⟩ (unknown state)
+  |A⟩ ─────────────────────────────────── |B⟩
+         (entangled pair shared)
+
+  Step 1: Alice entangles |ψ⟩ with |A⟩
+  Step 2: Alice measures — gets 2 classical bits (00, 01, 10, or 11)
+  Step 3: Alice sends 2 classical bits to Bob (speed of light limit)
+  Step 4: Bob applies correction gate based on bits received
+  Step 5: Bob's qubit |B⟩ is now identical to |ψ⟩
+
+  KEY: The unknown quantum state is "teleported" — not the particle itself.
+       No faster-than-light information transfer occurs.</div>
+
+  <h3>Wave-Particle Duality &amp; Interference</h3>
+  <div class="diagram-purple">DOUBLE-SLIT EXPERIMENT
+
+                        ┌───┐
+  Photon source ──────►│   │──► ┌──┐    ┌──────────────────┐
+                        │   │   │  │    │  Interference    │
+                        └───┘   │  │    │  Pattern         │
+                        Screen  │  │    │  ██  ██  ██  ██  │
+                         with   │  │    │   ██  ██  ██     │
+                         slits  └──┘    └──────────────────┘
+                                Slits        Screen
+
+  With TWO slits open:  photon acts like a WAVE → interference bands
+  With ONE slit blocked: photon acts like a PARTICLE → single band
+  Even single photons one-at-a-time build the interference pattern!
+
+  QUANTUM COMPUTING IMPLICATION:
+  Algorithms manipulate amplitudes so CORRECT answers interfere
+  constructively (amplified) and WRONG answers destructively
+  (cancelled) — this is how Grover's and Shor's work.</div>
+
+  <div class="card-grid">
+    <div class="card card-purple">
+      <h4>Superposition → Parallelism</h4>
+      <p>n qubits in superposition represent 2ⁿ states simultaneously. A 300-qubit computer can represent more states than atoms in the observable universe.</p>
+    </div>
+    <div class="card card-teal">
+      <h4>Entanglement → Correlation</h4>
+      <p>Entangled qubits enable instant correlation across distance — foundation for quantum cryptography and quantum networking.</p>
+    </div>
+    <div class="card card-green">
+      <h4>Interference → Optimization</h4>
+      <p>Quantum algorithms amplify correct-answer paths and cancel wrong-answer paths using wave interference — giving exponential speedups.</p>
+    </div>
+    <div class="card card-amber">
+      <h4>Measurement → Output</h4>
+      <p>Extracting classical information collapses the quantum state. Clever algorithm design ensures the answer is almost certain upon measurement.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+<div class="section page-break" id="s2">
+  <div class="section-num">Section 02</div>
+  <h2 class="section-title">Qubits &amp; Quantum States</h2>
+  <p class="lead">A qubit is the fundamental unit of quantum information. Unlike a classical bit, a qubit exists on the surface of the <strong>Bloch Sphere</strong> — a geometric representation of all possible quantum states — until measured.</p>
+
+  <h3>The Bloch Sphere</h3>
+  <div class="svg-wrap" style="background:#1e1b4b;border:1px solid #4c1d95;border-radius:12px;max-width:520px;margin:1rem auto;">
+    <svg viewBox="0 0 520 400" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+      <defs>
+        <marker id="ah" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#a78bfa"/>
+        </marker>
+        <marker id="ahg" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#5eead4"/>
+        </marker>
+        <marker id="ahy" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#fcd34d"/>
+        </marker>
+        <radialGradient id="sphereGrad" cx="42%" cy="38%" r="55%">
+          <stop offset="0%"   stop-color="#4c1d95" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#1e1b4b" stop-opacity="0.15"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Sphere body -->
+      <ellipse cx="240" cy="200" rx="140" ry="140" fill="url(#sphereGrad)" stroke="#6d28d9" stroke-width="1.5"/>
+
+      <!-- Back equatorial arc (dashed, behind sphere) -->
+      <path d="M100,200 A140,42 0 0,1 380,200" fill="none" stroke="#4c1d95" stroke-width="1.2" stroke-dasharray="5,4"/>
+      <!-- Front equatorial arc -->
+      <path d="M100,200 A140,42 0 0,0 380,200" fill="none" stroke="#7c3aed" stroke-width="1.5"/>
+
+      <!-- Z axis -->
+      <line x1="240" y1="52" x2="240" y2="348" stroke="#a78bfa" stroke-width="1.2" marker-end="url(#ah)"/>
+      <!-- X axis -->
+      <line x1="80"  y1="200" x2="400" y2="200" stroke="#5eead4" stroke-width="1.2" marker-end="url(#ahg)"/>
+      <!-- Y axis (perspective, going into page at angle) -->
+      <line x1="240" y1="200" x2="310" y2="255" stroke="#a78bfa" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#ah)"/>
+
+      <!-- State vector |ψ⟩ example -->
+      <line x1="240" y1="200" x2="316" y2="122" stroke="#fcd34d" stroke-width="2" marker-end="url(#ahy)"/>
+
+      <!-- Axis labels -->
+      <text x="240" y="44"  text-anchor="middle" fill="#c4b5fd" font-size="13" font-weight="700">|0⟩</text>
+      <text x="240" y="370" text-anchor="middle" fill="#c4b5fd" font-size="13" font-weight="700">|1⟩</text>
+      <text x="408" y="205" text-anchor="start"  fill="#5eead4" font-size="12" font-weight="600">|+⟩  x</text>
+      <text x="58"  y="205" text-anchor="end"    fill="#5eead4" font-size="12" font-weight="600">|−⟩</text>
+      <text x="318" y="270" text-anchor="start"  fill="#a78bfa" font-size="12">y</text>
+
+      <!-- State vector label -->
+      <text x="326" y="116" fill="#fcd34d" font-size="13" font-weight="700">|ψ⟩</text>
+
+      <!-- Angle annotations -->
+      <!-- theta arc -->
+      <path d="M240,200 A28,28 0 0,0 260,175" fill="none" stroke="#fcd34d" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="268" y="183" fill="#fcd34d" font-size="10">θ</text>
+      <!-- phi arc (equatorial) -->
+      <path d="M270,200 A30,9 0 0,0 256,208" fill="none" stroke="#f0abfc" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="276" y="216" fill="#f0abfc" font-size="10">φ</text>
+
+      <!-- North/South pole dots -->
+      <circle cx="240" cy="60"  r="4" fill="#c4b5fd"/>
+      <circle cx="240" cy="340" r="4" fill="#c4b5fd"/>
+
+      <!-- State points on equator -->
+      <circle cx="380" cy="200" r="3.5" fill="#5eead4"/>
+      <circle cx="100" cy="200" r="3.5" fill="#5eead4"/>
+
+      <!-- Formula box -->
+      <rect x="24" y="320" width="220" height="58" rx="7" fill="#12082a" stroke="#4c1d95" stroke-width="1"/>
+      <text x="34" y="337" fill="#818cf8" font-size="9" letter-spacing="1">STATE VECTOR</text>
+      <text x="34" y="354" fill="#c4b5fd" font-size="11">|ψ⟩ = cos(θ/2)|0⟩ + e^(iφ)sin(θ/2)|1⟩</text>
+      <text x="34" y="370" fill="#7c6faf" font-size="9">θ∈[0,π]  φ∈[0,2π]  — any point on sphere</text>
+
+      <!-- Legend box -->
+      <rect x="380" y="290" width="128" height="90" rx="7" fill="#12082a" stroke="#4c1d95" stroke-width="1"/>
+      <text x="390" y="307" fill="#818cf8" font-size="9" letter-spacing="1">KEY STATES</text>
+      <text x="390" y="323" fill="#c4b5fd" font-size="10">|0⟩  North pole</text>
+      <text x="390" y="337" fill="#c4b5fd" font-size="10">|1⟩  South pole</text>
+      <text x="390" y="351" fill="#5eead4" font-size="10">|+⟩  X+ equator</text>
+      <text x="390" y="365" fill="#5eead4" font-size="10">|−⟩  X− equator</text>
+      <text x="390" y="379" fill="#fcd34d" font-size="10">|ψ⟩  any state</text>
+    </svg>
+  </div>
+
+  <h3>Multi-Qubit Systems &amp; Hilbert Space</h3>
+  <p>Classical <em>n</em> bits describe <strong>one</strong> state out of 2ⁿ. Quantum <em>n</em> qubits describe <strong>all</strong> 2ⁿ states simultaneously.</p>
+  <div class="qubit-scale">
+    <div class="qubit-row">
+      <span class="qubit-n">2 qubits</span>
+      <div class="qubit-bar-wrap"><div class="qubit-bar" style="width:2%"></div></div>
+      <span class="qubit-label">4 states  (00, 01, 10, 11)</span>
+    </div>
+    <div class="qubit-row">
+      <span class="qubit-n">8 qubits</span>
+      <div class="qubit-bar-wrap"><div class="qubit-bar" style="width:4%"></div></div>
+      <span class="qubit-label">256 states</span>
+    </div>
+    <div class="qubit-row">
+      <span class="qubit-n">32 qubits</span>
+      <div class="qubit-bar-wrap"><div class="qubit-bar" style="width:12%"></div></div>
+      <span class="qubit-label">~4 billion  (= 4 GB classical RAM)</span>
+    </div>
+    <div class="qubit-row">
+      <span class="qubit-n">64 qubits</span>
+      <div class="qubit-bar-wrap"><div class="qubit-bar" style="width:28%"></div></div>
+      <span class="qubit-label">~1.8 × 10¹⁹  states</span>
+    </div>
+    <div class="qubit-row">
+      <span class="qubit-n">300 qubits</span>
+      <div class="qubit-bar-wrap"><div class="qubit-bar" style="width:72%"></div></div>
+      <span class="qubit-label">~10⁹⁰  &gt; atoms in observable universe</span>
+    </div>
+    <div class="qubit-row">
+      <span class="qubit-n">1000 qubits</span>
+      <div class="qubit-bar-wrap"><div class="qubit-bar" style="width:100%;background:linear-gradient(90deg,#7c3aed,#06b6d4)"></div></div>
+      <span class="qubit-label">2¹⁰⁰⁰  — beyond all imagination</span>
+    </div>
+  </div>
+  <p style="font-size:0.78rem;color:var(--ink3);font-family:var(--mono)">Two-qubit state: |ψ⟩ = α₀₀|00⟩ + α₀₁|01⟩ + α₁₀|10⟩ + α₁₁|11⟩ &nbsp;·&nbsp; Σ|αᵢⱼ|² = 1</p>
+
+  <h3>Quantum Decoherence — The Practical Challenge</h3>
+  <p>Qubits are extraordinarily fragile. Any interaction with the environment — heat, vibration, electromagnetic noise — causes <strong>decoherence</strong>: the quantum superposition collapses prematurely into a classical state.</p>
+
+  <div class="diagram-light">DECOHERENCE TIMELINE (typical superconducting qubit)
+
+  t=0      t=50μs    t=100μs   t=500μs   t→∞
+   │────────────────────────────────────────►
+   │
+   │  Coherence time (T₂ ~ 100-500 μs for best superconducting qubits)
+   │  ████████████████░░░░░░░░░░░░░░░░░░░░░░
+   │  ← Useful quantum operations → ← lost to environment →
+   │
+   Reason: Superconducting qubits must operate at ~15 millikelvin
+           (colder than outer space: 2.7 K vs 0.015 K)
+
+  T1 = energy relaxation time  (qubit "forgets" it was excited)
+  T2 = dephasing time          (phase relationship lost to environment)
+  T2 ≤ 2·T1 always holds</div>
+
+  <div class="callout callout-rose">
+    <strong>Why Decoherence Limits Current Quantum Computers</strong>
+    We are in the "Noisy Intermediate-Scale Quantum" (NISQ) era — machines with 50–1000 qubits but high error rates (~0.1–1% per gate). Fault-tolerant quantum computing requires error correction, which needs ~1000 physical qubits per logical qubit. That threshold is still years away for most problems.
+  </div>
+
+  <h3>Physical Qubit Technologies</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Technology</th><th>Principle</th><th>T2 Coherence</th><th>Gate Speed</th><th>Key Players</th></tr></thead>
+    <tbody>
+      <tr><td>Superconducting</td><td>Josephson junction circuit cooled to 15 mK</td><td>10–500 μs</td><td>~10–100 ns</td><td>IBM, Google, Rigetti</td></tr>
+      <tr><td>Trapped Ion</td><td>Individual ions suspended in electromagnetic fields</td><td>Seconds–minutes</td><td>~1–10 μs</td><td>IonQ, Quantinuum, Oxford Ionics</td></tr>
+      <tr><td>Photonic</td><td>Photon polarisation / path encoding</td><td>Very long (photons don't interact)</td><td>Sub-ns</td><td>PsiQuantum, Xanadu</td></tr>
+      <tr><td>Neutral Atom</td><td>Individual atoms held in optical tweezers</td><td>Seconds</td><td>~1–10 μs</td><td>QuEra, Atom Computing</td></tr>
+      <tr><td>Topological</td><td>Non-Abelian anyons (theoretically error-resistant)</td><td>Long (theoretical)</td><td>TBD</td><td>Microsoft</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+<div class="section page-break" id="s3">
+  <div class="section-num">Section 03</div>
+  <h2 class="section-title">Quantum Gates &amp; Circuits</h2>
+  <p class="lead">Quantum computation is performed by applying <strong>quantum gates</strong> — unitary transformations — to qubits. A quantum circuit is a sequence of gates applied to input qubits, followed by measurement to extract classical output.</p>
+
+  <h3>Single-Qubit Gates</h3>
+  <div class="svg-wrap" style="background:#0d1117;border:1px solid #30363d;border-radius:12px;">
+    <svg viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+      <!-- Title -->
+      <text x="20" y="22" fill="#6e7681" font-size="9" letter-spacing="2" text-transform="uppercase">SINGLE-QUBIT GATES</text>
+
+      <!-- ── Pauli-X row y=60 ── -->
+      <line x1="20"  y1="60" x2="100" y2="60" stroke="#4a90d9" stroke-width="1.5"/>
+      <rect  x="100" y="46" width="44" height="28" rx="5" fill="#1e3a5f" stroke="#4a90d9" stroke-width="1.5"/>
+      <text  x="122" y="64" text-anchor="middle" fill="#79c0ff" font-size="13" font-weight="700">X</text>
+      <line  x1="144" y1="60" x2="220" y2="60" stroke="#4a90d9" stroke-width="1.5"/>
+      <!-- X label -->
+      <text x="20"  y="55" fill="#8b949e" font-size="9">|0⟩</text>
+      <text x="222" y="55" fill="#8b949e" font-size="9">|1⟩</text>
+      <text x="100" y="106" fill="#6e7681" font-size="9">Matrix:</text>
+      <text x="100" y="118" fill="#a5d6ff" font-size="9">[0  1]</text>
+      <text x="100" y="130" fill="#a5d6ff" font-size="9">[1  0]</text>
+      <text x="100" y="145" fill="#5eead4" font-size="9">|0⟩→|1⟩  |1⟩→|0⟩</text>
+      <text x="20"  y="90" fill="#c4b5fd" font-size="11" font-weight="600">Pauli-X  (NOT / bit-flip)</text>
+
+      <!-- ── Pauli-Z row y=60, col 2 ── -->
+      <line x1="260" y1="60" x2="340" y2="60" stroke="#4a90d9" stroke-width="1.5"/>
+      <rect  x="340" y="46" width="44" height="28" rx="5" fill="#1e3a5f" stroke="#4a90d9" stroke-width="1.5"/>
+      <text  x="362" y="64" text-anchor="middle" fill="#79c0ff" font-size="13" font-weight="700">Z</text>
+      <line  x1="384" y1="60" x2="460" y2="60" stroke="#4a90d9" stroke-width="1.5"/>
+      <text x="260" y="55" fill="#8b949e" font-size="9">|0⟩</text>
+      <text x="462" y="55" fill="#8b949e" font-size="9">|0⟩ or −|1⟩</text>
+      <text x="340" y="106" fill="#6e7681" font-size="9">Matrix:</text>
+      <text x="340" y="118" fill="#a5d6ff" font-size="9">[ 1   0]</text>
+      <text x="340" y="130" fill="#a5d6ff" font-size="9">[ 0  −1]</text>
+      <text x="340" y="145" fill="#5eead4" font-size="9">|0⟩→|0⟩  |1⟩→−|1⟩</text>
+      <text x="260" y="90" fill="#c4b5fd" font-size="11" font-weight="600">Pauli-Z  (phase-flip)</text>
+
+      <!-- ── Hadamard row y=60, col 3 ── -->
+      <line x1="500" y1="60" x2="570" y2="60" stroke="#f0abfc" stroke-width="1.5"/>
+      <rect  x="570" y="46" width="44" height="28" rx="5" fill="#3b0764" stroke="#a855f7" stroke-width="1.5"/>
+      <text  x="592" y="64" text-anchor="middle" fill="#f0abfc" font-size="13" font-weight="700">H</text>
+      <line  x1="614" y1="60" x2="660" y2="60" stroke="#f0abfc" stroke-width="1.5"/>
+      <text x="500" y="55" fill="#8b949e" font-size="9">|0⟩</text>
+      <text x="500" y="90" fill="#c4b5fd" font-size="11" font-weight="600">Hadamard</text>
+      <text x="500" y="106" fill="#6e7681" font-size="9">1/√2 · [1  1]</text>
+      <text x="500" y="118" fill="#6e7681" font-size="9">       [1 −1]</text>
+      <text x="500" y="133" fill="#5eead4" font-size="9">|0⟩ → |+⟩ = (|0⟩+|1⟩)/√2</text>
+      <text x="500" y="145" fill="#5eead4" font-size="9">|1⟩ → |−⟩ = (|0⟩−|1⟩)/√2</text>
+      <text x="662" y="55" fill="#f0abfc" font-size="9">|+⟩</text>
+
+      <!-- ── T and S gates row ── -->
+      <!-- T gate -->
+      <line x1="20"  y1="210" x2="90"  y2="210" stroke="#4a90d9" stroke-width="1.5"/>
+      <rect  x="90"  y="196" width="44" height="28" rx="5" fill="#1e3a5f" stroke="#4a90d9" stroke-width="1.5"/>
+      <text  x="112" y="214" text-anchor="middle" fill="#79c0ff" font-size="13" font-weight="700">T</text>
+      <line  x1="134" y1="210" x2="200" y2="210" stroke="#4a90d9" stroke-width="1.5"/>
+      <text x="20"  y="192" fill="#c4b5fd" font-size="11" font-weight="600">T Gate  (π/8)</text>
+      <text x="20"  y="240" fill="#a5d6ff" font-size="9">[1  0] / [0  e^(iπ/4)]</text>
+
+      <!-- S gate -->
+      <line x1="260" y1="210" x2="330" y2="210" stroke="#4a90d9" stroke-width="1.5"/>
+      <rect  x="330" y="196" width="44" height="28" rx="5" fill="#1e3a5f" stroke="#4a90d9" stroke-width="1.5"/>
+      <text  x="352" y="214" text-anchor="middle" fill="#79c0ff" font-size="13" font-weight="700">S</text>
+      <line  x1="374" y1="210" x2="440" y2="210" stroke="#4a90d9" stroke-width="1.5"/>
+      <text x="260" y="192" fill="#c4b5fd" font-size="11" font-weight="600">S Gate  (phase)</text>
+      <text x="260" y="240" fill="#a5d6ff" font-size="9">[1  0] / [0  i]</text>
+
+      <!-- Key insight box -->
+      <rect x="480" y="186" width="185" height="56" rx="7" fill="#0f2a0f" stroke="#15803d" stroke-width="1"/>
+      <text x="492" y="202" fill="#4ade80" font-size="9" letter-spacing="1">KEY PROPERTY</text>
+      <text x="492" y="217" fill="#86efac" font-size="9">All gates are unitary: U†U = I</text>
+      <text x="492" y="230" fill="#86efac" font-size="9">Quantum gates are reversible.</text>
+      <text x="492" y="243" fill="#86efac" font-size="9">Classical NAND is not.</text>
+    </svg>
+  </div>
+
+  <h3>Two-Qubit Gates</h3>
+  <!-- Two-qubit gates SVG -->
+  <div class="svg-wrap" style="background:#0d1117;border:1px solid #30363d;border-radius:12px;">
+    <svg viewBox="0 0 680 230" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+      <text x="20" y="22" fill="#6e7681" font-size="9" letter-spacing="2">TWO-QUBIT GATES</text>
+
+      <!-- ─── CNOT section ─── -->
+      <text x="20" y="46" fill="#c4b5fd" font-size="11" font-weight="600">CNOT  (Controlled-NOT)</text>
+      <!-- control wire -->
+      <line x1="20" y1="72" x2="200" y2="72" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="6"  y="76" fill="#8b949e" font-size="9" text-anchor="end">ctrl</text>
+      <!-- target wire -->
+      <line x1="20" y1="108" x2="200" y2="108" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="6"  y="112" fill="#8b949e" font-size="9" text-anchor="end">tgt</text>
+      <!-- CNOT control dot + vertical + target circle -->
+      <circle cx="110" cy="72"  r="6"  fill="#a78bfa"/>
+      <line   x1="110" y1="78"  x2="110" y2="100" stroke="#a78bfa" stroke-width="1.5"/>
+      <circle cx="110" cy="108" r="10" fill="none" stroke="#a78bfa" stroke-width="1.8"/>
+      <line   x1="100" y1="108" x2="120" y2="108" stroke="#a78bfa" stroke-width="1.5"/>
+      <line   x1="110" y1="98"  x2="110" y2="118" stroke="#a78bfa" stroke-width="1.5"/>
+      <!-- truth table -->
+      <text x="20"  y="140" fill="#6e7681" font-size="9">Truth table:</text>
+      <text x="20"  y="153" fill="#5eead4" font-size="9">|00⟩→|00⟩  |01⟩→|01⟩</text>
+      <text x="20"  y="165" fill="#5eead4" font-size="9">|10⟩→|11⟩  |11⟩→|10⟩</text>
+      <text x="20"  y="178" fill="#6e7681" font-size="8">(target flips when control=1)</text>
+
+      <!-- ─── SWAP section ─── -->
+      <text x="230" y="46" fill="#c4b5fd" font-size="11" font-weight="600">SWAP</text>
+      <line x1="230" y1="72"  x2="390" y2="72"  stroke="#a78bfa" stroke-width="1.5"/>
+      <line x1="230" y1="108" x2="390" y2="108" stroke="#a78bfa" stroke-width="1.5"/>
+      <!-- X marks -->
+      <line x1="295" y1="64"  x2="315" y2="80"  stroke="#f0abfc" stroke-width="2"/>
+      <line x1="315" y1="64"  x2="295" y2="80"  stroke="#f0abfc" stroke-width="2"/>
+      <line x1="295" y1="100" x2="315" y2="116" stroke="#f0abfc" stroke-width="2"/>
+      <line x1="315" y1="100" x2="295" y2="116" stroke="#f0abfc" stroke-width="2"/>
+      <line x1="305" y1="80"  x2="305" y2="100" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="230" y="140" fill="#5eead4" font-size="9">Exchanges the states</text>
+      <text x="230" y="153" fill="#5eead4" font-size="9">of two qubits.</text>
+
+      <!-- ─── Toffoli section ─── -->
+      <text x="430" y="46" fill="#c4b5fd" font-size="11" font-weight="600">Toffoli  (CCNOT)</text>
+      <line x1="430" y1="68"  x2="580" y2="68"  stroke="#a78bfa" stroke-width="1.5"/>
+      <line x1="430" y1="95"  x2="580" y2="95"  stroke="#a78bfa" stroke-width="1.5"/>
+      <line x1="430" y1="122" x2="580" y2="122" stroke="#a78bfa" stroke-width="1.5"/>
+      <!-- ctrl1 dot -->
+      <circle cx="505" cy="68"  r="6" fill="#a78bfa"/>
+      <!-- ctrl2 dot -->
+      <circle cx="505" cy="95"  r="6" fill="#a78bfa"/>
+      <!-- target -->
+      <line x1="505" y1="74" x2="505" y2="110" stroke="#a78bfa" stroke-width="1.5"/>
+      <circle cx="505" cy="122" r="10" fill="none" stroke="#a78bfa" stroke-width="1.8"/>
+      <line x1="495" y1="122" x2="515" y2="122" stroke="#a78bfa" stroke-width="1.5"/>
+      <line x1="505" y1="112" x2="505" y2="132" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="430" y="148" fill="#5eead4" font-size="9">Flips target only when</text>
+      <text x="430" y="160" fill="#5eead4" font-size="9">BOTH controls = |1⟩.</text>
+      <text x="430" y="173" fill="#6e7681" font-size="8">Classical NAND equivalent</text>
+    </svg>
+  </div>
+
+  <!-- Bell State Creation Circuit SVG -->
+  <p style="margin-top:1.25rem"><strong>Bell State Creation Circuit</strong> — the two-step recipe for maximum entanglement:</p>
+  <div class="svg-wrap" style="background:#1e1b4b;border:1px solid #4c1d95;border-radius:12px;">
+    <svg viewBox="0 0 560 150" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+      <!-- wires -->
+      <line x1="60" y1="55"  x2="500" y2="55"  stroke="#a78bfa" stroke-width="1.8"/>
+      <line x1="60" y1="100" x2="500" y2="100" stroke="#a78bfa" stroke-width="1.8"/>
+
+      <!-- input labels -->
+      <text x="20" y="59"  fill="#c4b5fd" font-size="12" font-weight="700">|0⟩</text>
+      <text x="20" y="104" fill="#c4b5fd" font-size="12" font-weight="700">|0⟩</text>
+
+      <!-- Step annotations -->
+      <text x="120" y="20" fill="#6e7681" font-size="9" text-anchor="middle">Step 1</text>
+      <text x="260" y="20" fill="#6e7681" font-size="9" text-anchor="middle">Step 2</text>
+      <text x="430" y="20" fill="#6e7681" font-size="9" text-anchor="middle">Step 3</text>
+
+      <!-- H gate on q0 -->
+      <rect x="95" y="41" width="50" height="28" rx="6" fill="#3b0764" stroke="#a855f7" stroke-width="1.8"/>
+      <text x="120" y="59" text-anchor="middle" fill="#f0abfc" font-size="14" font-weight="700">H</text>
+
+      <!-- CNOT -->
+      <circle cx="255" cy="55"  r="7"  fill="#a78bfa"/>
+      <line   x1="255" y1="62"  x2="255" y2="88" stroke="#a78bfa" stroke-width="1.8"/>
+      <circle cx="255" cy="100" r="12"  fill="none" stroke="#a78bfa" stroke-width="1.8"/>
+      <line   x1="243" y1="100" x2="267" y2="100" stroke="#a78bfa" stroke-width="1.8"/>
+      <line   x1="255" y1="88"  x2="255" y2="112" stroke="#a78bfa" stroke-width="1.8"/>
+
+      <!-- Measurement boxes -->
+      <rect x="390" y="41"  width="50" height="28" rx="5" fill="#1a0a3e" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="415" y="59"  text-anchor="middle" fill="#c4b5fd" font-size="10">M₁</text>
+      <rect x="390" y="86"  width="50" height="28" rx="5" fill="#1a0a3e" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="415" y="104" text-anchor="middle" fill="#c4b5fd" font-size="10">M₂</text>
+
+      <!-- Output label -->
+      <rect x="10" y="118" width="540" height="24" rx="5" fill="#12082a" stroke="#4c1d95"/>
+      <text x="280" y="134" text-anchor="middle" fill="#fcd34d" font-size="10" font-weight="600">Result: (|00⟩ + |11⟩) / √2  — maximally entangled Bell state Φ⁺</text>
+    </svg>
+  </div>
+
+  <h3>A Full Quantum Circuit Example — Quantum Teleportation</h3>
+  <div class="svg-wrap" style="background:#0d1117;border:1px solid #30363d;border-radius:12px;">
+    <svg viewBox="0 0 720 310" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+      <!-- Title -->
+      <text x="20" y="20" fill="#6e7681" font-size="9" letter-spacing="2">QUANTUM TELEPORTATION CIRCUIT</text>
+
+      <!-- Actor labels -->
+      <text x="20" y="50" fill="#f0abfc" font-size="9" font-weight="600">ALICE</text>
+      <rect x="10" y="54" width="490" height="1" fill="#4c1d95" opacity="0.5"/>
+      <text x="20" y="240" fill="#5eead4" font-size="9" font-weight="600">BOB</text>
+      <rect x="10" y="244" width="700" height="1" fill="#134e4a" opacity="0.5"/>
+
+      <!-- Three qubit wires -->
+      <!-- Wire 1: |ψ⟩ y=80 -->
+      <line x1="60" y1="80"  x2="690" y2="80"  stroke="#a78bfa" stroke-width="1.6"/>
+      <!-- Wire 2: |0⟩ (Alice) y=130 -->
+      <line x1="60" y1="130" x2="690" y2="130" stroke="#a78bfa" stroke-width="1.6"/>
+      <!-- Wire 3: |0⟩ (Bob) y=190 -->
+      <line x1="60" y1="190" x2="690" y2="190" stroke="#5eead4" stroke-width="1.6"/>
+
+      <!-- Input labels -->
+      <text x="8"  y="84"  fill="#c4b5fd" font-size="11" font-weight="700">|ψ⟩</text>
+      <text x="8"  y="134" fill="#c4b5fd" font-size="11" font-weight="700">|0⟩</text>
+      <text x="8"  y="194" fill="#5eead4" font-size="11" font-weight="700">|0⟩</text>
+
+      <!-- Wire role labels -->
+      <text x="62" y="72"  fill="#6e7681" font-size="8">Alice's unknown state</text>
+      <text x="62" y="122" fill="#6e7681" font-size="8">Alice's half of Bell pair</text>
+      <text x="62" y="182" fill="#6e7681" font-size="8">Bob's half of Bell pair</text>
+
+      <!-- ── Step 1: H on wire 2 at x=160 ── -->
+      <rect x="145" y="116" width="36" height="28" rx="5" fill="#3b0764" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="163" y="134" text-anchor="middle" fill="#f0abfc" font-size="13" font-weight="700">H</text>
+
+      <!-- ── Step 2: CNOT ctrl=wire2 tgt=wire3 at x=220 ── -->
+      <circle cx="220" cy="130" r="6"  fill="#a78bfa"/>
+      <line   x1="220" y1="136" x2="220" y2="178" stroke="#a78bfa" stroke-width="1.5"/>
+      <circle cx="220" cy="190" r="10" fill="none" stroke="#a78bfa" stroke-width="1.8"/>
+      <line   x1="210" y1="190" x2="230" y2="190" stroke="#a78bfa" stroke-width="1.5"/>
+      <line   x1="220" y1="178" x2="220" y2="202" stroke="#a78bfa" stroke-width="1.5"/>
+
+      <!-- ── Step 3: CNOT ctrl=wire1 tgt=wire2 at x=300 ── -->
+      <circle cx="300" cy="80"  r="6"  fill="#a78bfa"/>
+      <line   x1="300" y1="86"  x2="300" y2="118" stroke="#a78bfa" stroke-width="1.5"/>
+      <circle cx="300" cy="130" r="10" fill="none" stroke="#a78bfa" stroke-width="1.8"/>
+      <line   x1="290" y1="130" x2="310" y2="130" stroke="#a78bfa" stroke-width="1.5"/>
+      <line   x1="300" y1="118" x2="300" y2="142" stroke="#a78bfa" stroke-width="1.5"/>
+
+      <!-- ── Step 4: H on wire 1 at x=370 ── -->
+      <rect x="355" y="66" width="36" height="28" rx="5" fill="#3b0764" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="373" y="84" text-anchor="middle" fill="#f0abfc" font-size="13" font-weight="700">H</text>
+
+      <!-- ── Step 5: Measure wire 1 at x=440, wire 2 at x=440 ── -->
+      <rect x="425" y="66"  width="44" height="28" rx="5" fill="#1a0a3e" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="447" y="84"  text-anchor="middle" fill="#c4b5fd" font-size="10" font-weight="700">M₁</text>
+      <rect x="425" y="116" width="44" height="28" rx="5" fill="#1a0a3e" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="447" y="134" text-anchor="middle" fill="#c4b5fd" font-size="10" font-weight="700">M₂</text>
+
+      <!-- Classical bit lines (double) going down to Bob -->
+      <line x1="447" y1="94"  x2="447" y2="210" stroke="#fcd34d" stroke-width="1"  stroke-dasharray="4,2"/>
+      <line x1="450" y1="94"  x2="450" y2="210" stroke="#fcd34d" stroke-width="0.8" stroke-dasharray="4,2"/>
+      <line x1="447" y1="144" x2="447" y2="210" stroke="#f97316" stroke-width="1"  stroke-dasharray="4,2"/>
+      <line x1="450" y1="144" x2="450" y2="210" stroke="#f97316" stroke-width="0.8" stroke-dasharray="4,2"/>
+      <text x="454" y="175" fill="#fcd34d" font-size="8">M₁</text>
+      <text x="454" y="190" fill="#f97316" font-size="8">M₂</text>
+
+      <!-- ── Step 6: X gate (if M₂=1) on wire 3 at x=520 ── -->
+      <rect x="505" y="176" width="36" height="28" rx="5" fill="#1e3a5f" stroke="#4a90d9" stroke-width="1.5"/>
+      <text x="523" y="194" text-anchor="middle" fill="#79c0ff" font-size="12" font-weight="700">X</text>
+      <text x="505" y="216" fill="#f97316" font-size="8" text-anchor="middle">if M₂=1</text>
+
+      <!-- ── Step 7: Z gate (if M₁=1) on wire 3 at x=590 ── -->
+      <rect x="575" y="176" width="36" height="28" rx="5" fill="#1e3a5f" stroke="#4a90d9" stroke-width="1.5"/>
+      <text x="593" y="194" text-anchor="middle" fill="#79c0ff" font-size="12" font-weight="700">Z</text>
+      <text x="575" y="216" fill="#fcd34d" font-size="8" text-anchor="middle">if M₁=1</text>
+
+      <!-- Output -->
+      <text x="668" y="186" fill="#5eead4" font-size="10" font-weight="700">|ψ⟩ ✓</text>
+
+      <!-- Step number annotations -->
+      <text x="163" y="156" fill="#6e7681" font-size="8" text-anchor="middle">①</text>
+      <text x="220" y="212" fill="#6e7681" font-size="8" text-anchor="middle">②</text>
+      <text x="300" y="152" fill="#6e7681" font-size="8" text-anchor="middle">③</text>
+      <text x="373" y="106" fill="#6e7681" font-size="8" text-anchor="middle">④</text>
+      <text x="447" y="106" fill="#6e7681" font-size="8" text-anchor="middle">⑤</text>
+      <text x="523" y="233" fill="#6e7681" font-size="8" text-anchor="middle">⑥</text>
+
+      <!-- Legend -->
+      <rect x="10" y="260" width="700" height="42" rx="6" fill="#0a0e17" stroke="#1e293b"/>
+      <text x="20"  y="275" fill="#6e7681" font-size="8">① H on Alice's bell-pair qubit</text>
+      <text x="160" y="275" fill="#6e7681" font-size="8">② CNOT entangle pair</text>
+      <text x="300" y="275" fill="#6e7681" font-size="8">③ CNOT entangle |ψ⟩ with pair</text>
+      <text x="460" y="275" fill="#6e7681" font-size="8">④ H on |ψ⟩</text>
+      <text x="540" y="275" fill="#6e7681" font-size="8">⑤ Measure → 2 classical bits</text>
+      <text x="20"  y="294" fill="#fcd34d" font-size="8">── classical bit</text>
+      <text x="100" y="294" fill="#6e7681" font-size="8">⑥ Bob applies X/Z correction — his qubit becomes the original |ψ⟩</text>
+    </svg>
+  </div>
+
+  <h3>Quantum Circuit Depth &amp; Complexity</h3>
+  <div class="callout callout-blue">
+    <strong>Circuit Depth = Time Complexity</strong>
+    Circuit depth is the number of sequential gate layers. Deeper circuits = more time = more decoherence errors. Optimizing circuit depth is critical for NISQ devices. Compilers like t|ket⟩ (Cambridge Quantum) and Qiskit transpiler automatically reduce gate count and depth for specific hardware.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+<div class="section page-break" id="s4">
+  <div class="section-num">Section 04</div>
+  <h2 class="section-title">Key Quantum Algorithms</h2>
+  <p class="lead">Quantum algorithms achieve speedups by exploiting superposition, entanglement, and interference. The three landmark algorithms are Shor's (cryptography), Grover's (search), and the Quantum Fourier Transform (subroutine for many algorithms).</p>
+
+  <h3>Grover's Search Algorithm</h3>
+  <p>Searches an unsorted database of N items in <strong>O(√N)</strong> operations vs classical O(N). Provably optimal for unstructured search.</p>
+
+  <div class="diagram">GROVER'S ALGORITHM — ORACLE + DIFFUSION
+
+  Phase 1: Initialize superposition over all N states
+  ┌────────────────────────────────────────────────────────┐
+  │  |0⟩⊗ⁿ ──── H⊗ⁿ ────► |+⟩ (equal superposition)     │
+  │  All 2ⁿ states have amplitude 1/√N                    │
+  └────────────────────────────────────────────────────────┘
+
+  Phase 2: Repeat ~π√N/4 times (Grover iterations)
+  ┌────────────────────────────────────────────────────────┐
+  │                                                        │
+  │   Oracle Uω                  Diffusion D               │
+  │  ┌───────────┐              ┌─────────────────────┐   │
+  │  │ Flips sign│              │ Inversion about mean │   │
+  │  │ of target │──────────────│ amplifies target,   │   │
+  │  │ state     │              │ suppresses others   │   │
+  │  └───────────┘              └─────────────────────┘   │
+  │                                                        │
+  └────────────────────────────────────────────────────────┘
+
+  <!-- Grover amplitude evolution bar chart -->
+</div>
+
+  <div class="svg-wrap" style="background:#0d1117;border:1px solid #30363d;border-radius:12px;padding:0.25rem 0;">
+    <svg viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+      <text x="20" y="18" fill="#6e7681" font-size="9" letter-spacing="2">AMPLITUDE EVOLUTION — target state amplified each iteration</text>
+
+      <!-- Y axis baseline labels -->
+      <text x="14" y="155" fill="#6e7681" font-size="8" text-anchor="end">0</text>
+      <text x="14" y="60"  fill="#6e7681" font-size="8" text-anchor="end">1</text>
+      <line x1="16" y1="38" x2="16" y2="155" stroke="#21262d" stroke-width="1"/>
+      <line x1="16" y1="155" x2="630" y2="155" stroke="#21262d" stroke-width="1"/>
+
+      <!-- Grid lines -->
+      <line x1="16" y1="38"  x2="630" y2="38"  stroke="#161b22" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="16" y1="100" x2="630" y2="100" stroke="#161b22" stroke-width="1" stroke-dasharray="3,3"/>
+      <text x="14" y="104" fill="#6e7681" font-size="7" text-anchor="end">0.5</text>
+
+      <!-- Iteration 0: all equal ~0.25, 4 bars shown -->
+      <!-- Bar heights: 0.25 → 29px high (max=117px for 1.0), bottom=155 -->
+      <!-- states: s0 s1 s★ s3 (★=target) -->
+      <!-- Iter 0 group at x=30 -->
+      <text x="85" y="172" fill="#8b949e" font-size="9" text-anchor="middle">Iter 0</text>
+      <rect x="32" y="126" width="22" height="29" fill="#1e3a5f" stroke="#1d4ed8" stroke-width="1" rx="2"/>
+      <rect x="58" y="126" width="22" height="29" fill="#1e3a5f" stroke="#1d4ed8" stroke-width="1" rx="2"/>
+      <rect x="84" y="126" width="22" height="29" fill="#3b0764" stroke="#7c3aed" stroke-width="1.5" rx="2"/>
+      <text x="95" y="122" fill="#a78bfa" font-size="7" text-anchor="middle">★</text>
+      <rect x="110" y="126" width="22" height="29" fill="#1e3a5f" stroke="#1d4ed8" stroke-width="1" rx="2"/>
+      <text x="85" y="182" fill="#6e7681" font-size="7" text-anchor="middle">equal 0.25</text>
+
+      <!-- Iter 1 group at x=175 — target ~0.6, others ~0.2 -->
+      <text x="235" y="172" fill="#8b949e" font-size="9" text-anchor="middle">Iter 1</text>
+      <rect x="182" y="132" width="22" height="23" fill="#1e3a5f" stroke="#1d4ed8" stroke-width="1" rx="2"/>
+      <rect x="208" y="132" width="22" height="23" fill="#1e3a5f" stroke="#1d4ed8" stroke-width="1" rx="2"/>
+      <rect x="234" y="85"  width="22" height="70" fill="#4c1d95" stroke="#a855f7" stroke-width="1.5" rx="2"/>
+      <text x="245" y="80" fill="#f0abfc" font-size="7" text-anchor="middle">★0.6</text>
+      <rect x="260" y="132" width="22" height="23" fill="#1e3a5f" stroke="#1d4ed8" stroke-width="1" rx="2"/>
+      <text x="235" y="182" fill="#6e7681" font-size="7" text-anchor="middle">target ↑</text>
+
+      <!-- Iter 2 group at x=325 — target ~0.88, others ~0.13 -->
+      <text x="385" y="172" fill="#8b949e" font-size="9" text-anchor="middle">Iter 2</text>
+      <rect x="332" y="141" width="22" height="14" fill="#1e3a5f" stroke="#1d4ed8" stroke-width="1" rx="2"/>
+      <rect x="358" y="141" width="22" height="14" fill="#1e3a5f" stroke="#1d4ed8" stroke-width="1" rx="2"/>
+      <rect x="384" y="52"  width="22" height="103" fill="#6d28d9" stroke="#a855f7" stroke-width="2" rx="2"/>
+      <text x="395" y="47" fill="#f0abfc" font-size="7" text-anchor="middle">★0.88</text>
+      <rect x="410" y="141" width="22" height="14" fill="#1e3a5f" stroke="#1d4ed8" stroke-width="1" rx="2"/>
+      <text x="385" y="182" fill="#6e7681" font-size="7" text-anchor="middle">target ↑↑</text>
+
+      <!-- Iter 3 group at x=475 — target ~0.99, others ~tiny -->
+      <text x="535" y="172" fill="#8b949e" font-size="9" text-anchor="middle">Iter 3 → MEASURE</text>
+      <rect x="482" y="152" width="22" height="3" fill="#1e3a5f" stroke="#1d4ed8" stroke-width="1" rx="1"/>
+      <rect x="508" y="152" width="22" height="3" fill="#1e3a5f" stroke="#1d4ed8" stroke-width="1" rx="1"/>
+      <rect x="534" y="39"  width="22" height="116" fill="url(#groverGrad)" stroke="#c4b5fd" stroke-width="2" rx="2"/>
+      <text x="545" y="34" fill="#fcd34d" font-size="9" text-anchor="middle" font-weight="700">★ 0.99</text>
+      <rect x="560" y="152" width="22" height="3" fill="#1e3a5f" stroke="#1d4ed8" stroke-width="1" rx="1"/>
+      <text x="535" y="182" fill="#fcd34d" font-size="7" text-anchor="middle">P(correct) ≈ 99%</text>
+
+      <defs>
+        <linearGradient id="groverGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#a78bfa"/>
+          <stop offset="100%" stop-color="#6d28d9"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Legend -->
+      <rect x="18" y="28" width="12" height="8" fill="#4c1d95" stroke="#7c3aed" rx="1"/>
+      <text x="33" y="36" fill="#c4b5fd" font-size="8">target state ★</text>
+      <rect x="130" y="28" width="12" height="8" fill="#1e3a5f" stroke="#1d4ed8" rx="1"/>
+      <text x="145" y="36" fill="#8b949e" font-size="8">other states</text>
+    </svg>
+  </div>
+
+  <p style="font-family:var(--mono);font-size:0.8rem;color:var(--ink3);margin-top:0.5rem">Phase 3: Measure → correct answer with high probability &nbsp;·&nbsp; Speedup: Classical O(N) vs Grover O(√N) &nbsp;·&nbsp; N=1M: ~500K ops → ~1000 ops</p>
+
+  <h3>Shor's Algorithm — Breaking RSA</h3>
+  <p>Factors large integers in polynomial time <strong>O((log N)³)</strong> vs classical sub-exponential best. A large enough quantum computer would break RSA encryption.</p>
+
+  <div class="diagram-teal">SHOR'S ALGORITHM — FACTORING N = p × q
+
+  Goal: Find prime factors p and q given composite N
+
+  CLASSICAL PART:
+  ─────────────
+  1. Pick random a < N
+  2. If gcd(a,N) ≠ 1 → found factor (lucky!)
+  3. Otherwise need period r of f(x) = aˣ mod N
+
+  QUANTUM PART (Quantum Phase Estimation):
+  ─────────────────────────────────────────
+  |0⟩⊗ᵐ ── H⊗ᵐ ──────────────────────── QFT⁻¹ ──── Measure r
+                 │
+  |1⟩    ── Uₐ^(2ʲ) (controlled modular exponentiation)
+
+  Quantum Fourier Transform encodes the period r into
+  measurable phases — this is the quantum speedup.
+
+  CLASSICAL POST-PROCESSING:
+  ──────────────────────────
+  4. With period r (even and aʳ/² ≢ -1 mod N):
+     p = gcd(aʳ/² + 1, N)
+     q = gcd(aʳ/² - 1, N)
+
+  IMPACT ON CRYPTOGRAPHY:
+  RSA-2048 classical: ~10¹² years to break
+  RSA-2048 quantum:   ~hours (with ~4000 logical qubits)
+  → Post-quantum cryptography (NIST PQC standards) needed!</div>
+
+  <h3>Quantum Fourier Transform (QFT)</h3>
+  <div class="diagram">QUANTUM FOURIER TRANSFORM
+
+  Classical DFT: O(N log N) with FFT
+  Quantum QFT:   O((log N)²) — exponential speedup!
+
+  QFT on n qubits maps:
+  |x⟩ ──► (1/√2ⁿ) Σⱼ e^(2πixj/2ⁿ) |j⟩
+
+  Circuit for 3-qubit QFT:
+  |q₀⟩ ── H ── R₂ ── R₃ ────────────── SWAP ─┐
+               │      │                        │ ← wire swap
+  |q₁⟩ ──────●─── H ── R₂ ─────── SWAP ──────┘
+                        │           │
+  |q₂⟩ ────────────────●──── H ───/
+
+  Rₖ = phase gate rotating by 2π/2ᵏ
+
+  Used as subroutine in: Shor's, quantum simulation,
+  HHL (linear systems), QPE (phase estimation)</div>
+
+  <h3>Variational Quantum Algorithms (NISQ Era)</h3>
+  <div class="callout callout-purple">
+    <strong>VQE &amp; QAOA — Hybrid Classical-Quantum Algorithms</strong>
+    Since current NISQ devices are noisy, hybrid algorithms use shallow quantum circuits combined with classical optimizers. VQE (Variational Quantum Eigensolver) finds ground state energies of molecules — useful for drug discovery and materials science. QAOA (Quantum Approximate Optimization Algorithm) tackles combinatorial optimization problems like Max-Cut and portfolio optimization.
+  </div>
+
+  <div class="diagram-light">HYBRID QUANTUM-CLASSICAL LOOP (VQE / QAOA)
+
+  ┌─────────────────────────────────────────────────┐
+  │              CLASSICAL COMPUTER                 │
+  │                                                 │
+  │  Initialize parameters θ = [θ₁, θ₂, ..., θₙ]  │
+  │                    │                            │
+  │                    ▼                            │
+  │  Classical optimizer (Adam, COBYLA, SPSA)       │
+  │                    │                            │
+  └────────────────────┼────────────────────────────┘
+                       │ θ parameters
+                       ▼
+  ┌─────────────────────────────────────────────────┐
+  │              QUANTUM PROCESSOR                  │
+  │                                                 │
+  │  Ansatz circuit U(θ): parameterized gates       │
+  │  |0⟩ ── H ── RY(θ₁) ──●── RZ(θ₂) ──── M       │
+  │                         │                       │
+  │  |0⟩ ── H ── RX(θ₃) ───⊕── RY(θ₄) ─── M      │
+  │                                                 │
+  │  Measure ⟨ψ(θ)|H|ψ(θ)⟩ = expectation value    │
+  └────────────────────────┬────────────────────────┘
+                           │ cost value
+                           ▼
+               Update θ to minimize cost
+               Repeat until convergence</div>
+
+  <h3>Algorithm Complexity Summary</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Algorithm</th><th>Problem</th><th>Classical Best</th><th>Quantum</th><th>Speedup</th></tr></thead>
+    <tbody>
+      <tr><td>Grover's</td><td>Unstructured search (N items)</td><td>O(N)</td><td>O(√N)</td><td>Quadratic</td></tr>
+      <tr><td>Shor's</td><td>Integer factoring (N digits)</td><td>O(e^(N^1/3))</td><td>O(N³)</td><td>Exponential</td></tr>
+      <tr><td>QFT</td><td>Discrete Fourier Transform (N points)</td><td>O(N log N)</td><td>O((log N)²)</td><td>Exponential</td></tr>
+      <tr><td>HHL</td><td>Linear systems Ax=b (N equations)</td><td>O(N²·√κ)</td><td>O(log N · κ²)</td><td>Exponential*</td></tr>
+      <tr><td>QAOA</td><td>Combinatorial optimization (approximation)</td><td>NP-hard</td><td>Approximate</td><td>Potential</td></tr>
+      <tr><td>VQE</td><td>Quantum chemistry / ground states</td><td>Exponential</td><td>Polynomial</td><td>Exponential</td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:0.8rem;color:var(--ink3)">* HHL has caveats — input/output bottlenecks can eliminate speedup for classical data.</p>
+</div>
+
+<!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+<div class="section page-break" id="s5">
+  <div class="section-num">Section 05</div>
+  <h2 class="section-title">Quantum vs Classical Computing</h2>
+  <p class="lead">Quantum computers are not universally faster. They excel at specific problem classes. Understanding when to use quantum vs classical is as important as understanding how quantum computers work.</p>
+
+  <div class="diagram">QUANTUM vs CLASSICAL — MENTAL MODEL
+
+  Classical Computer              Quantum Computer
+  ─────────────────────────────────────────────────
+  Bits: 0 or 1                    Qubits: superposition of 0 and 1
+  Deterministic                   Probabilistic (amplitudes)
+  Sequential / parallel threads   Quantum parallelism (all paths at once)
+  Error rate: ~10⁻¹⁵              Error rate: ~10⁻³ (NISQ)
+  Room temperature                ~15 mK (colder than space)
+  Billions of bits                50–1000+ qubits (2024)
+  Mature (70+ years)              Emerging (~30 years)
+
+  PROBLEM CLASSES:
+  ┌────────────────────────────────────────────────────────────┐
+  │                                                            │
+  │  CLASSICAL WINS            QUANTUM WINS                   │
+  │  ─────────────────         ──────────────────             │
+  │  • Web servers             • Factoring large numbers      │
+  │  • Databases               • Unstructured search          │
+  │  • ML training (GPUs)      • Quantum simulation           │
+  │  • Video streaming         • Optimization (QAOA)          │
+  │  • Business logic          • Quantum chemistry / ML       │
+  │  • Most everyday tasks     • Cryptography breaking        │
+  │                            • Sampling problems            │
+  └────────────────────────────────────────────────────────────┘</div>
+
+  <h3>Quantum Supremacy vs Quantum Advantage</h3>
+  <div class="two-col">
+    <div class="card card-purple">
+      <h4>Quantum Supremacy (Achieved)</h4>
+      <p>A quantum computer performs a specific task that <em>no classical computer can do in any practical time</em> — even if the task has no useful application.</p>
+      <ul>
+        <li>Google Sycamore (2019): random circuit sampling in 200 seconds vs est. 10,000 years classically</li>
+        <li>IBM later claimed 2.5 days with improved classical algorithms</li>
+        <li>Primarily a benchmark milestone</li>
+      </ul>
+    </div>
+    <div class="card card-teal">
+      <h4>Quantum Advantage (Future)</h4>
+      <p>A quantum computer solves a <em>commercially useful problem</em> faster or cheaper than any classical computer.</p>
+      <ul>
+        <li>Drug discovery: simulating protein folding exactly</li>
+        <li>Finance: portfolio optimization at scale</li>
+        <li>Logistics: vehicle routing at global scale</li>
+        <li>Materials science: superconductor/catalyst design</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Quantum Error Correction</h3>
+  <div class="diagram-purple">QUANTUM ERROR CORRECTION — SURFACE CODE
+
+  Physical qubits are noisy. Logical qubits are error-corrected.
+
+  Surface Code Layout (distance-3):
+  ┌─────────────────────────────────────────┐
+  │   d  ─── d  ─── d        d = data qubit │
+  │   │   ×  │   ×  │        × = X syndrome │
+  │   d  ─── d  ─── d        ○ = Z syndrome │
+  │   │   ○  │   ○  │                        │
+  │   d  ─── d  ─── d                        │
+  └─────────────────────────────────────────┘
+
+  OVERHEAD: ~1000 physical qubits per 1 logical qubit (at threshold)
+  THRESHOLD: If physical error rate < ~1%, error correction works
+  CURRENT:   Best superconducting: ~0.1-0.5% per gate ← close!
+
+  Error types corrected:
+  • Bit flip (X error):   |0⟩ → |1⟩ accidentally
+  • Phase flip (Z error): |+⟩ → |-⟩ accidentally
+  • Combination (Y error): both simultaneously</div>
+</div>
+
+<!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+<div class="section page-break" id="s6">
+  <div class="section-num">Section 06</div>
+  <h2 class="section-title">Hardware &amp; Platforms</h2>
+  <p class="lead">The quantum computing ecosystem spans multiple hardware approaches, cloud platforms, and software stacks. As an engineer you will interact with this via cloud APIs and quantum circuit frameworks.</p>
+
+  <h3>Quantum Cloud Platforms</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Platform</th><th>Provider</th><th>Max Qubits</th><th>SDK</th><th>Access</th></tr></thead>
+    <tbody>
+      <tr><td>IBM Quantum</td><td>IBM</td><td>127–433 qubits (Eagle/Osprey/Heron)</td><td>Qiskit (Python)</td><td>Free tier + paid</td></tr>
+      <tr><td>Amazon Braket</td><td>AWS</td><td>Multiple backends (IonQ, Rigetti, OQC)</td><td>Braket SDK</td><td>Pay per shot</td></tr>
+      <tr><td>Azure Quantum</td><td>Microsoft</td><td>IonQ, Quantinuum, Pasqal</td><td>Q# / Qiskit</td><td>Credits + pay</td></tr>
+      <tr><td>Google Quantum AI</td><td>Google</td><td>70-qubit Sycamore</td><td>Cirq (Python)</td><td>Research access</td></tr>
+      <tr><td>IonQ Harmony/Aria</td><td>IonQ</td><td>25–35 algorithmic qubits</td><td>Qiskit / Cirq</td><td>Cloud API</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>The Quantum Software Stack</h3>
+  <div style="margin:1rem 0;display:flex;flex-direction:column;gap:3px;font-size:0.82rem;">
+    <!-- SOFTWARE STACK layers -->
+    <div style="background:linear-gradient(90deg,#1e1b4b,#2d1b4e);border:1px solid #4c1d95;border-radius:8px 8px 0 0;padding:0.65rem 1.1rem;">
+      <strong style="color:#c4b5fd">Application Layer</strong>
+      <span style="color:#8b949e;margin-left:0.75rem;font-size:0.75rem">Chemistry (PySCF) · Finance (Qiskit Finance) · ML (QML) · Optimization</span>
+    </div>
+    <div style="background:linear-gradient(90deg,#0c1a2e,#1e3a5f);border:1px solid #1d4ed8;padding:0.65rem 1.1rem;">
+      <strong style="color:#93c5fd">Algorithm Libraries</strong>
+      <span style="color:#8b949e;margin-left:0.75rem;font-size:0.75rem">Qiskit Algorithms · PennyLane · Cirq · OpenQASM 3</span>
+    </div>
+    <div style="background:linear-gradient(90deg,#052e16,#14532d);border:1px solid #15803d;padding:0.65rem 1.1rem;">
+      <strong style="color:#86efac">Circuit Compiler / Transpiler</strong>
+      <span style="color:#8b949e;margin-left:0.75rem;font-size:0.75rem">Maps abstract gates → hardware-native gates · optimises depth &amp; qubit routing</span>
+    </div>
+    <div style="background:linear-gradient(90deg,#1c1000,#292200);border:1px solid #b45309;padding:0.65rem 1.1rem;">
+      <strong style="color:#fcd34d">Pulse-Level Control</strong>
+      <span style="color:#8b949e;margin-left:0.75rem;font-size:0.75rem">Qiskit Pulse — direct microwave pulse shaping (expert use only)</span>
+    </div>
+    <div style="background:linear-gradient(90deg,#0a0010,#1a0028);border:1px solid #7c3aed;border-radius:0 0 8px 8px;padding:0.65rem 1.1rem;">
+      <strong style="color:#e9d5ff">Quantum Hardware</strong>
+      <span style="color:#8b949e;margin-left:0.75rem;font-size:0.75rem">Physical qubits: superconducting · trapped-ion · photonic · neutral atom</span>
+    </div>
+  </div>
+
+
+  <h3>Hello Quantum — Qiskit Code Example</h3>
+<pre><code>from qiskit import QuantumCircuit, transpile
+from qiskit_ibm_runtime import QiskitRuntimeService, Sampler
+
+# Create a 2-qubit Bell state circuit
+qc = QuantumCircuit(2, 2)
+qc.h(0)          # Hadamard on qubit 0 → superposition
+qc.cx(0, 1)      # CNOT: entangle qubit 0 and 1
+qc.measure([0, 1], [0, 1])
+
+print(qc.draw())
+# q_0: ─ H ─●─ M
+#            │   ║
+# q_1: ─────X─ M
+
+# Run on IBM Quantum (cloud)
+service = QiskitRuntimeService()
+backend = service.least_busy(operational=True, simulator=False)
+
+transpiled = transpile(qc, backend)
+sampler = Sampler(backend)
+job = sampler.run([transpiled], shots=1024)
+result = job.result()
+
+# Expected output: ~50% '00', ~50% '11' (Bell state)
+counts = result[0].data.meas.get_counts()
+print(counts)  # {'00': 512, '11': 512} approx</code></pre>
+</div>
+
+<!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+<div class="section page-break" id="s7">
+  <div class="section-num">Section 07</div>
+  <h2 class="section-title">Quantum-Inspired Distributed Computing Framework</h2>
+  <p class="lead">Even without a quantum computer, the <em>mathematical principles</em> of quantum mechanics can inspire radically new distributed system designs. This section explores how superposition, entanglement, interference, and teleportation map to distributed computing patterns — both theoretical and practical today.</p>
+
+  <div class="callout callout-purple">
+    <strong>Two Distinct Approaches</strong>
+    (1) <strong>Quantum-Inspired Classical Algorithms</strong>: Software that mimics quantum math on classical hardware for optimization/sampling — available TODAY. (2) <strong>Quantum Distributed Systems</strong>: Actual quantum networks using physical qubits and entanglement for communication — emerging research. Both are explored below.
+  </div>
+
+  <h3>Mapping Quantum Principles to Distributed Systems</h3>
+  <div class="svg-wrap" style="background:#0d1117;border:1px solid #30363d;border-radius:12px;padding:1.2rem 1.4rem;">
+    <div style="font-family:var(--mono);font-size:0.62rem;letter-spacing:2px;color:#6e7681;margin-bottom:1rem;text-transform:uppercase">Quantum Principle → Distributed System Design</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0.75rem;">
+      <div style="background:#1e1b4b;border:1px solid #4c1d95;border-radius:8px;padding:0.8rem 1rem;">
+        <div style="color:#a78bfa;font-size:0.8rem;font-weight:700;margin-bottom:0.3rem">🌀 Superposition → Probabilistic Routing</div>
+        <div style="color:#c4b5fd;font-size:0.75rem;line-height:1.55">Tasks exist in superposition across candidate workers. Amplitude-weighted sampling collapses the assignment on execution — prevents thundering herd.</div>
+      </div>
+      <div style="background:#042f2e;border:1px solid #134e4a;border-radius:8px;padding:0.8rem 1rem;">
+        <div style="color:#5eead4;font-size:0.8rem;font-weight:700;margin-bottom:0.3rem">🔗 Entanglement → Cache Coherence</div>
+        <div style="color:#a7f3d0;font-size:0.75rem;line-height:1.55">Register data replicas as entangled pairs. On write, both enter "decoherent" state simultaneously — next read triggers fresh fetch (lazy collapse).</div>
+      </div>
+      <div style="background:#0c1a2e;border:1px solid #1e3a5f;border-radius:8px;padding:0.8rem 1rem;">
+        <div style="color:#93c5fd;font-size:0.8rem;font-weight:700;margin-bottom:0.3rem">〰️ Interference → Consensus</div>
+        <div style="color:#bfdbfe;font-size:0.75rem;line-height:1.55">Conflicting proposals carry negative phase — destructive interference cancels them. Matching proposals amplify. Highest net amplitude commits.</div>
+      </div>
+      <div style="background:#1a0a1e;border:1px solid #6b21a8;border-radius:8px;padding:0.8rem 1rem;">
+        <div style="color:#f0abfc;font-size:0.8rem;font-weight:700;margin-bottom:0.3rem">📍 Collapse → Circuit Breaking</div>
+        <div style="color:#f5d0fe;font-size:0.75rem;line-height:1.55">Once a node observes/commits a value the distributed state "collapses" — downstream nodes get the resolved classical value, not a quantum superposition.</div>
+      </div>
+      <div style="background:#1c1000;border:1px solid #b45309;border-radius:8px;padding:0.8rem 1rem;">
+        <div style="color:#fcd34d;font-size:0.8rem;font-weight:700;margin-bottom:0.3rem">📡 Teleportation → Workload Migration</div>
+        <div style="color:#fef3c7;font-size:0.75rem;line-height:1.55">Migrate workloads via tiny execution-context metadata + pre-staged shared storage. O(context) cost not O(data) — like CRIU + S3 pre-staging.</div>
+      </div>
+      <div style="background:#0f2a0f;border:1px solid #166534;border-radius:8px;padding:0.8rem 1rem;">
+        <div style="color:#86efac;font-size:0.8rem;font-weight:700;margin-bottom:0.3rem">🚫 No-Cloning → Capability Tokens</div>
+        <div style="color:#d1fae5;font-size:0.75rem;line-height:1.55">Task tokens can only be transferred (destroy + create), never copied. Prevents double-assignment, race conditions, and replay attacks without a central coordinator.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Framework Architecture: QDF (Quantum-Inspired Distributed Framework)</h3>
+  <div class="arch-diagram">
+    <!-- Row 1: Ingress -->
+    <div class="arch-row">
+      <div class="arch-box ab-indigo" style="max-width:460px">
+        <div style="font-size:0.65rem;letter-spacing:2px;opacity:0.6;margin-bottom:0.3rem">LAYER 1</div>
+        <strong>API Gateway / Task Ingress</strong>
+        <div style="font-size:0.72rem;opacity:0.75;margin-top:0.3rem">Accepts tasks · assigns no-clone capability token · sets amplitude hints (priority, affinity)</div>
+      </div>
+    </div>
+    <div class="arch-arrow-down">↓</div>
+    <!-- Row 2: Planner + Coherence side by side -->
+    <div class="arch-row">
+      <div class="arch-box ab-purple" style="max-width:260px">
+        <div style="font-size:0.65rem;letter-spacing:2px;opacity:0.6;margin-bottom:0.3rem">LAYER 2A</div>
+        <strong>Superposition Planner</strong>
+        <div style="font-size:0.72rem;opacity:0.75;margin-top:0.3rem">Amplitude vector per worker · weighted sampling · prevents herd effect via quantum jitter</div>
+      </div>
+      <div class="arch-arrow-across">⇄</div>
+      <div class="arch-box ab-teal" style="max-width:260px">
+        <div style="font-size:0.65rem;letter-spacing:2px;opacity:0.6;margin-bottom:0.3rem">LAYER 2B</div>
+        <strong>Coherence Manager</strong>
+        <div style="font-size:0.72rem;opacity:0.75;margin-top:0.3rem">Tracks entangled state pairs globally · CAS + vector clocks · decoherence timeout on stale data</div>
+      </div>
+    </div>
+    <div class="arch-arrow-down">↓ &nbsp; amplitude assignments + coherence tokens</div>
+    <!-- Row 3: Workers -->
+    <div class="arch-row" style="flex-wrap:wrap;gap:0.5rem;justify-content:center;">
+      <div class="arch-worker"><strong>Worker A</strong>α = 0.80 · |ψ_A⟩</div>
+      <div class="arch-worker"><strong>Worker B</strong>α = 0.60 · |ψ_B⟩</div>
+      <div class="arch-worker"><strong>Worker C</strong>α = 0.45 · |ψ_C⟩</div>
+      <div class="arch-worker" style="background:#1e293b;color:#475569;border-style:dashed">Worker ··· N</div>
+    </div>
+    <div class="arch-arrow-down">↓ &nbsp; results with phase vectors (confidence scores)</div>
+    <!-- Row 4: Interference -->
+    <div class="arch-row">
+      <div class="arch-box ab-blue" style="max-width:460px">
+        <div style="font-size:0.65rem;letter-spacing:2px;opacity:0.6;margin-bottom:0.3rem">LAYER 4</div>
+        <strong>Interference Consensus Layer</strong>
+        <div style="font-size:0.72rem;opacity:0.75;margin-top:0.3rem">Aggregates phase-weighted results · conflicting updates destructively cancel · matching updates constructively amplify</div>
+      </div>
+    </div>
+    <div class="arch-arrow-down">↓</div>
+    <!-- Row 5: Collapse -->
+    <div class="arch-row">
+      <div class="arch-box ab-green" style="max-width:460px">
+        <div style="font-size:0.65rem;letter-spacing:2px;opacity:0.6;margin-bottom:0.3rem">LAYER 5</div>
+        <strong>Collapse / Commit Layer</strong>
+        <div style="font-size:0.72rem;opacity:0.75;margin-top:0.3rem">"Measures" the distributed quantum state · emits deterministic classical result · burns no-clone token (prevents replay)</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Superposition Scheduler — Probabilistic Task Routing</h3>
+  <p>Instead of deterministic round-robin or least-connections, a <strong>superposition scheduler</strong> maintains amplitude vectors for each worker and routes tasks probabilistically — then "collapses" the assignment on execution.</p>
+
+  <div class="diagram">SUPERPOSITION SCHEDULER (Quantum-Inspired)
+
+  Classical scheduler: deterministic → always picks "best" worker
+  Problem: herd effect when all clients see same "best" node
+
+  Quantum-inspired: tasks exist in superposition across candidates
+  ┌─────────────────────────────────────────────────────────┐
+  │  Incoming Task T                                        │
+  │        │                                               │
+  │        ▼                                               │
+  │  Worker amplitudes (updated each heartbeat):            │
+  │  Worker A: α_A = 0.8 (low latency, good health)        │
+  │  Worker B: α_B = 0.5 (medium load)                     │
+  │  Worker C: α_C = 0.2 (high load)                       │
+  │                                                         │
+  │  Normalise: P(A) = 0.64/Σ, P(B) = 0.25/Σ, P(C)=0.04/Σ│
+  │                                                         │
+  │  Sample → "collapse" to Worker A (64% of the time)     │
+  │                                                         │
+  │  BENEFIT: Natural load diversification, avoids          │
+  │  thundering-herd; stale metrics matter less because    │
+  │  sampling adds inherent jitter.                        │
+  └─────────────────────────────────────────────────────────┘
+
+  Compare to: Power-of-two-choices (P2C) — quantum version
+  samples from the full amplitude distribution rather than
+  just 2 random nodes.</div>
+
+  <h3>Entanglement-Inspired State Synchronization</h3>
+  <p>Classical distributed caching (Redis, Memcached) requires explicit invalidation messages. An <strong>entanglement-inspired</strong> approach pre-registers correlated state pairs — when one changes, its entangled partner is automatically invalidated.</p>
+
+  <div class="diagram-teal">ENTANGLEMENT-INSPIRED CACHE COHERENCE
+
+  Classical cache invalidation:
+  Node A writes → sends INVALIDATE msg → Node B receives → purges
+  Problem: Race condition window, message loss, network partition
+
+  Entanglement-Inspired Approach:
+  ─────────────────────────────────
+  1. When data item X is replicated:
+     register (X_A, X_B) as an "entangled pair" in metadata service
+
+  2. On write to X_A:
+     ┌─────────────────────────────────────────────────────┐
+     │  Write to X_A                                       │
+     │      │                                              │
+     │      ▼                                              │
+     │  Metadata: mark X_A and X_B as "decoherent"         │
+     │  (both enter uncertain state simultaneously)        │
+     │      │                                              │
+     │  Next READ of X_B triggers "measurement":           │
+     │  → fetch fresh value (collapse to definite state)  │
+     └─────────────────────────────────────────────────────┘
+
+  3. Result: lazy coherence with guaranteed detection
+     No INVALIDATE flood; uncertainty is tracked, not propagated
+
+  Implementation: Vector clocks per pair + CAS on read
+  Similar to: CRDT (Conflict-free Replicated Data Types) philosophy</div>
+
+  <h3>Interference-Based Consensus</h3>
+  <p>Raft and Paxos achieve consensus through leader election and majority votes — linear message complexity. An <strong>interference-based consensus</strong> uses phase cancellation: conflicting proposals destructively interfere; matching proposals constructively reinforce.</p>
+
+  <div class="diagram">INTERFERENCE-BASED CONSENSUS
+
+  Traditional Raft:
+  Leader broadcasts → followers ACK → leader commits
+  (O(n) messages per round, single point of failure)
+
+  Quantum-Inspired Interference Consensus:
+  ┌────────────────────────────────────────────────────────┐
+  │  Nodes broadcast proposal + phase vector               │
+  │                                                        │
+  │  Node 1: propose "v=42", phase=+1                      │
+  │  Node 2: propose "v=42", phase=+1  → CONSTRUCTIVE      │
+  │  Node 3: propose "v=99", phase=-1  → DESTRUCTIVE       │
+  │  Node 4: propose "v=42", phase=+1  → CONSTRUCTIVE      │
+  │                                                        │
+  │  Net amplitude for v=42: (+1+1+1) = 3 (large)         │
+  │  Net amplitude for v=99: (-1) = -1 (cancelled)        │
+  │                                                        │
+  │  Decision: highest net amplitude wins                  │
+  │  Threshold: amplitude > n/2 → commit                  │
+  └────────────────────────────────────────────────────────┘
+
+  Real-world analogue: Weighted voting with Byzantine fault
+  tolerance. Amplitudes encode trust/confidence scores.
+  Dissenting votes subtract (destructive interference).
+
+  Used in: Avalanche consensus protocol (blockchain),
+  weighted Paxos variants, probabilistic BFT</div>
+
+  <h3>Quantum Teleportation → Workload Migration</h3>
+  <div class="diagram-light">QUANTUM TELEPORTATION ANALOGY FOR WORKLOAD MIGRATION
+
+  Classical migration (live VM migration):
+  Copy ALL memory pages → stop-and-copy final dirty pages → resume
+  Cost: O(memory size) network traffic, downtime
+
+  Teleportation-Inspired Migration:
+  ┌──────────────────────────────────────────────────────────┐
+  │  Source Node (Alice)           Dest Node (Bob)           │
+  │  ─────────────────             ────────────────          │
+  │                                                          │
+  │  1. Serialize minimal "quantum state":                   │
+  │     • Execution context (PC, registers, stack frame)     │
+  │     • Data locality manifest (what data is needed)       │
+  │     → 2 classical "bits" = tiny metadata packet         │
+  │                                                          │
+  │  2. Bob pre-stages "entangled data" via:                 │
+  │     • Shared distributed storage (S3/Ceph)               │
+  │     • Pre-fetched working set via pre-shared manifest    │
+  │                                                          │
+  │  3. Bob applies "correction":                            │
+  │     • Fetches missing pages on-demand (lazy resolution)  │
+  │     • Resumes execution with correct working state       │
+  │                                                          │
+  │  Result: Migration cost ≈ O(execution state) ≪ O(data)  │
+  └──────────────────────────────────────────────────────────┘
+
+  Real implementations: CRIU (Checkpoint/Restore in Userspace),
+  Kubernetes pod migration, serverless cold-start optimization</div>
+
+  <h3>No-Cloning → Unique Capability Tokens</h3>
+  <div class="callout callout-teal">
+    <strong>The Quantum No-Cloning Theorem in Distributed Auth</strong>
+    Quantum mechanics forbids copying an unknown quantum state. Inspired by this: design distributed systems where capability tokens cannot be copied — only <em>transferred</em>. This prevents double-spend, race conditions, and replay attacks without a central coordinator. Implementation: cryptographic capability tokens + bloom-filter ledger. Each token can only be "transferred" (destroyed at source, created at destination) — never duplicated.
+  </div>
+
+  <h3>Complete QDF Reference Architecture</h3>
+  <div class="diagram-purple">QUANTUM-INSPIRED DISTRIBUTED FRAMEWORK (QDF)
+  Full Production Architecture
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │  API GATEWAY / TASK INGRESS                                  │
+  │  • Accepts tasks with amplitude hints (priority, affinity)  │
+  │  • Assigns unique no-clone token per task                   │
+  └───────────────────────────┬──────────────────────────────────┘
+                              │
+  ┌───────────────────────────▼──────────────────────────────────┐
+  │  SUPERPOSITION PLANNER                                       │
+  │  • Maintains amplitude vector per worker (updated ~100ms)   │
+  │  • Routes using weighted sampling (power-of-k-choices)      │
+  │  • Prevents herd effect via quantum jitter                  │
+  └───┬──────────────────────────────────────────────┬───────────┘
+      │                                              │
+  ┌───▼──────────────────┐             ┌─────────────▼──────────┐
+  │  ENTANGLEMENT BUS    │             │  COHERENCE MANAGER     │
+  │  • Pub/sub with      │             │  • Tracks entangled    │
+  │    correlated pairs  │◄────────────►  state pairs globally  │
+  │  • Lazy invalidation │             │  • CAS + vector clocks │
+  │  • Phase vectors     │             │  • Decoherence timeout │
+  └───┬──────────────────┘             └─────────────┬──────────┘
+      │                                              │
+  ┌───▼──────────────────────────────────────────────▼──────────┐
+  │  WORKER POOL                                                 │
+  │  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐   │
+  │  │ Worker 1  │ │ Worker 2  │ │ Worker 3  │ │ Worker N  │   │
+  │  │ amp: 0.8  │ │ amp: 0.6  │ │ amp: 0.4  │ │ amp: 0.9  │   │
+  │  │ |ψ₁⟩ state│ │ |ψ₂⟩ state│ │ |ψ₃⟩ state│ │ |ψN⟩ state│   │
+  │  └───────────┘ └───────────┘ └───────────┘ └───────────┘   │
+  └──────────────────────────────┬──────────────────────────────┘
+                                 │
+  ┌──────────────────────────────▼──────────────────────────────┐
+  │  INTERFERENCE CONSENSUS LAYER                                │
+  │  • Aggregates results using phase-weighted voting           │
+  │  • Conflicting results cancel (destructive interference)    │
+  │  • Consistent results amplify (constructive interference)   │
+  └──────────────────────────────┬──────────────────────────────┘
+                                 │
+  ┌──────────────────────────────▼──────────────────────────────┐
+  │  COLLAPSE / COMMIT LAYER                                     │
+  │  • "Measures" the distributed quantum state                 │
+  │  • Emits deterministic classical result                     │
+  │  • Burns no-clone token (prevents replay)                   │
+  └──────────────────────────────────────────────────────────────┘</div>
+
+  <h3>Implementation Technologies</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>QDF Component</th><th>Quantum Principle</th><th>Classical Tech Stack</th></tr></thead>
+    <tbody>
+      <tr><td>Superposition Planner</td><td>Amplitude-weighted routing</td><td>Custom scheduler + Redis sorted sets for amplitude vectors</td></tr>
+      <tr><td>Entanglement Bus</td><td>Correlated pair tracking</td><td>Kafka + custom metadata service (etcd/ZooKeeper)</td></tr>
+      <tr><td>Coherence Manager</td><td>Decoherence timeout + CAS</td><td>Redis with TTL + optimistic locking</td></tr>
+      <tr><td>Interference Consensus</td><td>Phase-weighted voting</td><td>Modified Raft/Avalanche with confidence weights</td></tr>
+      <tr><td>No-Clone Tokens</td><td>No-cloning theorem</td><td>JWT + bloom filter ledger or distributed lock (Redlock)</td></tr>
+      <tr><td>Teleportation Migration</td><td>State transfer via classical channel</td><td>CRIU + S3 pre-staging + lazy page fetch</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Real Quantum Distributed Systems (Research)</h3>
+  <div class="callout callout-blue">
+    <strong>Quantum Internet — The Future</strong>
+    Actual quantum networks are being built: the <strong>Quantum Internet Alliance</strong> (EU), <strong>DARPA Quantum Network</strong>, and China's satellite-based quantum key distribution (Micius satellite). These use real entanglement for provably secure key exchange (QKD — Quantum Key Distribution). A quantum internet would enable: unconditionally secure communication, distributed quantum computing, blind quantum computing (send encrypted program to quantum server), and quantum sensor networks.
+  </div>
+
+  <div class="diagram">QUANTUM KEY DISTRIBUTION (BB84 Protocol)
+  The only provably secure encryption protocol
+
+  Alice                                    Bob
+  ─────                                    ───
+  Generate random bits: 1 0 1 1 0 1 0 0
+  Choose random bases:  + × + × × + × +
+  Encode photons:       → ↗ → ↙ ↗ → ↗ →
+
+                ────── quantum channel ──────►
+
+                                        Measure with random bases
+                                        Bases: × + + × × + + ×
+
+  ───────── classical channel (public) ─────────────────►
+  Compare bases (not bits!): match on positions 2,4,5,7
+
+  Shared secret key: bits at matching positions = 0 1 1 0
+
+  SECURITY: Any eavesdropper measuring the photons disturbs
+  the quantum states (Heisenberg uncertainty) — detectable!
+  Eve cannot copy photons (no-cloning theorem).
+  Result: provably secure key exchange (information-theoretic security)</div>
+</div>
+
+<!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+<div class="section page-break" id="s8">
+  <div class="section-num">Section 08</div>
+  <h2 class="section-title">Interview Q&amp;A Cheat Sheet</h2>
+  <p class="lead">Key concepts, concise answers, and the depth markers that distinguish a strong candidate from a surface-level one.</p>
+
+  <h3>Foundational Questions</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Question</th><th>Strong Answer</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>What is superposition?</td>
+        <td>A qubit exists in a linear combination α|0⟩ + β|1⟩ of both classical states until measured, where |α|²+|β|²=1. Unlike classical probability, the amplitudes are complex numbers that can interfere.</td>
+      </tr>
+      <tr>
+        <td>What is quantum entanglement?</td>
+        <td>Two qubits share a joint quantum state that cannot be factored into independent states. Measuring one instantly determines the other. The canonical example is the Bell state (|00⟩+|11⟩)/√2. No faster-than-light communication — you still need a classical channel to use the correlation.</td>
+      </tr>
+      <tr>
+        <td>Why can't we just use 300 qubits and simulate a 2³⁰⁰ classical state space?</td>
+        <td>Reading out all 2³⁰⁰ amplitudes requires 2³⁰⁰ measurements, each destroying the superposition. We can only extract O(n) classical bits. The power is in manipulating all amplitudes coherently before measuring, using interference to concentrate probability on the answer.</td>
+      </tr>
+      <tr>
+        <td>What is quantum decoherence?</td>
+        <td>Unintended interaction of qubits with the environment causes quantum states to collapse to classical states, destroying superposition and entanglement. It limits circuit depth — the reason quantum computers must run at 15 mK and have error correction overhead.</td>
+      </tr>
+      <tr>
+        <td>What is the NISQ era?</td>
+        <td>Noisy Intermediate-Scale Quantum — current devices with 50–1000 qubits but gate error rates ~0.1–1%, insufficient for fault-tolerant computation. Hybrid algorithms (VQE, QAOA) are designed specifically for NISQ constraints.</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <h3>Algorithm Questions</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Question</th><th>Strong Answer</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>How does Grover's algorithm achieve O(√N)?</td>
+        <td>It uses an Oracle to flip the phase of the target state, then applies the Diffusion operator (inversion about mean) to amplify the target amplitude. After π√N/4 iterations the target's probability ≈ 1. The speedup comes from interference — wrong answers destructively cancel each iteration.</td>
+      </tr>
+      <tr>
+        <td>Why does Shor's algorithm break RSA?</td>
+        <td>RSA relies on the hardness of factoring. Shor's uses Quantum Phase Estimation with the Quantum Fourier Transform to find the period r of f(x)=aˣ mod N in O(log³N) time. Classically, the best is sub-exponential GNFS. A ~4000 logical qubit machine could factor RSA-2048 in hours.</td>
+      </tr>
+      <tr>
+        <td>What is quantum supremacy? Has it been achieved?</td>
+        <td>A quantum device performs a specific task no classical computer can do in any practical time. Google claimed it in 2019 with Sycamore (random circuit sampling in 200s vs ~10,000 years classically). IBM disputed this, reducing the classical estimate to ~2.5 days with better algorithms. No commercially useful quantum advantage has been demonstrated yet.</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <h3>Architecture / Design Questions</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Question</th><th>Strong Answer</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>How would quantum principles inspire a distributed scheduling system?</td>
+        <td>Use amplitude-weighted probabilistic routing (superposition analogy) instead of deterministic least-connections — naturally prevents herd effect. Track entangled state pairs for lazy cache coherence. Use phase-based consensus where conflicting proposals destructively interfere and matching ones amplify. Apply no-clone token semantics to prevent double-assignment.</td>
+      </tr>
+      <tr>
+        <td>What is QKD and why is it "provably secure"?</td>
+        <td>Quantum Key Distribution (BB84) uses photon polarization to share a secret key. Any eavesdropper disturbs the quantum states (Heisenberg) and is detectable. Security is information-theoretic (no computational assumptions) — it cannot be broken even by a quantum computer, unlike RSA. Deployed commercially by ID Quantique and over China's Micius satellite.</td>
+      </tr>
+      <tr>
+        <td>What is post-quantum cryptography (PQC)?</td>
+        <td>Classical cryptographic algorithms (lattice-based, hash-based, code-based) that are believed resistant to quantum attack. NIST finalized PQC standards in 2024: CRYSTALS-Kyber (key exchange) and CRYSTALS-Dilithium (signatures). These must replace RSA/ECC before large-scale quantum computers arrive — the "harvest now, decrypt later" threat is already active.</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <h3>Quick-Reference Summary Card</h3>
+  <div class="diagram">QUANTUM COMPUTING — ARCHITECT'S QUICK REFERENCE
+
+  PHYSICS PRINCIPLES → COMPUTING PRIMITIVES
+  ─────────────────────────────────────────────
+  Superposition     →  Process 2ⁿ states in parallel
+  Entanglement      →  Correlate qubits across distance
+  Interference      →  Amplify correct / cancel wrong answers
+  Measurement       →  Extract classical result (collapses state)
+  No-Cloning        →  Unique quantum information (no copy)
+
+  LANDMARK ALGORITHMS
+  ─────────────────────────────────────────────
+  Grover's      O(√N) search     (quadratic speedup)
+  Shor's        O(N³) factoring  (exponential speedup, breaks RSA)
+  QFT           O((log N)²) DFT  (exponential speedup)
+  VQE / QAOA    Hybrid NISQ     (chemistry / optimization)
+  HHL           log(N) linear systems (exponential — with caveats)
+
+  KEY TERMS
+  ─────────────────────────────────────────────
+  Qubit      : quantum bit — superposition of 0 and 1
+  Bloch Sphere: geometric visualization of qubit state
+  Coherence  : time before qubit decoheres (T₁, T₂)
+  NISQ       : Noisy Intermediate-Scale Quantum (today)
+  Fault-tolerant QC: requires ~1000 phys qubits / logical qubit
+  QKD        : Quantum Key Distribution — provably secure
+  PQC        : Post-Quantum Cryptography — classical algorithms
+  QDF        : Quantum-Inspired Distributed Framework
+
+  CURRENT HARDWARE FRONTIER (2024–2026)
+  ─────────────────────────────────────────────
+  IBM Eagle/Osprey/Heron   : 127–133 qubits, superconducting
+  Google Sycamore/Willow   : 70 qubits, error correction demo
+  IonQ Aria                : 25 AQ (algorithmic qubits), trapped ion
+  Microsoft (Majorana 1)   : Topological qubit prototype announced 2025
+  Target for advantage     : ~1M physical qubits / ~1000 logical qubits</div>
+
+  <div class="callout callout-green">
+    <strong>The One-Sentence Summary</strong>
+    Quantum computers exploit superposition to evaluate exponentially many possibilities simultaneously, entanglement to correlate distributed qubits, and interference to amplify correct answers — delivering provable speedups for specific problems like factoring and unstructured search, while inspiring new patterns in classical distributed systems design.
+  </div>
+</div>
+
+</div><!-- /container -->
+</div><!-- /main-scroll -->
+</div><!-- /topic-page -->
+
+<footer class="guide-footer">Synapse &middot; Quantum Physics &amp; Quantum Computing &middot; v1.0 May 2026</footer>
+</body>
+</html>

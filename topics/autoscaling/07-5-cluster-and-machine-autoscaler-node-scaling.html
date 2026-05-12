@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cluster and Machine Autoscaler (Node Scaling) – Autoscaling</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../autoscaling.html">Autoscaling</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Cluster and Machine Autoscaler (Node Scaling)</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Autoscaling</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-scaling-fundamentals.html">Scaling Fundamentals</a></li>
+        <li><a href="04-2-horizontal-pod-autoscaler-hpa.html">Horizontal Pod Autoscaler (HPA)</a></li>
+        <li><a href="05-3-vertical-pod-autoscaler-vpa.html">Vertical Pod Autoscaler (VPA)</a></li>
+        <li><a href="06-4-custom-metrics-autoscaler-keda.html">Custom Metrics Autoscaler (KEDA)</a></li>
+        <li class="active"><a href="07-5-cluster-and-machine-autoscaler-node-scaling.html" class="active">Cluster and Machine Autoscaler (Node Scaling)</a></li>
+        <li><a href="08-6-openshift-serverless-knative-autoscaling.html">OpenShift Serverless (Knative) Autoscaling</a></li>
+        <li><a href="09-7-fastapi-publishing-metrics-for-autoscaling.html">FastAPI: Publishing Metrics for Autoscaling</a></li>
+        <li><a href="10-8-what-is-not-possible-limitations.html">What is NOT Possible — Limitations</a></li>
+        <li><a href="11-9-decision-guide-which-autoscaler-to-use.html">Decision Guide — Which Autoscaler to Use?</a></li>
+        <li><a href="12-10-end-to-end-autoscaling-architecture.html">End-to-End Autoscaling Architecture</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>5. Cluster and Machine Autoscaler (Node Scaling)</h1>
+<p>While HPA, KEDA, and VPA scale at the pod level, the Cluster Autoscaler and Machine Autoscaler scale the underlying infrastructure by adding or removing worker nodes. They work together to ensure the cluster has enough capacity to schedule all pods.</p>
+<pre><code>Node Autoscaling Flow
+HPA/KEDA creates more pods
+|
+v
+Pods become 'Pending' (no node has capacity)
+|
+v
+Cluster Autoscaler detects pending pods
+|
+v
+Machine Autoscaler adds Machines to MachineSet
+|
+v
+Cloud/vSphere provisions new VM
+|
+v
+New worker node joins cluster
+|
+v
+Pending pods get scheduled on new node
+[Reverse: when nodes &lt; 50% utilised for extended period,
+Cluster Autoscaler drains and removes the node]</code></pre>
+<h3>5.1 ClusterAutoscaler Example</h3>
+<pre><code>apiVersion: autoscaling.openshift.io/v1
+kind: ClusterAutoscaler
+metadata:
+name: default
+spec:
+podPriorityThreshold: -10
+resourceLimits:
+maxNodesTotal: 24
+cores:
+min: 8
+max: 128
+memory:
+min: 4
+max: 256
+gpus:
+- type: nvidia.com/gpu
+min: 0
+max: 16
+scaleDown:
+enabled: true
+delayAfterAdd: 10m
+delayAfterDelete: 5m
+delayAfterFailure: 3m
+unneededTime: 5m
+utilizationThreshold: &quot;0.4&quot;     # Node below 40% = candidate for removal</code></pre>
+<h3>5.2 MachineAutoscaler Example</h3>
+<pre><code>apiVersion: autoscaling.openshift.io/v1beta1
+kind: MachineAutoscaler
+metadata:
+name: worker-us-east-1a
+namespace: openshift-machine-api
+spec:
+minReplicas: 2                    # Never go below 2 nodes
+maxReplicas: 8                    # Never exceed 8 nodes
+scaleTargetRef:
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+name: my-cluster-worker-us-east-1a</code></pre>
+<p>Limitation: Cluster Autoscaler only works where the Machine API is operational — IPI installations on AWS, Azure, GCP, vSphere, or OpenStack. It does NOT work on bare-metal UPI clusters or manually managed infrastructure.</p>
+      </article>
+
+      <nav class="page-nav">
+        <a href="06-4-custom-metrics-autoscaler-keda.html">&#8592; Custom Metrics Autoscaler (KEDA)</a>
+        <span class="spacer"></span>
+        <a href="08-6-openshift-serverless-knative-autoscaling.html">OpenShift Serverless (Knative) Autoscaling &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

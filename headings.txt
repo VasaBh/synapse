@@ -1,0 +1,238 @@
+﻿
+======================================================================
+DOC: Senior Architect Interview Prep.docx
+======================================================================
+[Normal] 1. CORE ARCHITECTURE FUNDAMENTALS
+  [Normal] 1.1 Key Principles
+  [Normal] 1.2 Architecture Styles
+  [Normal] 1.3 Design Patterns to Know
+  [Normal] 1.4 High Availability &amp; Fault Tolerance
+[Normal] 2. MICROSERVICES – DEEP DIVE
+  [Normal] 2.1 Decomposition Strategies
+  [Normal] 2.2 Communication Patterns
+  [Normal] 2.3 Resilience Patterns
+  [Normal] 2.4 Data Management
+  [Normal] 2.5 Observability (The Three Pillars)
+  [Normal] 2.6 Security
+[Normal] 3. OPENSHIFT – ROUTING &amp; LOAD BALANCING
+  [Normal] 3.1 OpenShift Router vs Kubernetes Ingress
+  [Normal] 3.2 TLS Termination Modes
+  [Normal] 3.3 Service Types &amp; Load Balancing
+  [Normal] 3.4 Traffic Splitting &amp; Deployment Strategies
+  [Normal] 3.5 Health Checks
+  [Normal] 3.6 Network Policies &amp; Security
+[Normal] 4. OPENSHIFT – HORIZONTAL &amp; VERTICAL SCALING
+  [Normal] 4.1 Horizontal Scaling (Scale Out/In)
+  [Normal] 4.2 Vertical Scaling (Scale Up/Down)
+  [Normal] 4.3 HPA vs VPA – Decision Guide
+  [Normal] 4.4 OpenShift-Specific: MachineSets &amp; MachineAutoscaler
+  [Normal] 4.5 Key CLI Commands
+[Normal] 5. MCP – MODEL CONTEXT PROTOCOL
+  [Normal] 5.1 What is MCP?
+  [Normal] 5.2 Architecture Overview
+  [Normal] 5.3 Core Primitives
+  [Normal] 5.4 Transport Mechanisms
+  [Normal] 5.5 Security Considerations (Architect-level)
+  [Normal] 5.6 MCP vs Traditional API Integration
+  [Normal] 5.7 Enterprise MCP Design Patterns
+[Normal] 6. AGENTIC AI ARCHITECTURE
+  [Normal] 6.1 What is an AI Agent?
+  [Normal] 6.2 Core Reasoning Patterns
+  [Normal] 6.3 Multi-Agent Architectures
+  [Normal] 6.4 Memory Types
+  [Normal] 6.5 Key Design Challenges
+  [Normal] 6.6 Frameworks Comparison
+  [Normal] 6.7 Agentic AI + MCP Integration
+[Normal] 7. INTERVIEW Q&amp;A CHEAT SHEET
+
+======================================================================
+DOC: react-interview-guide.docx
+======================================================================
+[Heading1] 1. React Fundamentals
+  [Heading2] 1.1 What is React?
+  [Heading2] 1.2 What is JSX?
+  [Heading2] 1.3 Components: Functional vs Class
+  [Heading2] 1.4 Props vs State
+  [Heading2] 1.5 Conditional Rendering &amp; Lists
+[Heading1] 2. React Hooks (Deep Dive)
+  [Heading2] 2.1 useState — State Management
+  [Heading2] 2.2 useEffect — Side Effects
+  [Heading2] 2.3 useRef — Persistent Mutable Value
+  [Heading2] 2.4 useMemo &amp; useCallback — Performance
+  [Heading2] 2.5 useContext — Avoiding Prop Drilling
+  [Heading2] 2.6 Custom Hooks — Reusable Logic
+[Heading1] 3. How React Works Internally
+  [Heading2] 3.1 Virtual DOM &amp; Reconciliation
+  [Heading2] 3.2 React Fiber Architecture
+  [Heading2] 3.3 Batching &amp; Concurrent Features (React 18+)
+[Heading1] 4. Node.js, Vite &amp; The React Ecosystem
+  [Heading2] 4.1 What is Node.js?
+  [Heading2] 4.2 Vite vs Webpack vs Create React App
+  [Heading2] 4.3 Essential React Libraries
+  [Heading2] 4.4 React Frameworks: Next.js, Remix, Gatsby
+[Heading1] 5. Advanced Patterns &amp; Concepts
+  [Heading2] 5.1 Design Patterns
+[Normal] 1. Compound Components
+[Normal] 2. Render Props
+[Normal] 3. Higher-Order Components (HOC)
+  [Heading2] 5.2 Error Boundaries
+  [Heading2] 5.3 Code Splitting with React.lazy &amp; Suspense
+  [Heading2] 5.4 Performance Optimization Checklist
+[ListParagraph] 1. Fix Architecture: Colocate state near where it’s used. Split frequently-updating components from 
+[ListParagraph] 2. Memoization (sparingly): React.memo for pure components, useMemo for expensive calculations, useC
+[ListParagraph] 3. Virtualisation: Use react-window or @tanstack/virtual for long lists (render only visible items).
+[ListParagraph] 4. Code Splitting: React.lazy + Suspense for route-level splitting. Dynamic import() for heavy libra
+[ListParagraph] 5. Avoid Anti-Patterns: Don’t create objects/arrays inline in JSX. Don’t store derived data in state
+[Heading1] 6. TypeScript with React
+  [Heading2] 6.1 Typing Props, State, Events &amp; Refs
+  [Heading2] 6.2 Generic Components
+[Heading1] 7. Top Interview Questions — Rapid Fire
+
+======================================================================
+DOC: Python Advanced Features Reference.docx
+======================================================================
+[Heading1] 1. Advanced Language Features
+  [Heading2] 1.1 Comprehensions
+  [Heading2] 1.2 Unpacking &amp; Starred Expressions
+  [Heading2] 1.3 Walrus Operator (:=)
+  [Heading2] 1.4 Structural Pattern Matching (match/case)
+  [Heading2] 1.5 Slots, Dataclasses &amp; NamedTuples
+[Heading1] 2. Decorators
+  [Heading2] 2.1 Basic Decorator
+  [Heading2] 2.2 Decorator with Arguments
+  [Heading2] 2.3 Class-Based Decorator
+  [Heading2] 2.4 Built-in Decorators
+[Heading1] 3. Generators
+  [Heading2] 3.1 Generator Functions
+  [Heading2] 3.2 Generator Expressions vs List Comprehensions
+  [Heading2] 3.3 yield from (Delegation)
+  [Heading2] 3.4 send() and Coroutine-Style Generators
+[Heading1] 4. Async / Await
+  [Heading2] 4.1 Coroutines &amp; asyncio.run
+  [Heading2] 4.2 Tasks, gather, wait
+  [Heading2] 4.3 Async Iteration &amp; Comprehensions
+  [Heading2] 4.4 Semaphores &amp; Rate Limiting
+[Heading1] 5. Context Managers
+  [Heading2] 5.1 Class-Based Context Manager
+  [Heading2] 5.2 Generator-Based (@contextmanager)
+  [Heading2] 5.3 Combining Multiple Contexts
+[Heading1] 6. Async Context Managers
+  [Heading2] 6.1 Class-Based Async Context Manager
+  [Heading2] 6.2 Generator-Based (@asynccontextmanager)
+[Heading1] 7. Async Generators &amp; Their Uses
+  [Heading2] 7.1 Basic Async Generator
+  [Heading2] 7.2 Async Generator for Real-Time Data
+  [Heading2] 7.3 Async Generator Cleanup
+[Heading1] 8. map, reduce &amp; Functional Programming
+  [Heading2] 8.1 map, filter, reduce
+  [Heading2] 8.2 itertools — Iterator Building Blocks
+  [Heading2] 8.3 functools Highlights
+[Heading1] 9. Dunder (Magic) Methods
+  [Heading2] 9.1 Making a Complete Custom Class
+  [Heading2] 9.2 Making Your Class a Container
+[Heading1] 10. Duck Typing &amp; Protocols
+  [Heading2] 10.1 Duck Typing in Practice
+  [Heading2] 10.2 Protocols (Structural Subtyping)
+  [Heading2] 10.3 Abstract Base Classes (ABCs)
+[Heading1] 11. Python Data Science &amp; Ecosystem Libraries
+  [Heading2] 11.1 NumPy Essentials
+  [Heading2] 11.2 Pandas Essentials
+  [Heading2] 11.3 Polars (Pandas Alternative)
+  [Heading2] 11.4 Streamlit &amp; Dash
+  [Heading2] 11.5 Ray (Distributed Computing)
+[Heading1] 12. Metaprogramming
+  [Heading2] 12.1 Metaclasses
+  [Heading2] 12.2 __init_subclass__
+  [Heading2] 12.3 Descriptors
+  [Heading2] 12.4 Dynamic Class Creation
+[Heading1] 13. Testing
+  [Heading2] 13.1 pytest Fundamentals
+  [Heading2] 13.2 Fixtures
+  [Heading2] 13.3 Mocking
+  [Heading2] 13.4 Async Testing
+[Heading1] 14. Async I/O Libraries
+  [Heading2] 14.1 Common Patterns
+[Heading1] 15. The GIL (Global Interpreter Lock)
+  [Heading2] 15.1 Why the GIL Exists
+  [Heading2] 15.2 Impact on Concurrency
+  [Heading2] 15.3 Workarounds
+  [Heading2] 15.4 Python 3.13+ Free-Threaded Mode
+[Heading1] 16. Quick Reference Cheatsheet
+
+======================================================================
+DOC: load-balancing-openshift-guide.docx
+======================================================================
+[Heading1] Table of Contents
+[Heading1] 1. API &amp; Traffic Load Balancing Fundamentals
+  [Heading2] 1.1 What is Load Balancing?
+  [Heading2] 1.2 OSI Layer Classification
+  [Heading2] 1.3 Load Balancing Algorithms
+[Heading1] 2. Load Balancing Inside OpenShift
+  [Heading2] 2.1 Kubernetes Service (ClusterIP) — Internal L4
+  [Heading2] 2.2 OpenShift Routes — L7 Ingress Load Balancing
+  [Heading2] 2.3 OpenShift Service Mesh (Istio) — Advanced L7
+  [Heading2] 2.4 MetalLB — L4 LoadBalancer Services (On-Premises)
+[Heading1] 3. Load Balancing Outside OpenShift (External)
+  [Heading2] 3.1 External Hardware / Software Load Balancers
+  [Heading2] 3.2 Cloud Provider Load Balancers
+  [Heading2] 3.3 DNS-Based Load Balancing
+[Heading1] 4. How to Use External Load Balancers WITH OpenShift
+    [Heading3] 4.1 Health Check Configuration
+    [Heading3] 4.2 TLS Termination Strategies
+    [Heading3] 4.3 Example: HAProxy External LB for OpenShift
+[Heading1] 5. Canary Deployments in OpenShift
+  [Heading2] 5.1 Method 1: Native OpenShift Routes (Simple Canary)
+  [Heading2] 5.2 Method 2: Service Mesh (Istio) Canary
+  [Heading2] 5.3 Method 3: Argo Rollouts (Automated Canary)
+[Heading1] 6. Load Balancing Between Production and COB/DR Environments
+  [Heading2] 6.1 Architecture Overview
+  [Heading2] 6.2 GSLB — Global Server Load Balancing
+  [Heading2] 6.3 Deployment Models
+  [Heading2] 6.4 GSLB Tools for Prod-COB
+  [Heading2] 6.5 Example: F5 GTM Active-Passive for Prod-COB
+  [Heading2] 6.6 Canary Testing Between Prod and COB
+[Heading1] 7. Complete Load Balancing Stack — End-to-End
+  [Heading2] 7.1 Full Traffic Flow Diagram
+[Heading1] 8. Decision Guide — Which Approach to Use?
+
+======================================================================
+DOC: autoscaling-openshift-guide.docx
+======================================================================
+[Heading1] Table of Contents
+[Heading1] 1. Scaling Fundamentals
+  [Heading2] 1.1 Horizontal vs Vertical Scaling
+  [Heading2] 1.2 Node-Level Scaling
+[Heading1] 2. Horizontal Pod Autoscaler (HPA)
+    [Heading3] 2.1 Supported Metrics
+    [Heading3] 2.2 Prerequisites
+    [Heading3] 2.3 Example: CLI
+    [Heading3] 2.4 Example: YAML (CPU + Memory)
+[Heading1] 3. Vertical Pod Autoscaler (VPA)
+  [Heading2] 3.1 Update Modes
+  [Heading2] 3.2 Example: VPA Configuration
+[Heading1] 4. Custom Metrics Autoscaler (KEDA)
+  [Heading2] 4.1 Popular Trigger Sources
+  [Heading2] 4.2 Example: Scale on Prometheus HTTP Requests
+  [Heading2] 4.3 Example: Kafka Consumer Lag
+[Heading1] 5. Cluster and Machine Autoscaler (Node Scaling)
+  [Heading2] 5.1 ClusterAutoscaler Example
+  [Heading2] 5.2 MachineAutoscaler Example
+[Heading1] 6. OpenShift Serverless (Knative) Autoscaling
+  [Heading2] 6.1 Scaling Metrics
+  [Heading2] 6.2 Concurrency Limits
+  [Heading2] 6.3 Example: Knative Service with Autoscaling
+[Heading1] 7. FastAPI: Publishing Metrics for Autoscaling
+  [Heading2] 7.1 Option A: Instrument FastAPI with Prometheus
+    [Heading3] Step 1: Install the Library
+    [Heading3] Step 2: Instrument Your App
+    [Heading3] Step 3: Custom Business Metrics (Optional)
+    [Heading3] Step 4: ServiceMonitor (Tell Prometheus to Scrape)
+    [Heading3] Step 5: KEDA ScaledObject
+  [Heading2] 7.2 Option B: Autoscale WITHOUT Code Changes
+    [Heading3] Approach 1: HPA on CPU (Indirect Traffic Proxy)
+    [Heading3] Approach 2: Knative Serverless (Concurrency-Based)
+    [Heading3] Approach 3: KEDA with Istio/Service Mesh Metrics
+[Heading1] 8. What is NOT Possible — Limitations
+[Heading1] 9. Decision Guide — Which Autoscaler to Use?
+  [Heading2] 9.1 Quick Reference Summary
+[Heading1] 10. End-to-End Autoscaling Architecture

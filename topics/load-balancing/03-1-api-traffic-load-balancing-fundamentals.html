@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API &amp; Traffic Load Balancing Fundamentals – Load Balancing</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../load-balancing.html">Load Balancing</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">API &amp; Traffic Load Balancing Fundamentals</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Load Balancing</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li class="active"><a href="03-1-api-traffic-load-balancing-fundamentals.html" class="active">API &amp; Traffic Load Balancing Fundamentals</a></li>
+        <li><a href="04-2-load-balancing-inside-openshift.html">Load Balancing Inside OpenShift</a></li>
+        <li><a href="05-3-load-balancing-outside-openshift-external.html">Load Balancing Outside OpenShift (External)</a></li>
+        <li><a href="06-4-how-to-use-external-load-balancers-with-openshift.html">How to Use External Load Balancers WITH OpenShift</a></li>
+        <li><a href="07-5-canary-deployments-in-openshift.html">Canary Deployments in OpenShift</a></li>
+        <li><a href="08-6-load-balancing-between-production-and-cobdr-environments.html">Load Balancing Between Production and COB/DR Environments</a></li>
+        <li><a href="09-7-complete-load-balancing-stack-end-to-end.html">Complete Load Balancing Stack — End-to-End</a></li>
+        <li><a href="10-8-decision-guide-which-approach-to-use.html">Decision Guide — Which Approach to Use?</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>1. API &amp; Traffic Load Balancing Fundamentals</h1>
+<h3>1.1 What is Load Balancing?</h3>
+<p>Load balancing is the process of distributing incoming network traffic across multiple backend servers or service instances so that no single server becomes a bottleneck. In the context of APIs, every HTTP/HTTPS request hitting your API endpoint is intelligently spread across multiple replicas of your application, ensuring high availability, fault tolerance, and optimal performance.</p>
+<p>Without load balancing, a single server handles all traffic. If that server crashes or becomes overloaded, the entire service goes down. With load balancing, if one server fails, the load balancer detects this through health checks and routes traffic only to healthy servers, providing seamless failover.</p>
+<h3>1.2 OSI Layer Classification</h3>
+<p>Load balancers operate at different layers of the OSI (Open Systems Interconnection) model. Understanding these layers is critical to choosing the right strategy:</p>
+<div class="table-wrap"><table>
+  <tr><th>Layer</th><th>Name</th><th>How It Works</th><th>Examples</th></tr>
+  <tr><td>Layer 4</td><td>Transport (TCP/UDP)</td><td>Routes based on IP address and port number. Does not inspect packet content. Fastest.</td><td>IPVS, Keepalived/LVS, HAProxy (TCP mode), AWS NLB</td></tr>
+  <tr><td>Layer 7</td><td>Application (HTTP)</td><td>Inspects HTTP headers, URL paths, cookies, and content. Enables intelligent routing decisions like path-based, header-based, and canary routing.</td><td>HAProxy (HTTP mode), NGINX, Envoy Proxy, OpenShift Router, Istio VirtualService</td></tr>
+</table></div>
+<h3>1.3 Load Balancing Algorithms</h3>
+<p>These are the core algorithms used by load balancers to decide which backend server receives each request:</p>
+<div class="table-wrap"><table>
+  <tr><th>Algorithm</th><th>How It Works</th><th>Best For</th></tr>
+  <tr><td>Round Robin</td><td>Requests distributed sequentially to each server in order. Server 1, then 2, then 3, repeat.</td><td>Servers with similar capacity. Simple, predictable distribution.</td></tr>
+  <tr><td>Weighted Round Robin</td><td>Like round robin, but servers receive traffic proportional to their assigned weight. A server with weight 3 gets 3x more requests than weight 1.</td><td>Heterogeneous server capacities. Gradual traffic shifting during deployments.</td></tr>
+  <tr><td>Least Connections</td><td>Sends new requests to the server currently handling the fewest active connections.</td><td>Long-lived connections like WebSockets, database connections, or LDAP sessions.</td></tr>
+  <tr><td>Source IP Hash</td><td>Hashes the client IP address to deterministically map each client to a specific server. Same client always reaches the same server.</td><td>Session affinity / sticky sessions without cookies. Stateful applications.</td></tr>
+  <tr><td>Random</td><td>Randomly selects a backend server for each request. Statistically even distribution at scale.</td><td>Large-scale deployments. Default in OpenShift Router for non-passthrough routes.</td></tr>
+  <tr><td>Least Response Time</td><td>Routes to the server with the fastest measured response time. Requires active monitoring.</td><td>Performance-sensitive APIs. Geographically distributed backends.</td></tr>
+</table></div>
+      </article>
+
+      <nav class="page-nav">
+        <a href="02-table-of-contents.html">&#8592; Table of Contents</a>
+        <span class="spacer"></span>
+        <a href="04-2-load-balancing-inside-openshift.html">Load Balancing Inside OpenShift &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

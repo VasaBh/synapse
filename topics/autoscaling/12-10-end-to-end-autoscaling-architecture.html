@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>End-to-End Autoscaling Architecture – Autoscaling</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../autoscaling.html">Autoscaling</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">End-to-End Autoscaling Architecture</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Autoscaling</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-scaling-fundamentals.html">Scaling Fundamentals</a></li>
+        <li><a href="04-2-horizontal-pod-autoscaler-hpa.html">Horizontal Pod Autoscaler (HPA)</a></li>
+        <li><a href="05-3-vertical-pod-autoscaler-vpa.html">Vertical Pod Autoscaler (VPA)</a></li>
+        <li><a href="06-4-custom-metrics-autoscaler-keda.html">Custom Metrics Autoscaler (KEDA)</a></li>
+        <li><a href="07-5-cluster-and-machine-autoscaler-node-scaling.html">Cluster and Machine Autoscaler (Node Scaling)</a></li>
+        <li><a href="08-6-openshift-serverless-knative-autoscaling.html">OpenShift Serverless (Knative) Autoscaling</a></li>
+        <li><a href="09-7-fastapi-publishing-metrics-for-autoscaling.html">FastAPI: Publishing Metrics for Autoscaling</a></li>
+        <li><a href="10-8-what-is-not-possible-limitations.html">What is NOT Possible — Limitations</a></li>
+        <li><a href="11-9-decision-guide-which-autoscaler-to-use.html">Decision Guide — Which Autoscaler to Use?</a></li>
+        <li class="active"><a href="12-10-end-to-end-autoscaling-architecture.html" class="active">End-to-End Autoscaling Architecture</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>10. End-to-End Autoscaling Architecture</h1>
+<p>The following diagram shows how all autoscaling components work together in a production OpenShift deployment:</p>
+<pre><code>COMPLETE END-TO-END AUTOSCALING FLOW
+[1] Traffic hits the application
+|
+v
+[2] FastAPI exposes /metrics (http_requests_total)
+OR Istio/Envoy sidecar captures istio_requests_total
+OR Knative activator counts concurrent requests
+|
+v
+[3] Prometheus scrapes metrics (via ServiceMonitor)
+Stores time-series data in Thanos
+|
+v
+[4] KEDA queries Prometheus (PromQL: rate of requests)
+OR Knative Autoscaler reads concurrency from activator
+OR HPA reads CPU/memory from Metrics Server
+|
+v
+[5] Autoscaler decides: scale up or down
+KEDA -&gt; feeds external metrics -&gt; HPA -&gt; adjusts replicas
+Knative -&gt; directly adjusts ReplicaSet
+HPA -&gt; directly adjusts replicas
+|
+v
+[6] New pods created, but no node has capacity?
+|
+v
+[7] Cluster Autoscaler detects pending pods
+Machine Autoscaler provisions new VM in MachineSet
+New worker node joins, pods get scheduled
+|
+v
+[8] Meanwhile, VPA monitors actual resource usage
+Right-sizes CPU/memory requests for optimal efficiency
+[SCALE DOWN: reverse flow]
+Traffic drops -&gt; fewer replicas needed -&gt; pods terminated
+-&gt; nodes become underutilised -&gt; Cluster AS removes nodes</code></pre>
+<p>— End of Document —</p>
+      </article>
+
+      <nav class="page-nav">
+        <a href="11-9-decision-guide-which-autoscaler-to-use.html">&#8592; Decision Guide — Which Autoscaler to Use?</a>
+        <span class="spacer"></span>
+        
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

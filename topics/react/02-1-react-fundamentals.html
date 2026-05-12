@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>React Fundamentals – React</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../react.html">React</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">React Fundamentals</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">React</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li class="active"><a href="02-1-react-fundamentals.html" class="active">React Fundamentals</a></li>
+        <li><a href="03-2-react-hooks-deep-dive.html">React Hooks (Deep Dive)</a></li>
+        <li><a href="04-3-how-react-works-internally.html">How React Works Internally</a></li>
+        <li><a href="05-4-nodejs-vite-the-react-ecosystem.html">Node.js, Vite &amp; The React Ecosystem</a></li>
+        <li><a href="06-5-advanced-patterns-concepts.html">Advanced Patterns &amp; Concepts</a></li>
+        <li><a href="07-1-compound-components.html">Compound Components</a></li>
+        <li><a href="08-2-render-props.html">Render Props</a></li>
+        <li><a href="09-3-higher-order-components-hoc.html">Higher-Order Components (HOC)</a></li>
+        <li><a href="10-6-typescript-with-react.html">TypeScript with React</a></li>
+        <li><a href="11-7-top-interview-questions-rapid-fire.html">Top Interview Questions — Rapid Fire</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>1. React Fundamentals</h1>
+<h3>1.1 What is React?</h3>
+<p>React is a JavaScript library (not a framework) created by Facebook (Meta) in 2013 for building user interfaces. It focuses exclusively on the View layer of an application.</p>
+<p>Key Characteristics</p>
+<ul>
+  <li>Declarative: You describe WHAT the UI should look like, React handles HOW to update the DOM.</li>
+  <li>Component-Based: UI is divided into small, reusable, isolated pieces called components.</li>
+  <li>Unidirectional Data Flow: Data flows from parent to child via props, making the app predictable and easier to debug.</li>
+</ul>
+<p>Example</p>
+<pre><code>// Declarative — just describe the UI
+function Welcome({ name }) {
+return &lt;h1&gt;Hello, {name}!&lt;/h1&gt;;
+}
+// React figures out how to update the DOM efficiently</code></pre>
+<h3>1.2 What is JSX?</h3>
+<p>JSX (JavaScript XML) is a syntax extension that lets you write HTML-like code inside JavaScript. It is NOT valid JavaScript — Babel transpiles it into React.createElement() calls.</p>
+<p>JSX to JavaScript Transformation</p>
+<pre><code>// What you write (JSX):
+const el = &lt;h1 className=&quot;title&quot;&gt;Hello&lt;/h1&gt;;
+// What Babel compiles it to:
+const el = React.createElement('h1', { className: 'title' }, 'Hello');</code></pre>
+<p>Rules of JSX</p>
+<ul>
+  <li>Must return a single root element (use &lt;&gt; Fragment if needed)</li>
+  <li>Use className instead of class</li>
+  <li>Use camelCase for attributes: onClick, onChange</li>
+  <li>JavaScript expressions go inside {curly braces}</li>
+  <li>Self-close tags: &lt;img /&gt;, &lt;br /&gt;</li>
+</ul>
+<h3>1.3 Components: Functional vs Class</h3>
+<p>Functional Components (Modern — use these)</p>
+<pre><code>function Counter() {
+const [count, setCount] = useState(0);
+return (
+&lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+Clicked {count} times
+&lt;/button&gt;
+);
+}</code></pre>
+<p>Class Components (Legacy — know for interviews)</p>
+<pre><code>class Counter extends React.Component {
+state = { count: 0 };
+render() {
+return (
+&lt;button onClick={() =&gt;
+this.setState({ count: this.state.count + 1 })}&gt;
+Clicked {this.state.count} times
+&lt;/button&gt;
+);
+}
+}</code></pre>
+<div class="table-wrap"><table>
+  <tr><th>✅ Why Functional Components Won Simpler syntax, hooks for state/effects, easier to test, no ‘this’ binding issues, better performance with React Compiler.</th></tr>
+</table></div>
+<h3>1.4 Props vs State</h3>
+<div class="table-wrap"><table>
+  <tr><th>Feature</th><th>Props</th><th>State</th></tr>
+  <tr><td>Owner</td><td>Parent component</td><td>Component itself</td></tr>
+  <tr><td>Mutable?</td><td>❌ Read-only</td><td>✅ Can update via setter</td></tr>
+  <tr><td>Direction</td><td>Parent → Child</td><td>Internal</td></tr>
+  <tr><td>Re-render?</td><td>When parent re-renders</td><td>When setState is called</td></tr>
+</table></div>
+<pre><code>function Parent() {
+const [user, setUser] = useState(&quot;Alice&quot;); // STATE
+return &lt;Child name={user} /&gt;;               // PROP
+}
+function Child({ name }) {
+// 'name' is a PROP — cannot modify it
+return &lt;p&gt;Hello, {name}&lt;/p&gt;;
+}</code></pre>
+<div class="table-wrap"><table>
+  <tr><th>Golden Rule If data changes over time and affects rendering, it’s state. If it’s received from a parent, it’s a prop.</th></tr>
+</table></div>
+<h3>1.5 Conditional Rendering &amp; Lists</h3>
+<p>React uses plain JavaScript for conditional rendering — no special template syntax:</p>
+<pre><code>function Dashboard({ isLoggedIn, isAdmin, notifications }) {
+if (!isLoggedIn) return &lt;LoginPage /&gt;;
+return (
+&lt;div&gt;
+{isAdmin ? &lt;AdminPanel /&gt; : &lt;UserPanel /&gt;}
+{notifications.length &gt; 0 &amp;&amp; &lt;Badge count={notifications.length} /&gt;}
+&lt;/div&gt;
+);
+}</code></pre>
+<div class="table-wrap"><table>
+  <tr><th>⚠️ Gotcha with &amp;&amp; Operator Avoid {count &amp;&amp; &lt;Component /&gt;}. If count = 0, it renders “0” on screen. Use {count &gt; 0 &amp;&amp; &lt;Component /&gt;} instead.</th></tr>
+</table></div>
+<p>Lists and Keys</p>
+<pre><code>function TodoList({ todos }) {
+return (
+&lt;ul&gt;
+{todos.map(todo =&gt; (
+&lt;li key={todo.id}&gt;{todo.text}&lt;/li&gt;  // ✅ Unique, stable ID
+))}
+&lt;/ul&gt;
+);
+}
+// ❌ NEVER use index as key if list can reorder
+// ❌ NEVER use Math.random() as key</code></pre>
+      </article>
+
+      <nav class="page-nav">
+        <a href="01-_intro.html">&#8592; _intro</a>
+        <span class="spacer"></span>
+        <a href="03-2-react-hooks-deep-dive.html">React Hooks (Deep Dive) &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

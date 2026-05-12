@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Senior Architect &#8212; Complete Reference Guide 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e;
+  --ink2: #3d3d5c;
+  --ink3: #6b6b8a;
+  --bg: #ffffff;
+  --bg2: #f4f3f0;
+  --bg3: #eae8e4;
+  --accent: #2563eb;
+  --accent2: #1d4ed8;
+  --accent-bg: #eff6ff;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --amber: #d97706;
+  --amber-bg: #fffbeb;
+  --rose: #e11d48;
+  --rose-bg: #fff1f2;
+  --purple: #7c3aed;
+  --purple-bg: #f5f3ff;
+  --teal: #0d9488;
+  --teal-bg: #f0fdfa;
+  --coral: #ea580c;
+  --coral-bg: #fff7ed;
+  --border: #e2e0dc;
+  --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+
+@media print {
+  body { font-size: 10pt; line-height: 1.5; }
+  .no-print { display: none !important; }
+  .page-break { page-break-before: always; }
+  section { page-break-inside: avoid; }
+  .card { break-inside: avoid; }
+  pre { font-size: 8pt; }
+  h1 { font-size: 22pt; }
+  h2 { font-size: 14pt; }
+  h3 { font-size: 11pt; }
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+.cover {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%);
+  color: white;
+  padding: 4rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(124,58,237,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 30%, rgba(37,99,235,0.1) 0%, transparent 50%);
+}
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #c4b5fd, #818cf8); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+.diagram { background: #1e293b; border-radius: 10px; padding: 1.5rem; margin: 1rem 0; overflow-x: auto; }
+.diagram pre { background: none; border: none; color: #e2e8f0; font-size: 0.78rem; margin: 0; }
+
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+
+@media (max-width: 1100px) { .sidebar { display: none; } }
+@media (max-width: 600px) { .cover h1 { font-size: 2.2rem; } .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">&#8592; All Topics</a>
+  <h1>Interview Preparation Guide</h1>
+</header>
+
+<div class="topic-page">
+
+  <aside class="sidebar">
+    <p class="sidebar-title">Senior Architect</p>
+    <nav>
+      <ul>
+        <li><a href="#s1"><span class="toc-num">01</span>Architecture Fundamentals</a></li>
+        <li><a href="#s2"><span class="toc-num">02</span>Microservices Deep Dive</a></li>
+        <li><a href="#s3"><span class="toc-num">03</span>OpenShift Routing &amp; LB</a></li>
+        <li><a href="#s4"><span class="toc-num">04</span>OpenShift Scaling</a></li>
+        <li><a href="#s5"><span class="toc-num">05</span>MCP Protocol</a></li>
+        <li><a href="#s6"><span class="toc-num">06</span>Agentic AI Architecture</a></li>
+        <li><a href="#s7"><span class="toc-num">07</span>Interview Q&amp;A Cheat Sheet</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <div class="main-scroll">
+
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference &#8212; April 2026</div>
+  <h1>Senior <span>Architect</span> Guide</h1>
+  <p class="cover-sub">CAP theorem, microservices, distributed systems, OpenShift at scale, MCP protocol, and agentic AI architecture &#8212; the complete reference for principal and staff engineer interviews.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">CAP Theorem</span>
+    <span class="cover-tag">Microservices</span>
+    <span class="cover-tag">Event Sourcing</span>
+    <span class="cover-tag">CQRS</span>
+    <span class="cover-tag">Saga Pattern</span>
+    <span class="cover-tag">OpenShift</span>
+    <span class="cover-tag">MCP</span>
+    <span class="cover-tag">LangGraph</span>
+    <span class="cover-tag">Agentic AI</span>
+    <span class="cover-tag">DDD</span>
+  </div>
+  <div class="cover-date">v1.0 &#8212; Last updated April 2026</div>
+</div>
+
+<div class="container">
+
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <div class="toc-grid">
+    <a href="#s1" class="toc-item"><span class="toc-num">01</span><span class="toc-label">Core Architecture Fundamentals</span></a>
+    <a href="#s2" class="toc-item"><span class="toc-num">02</span><span class="toc-label">Microservices Deep Dive</span></a>
+    <a href="#s3" class="toc-item"><span class="toc-num">03</span><span class="toc-label">OpenShift Routing &amp; Load Balancing</span></a>
+    <a href="#s4" class="toc-item"><span class="toc-num">04</span><span class="toc-label">OpenShift Scaling Strategies</span></a>
+    <a href="#s5" class="toc-item"><span class="toc-num">05</span><span class="toc-label">MCP Protocol</span></a>
+    <a href="#s6" class="toc-item"><span class="toc-num">06</span><span class="toc-label">Agentic AI Architecture</span></a>
+    <a href="#s7" class="toc-item"><span class="toc-num">07</span><span class="toc-label">Interview Q&amp;A Cheat Sheet</span></a>
+  </div>
+</div>
+
+<!-- SECTION 1 -->
+<div id="s1" class="section page-break">
+  <div class="section-num">SECTION 01</div>
+  <h2 class="section-title">Core Architecture Fundamentals</h2>
+  <p class="lead">Senior architects are expected to reason about distributed systems trade-offs, not just implement features. CAP theorem, consistency models, and distributed patterns are the vocabulary of these discussions.</p>
+
+  <h3>CAP Theorem</h3>
+  <p>A distributed system can guarantee at most <strong>two</strong> of the three properties simultaneously:</p>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Consistency (C)</h4>
+      <p>Every read receives the most recent write or an error. All nodes see the same data at the same time.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Availability (A)</h4>
+      <p>Every request receives a (non-error) response, but it may not be the most recent data.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Partition Tolerance (P)</h4>
+      <p>The system continues operating even when network partitions cause message loss between nodes.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>The real trade-off is C vs A during partitions</strong>
+    Network partitions happen in any distributed system. So the real choice is: when a partition occurs, do you stop serving requests to maintain consistency (CP), or serve potentially stale data to maintain availability (AP)?
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>System</th><th>CAP Type</th><th>Behaviour on Partition</th></tr></thead>
+      <tbody>
+        <tr><td>PostgreSQL (single primary)</td><td>CP</td><td>Replication lag; followers may serve stale reads</td></tr>
+        <tr><td>Cassandra</td><td>AP (tunable)</td><td>Serves stale data; eventual consistency</td></tr>
+        <tr><td>ZooKeeper / etcd</td><td>CP</td><td>Leader election; pauses if quorum lost</td></tr>
+        <tr><td>DynamoDB (eventual)</td><td>AP</td><td>Available; might return stale data</td></tr>
+        <tr><td>CockroachDB</td><td>CP</td><td>Distributed SQL with Raft consensus</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>PACELC Extension</h3>
+  <p>PACELC extends CAP by noting that even in the absence of a partition (Else), systems must trade off <strong>Latency vs Consistency</strong>. A system like DynamoDB (AP/EL) sacrifices consistency for low latency even under normal operation. This is why "what consistency level does your system need?" is the first question in any data architecture discussion.</p>
+
+  <h3>Consistency Models</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Model</th><th>Guarantee</th><th>Latency</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>Strong (Linearisable)</td><td>Every read sees the latest write globally</td><td>High (requires quorum)</td><td>etcd, ZooKeeper</td></tr>
+        <tr><td>Sequential</td><td>All processes see operations in same order, not necessarily real-time</td><td>Medium</td><td>Raft-based systems</td></tr>
+        <tr><td>Causal</td><td>Causally related operations seen in order; concurrent writes may differ</td><td>Low-medium</td><td>MongoDB causal sessions</td></tr>
+        <tr><td>Eventual</td><td>All replicas converge if no new writes</td><td>Low</td><td>DNS, Cassandra default</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Domain-Driven Design (DDD) Concepts</h3>
+  <div class="card-grid">
+    <div class="card">
+      <h4>Bounded Context</h4>
+      <p>A linguistic boundary within which a domain model is defined and applicable. The natural unit for microservice boundaries.</p>
+    </div>
+    <div class="card">
+      <h4>Aggregate</h4>
+      <p>A cluster of domain objects treated as a single unit for data changes. Aggregate root is the only entry point. Enforces invariants within the boundary.</p>
+    </div>
+    <div class="card">
+      <h4>Domain Event</h4>
+      <p>Something meaningful that happened in the domain (OrderPlaced, PaymentFailed). The communication currency between bounded contexts.</p>
+    </div>
+    <div class="card">
+      <h4>Context Map</h4>
+      <p>Diagram showing relationships between bounded contexts: Shared Kernel, Customer-Supplier, Conformist, Anti-Corruption Layer.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2 -->
+<div id="s2" class="section page-break">
+  <div class="section-num">SECTION 02</div>
+  <h2 class="section-title">Microservices Deep Dive</h2>
+  <p class="lead">Microservices solve organisational and deployment scalability problems, not just technical ones. The patterns in this section address the hard problems that emerge once you split the monolith.</p>
+
+  <h3>When NOT to Use Microservices</h3>
+  <div class="callout callout-amber">
+    <strong>Start with a modular monolith</strong>
+    A small team building a new product should start with a well-structured monolith. Premature decomposition into microservices adds network latency, operational overhead, and distributed transactions before you understand your domain boundaries. Extract services when a module's deployment frequency, team ownership, or scalability needs diverge.
+  </div>
+
+  <h3>Service Communication Patterns</h3>
+  <div class="two-col">
+    <div class="card card-accent">
+      <h4>Synchronous (Request-Response)</h4>
+      <p>REST (HTTP/1.1 JSON), gRPC (HTTP/2 protobuf), GraphQL. Caller waits for response. Simple but creates temporal coupling &#8212; if the callee is down, the caller fails.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Asynchronous (Event-Driven)</h4>
+      <p>Kafka, RabbitMQ, AWS SQS. Producer fires and forgets. Decouples availability &#8212; consumer processes when ready. Adds complexity: ordering, idempotency, dead-letter handling.</p>
+    </div>
+  </div>
+
+  <h3>Saga Pattern &#8212; Distributed Transactions</h3>
+  <p>Distributed ACID transactions across services are impractical. The Saga pattern coordinates a sequence of local transactions, each publishing events that trigger the next step. On failure, compensating transactions undo completed steps.</p>
+
+  <div class="diagram">
+    <pre>
+  Choreography-based Saga (event-driven)
+  ──────────────────────────────────────
+  OrderService         PaymentService        InventoryService
+      |                      |                      |
+      |-- OrderCreated -----&gt;|                      |
+      |                   Charge card               |
+      |                      |-- PaymentDone ------&gt;|
+      |                      |                   Reserve stock
+      |                      |                      |-- StockReserved
+      |                      |                      |
+  [failure path]
+      |                      |&lt;-- PaymentFailed ---|
+      |                   Refund card               |
+      |&lt;-- OrderCancelled ---|
+    </pre>
+  </div>
+
+  <h3>CQRS &#8212; Command Query Responsibility Segregation</h3>
+  <p>Separate the <em>write model</em> (commands that change state) from the <em>read model</em> (queries that return data). The read model is a denormalised projection optimised for query patterns, updated asynchronously from the write model via events.</p>
+  <pre>// Command side: enforces invariants, persists to write store
+POST /orders { items: [...] }  --&gt; OrderAggregate.place() --&gt; OrderPlaced event
+
+// Query side: denormalised view, updated by event handler
+GET /orders/{id}  --&gt;  OrderReadModel (MongoDB doc with all fields pre-joined)
+
+// Eventual consistency: read model may lag write model by milliseconds</pre>
+
+  <h3>Event Sourcing</h3>
+  <p>Instead of storing current state, store the <em>sequence of events</em> that led to it. Current state is derived by replaying events. The event log is immutable and becomes the source of truth.</p>
+  <ul class="clean">
+    <li><strong>Audit log for free:</strong> complete history of every state change</li>
+    <li><strong>Time travel:</strong> replay to any point in time</li>
+    <li><strong>Projections:</strong> build any read model from the event log</li>
+    <li><strong>Complexity:</strong> snapshots needed for long-lived aggregates; schema evolution is hard</li>
+  </ul>
+
+  <h3>API Gateway Pattern</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Request Routing</h4>
+      <p>Single entry point routes to correct service by path/header. Hides internal topology from clients.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Cross-Cutting Concerns</h4>
+      <p>Auth/authz, rate limiting, SSL termination, request logging &#8212; centralised at gateway, not duplicated in every service.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>BFF (Backend for Frontend)</h4>
+      <p>Dedicated gateway per client type (mobile, web, partner). Each BFF aggregates and transforms data for its specific consumer's needs.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Circuit Breaker</h4>
+      <p>Prevents cascading failures. After N consecutive failures to a backend, the circuit opens and returns fast-fail responses for a cooldown period.</p>
+    </div>
+  </div>
+
+  <h3>Resilience Patterns</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Pattern</th><th>Problem Solved</th><th>Implementation</th></tr></thead>
+      <tbody>
+        <tr><td>Circuit Breaker</td><td>Cascading failure when downstream is slow</td><td>Resilience4j, Istio outlier detection</td></tr>
+        <tr><td>Retry with backoff</td><td>Transient network errors</td><td>Exponential backoff + jitter, max 3 retries</td></tr>
+        <tr><td>Timeout</td><td>Slow downstream ties up threads</td><td>Set at every synchronous call site</td></tr>
+        <tr><td>Bulkhead</td><td>One slow service exhausts shared thread pool</td><td>Separate thread pool per downstream</td></tr>
+        <tr><td>Idempotency key</td><td>Duplicate requests from retry storms</td><td>UUID per request; server deduplicates</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION 3 -->
+<div id="s3" class="section page-break">
+  <div class="section-num">SECTION 03</div>
+  <h2 class="section-title">OpenShift Routing &amp; Load Balancing</h2>
+  <p class="lead">A senior architect must be able to describe the full traffic path from the internet to a pod, and choose the right layer for each concern: security, routing, load balancing, and observability.</p>
+
+  <h3>The Full Traffic Stack</h3>
+  <div class="diagram">
+    <pre>
+  Internet
+      |
+  GSLB (F5 GTM / Route 53) ---- DNS-level failover between sites
+      |
+  External LB (F5 BIG-IP / AWS ALB) ---- WAF, SSL offload, DDoS
+      |
+  OpenShift HAProxy Router ---- Route matching, weight-based LB
+      |
+  kube-proxy / IPVS ---- ClusterIP to Pod IP NAT
+      |
+  (Optional) Istio Envoy Sidecar ---- mTLS, circuit break, telemetry
+      |
+  Application Pod (FastAPI)
+    </pre>
+  </div>
+
+  <h3>Route-Based Traffic Splitting</h3>
+  <pre>apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: payment-api
+  annotations:
+    haproxy.router.openshift.io/balance: leastconn
+    haproxy.router.openshift.io/timeout: 60s
+spec:
+  to:
+    kind: Service
+    name: payment-v1
+    weight: 90        # 90% stable
+  alternateBackends:
+  - kind: Service
+    name: payment-v2
+    weight: 10        # 10% canary</pre>
+
+  <h3>Service Mesh Decision</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Requirement</th><th>Without Service Mesh</th><th>With Istio/OSM</th></tr></thead>
+      <tbody>
+        <tr><td>mTLS east-west</td><td>Manual cert management per service</td><td>Automatic, certificate rotation handled</td></tr>
+        <tr><td>Fine-grained traffic control</td><td>Code changes required</td><td>VirtualService / DestinationRule YAML</td></tr>
+        <tr><td>Distributed tracing</td><td>Manual propagation of trace headers</td><td>Automatic via sidecar</td></tr>
+        <tr><td>Circuit breaking</td><td>Library per language (Resilience4j)</td><td>Envoy outlier detection, language-agnostic</td></tr>
+        <tr><td>Overhead</td><td>Zero</td><td>1&#8211;3ms per hop, ~50MB sidecar RAM</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>IngressController Multi-Tenancy</h3>
+  <pre>apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  name: team-payments
+  namespace: openshift-ingress-operator
+spec:
+  replicas: 3
+  routeSelector:
+    matchLabels:
+      team: payments          # only routes with this label
+  namespaceSelector:
+    matchLabels:
+      env: production
+  endpointPublishingStrategy:
+    type: LoadBalancerService</pre>
+
+  <div class="callout callout-blue">
+    <strong>Architect insight</strong>
+    Running multiple IngressControllers lets you isolate high-traffic teams on dedicated routers, apply different HAProxy configs per team, and prevent a misconfigured route from one team affecting another team's ingress performance.
+  </div>
+</div>
+
+<!-- SECTION 4 -->
+<div id="s4" class="section page-break">
+  <div class="section-num">SECTION 04</div>
+  <h2 class="section-title">OpenShift Scaling Strategies</h2>
+  <p class="lead">At the senior architect level, the question isn't just "how do I configure HPA?" but "how do I design a system that scales gracefully under load spikes while remaining cost-efficient at idle?"</p>
+
+  <h3>Scaling Stack</h3>
+  <div class="diagram">
+    <pre>
+  Application metric (queue depth, req/s) ---- KEDA ScaledObject
+  CPU / Memory                             ---- HPA v2
+  Concurrency                              ---- Knative KPA
+                        |
+                        v
+               Pod replica count changes
+                        |
+                        v
+  Pending pods can't schedule? ---- Cluster Autoscaler
+  Node idle for 10+ min?        ---- Cluster Autoscaler removes it
+    </pre>
+  </div>
+
+  <h3>Architecting for Scale-to-Zero</h3>
+  <p>Scale-to-zero reduces infrastructure cost for bursty workloads but introduces cold-start latency. Design decisions:</p>
+  <ul class="clean">
+    <li><strong>Startup time matters:</strong> Python/JVM apps may take 5&#8211;30s. Optimise startup: lazy imports, connection pools initialised on first request not on boot</li>
+    <li><strong>Pre-pulling images:</strong> <code>ImagePullPolicy: IfNotPresent</code> with images pre-seeded on nodes avoids registry pull during cold start</li>
+    <li><strong>Knative activator buffering:</strong> First request held in activator buffer while pod starts. Buffer timeout must exceed cold start time</li>
+    <li><strong>Warm pool:</strong> Set minScale: 1 for latency-sensitive services; accept the idle cost</li>
+  </ul>
+
+  <h3>Capacity Planning Formula</h3>
+  <pre># Target replicas to handle peak load with headroom
+maxReplicas = ceil(peakRequestsPerSec / requestsPerPodPerSec) * safetyFactor(1.3)
+
+# Example: 1000 req/s peak, each pod handles 100 req/s, 1.3x safety
+maxReplicas = ceil(1000/100) * 1.3 = 13 pods
+
+# Minimum replicas: handle baseline load + absorb initial spike before HPA reacts
+# HPA reaction time: 15s metrics lag + 15s stabilisation = 30s
+# Baseline traffic at minReplicas must handle 30s of spike growth
+minReplicas = ceil(baselineRPS / requestsPerPodPerSec) * 1.5</pre>
+
+  <h3>PodDisruptionBudget &#8212; Non-Negotiable</h3>
+  <pre>apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: payment-api-pdb
+spec:
+  selector:
+    matchLabels:
+      app: payment-api
+  minAvailable: 2   # always keep 2 pods up during node drain / CA scale-down</pre>
+
+  <h3>Topology Spread Constraints</h3>
+  <pre># Spread pods across availability zones for resilience
+topologySpreadConstraints:
+- maxSkew: 1
+  topologyKey: topology.kubernetes.io/zone
+  whenUnsatisfiable: DoNotSchedule
+  labelSelector:
+    matchLabels:
+      app: payment-api</pre>
+</div>
+
+<!-- SECTION 5 -->
+<div id="s5" class="section page-break">
+  <div class="section-num">SECTION 05</div>
+  <h2 class="section-title">MCP Protocol</h2>
+  <p class="lead">The Model Context Protocol (MCP) is an open standard (Anthropic, 2024) that defines how AI models connect to external data sources, tools, and services &#8212; analogous to USB-C for AI integrations.</p>
+
+  <h3>What Problem MCP Solves</h3>
+  <p>Before MCP, every AI application required custom integration code for each data source (database connector, API client, file reader). Each LLM provider had different function-calling formats. MCP standardises the interface so a tool written once works with any MCP-compatible model host.</p>
+
+  <div class="diagram">
+    <pre>
+  Without MCP                          With MCP
+  ────────────                         ────────────────────────────
+  App  --custom--&gt; GitHub API          MCP Host (Claude Desktop / IDE)
+  App  --custom--&gt; PostgreSQL                     |
+  App  --custom--&gt; Jira                    MCP Protocol (JSON-RPC 2.0)
+  App  --custom--&gt; Slack             /         |         |        \
+  (4 integrations, all different)   GitHub  Postgres   Jira    Slack
+                                    MCP     MCP        MCP     MCP
+                                    Server  Server     Server  Server
+    </pre>
+  </div>
+
+  <h3>MCP Architecture</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>MCP Host</h4>
+      <p>The application running the LLM (Claude Desktop, VS Code extension, custom app). Manages connections to MCP servers, mediates security boundaries.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>MCP Client</h4>
+      <p>Protocol client inside the host. Maintains 1:1 connections with MCP servers, handles capability negotiation and sampling requests.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>MCP Server</h4>
+      <p>Lightweight process exposing Resources (data), Tools (actions), and Prompts (templates) via the MCP protocol. Runs locally or remotely.</p>
+    </div>
+  </div>
+
+  <h3>MCP Primitives</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Primitive</th><th>Direction</th><th>Purpose</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>Resources</td><td>Server &#8594; Client</td><td>Expose data / context</td><td>File contents, DB schema, API docs</td></tr>
+        <tr><td>Tools</td><td>Client &#8594; Server</td><td>Execute actions</td><td>Run SQL, call REST API, write file</td></tr>
+        <tr><td>Prompts</td><td>Server &#8594; Client</td><td>Reusable prompt templates</td><td>"Explain this error" with context pre-filled</td></tr>
+        <tr><td>Sampling</td><td>Server &#8594; Client</td><td>Server requests LLM completion</td><td>Server uses model to process data server-side</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Building an MCP Server (Python SDK)</h3>
+  <pre>from mcp.server import Server
+from mcp.server.models import InitializationOptions
+import mcp.types as types
+
+app = Server("database-mcp")
+
+@app.list_tools()
+async def list_tools() -&gt; list[types.Tool]:
+    return [
+        types.Tool(
+            name="execute_query",
+            description="Execute a read-only SQL query against the analytics DB",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "SQL SELECT statement"}
+                },
+                "required": ["query"]
+            }
+        )
+    ]
+
+@app.call_tool()
+async def call_tool(name: str, arguments: dict) -&gt; list[types.TextContent]:
+    if name == "execute_query":
+        results = await db.execute(arguments["query"])
+        return [types.TextContent(type="text", text=str(results))]</pre>
+
+  <h3>MCP Transport Layers</h3>
+  <div class="two-col">
+    <div class="card card-accent">
+      <h4>stdio (Local)</h4>
+      <p>Server launched as child process. Communication via stdin/stdout. Used by Claude Desktop for local MCP servers. Simplest, most secure.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>HTTP + SSE (Remote)</h4>
+      <p>Server runs as HTTP service. Client connects via Server-Sent Events for streaming. Enables remote MCP servers, multi-tenant deployments.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6 -->
+<div id="s6" class="section page-break">
+  <div class="section-num">SECTION 06</div>
+  <h2 class="section-title">Agentic AI Architecture</h2>
+  <p class="lead">Agentic AI systems go beyond single-turn LLM calls &#8212; they execute multi-step reasoning loops, use tools, maintain state, and delegate to sub-agents. Designing these systems requires both ML and distributed systems thinking.</p>
+
+  <h3>What Makes a System "Agentic"?</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Tool Use</h4>
+      <p>The model can call external functions (search, code execution, database queries) and incorporate results into subsequent reasoning steps.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Multi-Step Reasoning</h4>
+      <p>The system loops: think &#8594; act &#8594; observe &#8594; think again. Commonly implemented as ReAct (Reasoning + Acting) or Chain-of-Thought.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Memory</h4>
+      <p>State persists across steps: working memory (context window), episodic memory (conversation history), semantic memory (vector store), procedural (tool definitions).</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Planning</h4>
+      <p>Decompose a complex task into subtasks, delegate to specialised agents, reassemble results. Requires a planner/orchestrator agent.</p>
+    </div>
+  </div>
+
+  <h3>LangGraph &#8212; State Machine Approach</h3>
+  <p>LangGraph models agentic workflows as directed graphs where nodes are agent steps (LLM calls, tool calls) and edges define control flow including conditional branching and cycles.</p>
+
+  <pre>from langgraph.graph import StateGraph, END
+from typing import TypedDict, Annotated
+import operator
+
+class AgentState(TypedDict):
+    messages: Annotated[list, operator.add]
+    plan: str
+    research: str
+    draft: str
+
+def planner(state: AgentState) -&gt; AgentState:
+    response = llm.invoke([SystemMessage(content="Create a research plan"), *state["messages"]])
+    return {"plan": response.content}
+
+def researcher(state: AgentState) -&gt; AgentState:
+    results = search_tool.invoke(state["plan"])
+    return {"research": results}
+
+def writer(state: AgentState) -&gt; AgentState:
+    draft = llm.invoke(f"Write based on: {state['research']}")
+    return {"draft": draft.content}
+
+# Build the graph
+graph = StateGraph(AgentState)
+graph.add_node("planner", planner)
+graph.add_node("researcher", researcher)
+graph.add_node("writer", writer)
+
+graph.set_entry_point("planner")
+graph.add_edge("planner", "researcher")
+graph.add_edge("researcher", "writer")
+graph.add_edge("writer", END)
+
+app = graph.compile()</pre>
+
+  <h3>Multi-Agent Patterns</h3>
+  <div class="diagram">
+    <pre>
+  Orchestrator-Worker (hierarchical)
+  ──────────────────────────────────
+  Orchestrator Agent
+      |-- Task A --&gt; Worker Agent 1 (Research)
+      |-- Task B --&gt; Worker Agent 2 (Code Generation)
+      |-- Task C --&gt; Worker Agent 3 (Data Analysis)
+      &lt;-- Aggregate results --
+
+  Peer-to-Peer (collaborative)
+  ────────────────────────────
+  Agent A &lt;---&gt; Agent B &lt;---&gt; Agent C
+  (debate / critique / verify pattern)
+
+  Supervisor (with reflection)
+  ────────────────────────────
+  Supervisor --&gt; Worker --&gt; Critic --&gt; Supervisor (loop until satisfactory)
+    </pre>
+  </div>
+
+  <h3>Memory Architecture</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Memory Type</th><th>Storage</th><th>Scope</th><th>Use Case</th></tr></thead>
+      <tbody>
+        <tr><td>In-context (working)</td><td>LLM context window</td><td>Single session</td><td>Current task state, recent history</td></tr>
+        <tr><td>External short-term</td><td>Redis, PostgreSQL</td><td>Session / user</td><td>Conversation history, session state</td></tr>
+        <tr><td>Semantic (vector)</td><td>pgvector, Pinecone, Weaviate</td><td>Persistent</td><td>RAG: retrieve relevant docs/memories</td></tr>
+        <tr><td>Procedural</td><td>Tool definitions, system prompts</td><td>System-wide</td><td>Agent capabilities, instructions</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Safety &amp; Guardrails</h3>
+  <div class="callout callout-rose">
+    <strong>Agentic systems require explicit safety design</strong>
+    <ul class="clean" style="margin-top:0.5rem">
+      <li><strong>Minimal footprint:</strong> request only necessary permissions, prefer reversible actions</li>
+      <li><strong>Human-in-the-loop:</strong> interrupt for confirmation before irreversible actions (file delete, send email)</li>
+      <li><strong>Tool call validation:</strong> validate all tool parameters before execution; reject obviously harmful requests</li>
+      <li><strong>Rate limiting:</strong> cap tool calls per step to prevent runaway loops</li>
+      <li><strong>Audit logging:</strong> log every tool call, arguments, and result for post-hoc review</li>
+      <li><strong>Prompt injection defence:</strong> treat all external data (web pages, file contents, API responses) as untrusted; never let them override system instructions</li>
+    </ul>
+  </div>
+
+  <h3>RAG Architecture</h3>
+  <pre># Retrieval-Augmented Generation pipeline
+async def answer_with_rag(question: str) -&gt; str:
+    # 1. Embed the question
+    query_embedding = await embeddings.embed_query(question)
+
+    # 2. Retrieve relevant chunks from vector store
+    relevant_docs = await vectorstore.similarity_search(
+        query_embedding, k=5, score_threshold=0.75
+    )
+
+    # 3. Construct context-augmented prompt
+    context = "\n\n".join(doc.page_content for doc in relevant_docs)
+    prompt = f"Context:\n{context}\n\nQuestion: {question}\n\nAnswer:"
+
+    # 4. Generate answer
+    response = await llm.ainvoke(prompt)
+    return response.content</pre>
+</div>
+
+<!-- SECTION 7 -->
+<div id="s7" class="section page-break">
+  <div class="section-num">SECTION 07</div>
+  <h2 class="section-title">Interview Q&amp;A Cheat Sheet</h2>
+  <p class="lead">Model answers for the architectural questions senior engineers face in principal/staff-level interviews. Show reasoning, not just answers.</p>
+
+  <h3>Architecture Design Questions</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Question</th><th>Key Points</th></tr></thead>
+      <tbody>
+        <tr><td>How do you decide microservice boundaries?</td><td>DDD bounded contexts: deploy independently, team ownership, different scaling needs, avoid shared databases between services</td></tr>
+        <tr><td>How do you handle distributed transactions?</td><td>Avoid 2PC. Use Saga (choreography for simple flows, orchestration for complex). Design for eventual consistency. Idempotent operations + compensating transactions.</td></tr>
+        <tr><td>How do you scale a read-heavy system?</td><td>Read replicas, CQRS read projections, caching layers (Redis, CDN), eventual consistency acceptable. Profile before optimising.</td></tr>
+        <tr><td>How do you handle a database becoming a bottleneck?</td><td>Connection pooling (PgBouncer), read replicas, caching hot data, vertical scale, then shard if needed. Event sourcing removes update contention. CQRS separates read/write load.</td></tr>
+        <tr><td>What is your approach to API versioning?</td><td>URL path versioning (/v1/) for REST. Header versioning for internal services. Never break clients &#8212; add fields, deprecate don't remove. API Gateway routes by version.</td></tr>
+        <tr><td>How do you prevent cascading failures?</td><td>Circuit breaker (stop calling failing service), timeout (don't wait forever), bulkhead (isolate failure), retry with backoff + jitter, fallback (cached/default response).</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>OpenShift / Platform Questions</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Question</th><th>Key Points</th></tr></thead>
+      <tbody>
+        <tr><td>Describe your autoscaling strategy</td><td>KEDA for event-driven (Kafka lag), HPA for HTTP (custom metrics), VPA for right-sizing, Cluster Autoscaler for nodes. PDB prevents zero-replica situations.</td></tr>
+        <tr><td>How do you do zero-downtime deployments?</td><td>Rolling update with maxUnavailable: 0, readiness probes, PDB, terminationGracePeriodSeconds aligned with LB drain window. Blue-green for high-risk releases. Canary for gradual rollout.</td></tr>
+        <tr><td>How would you design multi-tenant OpenShift?</td><td>Namespace per team + RBAC, NetworkPolicy for isolation, LimitRange + ResourceQuota per namespace, dedicated IngressController per team, separate node pools via taints for noisy-neighbour isolation.</td></tr>
+        <tr><td>Explain a production incident you'd diagnose with high latency</td><td>1) Check HPA &#8212; is it at maxReplicas? 2) Check pod CPU/memory. 3) Check HAProxy stats (queue depth). 4) Distributed traces for per-service latency. 5) Check downstream dependencies. 6) Check node resource pressure.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>AI / MCP Questions</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Question</th><th>Key Points</th></tr></thead>
+      <tbody>
+        <tr><td>What is MCP and why does it matter?</td><td>Open standard for AI-to-tool integration. Solves N*M integration problem (N models, M tools). Defines Resources, Tools, Prompts. JSON-RPC 2.0 over stdio or HTTP/SSE.</td></tr>
+        <tr><td>How do you prevent an agent from going rogue?</td><td>Minimal permissions, reversible-first actions, human-in-the-loop on irreversible steps, tool call rate limits, prompt injection defence, full audit log, kill switch.</td></tr>
+        <tr><td>RAG vs fine-tuning?</td><td>RAG: knowledge changes frequently, need up-to-date data, audit trail needed, faster to deploy. Fine-tuning: baking in style/behaviour, small model, offline knowledge only. Most production use RAG + minimal fine-tuning.</td></tr>
+        <tr><td>How do you handle LLM non-determinism in production?</td><td>Structured outputs (JSON schema enforcement), output validation with Pydantic, retry on parse failure, temperature=0 for deterministic tasks, versioned prompts, shadow testing before rollout.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>The "10x" Architect Mindset</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Simplicity first</h4>
+      <p>The best architecture is the simplest one that meets requirements. Complexity is technical debt that compounds. Start simple, evolve under real load.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Make it observable</h4>
+      <p>If you can't measure it, you can't improve it. Traces, metrics, structured logs from day one. Alert on SLOs, not arbitrary thresholds.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Embrace failure</h4>
+      <p>Design for partial failure. Every service will fail. Degrade gracefully &#8212; return cached data, skip non-critical calls, serve a useful partial response.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Automate toil</h4>
+      <p>If humans do it more than twice, automate it. GitOps, auto-scaling, automated rollback, chaos engineering &#8212; the system should heal itself.</p>
+    </div>
+  </div>
+
+  <div class="pills">
+    <span class="pill pill-blue">CAP Theorem</span>
+    <span class="pill pill-blue">CQRS</span>
+    <span class="pill pill-purple">Event Sourcing</span>
+    <span class="pill pill-purple">Saga Pattern</span>
+    <span class="pill pill-green">Circuit Breaker</span>
+    <span class="pill pill-green">MCP Protocol</span>
+    <span class="pill pill-amber">LangGraph</span>
+    <span class="pill pill-teal">RAG</span>
+    <span class="pill pill-coral">DDD Bounded Contexts</span>
+  </div>
+
+  <div class="footer">Senior Architect &#8212; Complete Reference Guide &#183; Interview Preparation &#183; April 2026</div>
+</div>
+
+</div><!-- /.container -->
+</div><!-- /.main-scroll -->
+</div><!-- /.topic-page -->
+
+<footer class="guide-footer">Interview Preparation Guide</footer>
+</body>
+</html>

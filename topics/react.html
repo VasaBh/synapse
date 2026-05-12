@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React — Complete Reference Guide 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e;
+  --ink2: #3d3d5c;
+  --ink3: #6b6b8a;
+  --bg: #ffffff;
+  --bg2: #f4f3f0;
+  --bg3: #eae8e4;
+  --accent: #2563eb;
+  --accent2: #1d4ed8;
+  --accent-bg: #eff6ff;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --amber: #d97706;
+  --amber-bg: #fffbeb;
+  --rose: #e11d48;
+  --rose-bg: #fff1f2;
+  --purple: #7c3aed;
+  --purple-bg: #f5f3ff;
+  --teal: #0d9488;
+  --teal-bg: #f0fdfa;
+  --coral: #ea580c;
+  --coral-bg: #fff7ed;
+  --border: #e2e0dc;
+  --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+
+@media print {
+  body { font-size: 10pt; line-height: 1.5; }
+  .no-print { display: none !important; }
+  .page-break { page-break-before: always; }
+  section { page-break-inside: avoid; }
+  .card { break-inside: avoid; }
+  pre { font-size: 8pt; }
+  h1 { font-size: 22pt; }
+  h2 { font-size: 14pt; }
+  h3 { font-size: 11pt; }
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+.cover {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%);
+  color: white;
+  padding: 4rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(6,182,212,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 30%, rgba(37,99,235,0.1) 0%, transparent 50%);
+}
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #67e8f9, #60a5fa); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+.diagram { background: #1e293b; border-radius: 10px; padding: 1.5rem; margin: 1rem 0; overflow-x: auto; }
+.diagram pre { background: none; border: none; color: #e2e8f0; font-size: 0.78rem; margin: 0; }
+
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+
+@media (max-width: 1100px) { .sidebar { display: none; } }
+@media (max-width: 600px) { .cover h1 { font-size: 2.2rem; } .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">&#8592; All Topics</a>
+  <h1>Interview Preparation Guide</h1>
+</header>
+
+<div class="topic-page">
+
+  <aside class="sidebar">
+    <p class="sidebar-title">React</p>
+    <nav>
+      <ul>
+        <li><a href="#s1"><span class="toc-num">01</span>React Fundamentals</a></li>
+        <li><a href="#s2"><span class="toc-num">02</span>Hooks Deep Dive</a></li>
+        <li><a href="#s3"><span class="toc-num">03</span>React Internals &amp; Fiber</a></li>
+        <li><a href="#s4"><span class="toc-num">04</span>Ecosystem: Node, Vite, Next</a></li>
+        <li><a href="#s5"><span class="toc-num">05</span>Advanced Patterns</a></li>
+        <li><a href="#s6"><span class="toc-num">06</span>Compound Components</a></li>
+        <li><a href="#s7"><span class="toc-num">07</span>Render Props &amp; HOCs</a></li>
+        <li><a href="#s8"><span class="toc-num">08</span>State Management</a></li>
+        <li><a href="#s9"><span class="toc-num">09</span>TypeScript with React</a></li>
+        <li><a href="#s10"><span class="toc-num">10</span>Interview Q&amp;A Cheatsheet</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <div class="main-scroll">
+
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference &#8212; April 2026</div>
+  <h1>React <span>Deep Dive</span></h1>
+  <p class="cover-sub">Hooks, Fiber reconciliation, advanced patterns, state management, TypeScript, and the modern React ecosystem &#8212; everything you need for senior frontend interviews.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">Hooks</span>
+    <span class="cover-tag">Fiber</span>
+    <span class="cover-tag">Reconciliation</span>
+    <span class="cover-tag">Compound Components</span>
+    <span class="cover-tag">Render Props</span>
+    <span class="cover-tag">HOC</span>
+    <span class="cover-tag">Zustand</span>
+    <span class="cover-tag">TypeScript</span>
+    <span class="cover-tag">Next.js</span>
+    <span class="cover-tag">Vite</span>
+  </div>
+  <div class="cover-date">v1.0 &#8212; Last updated April 2026</div>
+</div>
+
+<div class="container">
+
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <div class="toc-grid">
+    <a href="#s1" class="toc-item"><span class="toc-num">01</span><span class="toc-label">React Fundamentals</span></a>
+    <a href="#s2" class="toc-item"><span class="toc-num">02</span><span class="toc-label">Hooks Deep Dive</span></a>
+    <a href="#s3" class="toc-item"><span class="toc-num">03</span><span class="toc-label">React Internals &amp; Fiber</span></a>
+    <a href="#s4" class="toc-item"><span class="toc-num">04</span><span class="toc-label">Ecosystem: Node.js, Vite, Next.js</span></a>
+    <a href="#s5" class="toc-item"><span class="toc-num">05</span><span class="toc-label">Advanced Patterns</span></a>
+    <a href="#s6" class="toc-item"><span class="toc-num">06</span><span class="toc-label">Compound Components</span></a>
+    <a href="#s7" class="toc-item"><span class="toc-num">07</span><span class="toc-label">Render Props &amp; Higher-Order Components</span></a>
+    <a href="#s8" class="toc-item"><span class="toc-num">08</span><span class="toc-label">State Management</span></a>
+    <a href="#s9" class="toc-item"><span class="toc-num">09</span><span class="toc-label">TypeScript with React</span></a>
+    <a href="#s10" class="toc-item"><span class="toc-num">10</span><span class="toc-label">Interview Q&amp;A Cheatsheet</span></a>
+  </div>
+</div>
+
+<!-- SECTION 1 -->
+<div id="s1" class="section page-break">
+  <div class="section-num">SECTION 01</div>
+  <h2 class="section-title">React Fundamentals</h2>
+  <p class="lead">React is a declarative UI library for building component trees. Understanding its mental model &#8212; UI as a function of state &#8212; is the foundation everything else builds on.</p>
+
+  <h3>Core Mental Model</h3>
+  <pre>UI = f(state)    // React re-renders when state changes, producing a new UI description</pre>
+  <p>React does not mutate the DOM directly. It maintains a <strong>virtual DOM</strong> (VDOM) &#8212; a lightweight JavaScript object tree describing what the UI should look like. On state change, React computes a new VDOM, diffs it against the previous (reconciliation), and applies only the minimal set of real DOM mutations.</p>
+
+  <h3>JSX</h3>
+  <p>JSX is syntactic sugar for <code>React.createElement(type, props, ...children)</code>. Babel/TypeScript transpiles it:</p>
+  <pre>// JSX
+const el = &lt;Button color="blue"&gt;Click me&lt;/Button&gt;;
+
+// Transpiled (React 17+ automatic runtime)
+const el = _jsx(Button, { color: "blue", children: "Click me" });</pre>
+
+  <h3>Component Types</h3>
+  <div class="two-col">
+    <div class="card card-accent">
+      <h4>Function Components (Modern)</h4>
+      <p>Plain JavaScript functions that accept props and return JSX. Hooks provide state and lifecycle. Recommended since React 16.8.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Class Components (Legacy)</h4>
+      <p>ES6 classes extending <code>React.Component</code>. Use lifecycle methods. Still supported but not idiomatic in new code.</p>
+    </div>
+  </div>
+
+  <h3>Props vs State</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Props</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td>Owner</td><td>Parent component</td><td>The component itself</td></tr>
+        <tr><td>Mutable by component?</td><td>No (read-only)</td><td>Yes (via useState / setState)</td></tr>
+        <tr><td>Triggers re-render?</td><td>Yes (when parent re-renders)</td><td>Yes (on change)</td></tr>
+        <tr><td>Analogy</td><td>Function arguments</td><td>Internal memory</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Controlled vs Uncontrolled Components</h3>
+  <pre>// Controlled: React owns the value
+function ControlledInput() {
+  const [value, setValue] = useState('');
+  return &lt;input value={value} onChange={e =&gt; setValue(e.target.value)} /&gt;;
+}
+
+// Uncontrolled: DOM owns the value, accessed via ref
+function UncontrolledInput() {
+  const ref = useRef(null);
+  return &lt;input ref={ref} defaultValue="initial" /&gt;;
+}</pre>
+
+  <h3>Keys in Lists</h3>
+  <p>Keys must be <strong>stable and unique among siblings</strong>. Using array index as key causes bugs when items reorder &#8212; React reuses DOM nodes in place and only updates their content, so input values, focus, and animations don't move with the data.</p>
+
+  <div class="callout callout-amber">
+    <strong>Index-as-key bug</strong>
+    If you reverse a list with index keys, each DOM node stays in position and only its content is patched. Local state (typed text, checkbox checked) stays at the same DOM position, not with the moved data.
+  </div>
+</div>
+
+<!-- SECTION 2 -->
+<div id="s2" class="section page-break">
+  <div class="section-num">SECTION 02</div>
+  <h2 class="section-title">Hooks Deep Dive</h2>
+  <p class="lead">Hooks let function components use state, side effects, context, and more without class boilerplate. Understanding the rules and internal mechanics is mandatory for senior interviews.</p>
+
+  <h3>Rules of Hooks</h3>
+  <ul class="clean">
+    <li>Only call hooks at the <strong>top level</strong> &#8212; never inside loops, conditions, or nested functions</li>
+    <li>Only call hooks from <strong>React function components or custom hooks</strong></li>
+    <li>React tracks hooks by call order &#8212; any conditional hook call shifts all subsequent hooks onto wrong slots</li>
+  </ul>
+
+  <h3>useState</h3>
+  <pre>const [count, setCount] = useState(0);
+
+// Functional update: use when new state depends on previous
+setCount(prev =&gt; prev + 1);
+
+// Lazy initialisation: expensive initial value computed once
+const [data, setData] = useState(() =&gt; JSON.parse(localStorage.getItem('data') ?? '[]'));</pre>
+
+  <h3>useEffect</h3>
+  <pre>// Runs after every render (no deps array)
+useEffect(() =&gt; { });
+
+// Runs once on mount
+useEffect(() =&gt; {
+  const sub = subscribe(id);
+  return () =&gt; sub.unsubscribe();  // cleanup on unmount
+}, []);
+
+// Runs when id changes
+useEffect(() =&gt; {
+  fetchUser(id).then(setUser);
+}, [id]);</pre>
+
+  <div class="callout callout-blue">
+    <strong>useEffect timing</strong>
+    useEffect fires <em>after</em> the browser paints. For DOM measurements before paint use <code>useLayoutEffect</code> (synchronous, fires after DOM mutation but before paint &#8212; can block visual updates).
+  </div>
+
+  <h3>useRef</h3>
+  <pre>// DOM reference
+const inputRef = useRef(null);
+inputRef.current?.focus();
+
+// Mutable value that persists without triggering re-render
+const timerRef = useRef(null);
+timerRef.current = setTimeout(() =&gt; {}, 1000);
+
+// Storing previous value
+const prevCountRef = useRef(count);
+useEffect(() =&gt; { prevCountRef.current = count; });</pre>
+
+  <h3>useMemo &amp; useCallback</h3>
+  <pre>// useMemo: memoises a computed value
+const sortedList = useMemo(
+  () =&gt; [...items].sort((a, b) =&gt; a.name.localeCompare(b.name)),
+  [items]
+);
+
+// useCallback: memoises a function reference
+const handleClick = useCallback(
+  (id) =&gt; dispatch({ type: 'SELECT', id }),
+  [dispatch]
+);</pre>
+
+  <div class="callout callout-amber">
+    <strong>Don't over-memo</strong>
+    useMemo and useCallback have a cost. Only use them when the computation is genuinely expensive, or when the value is passed as a prop to a React.memo child where referential stability matters.
+  </div>
+
+  <h3>useReducer</h3>
+  <pre>function reducer(state, action) {
+  switch (action.type) {
+    case 'increment': return { ...state, count: state.count + 1 };
+    case 'reset': return { count: 0, loading: false };
+    default: return state;
+  }
+}
+
+const [state, dispatch] = useReducer(reducer, { count: 0, loading: false });</pre>
+
+  <h3>Custom Hooks</h3>
+  <pre>function useWindowSize() {
+  const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+  useEffect(() =&gt; {
+    const handler = () =&gt; setSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener('resize', handler);
+    return () =&gt; window.removeEventListener('resize', handler);
+  }, []);
+  return size;
+}
+
+const { width, height } = useWindowSize();</pre>
+</div>
+
+<!-- SECTION 3 -->
+<div id="s3" class="section page-break">
+  <div class="section-num">SECTION 03</div>
+  <h2 class="section-title">React Internals &amp; Fiber</h2>
+  <p class="lead">React Fiber (React 16) rewrote the reconciler to support asynchronous, interruptible rendering. Understanding Fiber separates mid-level from senior React engineers.</p>
+
+  <h3>What is Fiber?</h3>
+  <p>Fiber is both an <strong>internal data structure</strong> (one Fiber node = one unit of work for a component) and a <strong>new reconciler architecture</strong> that can pause, resume, and prioritise rendering work. Before Fiber, rendering used a synchronous recursive call stack that could not be interrupted, causing dropped frames on large trees.</p>
+
+  <h3>Fiber Node (simplified)</h3>
+  <pre>// Each component in the tree has a Fiber node
+{
+  type: 'div' | MyComponent,   // element type
+  stateNode: DOMElement | null,
+  return: Fiber,               // parent
+  child: Fiber,                // first child
+  sibling: Fiber,              // next sibling (linked list)
+  memoizedState: Hook | null,  // linked list of this component's hooks
+  effectTag: INSERT | UPDATE | DELETE,
+  alternate: Fiber             // double-buffering: current vs work-in-progress
+}</pre>
+
+  <h3>Reconciliation &#8212; The Diffing Algorithm</h3>
+  <p>React's diffing algorithm runs in O(n) via two assumptions:</p>
+  <ul class="clean">
+    <li><strong>Different element types produce different trees:</strong> if a div changes to span, React unmounts the entire subtree</li>
+    <li><strong>Keys identify stable elements:</strong> matching keys reuse the existing Fiber node and DOM element</li>
+  </ul>
+
+  <div class="diagram">
+    <pre>
+  Render Phase (async, interruptible)        Commit Phase (sync, cannot pause)
+  ──────────────────────────────────        ────────────────────────────────────
+  Build work-in-progress Fiber tree         Apply all DOM mutations at once
+  Run component functions                   Call useLayoutEffect cleanup + setup
+  Compute new state                         Call useEffect cleanup + setup (async)
+  Tag nodes: INSERT / UPDATE / DELETE       Call ref callbacks
+  Can be paused by Scheduler                Must complete in one synchronous tick
+    </pre>
+  </div>
+
+  <h3>Concurrent Features (React 18+)</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>useTransition</h4>
+      <p>Mark a state update as non-urgent. React can interrupt it to handle urgent updates (typing, clicking). UI stays interactive while transition renders in background.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Suspense</h4>
+      <p>Declaratively show fallback while async work resolves. Works with React.lazy() for code splitting and frameworks like TanStack Query for data.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>useDeferredValue</h4>
+      <p>Defer an expensive derived value. React renders with old value first (keeping UI responsive), then re-renders with deferred value when idle.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Automatic Batching</h4>
+      <p>React 18 batches all setState calls in any async context (setTimeout, fetch callbacks) into a single re-render. Pre-18 only synthetic event handlers were batched.</p>
+    </div>
+  </div>
+
+  <pre>// useTransition: keep input responsive while filtering large list
+const [isPending, startTransition] = useTransition();
+
+function handleChange(e) {
+  setInputValue(e.target.value);           // urgent: immediate
+  startTransition(() =&gt; {
+    setFilteredList(expensiveFilter(e.target.value));  // non-urgent: deferrable
+  });
+}</pre>
+
+  <h3>React.memo</h3>
+  <pre>const Chart = React.memo(function Chart({ data, onSelect }) {
+  // Only re-renders when data or onSelect reference changes
+  return &lt;HeavyVisualization data={data} /&gt;;
+}, (prev, next) =&gt; prev.data.id === next.data.id);  // optional custom comparator</pre>
+</div>
+
+<!-- SECTION 4 -->
+<div id="s4" class="section page-break">
+  <div class="section-num">SECTION 04</div>
+  <h2 class="section-title">Ecosystem: Node.js, Vite, Next.js</h2>
+  <p class="lead">Modern React development relies on a rich tooling ecosystem. Understanding how build tools and meta-frameworks interact is essential for senior frontend roles.</p>
+
+  <h3>Vite vs webpack</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Vite</th><th>webpack</th></tr></thead>
+      <tbody>
+        <tr><td>Dev server</td><td>Native ESM &#8212; serves files as-is, no bundle step</td><td>Full bundle on every start (~seconds)</td></tr>
+        <tr><td>HMR speed</td><td>Milliseconds (ESM module invalidation)</td><td>Seconds (rebundle affected chunk)</td></tr>
+        <tr><td>Production build</td><td>Rollup under the hood</td><td>webpack itself</td></tr>
+        <tr><td>Config complexity</td><td>Low &#8212; sensible defaults</td><td>High &#8212; verbose</td></tr>
+        <tr><td>Plugin ecosystem</td><td>Growing (Rollup compat)</td><td>Mature (10+ years)</td></tr>
+        <tr><td>Use when</td><td>New projects, SPA, library</td><td>Legacy apps, Module Federation</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Next.js Rendering Strategies</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>SSG (Static Site Generation)</h4>
+      <p>HTML at build time. CDN-served. Use for rarely-changing content (blog, docs). Fastest TTFB.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>SSR (Server-Side Rendering)</h4>
+      <p>HTML per request on server. Fresh data. Use for personalised, SEO-critical dynamic pages.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>ISR (Incremental Static Regen)</h4>
+      <p>Static page regenerated in background after revalidate window. CDN speed + fresh data.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>React Server Components</h4>
+      <p>Next.js App Router default. Run on server only &#8212; direct DB access, no client JS shipped. Client components opt-in with 'use client'.</p>
+    </div>
+  </div>
+
+  <pre>// RSC: Server Component &#8212; no 'use client', async directly in component
+async function ProductPage({ params }) {
+  const product = await db.products.findById(params.id);  // direct DB access
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;{product.name}&lt;/h1&gt;
+      &lt;AddToCartButton id={product.id} /&gt;  {/* Client component */}
+    &lt;/div&gt;
+  );
+}</pre>
+
+  <h3>Code Splitting</h3>
+  <pre>// Route-level code splitting
+const Dashboard = React.lazy(() =&gt; import('./Dashboard'));
+
+&lt;Suspense fallback={&lt;Spinner /&gt;}&gt;
+  &lt;Dashboard /&gt;
+&lt;/Suspense&gt;</pre>
+</div>
+
+<!-- SECTION 5 -->
+<div id="s5" class="section page-break">
+  <div class="section-num">SECTION 05</div>
+  <h2 class="section-title">Advanced Patterns</h2>
+  <p class="lead">Structural patterns solve recurring design problems in React: sharing logic, building flexible APIs, and managing component communication without tight coupling.</p>
+
+  <h3>Container / Presentational Split</h3>
+  <pre>// Container: handles state and side effects
+function UserProfileContainer({ userId }) {
+  const { data, isLoading } = useQuery(['user', userId], fetchUser);
+  if (isLoading) return &lt;Skeleton /&gt;;
+  return &lt;UserProfile user={data} /&gt;;
+}
+
+// Presentational: pure function of props, easy to test
+function UserProfile({ user }) {
+  return &lt;div&gt;&lt;h2&gt;{user.name}&lt;/h2&gt;&lt;p&gt;{user.email}&lt;/p&gt;&lt;/div&gt;;
+}</pre>
+
+  <h3>Portal Pattern</h3>
+  <pre>import { createPortal } from 'react-dom';
+
+function Modal({ children, onClose }) {
+  return createPortal(
+    &lt;div className="modal-overlay" onClick={onClose}&gt;
+      &lt;div className="modal-content" onClick={e =&gt; e.stopPropagation()}&gt;
+        {children}
+      &lt;/div&gt;
+    &lt;/div&gt;,
+    document.body   // renders outside parent hierarchy
+  );
+}</pre>
+
+  <h3>Error Boundaries</h3>
+  <pre>class ErrorBoundary extends React.Component {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() { return { hasError: true }; }
+
+  componentDidCatch(error, info) { logErrorToService(error, info.componentStack); }
+
+  render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}</pre>
+
+  <h3>Optimistic Updates</h3>
+  <pre>async function addTodo(text) {
+  const tempId = crypto.randomUUID();
+  setTodos(prev =&gt; [...prev, { id: tempId, text, pending: true }]);  // optimistic
+  try {
+    const saved = await api.createTodo(text);
+    setTodos(prev =&gt; prev.map(t =&gt; t.id === tempId ? saved : t));   // confirm
+  } catch {
+    setTodos(prev =&gt; prev.filter(t =&gt; t.id !== tempId));            // rollback
+  }
+}</pre>
+
+  <h3>Prop Lifting vs Context</h3>
+  <p>Lift state to the nearest common ancestor when 2&#8211;3 siblings share it. Switch to Context when the state needs to reach components that are many levels deep, or when prop-drilling makes the intermediate components aware of data they don't use.</p>
+</div>
+
+<!-- SECTION 6 -->
+<div id="s6" class="section page-break">
+  <div class="section-num">SECTION 06</div>
+  <h2 class="section-title">Compound Components</h2>
+  <p class="lead">Compound components share implicit state via context, giving consumers full layout control without a large props surface &#8212; analogous to how native HTML elements like select/option work together.</p>
+
+  <h3>Why Compound Components?</h3>
+  <pre>// Props explosion &#8212; rigid, hard to customise layout
+&lt;Select options={opts} value={v} onChange={fn} label="Pick one" icon={...} footer={...} /&gt;
+
+// Compound &#8212; consumer controls structure
+&lt;Select value={v} onChange={fn}&gt;
+  &lt;Select.Trigger&gt;{selectedLabel}&lt;/Select.Trigger&gt;
+  &lt;Select.Dropdown&gt;
+    {opts.map(o =&gt; &lt;Select.Option key={o.id} value={o.id}&gt;{o.label}&lt;/Select.Option&gt;)}
+  &lt;/Select.Dropdown&gt;
+&lt;/Select&gt;</pre>
+
+  <h3>Implementation with Context</h3>
+  <pre>const SelectContext = createContext(null);
+
+function useSelectContext() {
+  const ctx = useContext(SelectContext);
+  if (!ctx) throw new Error('Must be used within Select');
+  return ctx;
+}
+
+function Select({ children, value, onChange }) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    &lt;SelectContext.Provider value={{ value, onChange, isOpen, setIsOpen }}&gt;
+      &lt;div className="select"&gt;{children}&lt;/div&gt;
+    &lt;/SelectContext.Provider&gt;
+  );
+}
+
+function Trigger({ children }) {
+  const { isOpen, setIsOpen } = useSelectContext();
+  return &lt;button onClick={() =&gt; setIsOpen(!isOpen)}&gt;{children}&lt;/button&gt;;
+}
+
+function Option({ value, children }) {
+  const ctx = useSelectContext();
+  return (
+    &lt;div
+      className={ctx.value === value ? 'selected' : ''}
+      onClick={() =&gt; { ctx.onChange(value); ctx.setIsOpen(false); }}
+    &gt;{children}&lt;/div&gt;
+  );
+}
+
+Select.Trigger = Trigger;
+Select.Option = Option;</pre>
+
+  <div class="callout callout-green">
+    <strong>Real-world examples</strong>
+    Radix UI and Headless UI are built entirely on the compound component pattern &#8212; they ship zero styles but full accessibility, and consumers compose the parts in their own markup.
+  </div>
+</div>
+
+<!-- SECTION 7 -->
+<div id="s7" class="section page-break">
+  <div class="section-num">SECTION 07</div>
+  <h2 class="section-title">Render Props &amp; Higher-Order Components</h2>
+  <p class="lead">Both patterns solve logic reuse before hooks existed. HOCs are still common in codebases and libraries. You need to understand, implement, and critique both patterns in interviews.</p>
+
+  <h3>Render Props</h3>
+  <p>A function prop that a component calls to know what to render. The component owns <em>logic</em>; the consumer owns <em>presentation</em>.</p>
+  <pre>function MouseTracker({ render }) {
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  return (
+    &lt;div onMouseMove={e =&gt; setPos({ x: e.clientX, y: e.clientY })}&gt;
+      {render(pos)}
+    &lt;/div&gt;
+  );
+}
+
+// Usage
+&lt;MouseTracker render={({ x, y }) =&gt; &lt;p&gt;Mouse: {x}, {y}&lt;/p&gt;} /&gt;
+
+// Modern equivalent &#8212; custom hook (no nesting, same logic reuse)
+const { x, y } = useMousePosition();</pre>
+
+  <h3>Higher-Order Components</h3>
+  <pre>// withAuth: HOC that guards routes
+function withAuth(WrappedComponent) {
+  return function AuthGuard(props) {
+    const { user } = useAuth();
+    if (!user) return &lt;Navigate to="/login" /&gt;;
+    return &lt;WrappedComponent {...props} /&gt;;
+  };
+}
+
+const ProtectedDashboard = withAuth(Dashboard);</pre>
+
+  <h3>HOC Caveats (say these in interviews)</h3>
+  <div class="callout callout-amber">
+    <strong>HOC pitfalls</strong>
+    <ul class="clean" style="margin-top:0.5rem">
+      <li>Prop name collisions &#8212; HOC props may shadow wrapped component props</li>
+      <li>Refs don't pass through &#8212; need React.forwardRef</li>
+      <li>Extra wrapper nodes in DevTools &#8212; always set displayName</li>
+      <li>Composition order matters &#8212; withAuth(withLogger(C)) is not the same as withLogger(withAuth(C))</li>
+    </ul>
+  </div>
+
+  <h3>Comparison</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Pattern</th><th>Logic Reuse</th><th>Nesting</th><th>Preferred?</th></tr></thead>
+      <tbody>
+        <tr><td>Custom Hooks</td><td>Yes</td><td>None</td><td>Yes &#8212; modern default</td></tr>
+        <tr><td>Render Props</td><td>Yes</td><td>Can nest</td><td>When component tree semantics matter</td></tr>
+        <tr><td>HOC</td><td>Yes</td><td>Extra wrapper nodes</td><td>Cross-cutting (auth guards, logging)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION 8 -->
+<div id="s8" class="section page-break">
+  <div class="section-num">SECTION 08</div>
+  <h2 class="section-title">State Management</h2>
+  <p class="lead">React's built-in state handles most cases. External state managers are warranted when state is shared across many component subtrees, needs to outlive the tree, or requires sophisticated devtools.</p>
+
+  <h3>Decision Tree</h3>
+  <div class="diagram">
+    <pre>
+  Does state need to be shared beyond the component?
+        |
+        No  -&gt;  useState / useReducer (local state)
+        |
+        Yes
+         |
+         +-- Only across a subtree? -&gt; useContext + useReducer
+         |
+         +-- Across the whole app?
+              |
+              +-- Server data (fetch, cache, sync) -&gt; TanStack Query / SWR
+              |
+              +-- Client global state
+                    +-- Simple  -&gt;  Zustand
+                    +-- Derived -&gt;  Jotai / Recoil
+                    +-- Large teams / time-travel debug -&gt;  Redux Toolkit
+    </pre>
+  </div>
+
+  <h3>Zustand</h3>
+  <pre>import { create } from 'zustand';
+
+const useCartStore = create((set) =&gt; ({
+  items: [],
+  addItem: (item) =&gt; set(state =&gt; ({ items: [...state.items, item] })),
+  removeItem: (id) =&gt; set(state =&gt; ({ items: state.items.filter(i =&gt; i.id !== id) })),
+}));
+
+// Component only re-renders when selected slice changes
+function CartCount() {
+  const count = useCartStore(state =&gt; state.items.length);
+  return &lt;span&gt;{count}&lt;/span&gt;;
+}</pre>
+
+  <h3>TanStack Query</h3>
+  <pre>const { data, isLoading, error } = useQuery({
+  queryKey: ['products', { category, page }],
+  queryFn: () =&gt; api.getProducts({ category, page }),
+  staleTime: 5 * 60 * 1000,   // data fresh for 5 min
+  gcTime: 30 * 60 * 1000,     // keep in cache 30 min after unmount
+});
+
+const mutation = useMutation({
+  mutationFn: (product) =&gt; api.createProduct(product),
+  onSuccess: () =&gt; queryClient.invalidateQueries({ queryKey: ['products'] }),
+});</pre>
+</div>
+
+<!-- SECTION 9 -->
+<div id="s9" class="section page-break">
+  <div class="section-num">SECTION 09</div>
+  <h2 class="section-title">TypeScript with React</h2>
+  <p class="lead">TypeScript and React are now inseparable in production codebases. Knowing the idiomatic patterns for typing props, events, generics, and hooks is a baseline for senior roles.</p>
+
+  <h3>Typing Props</h3>
+  <pre>interface ButtonProps {
+  variant: 'primary' | 'secondary' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  onClick?: (event: React.MouseEvent&lt;HTMLButtonElement&gt;) =&gt; void;
+  children: React.ReactNode;
+  disabled?: boolean;
+}
+
+// Extending native element props
+interface InputProps extends React.InputHTMLAttributes&lt;HTMLInputElement&gt; {
+  label: string;
+  error?: string;
+}
+
+function Input({ label, error, ...inputProps }: InputProps) {
+  return (
+    &lt;label&gt;
+      {label}
+      &lt;input {...inputProps} /&gt;
+      {error &amp;&amp; &lt;span className="error"&gt;{error}&lt;/span&gt;}
+    &lt;/label&gt;
+  );
+}</pre>
+
+  <h3>Typing Events &amp; Hooks</h3>
+  <pre>// Events
+const handleChange = (e: React.ChangeEvent&lt;HTMLInputElement&gt;) =&gt; setValue(e.target.value);
+const handleSubmit = (e: React.FormEvent&lt;HTMLFormElement&gt;) =&gt; { e.preventDefault(); };
+
+// useState with nullable
+const [user, setUser] = useState&lt;User | null&gt;(null);
+
+// useRef
+const inputRef = useRef&lt;HTMLInputElement&gt;(null);     // DOM ref
+const countRef = useRef&lt;number&gt;(0);                  // mutable value
+
+// Custom hook return type
+function useToggle(initial = false): [boolean, () =&gt; void] {
+  const [value, setValue] = useState(initial);
+  return [value, () =&gt; setValue(v =&gt; !v)];
+}</pre>
+
+  <h3>Generic Components</h3>
+  <pre>interface ListProps&lt;T&gt; {
+  items: T[];
+  getKey: (item: T) =&gt; string;
+  renderItem: (item: T) =&gt; React.ReactNode;
+}
+
+function List&lt;T&gt;({ items, getKey, renderItem }: ListProps&lt;T&gt;) {
+  return &lt;ul&gt;{items.map(item =&gt; &lt;li key={getKey(item)}&gt;{renderItem(item)}&lt;/li&gt;)}&lt;/ul&gt;;
+}
+
+// T inferred as User
+&lt;List items={users} getKey={u =&gt; u.id} renderItem={u =&gt; &lt;UserCard user={u} /&gt;} /&gt;</pre>
+
+  <h3>forwardRef</h3>
+  <pre>const FancyInput = React.forwardRef&lt;HTMLInputElement, InputProps&gt;(
+  function FancyInput({ label, ...props }, ref) {
+    return &lt;label&gt;{label}&lt;input ref={ref} {...props} /&gt;&lt;/label&gt;;
+  }
+);</pre>
+
+  <h3>Useful Utility Types</h3>
+  <pre>type ButtonProps = React.ComponentProps&lt;typeof Button&gt;;  // extract props from component
+type DivProps = React.HTMLAttributes&lt;HTMLDivElement&gt;;     // native element props
+type AnyChildren = { children: React.ReactNode };         // anything renderable</pre>
+</div>
+
+<!-- SECTION 10 -->
+<div id="s10" class="section page-break">
+  <div class="section-num">SECTION 10</div>
+  <h2 class="section-title">Interview Q&amp;A Cheatsheet</h2>
+  <p class="lead">Condensed answers to common senior React interview questions, structured to demonstrate architectural understanding rather than just API recall.</p>
+
+  <h3>Common Questions</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Question</th><th>Key Points to Cover</th></tr></thead>
+      <tbody>
+        <tr><td>What is the virtual DOM?</td><td>JS object tree representing UI. React diffs old vs new to compute minimal DOM mutations. Avoids expensive direct DOM manipulation on every state change.</td></tr>
+        <tr><td>What is React Fiber?</td><td>New reconciler (React 16). Fiber = unit of work. Enables interruptible rendering, priority scheduling, Suspense, concurrent mode.</td></tr>
+        <tr><td>When does a component re-render?</td><td>1) Own state changes. 2) Parent re-renders (even same props). 3) Context value changes. 4) A hook it uses updates. Prevent with React.memo + stable prop references.</td></tr>
+        <tr><td>useEffect vs useLayoutEffect?</td><td>useEffect fires after paint (async). useLayoutEffect fires after DOM mutation but before paint (sync, blocks paint). Use useLayoutEffect only for DOM measurements.</td></tr>
+        <tr><td>How does React.memo work?</td><td>Shallow compares all props. If same, skips render. Requires stable function/object references as props &#8212; use useCallback/useMemo on parent side.</td></tr>
+        <tr><td>Why not use array index as key?</td><td>React reuses DOM nodes by key. With index keys, reordering reuses nodes in place and only patches content &#8212; local state, focus, animations don't follow the data.</td></tr>
+        <tr><td>Compound vs props-based API?</td><td>Compound avoids props explosion, gives consumers layout control, shares implicit state via context. Use for multi-part components (Tabs, Select, Accordion).</td></tr>
+        <tr><td>How to handle server state?</td><td>TanStack Query: caching, deduplication, background refetch, staleTime. Don't use Redux for server data &#8212; it's the wrong abstraction.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Performance Optimisation Checklist</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Memoisation</h4>
+      <p>React.memo on expensive pure components. useMemo for expensive derived data. useCallback for handlers passed to memo children.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Virtualisation</h4>
+      <p>Render only visible rows in large lists with TanStack Virtual or react-window. Reduces DOM nodes from thousands to ~20.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Code Splitting</h4>
+      <p>React.lazy + Suspense per route. Dynamic imports for heavy libraries loaded on demand.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Concurrent Features</h4>
+      <p>useTransition for non-urgent updates. useDeferredValue for expensive derived renders. Keeps clicks and typing responsive.</p>
+    </div>
+  </div>
+
+  <h3>Red Flags to Avoid</h3>
+  <div class="callout callout-rose">
+    <strong>Common interview mistakes</strong>
+    <ul class="clean" style="margin-top:0.5rem">
+      <li>Mutating state directly: <code>state.items.push(x)</code> instead of creating new array</li>
+      <li>Missing deps in useEffect leading to stale closures or infinite loops</li>
+      <li>New object/function created in JSX on every render: breaks React.memo</li>
+      <li>Fetching data in render body without useEffect or Suspense</li>
+      <li>Using index as key when list order can change</li>
+    </ul>
+  </div>
+
+  <div class="pills">
+    <span class="pill pill-blue">Reconciliation</span>
+    <span class="pill pill-blue">Fiber</span>
+    <span class="pill pill-green">Hooks Rules</span>
+    <span class="pill pill-green">React.memo</span>
+    <span class="pill pill-purple">Compound Components</span>
+    <span class="pill pill-amber">useTransition</span>
+    <span class="pill pill-teal">TanStack Query</span>
+    <span class="pill pill-coral">TypeScript generics</span>
+  </div>
+
+  <div class="footer">React &#8212; Complete Reference Guide &#183; Interview Preparation &#183; April 2026</div>
+</div>
+
+</div><!-- /.container -->
+</div><!-- /.main-scroll -->
+</div><!-- /.topic-page -->
+
+<footer class="guide-footer">Interview Preparation Guide</footer>
+</body>
+</html>

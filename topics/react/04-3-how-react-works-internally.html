@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How React Works Internally – React</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../react.html">React</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">How React Works Internally</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">React</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-1-react-fundamentals.html">React Fundamentals</a></li>
+        <li><a href="03-2-react-hooks-deep-dive.html">React Hooks (Deep Dive)</a></li>
+        <li class="active"><a href="04-3-how-react-works-internally.html" class="active">How React Works Internally</a></li>
+        <li><a href="05-4-nodejs-vite-the-react-ecosystem.html">Node.js, Vite &amp; The React Ecosystem</a></li>
+        <li><a href="06-5-advanced-patterns-concepts.html">Advanced Patterns &amp; Concepts</a></li>
+        <li><a href="07-1-compound-components.html">Compound Components</a></li>
+        <li><a href="08-2-render-props.html">Render Props</a></li>
+        <li><a href="09-3-higher-order-components-hoc.html">Higher-Order Components (HOC)</a></li>
+        <li><a href="10-6-typescript-with-react.html">TypeScript with React</a></li>
+        <li><a href="11-7-top-interview-questions-rapid-fire.html">Top Interview Questions — Rapid Fire</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>3. How React Works Internally</h1>
+<h3>3.1 Virtual DOM &amp; Reconciliation</h3>
+<p>The Problem: Direct DOM manipulation is slow. Every update triggers layout recalculation, repainting, and compositing.</p>
+<p>React’s Solution — Virtual DOM</p>
+<ul>
+  <li>Step 1: Component renders → Creates a Virtual DOM tree (plain JS objects).</li>
+  <li>Step 2: State changes → Creates a NEW Virtual DOM tree.</li>
+  <li>Step 3: React DIFFs old tree vs new tree (Reconciliation).</li>
+  <li>Step 4: React applies ONLY the minimal changes to the real DOM.</li>
+</ul>
+<p>What a Virtual DOM Node Looks Like</p>
+<pre><code>// &lt;div className=&quot;card&quot;&gt;&lt;h1&gt;Hello&lt;/h1&gt;&lt;/div&gt; becomes:
+{
+type: 'div',
+props: { className: 'card' },
+children: [{
+type: 'h1',
+props: {},
+children: ['Hello']
+}]
+}</code></pre>
+<p>Reconciliation Rules</p>
+<ul>
+  <li>Different element types → tear down old tree, build new one.</li>
+  <li>Same element type → keep node, update changed attributes only.</li>
+  <li>Lists → use key prop to match old/new items efficiently.</li>
+</ul>
+<h3>3.2 React Fiber Architecture</h3>
+<p>Before Fiber (React ≤15): Reconciliation was SYNCHRONOUS. A large update blocked the main thread — UI froze, animations janked, inputs lagged.</p>
+<p>Fiber (React 16+): Rewrote reconciliation as an INCREMENTAL, interruptible process. Each component becomes a “Fiber node” — a unit of work that React can pause between.</p>
+<p>Two Phases</p>
+<ul>
+  <li>Render Phase (interruptible): React builds the new fiber tree and diffs it. Can be paused/restarted. No side effects.</li>
+  <li>Commit Phase (synchronous): React applies changes to the DOM in one go. Cannot be interrupted.</li>
+</ul>
+<div class="table-wrap"><table>
+  <tr><th>Priority System React assigns priority: User input &gt; Animations &gt; Data fetching &gt; Offscreen updates. High-priority updates are processed first, keeping the UI responsive.</th></tr>
+</table></div>
+<h3>3.3 Batching &amp; Concurrent Features (React 18+)</h3>
+<p>Automatic Batching: React 18 groups multiple state updates into a single re-render, even inside setTimeout, promises, and native event handlers.</p>
+<p>useTransition — Mark Updates as Non-Urgent</p>
+<pre><code>const [isPending, startTransition] = useTransition();
+const onChange = (e) =&gt; {
+setQuery(e.target.value);           // Urgent: update input immediately
+startTransition(() =&gt; {
+setResults(filterData(e.target.value)); // Non-urgent: can be interrupted
+});
+};</code></pre>
+<p>useDeferredValue — Defer Expensive Rendering</p>
+<pre><code>const deferredText = useDeferredValue(text);
+return &lt;ExpensiveList filter={deferredText} /&gt;;</code></pre>
+      </article>
+
+      <nav class="page-nav">
+        <a href="03-2-react-hooks-deep-dive.html">&#8592; React Hooks (Deep Dive)</a>
+        <span class="spacer"></span>
+        <a href="05-4-nodejs-vite-the-react-ecosystem.html">Node.js, Vite &amp; The React Ecosystem &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

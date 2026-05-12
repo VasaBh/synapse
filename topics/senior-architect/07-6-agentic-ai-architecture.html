@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AGENTIC AI ARCHITECTURE – Senior Architect</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../senior-architect.html">Senior Architect</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">AGENTIC AI ARCHITECTURE</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Senior Architect</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-1-core-architecture-fundamentals.html">CORE ARCHITECTURE FUNDAMENTALS</a></li>
+        <li><a href="03-2-microservices-deep-dive.html">MICROSERVICES – DEEP DIVE</a></li>
+        <li><a href="04-3-openshift-routing-load-balancing.html">OPENSHIFT – ROUTING &amp; LOAD BALANCING</a></li>
+        <li><a href="05-4-openshift-horizontal-vertical-scaling.html">OPENSHIFT – HORIZONTAL &amp; VERTICAL SCALING</a></li>
+        <li><a href="06-5-mcp-model-context-protocol.html">MCP – MODEL CONTEXT PROTOCOL</a></li>
+        <li class="active"><a href="07-6-agentic-ai-architecture.html" class="active">AGENTIC AI ARCHITECTURE</a></li>
+        <li><a href="08-7-interview-qa-cheat-sheet.html">INTERVIEW Q&amp;A CHEAT SHEET</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>6. AGENTIC AI ARCHITECTURE</h1>
+<h3>6.1 What is an AI Agent?</h3>
+<p>An AI agent is an autonomous system that perceives its environment, reasons about it, takes actions (often via tools), observes the results, and iterates until a goal is achieved — without step-by-step human instruction for each action.</p>
+<p>The Agent Loop</p>
+<ul>
+  <li>Perceive – receive input (user message, observation from environment)</li>
+  <li>Reason – use LLM to plan next action (what tool to call, what to say)</li>
+  <li>Act – execute tool call / produce output</li>
+  <li>Observe – receive tool result / environment feedback</li>
+  <li>Iterate – repeat until goal achieved or stopping condition met</li>
+</ul>
+<h3>6.2 Core Reasoning Patterns</h3>
+<div class="table-wrap"><table>
+  <tr><th>Pattern</th><th>Description</th><th>Best For</th></tr>
+  <tr><td>ReAct</td><td>Interleave Reasoning and Acting; chain of thought drives tool selection</td><td>General-purpose agents</td></tr>
+  <tr><td>Plan &amp; Execute</td><td>Separate planning step from execution; planner creates task list</td><td>Complex multi-step tasks</td></tr>
+  <tr><td>Reflexion</td><td>Agent critiques its own output and retries with self-feedback</td><td>Quality-critical tasks</td></tr>
+  <tr><td>Tree of Thought</td><td>Explore multiple reasoning branches; backtrack from dead ends</td><td>Complex problem solving</td></tr>
+</table></div>
+<h3>6.3 Multi-Agent Architectures</h3>
+<p>Orchestrator–Subagent</p>
+<ul>
+  <li>Central orchestrator decomposes task and delegates to specialist subagents</li>
+  <li>Subagents: ResearchAgent, WritingAgent, CodeAgent, ValidationAgent</li>
+  <li>Orchestrator aggregates results and handles failures/retries</li>
+  <li>Analogous to a project manager delegating to a team</li>
+</ul>
+<p>Peer-to-Peer (Swarm)</p>
+<ul>
+  <li>Agents communicate directly without central coordinator</li>
+  <li>Emergent behaviour from inter-agent negotiation</li>
+  <li>Harder to debug and control; risk of circular dependencies</li>
+</ul>
+<p>Pipeline / DAG</p>
+<ul>
+  <li>Agents arranged in a directed acyclic graph</li>
+  <li>Output of one agent feeds into the next</li>
+  <li>Deterministic; easy to observe and test</li>
+  <li>Frameworks: LangGraph (graph-based), Prefect/Airflow (workflow DAGs)</li>
+</ul>
+<h3>6.4 Memory Types</h3>
+<div class="table-wrap"><table>
+  <tr><th>Memory Type</th><th>Storage</th><th>Lifetime</th><th>Use Case</th></tr>
+  <tr><td>In-context</td><td>LLM context window</td><td>Single conversation</td><td>Current task state, recent history</td></tr>
+  <tr><td>External</td><td>Vector DB (Pinecone, Weaviate)</td><td>Persistent across sessions</td><td>Long-term knowledge, past interactions</td></tr>
+  <tr><td>Episodic</td><td>Structured store (Redis, SQL)</td><td>Configurable</td><td>Past task summaries, user preferences</td></tr>
+  <tr><td>Semantic</td><td>Knowledge graph</td><td>Persistent</td><td>Entity relationships, domain facts</td></tr>
+</table></div>
+<h3>6.5 Key Design Challenges</h3>
+<p>Safety &amp; Control</p>
+<ul>
+  <li>Minimal footprint – request only necessary permissions; avoid storing sensitive data</li>
+  <li>Prefer reversible over irreversible actions (draft before send; stage before deploy)</li>
+  <li>Human-in-the-loop checkpoints – pause before destructive or high-value actions</li>
+  <li>Confirmation gates – 'Are you sure you want to delete 500 records?' before proceeding</li>
+  <li>Scope limiting – define clear boundaries; agent should refuse out-of-scope actions</li>
+</ul>
+<p>Reliability</p>
+<ul>
+  <li>Idempotency – tool calls may be retried; ensure same call twice = same result</li>
+  <li>Error recovery – agent should recognise failure and replan, not loop infinitely</li>
+  <li>Timeouts – every tool call must have a maximum wait time</li>
+  <li>Max iteration limit – prevent infinite agent loops; set a hard cap</li>
+</ul>
+<p>Observability</p>
+<ul>
+  <li>Trace every step of the agent loop (which tool, which arguments, which result)</li>
+  <li>Structured audit logs for compliance and debugging</li>
+  <li>Replay capability – re-run a failed agent run with same state for debugging</li>
+</ul>
+<p>Security</p>
+<ul>
+  <li>Prompt injection – malicious content in tool results can hijack agent behaviour</li>
+  <li>Tool access control – agent should only have tools relevant to current task</li>
+  <li>Data exfiltration – prevent agent from sending sensitive data to external endpoints</li>
+  <li>Sandboxed code execution – if agent runs code, isolate in container/VM</li>
+</ul>
+<h3>6.6 Frameworks Comparison</h3>
+<div class="table-wrap"><table>
+  <tr><th>Framework</th><th>Approach</th><th>Strengths</th><th>Weaknesses</th></tr>
+  <tr><td>LangGraph</td><td>Graph-based state machines</td><td>Fine-grained control; debuggable</td><td>Verbose setup</td></tr>
+  <tr><td>CrewAI</td><td>Role-based multi-agent crews</td><td>Fast to prototype; role abstractions</td><td>Less control over internals</td></tr>
+  <tr><td>AutoGen</td><td>Conversational multi-agent</td><td>Natural multi-agent dialogue</td><td>Harder to constrain</td></tr>
+  <tr><td>LlamaIndex</td><td>Data-centric agentic RAG</td><td>Excellent for knowledge retrieval</td><td>Less suited for action-heavy agents</td></tr>
+</table></div>
+<h3>6.7 Agentic AI + MCP Integration</h3>
+<ul>
+  <li>MCP provides the standardised tool layer for agents to interact with external systems</li>
+  <li>Agent (LLM) uses MCP client to discover available tools and resources at runtime</li>
+  <li>Agent selects and calls tools via MCP protocol; receives structured results</li>
+  <li>MCP Sampling allows the MCP server itself to trigger AI reasoning (meta-agents)</li>
+  <li>Result: clean separation between AI reasoning logic and tool implementation</li>
+</ul>
+<div class="callout tip">💡 Interview Tip: Expected question: 'How do you prevent an agent from taking destructive actions?' Answer: Human-in-the-loop gates for irreversible actions, prefer reversible actions, scope-limited tools, rate limiting, audit logging, and confirmation prompts before high-impact operations.</div>
+      </article>
+
+      <nav class="page-nav">
+        <a href="06-5-mcp-model-context-protocol.html">&#8592; MCP – MODEL CONTEXT PROTOCOL</a>
+        <span class="spacer"></span>
+        <a href="08-7-interview-qa-cheat-sheet.html">INTERVIEW Q&amp;A CHEAT SHEET &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

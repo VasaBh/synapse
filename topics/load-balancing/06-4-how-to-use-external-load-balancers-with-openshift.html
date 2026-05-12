@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to Use External Load Balancers WITH OpenShift – Load Balancing</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../load-balancing.html">Load Balancing</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">How to Use External Load Balancers WITH OpenShift</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Load Balancing</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-api-traffic-load-balancing-fundamentals.html">API &amp; Traffic Load Balancing Fundamentals</a></li>
+        <li><a href="04-2-load-balancing-inside-openshift.html">Load Balancing Inside OpenShift</a></li>
+        <li><a href="05-3-load-balancing-outside-openshift-external.html">Load Balancing Outside OpenShift (External)</a></li>
+        <li class="active"><a href="06-4-how-to-use-external-load-balancers-with-openshift.html" class="active">How to Use External Load Balancers WITH OpenShift</a></li>
+        <li><a href="07-5-canary-deployments-in-openshift.html">Canary Deployments in OpenShift</a></li>
+        <li><a href="08-6-load-balancing-between-production-and-cobdr-environments.html">Load Balancing Between Production and COB/DR Environments</a></li>
+        <li><a href="09-7-complete-load-balancing-stack-end-to-end.html">Complete Load Balancing Stack — End-to-End</a></li>
+        <li><a href="10-8-decision-guide-which-approach-to-use.html">Decision Guide — Which Approach to Use?</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>4. How to Use External Load Balancers WITH OpenShift</h1>
+<p>The integration pattern places the external load balancer as the entry point, forwarding traffic to OpenShift nodes:</p>
+<pre><code>CLIENT REQUEST
+|
+v
++---------------------------+
+|   External Load Balancer   |
+|   (F5 / HAProxy / NLB)     |
++---------------------------+
+/          |          \
+v           v           v
++-----------+ +-----------+ +-----------+
+| Worker    | | Worker    | | Worker    |
+| Node 1    | | Node 2    | | Node 3    |
+| [Router]  | | [Router]  | | [Router]  |
++-----------+ +-----------+ +-----------+
+|             |             |
+v             v             v
++-----------+ +-----------+ +-----------+
+| Service   | | Service   | | Service   |
+|  -&gt; Pods  | |  -&gt; Pods  | |  -&gt; Pods  |
++-----------+ +-----------+ +-----------+</code></pre>
+<h4>4.1 Health Check Configuration</h4>
+<p>The external load balancer must health-check OpenShift endpoints to know which nodes are healthy:</p>
+<ul>
+  <li>API health check: GET /readyz on port 6443 (HTTPS). Must detect API server down within 30 seconds.</li>
+  <li>Router/Ingress health check: GET /healthz/ready on port 1936 (HAProxy stats port). Detects unhealthy router pods.</li>
+</ul>
+<h4>4.2 TLS Termination Strategies</h4>
+<p>There are three approaches to handling TLS when an external LB sits in front of OpenShift:</p>
+<div class="table-wrap"><table>
+  <tr><th>Strategy</th><th>How It Works</th><th>Pros / Cons</th></tr>
+  <tr><td>SSL Passthrough</td><td>External LB forwards encrypted traffic directly to OpenShift Router. No TLS termination on the LB.</td><td>Pro: Simple setup, end-to-end encryption. Con: LB cannot inspect HTTP content, no L7 routing on LB.</td></tr>
+  <tr><td>SSL Termination</td><td>External LB terminates TLS, forwards plain HTTP to OpenShift Router. Certs managed on the LB.</td><td>Pro: LB can inspect/modify HTTP. Con: Traffic is unencrypted between LB and Router (unless on trusted network).</td></tr>
+  <tr><td>SSL Re-encryption</td><td>External LB terminates TLS, then re-encrypts with a new TLS connection to OpenShift Router.</td><td>Pro: Full encryption throughout. LB can still inspect traffic. Con: Double TLS overhead, more cert management.</td></tr>
+</table></div>
+<h4>4.3 Example: HAProxy External LB for OpenShift</h4>
+<pre><code># /etc/haproxy/haproxy.cfg
+defaults
+mode tcp
+timeout connect 30s
+timeout client 1m
+timeout server 1m
+# --- OpenShift API (port 6443) ---
+frontend ocp-api
+bind *:6443
+default_backend api-servers
+backend api-servers
+option httpchk GET /readyz HTTP/1.0
+option log-health-checks
+balance roundrobin
+server master-0 192.168.1.10:6443 check check-ssl inter 1s fall 2 rise 3 verify none
+server master-1 192.168.1.11:6443 check check-ssl inter 1s fall 2 rise 3 verify none
+server master-2 192.168.1.12:6443 check check-ssl inter 1s fall 2 rise 3 verify none
+# --- Application Ingress (port 443) ---
+frontend ocp-https
+bind *:443
+default_backend ingress-routers
+backend ingress-routers
+option httpchk GET /healthz/ready HTTP/1.0
+balance roundrobin
+server worker-0 192.168.1.20:443 check check-ssl port 1936 inter 1s fall 2 rise 3 verify none
+server worker-1 192.168.1.21:443 check check-ssl port 1936 inter 1s fall 2 rise 3 verify none
+server worker-2 192.168.1.22:443 check check-ssl port 1936 inter 1s fall 2 rise 3 verify none</code></pre>
+      </article>
+
+      <nav class="page-nav">
+        <a href="05-3-load-balancing-outside-openshift-external.html">&#8592; Load Balancing Outside OpenShift (External)</a>
+        <span class="spacer"></span>
+        <a href="07-5-canary-deployments-in-openshift.html">Canary Deployments in OpenShift &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

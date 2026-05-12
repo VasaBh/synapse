@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OPENSHIFT – HORIZONTAL &amp; VERTICAL SCALING – Senior Architect</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../senior-architect.html">Senior Architect</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">OPENSHIFT – HORIZONTAL &amp; VERTICAL SCALING</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Senior Architect</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-1-core-architecture-fundamentals.html">CORE ARCHITECTURE FUNDAMENTALS</a></li>
+        <li><a href="03-2-microservices-deep-dive.html">MICROSERVICES – DEEP DIVE</a></li>
+        <li><a href="04-3-openshift-routing-load-balancing.html">OPENSHIFT – ROUTING &amp; LOAD BALANCING</a></li>
+        <li class="active"><a href="05-4-openshift-horizontal-vertical-scaling.html" class="active">OPENSHIFT – HORIZONTAL &amp; VERTICAL SCALING</a></li>
+        <li><a href="06-5-mcp-model-context-protocol.html">MCP – MODEL CONTEXT PROTOCOL</a></li>
+        <li><a href="07-6-agentic-ai-architecture.html">AGENTIC AI ARCHITECTURE</a></li>
+        <li><a href="08-7-interview-qa-cheat-sheet.html">INTERVIEW Q&amp;A CHEAT SHEET</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>4. OPENSHIFT – HORIZONTAL &amp; VERTICAL SCALING</h1>
+<h3>4.1 Horizontal Scaling (Scale Out/In)</h3>
+<p>Adds or removes pod replicas to distribute load across more instances.</p>
+<p>HPA – Horizontal Pod Autoscaler</p>
+<ul>
+  <li>Watches metrics server; compares current vs target utilisation</li>
+  <li>Scales pods up when: current / target &gt; 1.0; scales down when: current / target &lt; 1.0</li>
+  <li>Default metric: CPU utilisation (target 50–80% is common)</li>
+  <li>Custom metrics: Kafka consumer lag, queue depth, RPS via Prometheus Adapter</li>
+  <li>Key settings: minReplicas, maxReplicas, scaleUp / scaleDown stabilization windows</li>
+</ul>
+<div class="callout warn">⚠️ Key Concept: Stabilization window prevents 'flapping'. Default scale-down stabilization is 300 seconds — pods don't disappear immediately after load drops.</div>
+<p>KEDA – Kubernetes Event-Driven Autoscaler</p>
+<ul>
+  <li>Extends HPA; scales based on event source metrics</li>
+  <li>Supports 50+ scalers: Kafka, RabbitMQ, Azure Service Bus, SQS, Cron schedule</li>
+  <li>Scale-to-zero capability – ideal for batch jobs and queue consumers</li>
+  <li>Works by creating HPA objects under the hood; fully Kubernetes-native</li>
+</ul>
+<p>Cluster Autoscaler (Node-level Scaling)</p>
+<ul>
+  <li>Adds nodes when pods are Pending due to insufficient resources</li>
+  <li>Removes underutilised nodes after configurable idle period</li>
+  <li>Works with MachineSets in OpenShift (cloud-provider aware)</li>
+  <li>Pod Disruption Budgets (PDB) protect minimum available pods during node drain</li>
+</ul>
+<h3>4.2 Vertical Scaling (Scale Up/Down)</h3>
+<p>Increases or decreases CPU and memory allocated to existing pods.</p>
+<p>VPA – Vertical Pod Autoscaler</p>
+<div class="table-wrap"><table>
+  <tr><th>VPA Mode</th><th>Behaviour</th><th>Use Case</th></tr>
+  <tr><td>Off</td><td>Generates recommendations only; no action taken</td><td>Capacity planning; tuning guidance</td></tr>
+  <tr><td>Initial</td><td>Sets resources at pod creation time only</td><td>Right-size new pods without restarts</td></tr>
+  <tr><td>Auto</td><td>Evicts and restarts pods with new resource values</td><td>Automated right-sizing (causes restarts)</td></tr>
+  <tr><td>Recreate</td><td>Same as Auto but more aggressive eviction</td><td>Stateless workloads only</td></tr>
+</table></div>
+<p>Resource Requests vs Limits</p>
+<div class="table-wrap"><table>
+  <tr><th>Property</th><th>Request</th><th>Limit</th></tr>
+  <tr><td>Definition</td><td>Guaranteed minimum reserved</td><td>Hard ceiling – cannot exceed</td></tr>
+  <tr><td>Scheduler use</td><td>Used to place pod on node</td><td>Not used for scheduling</td></tr>
+  <tr><td>CPU breach</td><td>N/A</td><td>CPU throttled (not killed)</td></tr>
+  <tr><td>Memory breach</td><td>N/A</td><td>OOMKilled – container restarted</td></tr>
+  <tr><td>Best practice</td><td>Set based on average load</td><td>Set based on peak load + buffer</td></tr>
+</table></div>
+<p>LimitRange &amp; ResourceQuota</p>
+<ul>
+  <li>LimitRange – namespace-level defaults for requests/limits per pod/container</li>
+  <li>ResourceQuota – caps total CPU/memory/object count per namespace</li>
+  <li>Without LimitRange, containers with no limits can starve other pods on the node</li>
+</ul>
+<h3>4.3 HPA vs VPA – Decision Guide</h3>
+<div class="table-wrap"><table>
+  <tr><th>Workload Type</th><th>Recommended Scaler</th><th>Reason</th></tr>
+  <tr><td>Stateless APIs / web services</td><td>HPA</td><td>Safely add replicas; no state to migrate</td></tr>
+  <tr><td>Traffic spike scenarios</td><td>HPA + KEDA</td><td>Fast scale-out triggered by queue depth or RPS</td></tr>
+  <tr><td>Stateful databases, singletons</td><td>VPA (Off/Initial)</td><td>Can't simply add replicas; tune resources instead</td></tr>
+  <tr><td>Memory-bound ML inference</td><td>VPA</td><td>More memory needed, not more copies</td></tr>
+  <tr><td>Event-driven batch jobs</td><td>KEDA</td><td>Scale-to-zero between job runs</td></tr>
+  <tr><td>Mixed workload</td><td>HPA + VPA(Off)</td><td>HPA scales pods; VPA gives resource recommendations</td></tr>
+</table></div>
+<div class="callout warn">⚠️ Key Concept: Do NOT use HPA and VPA (Auto/Recreate mode) on the same CPU/memory metric simultaneously. Use VPA in 'Off' mode alongside HPA — it gives recommendations without conflicting with HPA's decisions.</div>
+<h3>4.4 OpenShift-Specific: MachineSets &amp; MachineAutoscaler</h3>
+<ul>
+  <li>MachineSet – declarative definition of a group of nodes (cloud-provider aware: AWS, GCP, Azure)</li>
+  <li>MachineAutoscaler – automatically adjusts MachineSet replica count based on cluster demand</li>
+  <li>ClusterAutoscaler – coordinates multiple MachineAutoscalers; defines cluster-wide min/max nodes</li>
+  <li>More powerful than vanilla K8s node autoscaling — integrates with cloud APIs directly</li>
+</ul>
+<h3>4.5 Key CLI Commands</h3>
+<p>Horizontal Scaling</p>
+<ul>
+  <li>oc scale deployment my-app --replicas=5                   # manual scale</li>
+  <li>oc get hpa                                                # list all HPAs</li>
+  <li>oc describe hpa my-app-hpa                               # current metrics vs target</li>
+  <li>oc autoscale deployment my-app --min=2 --max=10 --cpu-percent=70</li>
+</ul>
+<p>Vertical / Node Scaling</p>
+<ul>
+  <li>oc describe vpa my-app-vpa                               # VPA recommendations</li>
+  <li>oc get machines -n openshift-machine-api                 # list machines</li>
+  <li>oc get machineautoscaler -n openshift-machine-api        # list autoscalers</li>
+</ul>
+<div class="callout tip">💡 Interview Tip: Interview answer for 'How do you prevent cascading failure during a traffic spike?' — HPA scales pods + Cluster Autoscaler adds nodes + PDB keeps minimum pods available + Circuit Breaker stops cascade. Layer your defences.</div>
+      </article>
+
+      <nav class="page-nav">
+        <a href="04-3-openshift-routing-load-balancing.html">&#8592; OPENSHIFT – ROUTING &amp; LOAD BALANCING</a>
+        <span class="spacer"></span>
+        <a href="06-5-mcp-model-context-protocol.html">MCP – MODEL CONTEXT PROTOCOL &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

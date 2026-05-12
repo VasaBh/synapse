@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Custom Metrics Autoscaler (KEDA) – Autoscaling</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../autoscaling.html">Autoscaling</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Custom Metrics Autoscaler (KEDA)</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Autoscaling</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-scaling-fundamentals.html">Scaling Fundamentals</a></li>
+        <li><a href="04-2-horizontal-pod-autoscaler-hpa.html">Horizontal Pod Autoscaler (HPA)</a></li>
+        <li><a href="05-3-vertical-pod-autoscaler-vpa.html">Vertical Pod Autoscaler (VPA)</a></li>
+        <li class="active"><a href="06-4-custom-metrics-autoscaler-keda.html" class="active">Custom Metrics Autoscaler (KEDA)</a></li>
+        <li><a href="07-5-cluster-and-machine-autoscaler-node-scaling.html">Cluster and Machine Autoscaler (Node Scaling)</a></li>
+        <li><a href="08-6-openshift-serverless-knative-autoscaling.html">OpenShift Serverless (Knative) Autoscaling</a></li>
+        <li><a href="09-7-fastapi-publishing-metrics-for-autoscaling.html">FastAPI: Publishing Metrics for Autoscaling</a></li>
+        <li><a href="10-8-what-is-not-possible-limitations.html">What is NOT Possible — Limitations</a></li>
+        <li><a href="11-9-decision-guide-which-autoscaler-to-use.html">Decision Guide — Which Autoscaler to Use?</a></li>
+        <li><a href="12-10-end-to-end-autoscaling-architecture.html">End-to-End Autoscaling Architecture</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>4. Custom Metrics Autoscaler (KEDA)</h1>
+<p>KEDA (Kubernetes Event-Driven Autoscaler) is available as the Custom Metrics Autoscaler Operator in OpenShift from version 4.12+. It is a CNCF incubating project co-founded by Red Hat. KEDA extends HPA by providing access to 70+ external metric sources and enabling scale-to-zero.</p>
+<pre><code>How KEDA Works
++------------------+    +-----------------+    +--------+    +------------+
+| External Metrics |    | KEDA Operator   |    |  HPA   |    | Deployment |
+| Sources:         |---&gt;| (ScaledObject)  |---&gt;|        |---&gt;| replicas   |
+|                  |    |                 |    |        |    |            |
+| - Prometheus     |    | Fetches metrics |    | Scales |    | 0..N pods  |
+| - Kafka          |    | Feeds to HPA as |    | pods   |    |            |
+| - RabbitMQ       |    | external metrics|    |        |    |            |
+| - Cron           |    |                 |    |        |    |            |
+| - HTTP/RPS       |    | Manages scale   |    |        |    |            |
+| - 70+ triggers   |    | to/from zero    |    |        |    |            |
++------------------+    +-----------------+    +--------+    +------------+</code></pre>
+<h3>4.1 Popular Trigger Sources</h3>
+<div class="table-wrap"><table>
+  <tr><th>Trigger</th><th>Metric</th><th>Example Use Case</th></tr>
+  <tr><td>Prometheus</td><td>Any PromQL query: request rate, error rate, latency, custom business metrics.</td><td>Scale on HTTP requests/second from FastAPI /metrics endpoint.</td></tr>
+  <tr><td>Kafka</td><td>Consumer group lag (messages in topic minus consumed).</td><td>Scale consumers when message backlog grows.</td></tr>
+  <tr><td>RabbitMQ</td><td>Queue depth (number of messages in queue).</td><td>Scale workers when queue fills up.</td></tr>
+  <tr><td>Cron</td><td>Schedule-based (time of day, day of week).</td><td>Pre-scale before known traffic peaks (e.g., 9 AM rush).</td></tr>
+  <tr><td>CPU / Memory</td><td>Pod resource utilisation (like HPA but with scale-to-zero).</td><td>Same as HPA but allows scaling to 0 replicas.</td></tr>
+  <tr><td>AWS SQS / Azure SB</td><td>Cloud message queue depth.</td><td>Serverless-style processing of cloud queue messages.</td></tr>
+</table></div>
+<h3>4.2 Example: Scale on Prometheus HTTP Requests</h3>
+<p>This example scales a FastAPI deployment based on total HTTP requests per second, as reported by Prometheus:</p>
+<pre><code># Step 1: TriggerAuthentication for Prometheus/Thanos
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+name: keda-trigger-auth-prometheus
+spec:
+secretTargetRef:
+- parameter: bearerToken
+name: thanos-token
+key: token
+- parameter: ca
+name: thanos-token
+key: ca.crt
+---
+# Step 2: ScaledObject
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+name: my-api-scaler
+spec:
+scaleTargetRef:
+name: my-api                    # Deployment name
+minReplicaCount: 1                # Min pods (0 = scale to zero)
+maxReplicaCount: 20               # Max pods
+pollingInterval: 15               # Check metrics every 15s
+cooldownPeriod: 300               # Wait 5 min before scaling to min
+triggers:
+- type: prometheus
+metadata:
+serverAddress: https://thanos-querier.openshift-monitoring.svc.cluster.local:9092
+metricName: http_requests_per_second
+query: |
+sum(rate(http_requests_total{namespace=&quot;my-ns&quot;,service=&quot;my-api&quot;}[2m]))
+threshold: &quot;50&quot;             # Scale up when RPS &gt; 50 per pod
+authModes: &quot;bearer&quot;
+authenticationRef:
+name: keda-trigger-auth-prometheus</code></pre>
+<p>This means: if the average HTTP requests per second per pod exceeds 50, KEDA tells HPA to add more pods. When traffic drops, pods are removed. If minReplicaCount is set to 0, the deployment can scale to zero pods during idle periods.</p>
+<h3>4.3 Example: Kafka Consumer Lag</h3>
+<pre><code>apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+name: kafka-consumer-scaler
+spec:
+scaleTargetRef:
+name: kafka-consumer
+minReplicaCount: 0
+maxReplicaCount: 30
+triggers:
+- type: kafka
+metadata:
+bootstrapServers: kafka-cluster-kafka-bootstrap:9092
+consumerGroup: my-consumer-group
+topic: orders
+lagThreshold: &quot;100&quot;          # Scale when lag &gt; 100 messages</code></pre>
+      </article>
+
+      <nav class="page-nav">
+        <a href="05-3-vertical-pod-autoscaler-vpa.html">&#8592; Vertical Pod Autoscaler (VPA)</a>
+        <span class="spacer"></span>
+        <a href="07-5-cluster-and-machine-autoscaler-node-scaling.html">Cluster and Machine Autoscaler (Node Scaling) &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

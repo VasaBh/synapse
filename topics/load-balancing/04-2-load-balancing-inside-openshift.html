@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Load Balancing Inside OpenShift – Load Balancing</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../load-balancing.html">Load Balancing</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Load Balancing Inside OpenShift</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Load Balancing</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-api-traffic-load-balancing-fundamentals.html">API &amp; Traffic Load Balancing Fundamentals</a></li>
+        <li class="active"><a href="04-2-load-balancing-inside-openshift.html" class="active">Load Balancing Inside OpenShift</a></li>
+        <li><a href="05-3-load-balancing-outside-openshift-external.html">Load Balancing Outside OpenShift (External)</a></li>
+        <li><a href="06-4-how-to-use-external-load-balancers-with-openshift.html">How to Use External Load Balancers WITH OpenShift</a></li>
+        <li><a href="07-5-canary-deployments-in-openshift.html">Canary Deployments in OpenShift</a></li>
+        <li><a href="08-6-load-balancing-between-production-and-cobdr-environments.html">Load Balancing Between Production and COB/DR Environments</a></li>
+        <li><a href="09-7-complete-load-balancing-stack-end-to-end.html">Complete Load Balancing Stack — End-to-End</a></li>
+        <li><a href="10-8-decision-guide-which-approach-to-use.html">Decision Guide — Which Approach to Use?</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>2. Load Balancing Inside OpenShift</h1>
+<p>OpenShift provides multiple layers of load balancing built into the platform. Each layer operates at a different level and serves a different purpose. This section covers every mechanism available natively within an OpenShift cluster.</p>
+<h3>2.1 Kubernetes Service (ClusterIP) — Internal L4</h3>
+<p>This is the most fundamental load balancing mechanism. When you create a Kubernetes Service of type ClusterIP, the underlying network plugin (kube-proxy with iptables/IPVS, or OVN-Kubernetes in OpenShift 4) creates rules that distribute traffic across all pods matching the service selector. The default algorithm is random round-robin.</p>
+<pre><code>┌─────────────────────────────────────────────┐
+│   Kubernetes Service (ClusterIP)            │
+│   my-api-service:8080                       │
+│                                             │
+│   ┌──────┐  ┌──────┐  ┌──────┐             │
+│   │ Pod  │  │ Pod  │  │ Pod  │             │
+│   │  #1  │  │  #2  │  │  #3  │             │
+│   └──────┘  └──────┘  └──────┘             │
+└─────────────────────────────────────────────┘
+kube-proxy / OVN-Kubernetes rules
+distribute traffic randomly across all pods</code></pre>
+<p>Example YAML:</p>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+name: my-api
+spec:
+selector:
+app: my-api
+ports:
+- port: 8080
+targetPort: 8080
+type: ClusterIP</code></pre>
+<p>Key characteristics: traffic only reachable within the cluster, no external access. For external exposure, you use Routes or Services of type LoadBalancer.</p>
+<h3>2.2 OpenShift Routes — L7 Ingress Load Balancing</h3>
+<p>The OpenShift Router is an HAProxy-based ingress controller that runs on infrastructure or worker nodes. It provides Layer 7 load balancing for external traffic entering the cluster. Every Route object you create configures a virtual host in HAProxy.</p>
+<p>The router supports three load balancing algorithms that can be set per-route via annotations:</p>
+<div class="table-wrap"><table>
+  <tr><th>Algorithm</th><th>Annotation Value</th><th>Default For</th></tr>
+  <tr><td>roundrobin</td><td>haproxy.router.openshift.io/balance: roundrobin</td><td>Not default. Best for weighted A/B deployments.</td></tr>
+  <tr><td>leastconn</td><td>haproxy.router.openshift.io/balance: leastconn</td><td>Long-lived connections (LDAP, SQL, WebSockets).</td></tr>
+  <tr><td>source</td><td>haproxy.router.openshift.io/balance: source</td><td>Default for TLS passthrough routes. Session stickiness.</td></tr>
+  <tr><td>random</td><td>(default - no annotation needed)</td><td>Default for edge and re-encrypt routes in OCP 4.x.</td></tr>
+</table></div>
+<p>Example — Route with weighted traffic split (A/B testing):</p>
+<pre><code>apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+name: my-api
+annotations:
+haproxy.router.openshift.io/balance: roundrobin
+spec:
+host: my-api.apps.example.com
+to:
+kind: Service
+name: my-api-v1
+weight: 90            # 90% of traffic
+alternateBackends:
+- kind: Service
+name: my-api-v2
+weight: 10          # 10% of traffic</code></pre>
+<p>CLI shortcut for setting weights:</p>
+<pre><code># Set 80/20 split
+oc set route-backends my-api my-api-v1=80 my-api-v2=20
+# Check current backends
+oc set route-backends my-api</code></pre>
+<h3>2.3 OpenShift Service Mesh (Istio) — Advanced L7</h3>
+<p>OpenShift Service Mesh, based on Istio, provides the most powerful and fine-grained traffic management. It works by injecting an Envoy sidecar proxy into each pod. All traffic in and out of the pod is intercepted by Envoy, which is centrally configured by the Istio control plane (istiod).</p>
+<pre><code>Istio Control Plane (istiod)
+|          |          |
+config push  config push  config push
+|          |          |
++----------+ +----------+ +----------+
+|  Pod A   | |  Pod B   | |  Pod C   |
+| +------+ | | +------+ | | +------+ |
+| |Envoy | | | |Envoy | | | |Envoy | |
+| |Proxy | | | |Proxy | | | |Proxy | |
+| +------+ | | +------+ | | +------+ |
+| |  App | | | |  App | | | |  App | |
+| +------+ | | +------+ | | +------+ |
++----------+ +----------+ +----------+
+All traffic passes through Envoy</code></pre>
+<p>Service Mesh capabilities for load balancing:</p>
+<ul>
+  <li>Weighted traffic splitting: Route percentages of traffic to different service versions (canary, A/B).</li>
+  <li>Header-based routing: Route based on HTTP headers (user-agent, custom headers, cookies).</li>
+  <li>Load balancing algorithms: ROUND_ROBIN, LEAST_CONN, RANDOM, PASSTHROUGH per DestinationRule.</li>
+  <li>Circuit breaking: Prevent cascading failures by limiting connections to unhealthy services.</li>
+  <li>Fault injection: Inject delays or errors to test resilience.</li>
+  <li>Traffic mirroring: Send a copy of live traffic to a test service without affecting production.</li>
+  <li>Retries and timeouts: Automatic retries with configurable backoff and deadline.</li>
+</ul>
+<p>Example — VirtualService with 90/10 weighted split:</p>
+<pre><code>apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+name: my-api
+spec:
+hosts:
+- my-api
+http:
+- route:
+- destination:
+host: my-api
+subset: v1
+weight: 90
+- destination:
+host: my-api
+subset: v2
+weight: 10</code></pre>
+<p>Example — DestinationRule with load balancer algorithm:</p>
+<pre><code>apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+name: my-api
+spec:
+host: my-api
+trafficPolicy:
+loadBalancer:
+simple: ROUND_ROBIN
+subsets:
+- name: v1
+labels:
+version: v1
+- name: v2
+labels:
+version: v2</code></pre>
+<h3>2.4 MetalLB — L4 LoadBalancer Services (On-Premises)</h3>
+<p>In cloud environments, creating a Service of type LoadBalancer automatically provisions a cloud load balancer (AWS ELB, Azure LB, etc.). On-premises OpenShift clusters lack this cloud integration. MetalLB fills this gap by providing LoadBalancer-type services for bare metal or on-prem environments.</p>
+<p>MetalLB operates in two modes:</p>
+<ul>
+  <li>Layer 2 (ARP/NDP): Announces the service IP via ARP on the local network. Simple setup, but a single node handles all traffic for each IP (failover, not true load balancing).</li>
+  <li>BGP (Layer 3): Announces routes via BGP to network routers. Enables true ECMP (Equal-Cost Multi-Path) load balancing across multiple nodes.</li>
+</ul>
+<p>Example — MetalLB LoadBalancer Service:</p>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+name: my-database
+annotations:
+metallb.universe.tf/address-pool: production-pool
+spec:
+type: LoadBalancer
+selector:
+app: my-database
+ports:
+- port: 3306
+targetPort: 3306</code></pre>
+<p>Note: MetalLB cannot replace the OpenShift API or Ingress VIP endpoints. It is designed for application-level LoadBalancer services, particularly useful for non-HTTP workloads like databases, message brokers, and custom TCP services.</p>
+      </article>
+
+      <nav class="page-nav">
+        <a href="03-1-api-traffic-load-balancing-fundamentals.html">&#8592; API &amp; Traffic Load Balancing Fundamentals</a>
+        <span class="spacer"></span>
+        <a href="05-3-load-balancing-outside-openshift-external.html">Load Balancing Outside OpenShift (External) &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

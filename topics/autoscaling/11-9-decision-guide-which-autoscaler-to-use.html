@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Decision Guide — Which Autoscaler to Use? – Autoscaling</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../autoscaling.html">Autoscaling</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Decision Guide — Which Autoscaler to Use?</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Autoscaling</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-scaling-fundamentals.html">Scaling Fundamentals</a></li>
+        <li><a href="04-2-horizontal-pod-autoscaler-hpa.html">Horizontal Pod Autoscaler (HPA)</a></li>
+        <li><a href="05-3-vertical-pod-autoscaler-vpa.html">Vertical Pod Autoscaler (VPA)</a></li>
+        <li><a href="06-4-custom-metrics-autoscaler-keda.html">Custom Metrics Autoscaler (KEDA)</a></li>
+        <li><a href="07-5-cluster-and-machine-autoscaler-node-scaling.html">Cluster and Machine Autoscaler (Node Scaling)</a></li>
+        <li><a href="08-6-openshift-serverless-knative-autoscaling.html">OpenShift Serverless (Knative) Autoscaling</a></li>
+        <li><a href="09-7-fastapi-publishing-metrics-for-autoscaling.html">FastAPI: Publishing Metrics for Autoscaling</a></li>
+        <li><a href="10-8-what-is-not-possible-limitations.html">What is NOT Possible — Limitations</a></li>
+        <li class="active"><a href="11-9-decision-guide-which-autoscaler-to-use.html" class="active">Decision Guide — Which Autoscaler to Use?</a></li>
+        <li><a href="12-10-end-to-end-autoscaling-architecture.html">End-to-End Autoscaling Architecture</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>9. Decision Guide — Which Autoscaler to Use?</h1>
+<pre><code>AUTOSCALER DECISION TREE
+What do you want to scale ON?
+|
++--&gt; CPU / Memory only?
+|       |
+|       +--&gt; Need scale-to-zero? --YES--&gt; KEDA (CPU trigger)
+|       |
+|       +--&gt; No scale-to-zero? ---------&gt; HPA (built-in)
+|
++--&gt; HTTP traffic / requests per second?
+|       |
+|       +--&gt; Can modify app code? --YES--&gt; FastAPI Prometheus + KEDA
+|       |
+|       +--&gt; Cannot modify code?
+|               |
+|               +--&gt; Service Mesh? --YES--&gt; KEDA + istio_requests_total
+|               |
+|               +--&gt; No Mesh? -----------&gt; Knative Serverless
+|                                     or   HPA on CPU (indirect)
+|
++--&gt; Queue depth (Kafka, RabbitMQ)?
+|       |
+|       +--&gt; KEDA with Kafka/RabbitMQ trigger
+|
++--&gt; Concurrent connections / WebSockets?
+|       |
+|       +--&gt; Knative (concurrency-based)
+|       or   KEDA + custom Prometheus gauge
+|
++--&gt; Right-size pod resources?
+|
++--&gt; VPA Operator (Off mode first, then Auto)
+ALSO need cluster to grow/shrink nodes?
++--&gt; Cluster Autoscaler + Machine Autoscaler (IPI only)</code></pre>
+<h3>9.1 Quick Reference Summary</h3>
+<div class="table-wrap"><table>
+  <tr><th>Autoscaler</th><th>Scales</th><th>Metric Source</th><th>Scale to 0</th><th>Code Change</th><th>Operator</th><th>Support</th></tr>
+  <tr><td>HPA</td><td>Pod replicas</td><td>CPU, Memory</td><td>No</td><td>No</td><td>Built-in</td><td>GA</td></tr>
+  <tr><td>VPA</td><td>Pod resources</td><td>Historical usage</td><td>N/A</td><td>No</td><td>VPA Op.</td><td>GA</td></tr>
+  <tr><td>KEDA</td><td>Pod replicas</td><td>70+ triggers</td><td>Yes</td><td>Depends</td><td>CMA Op.</td><td>GA 4.12+</td></tr>
+  <tr><td>Knative</td><td>Pod replicas</td><td>Concurrency, RPS</td><td>Yes</td><td>No</td><td>Serverless</td><td>GA</td></tr>
+  <tr><td>Cluster AS</td><td>Nodes</td><td>Pending pods</td><td>N/A</td><td>No</td><td>Built-in</td><td>IPI only</td></tr>
+  <tr><td>Machine AS</td><td>MachineSets</td><td>Cluster AS signals</td><td>Yes*</td><td>No</td><td>Built-in</td><td>IPI only</td></tr>
+</table></div>
+<p>* Machine Autoscaler can scale MachineSets to 0 replicas, but do not set min=0 for the default compute machine sets created during installation.</p>
+      </article>
+
+      <nav class="page-nav">
+        <a href="10-8-what-is-not-possible-limitations.html">&#8592; What is NOT Possible — Limitations</a>
+        <span class="spacer"></span>
+        <a href="12-10-end-to-end-autoscaling-architecture.html">End-to-End Autoscaling Architecture &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

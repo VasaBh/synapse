@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Top Interview Questions — Rapid Fire – React</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../react.html">React</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Top Interview Questions — Rapid Fire</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">React</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-1-react-fundamentals.html">React Fundamentals</a></li>
+        <li><a href="03-2-react-hooks-deep-dive.html">React Hooks (Deep Dive)</a></li>
+        <li><a href="04-3-how-react-works-internally.html">How React Works Internally</a></li>
+        <li><a href="05-4-nodejs-vite-the-react-ecosystem.html">Node.js, Vite &amp; The React Ecosystem</a></li>
+        <li><a href="06-5-advanced-patterns-concepts.html">Advanced Patterns &amp; Concepts</a></li>
+        <li><a href="07-1-compound-components.html">Compound Components</a></li>
+        <li><a href="08-2-render-props.html">Render Props</a></li>
+        <li><a href="09-3-higher-order-components-hoc.html">Higher-Order Components (HOC)</a></li>
+        <li><a href="10-6-typescript-with-react.html">TypeScript with React</a></li>
+        <li class="active"><a href="11-7-top-interview-questions-rapid-fire.html" class="active">Top Interview Questions — Rapid Fire</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>7. Top Interview Questions — Rapid Fire</h1>
+<p>Q1: What is the difference between controlled and uncontrolled components?</p>
+<p>Controlled: React state drives the input value via value + onChange. Uncontrolled: the DOM holds the value, accessed via ref.</p>
+<p>Q2: What is React.StrictMode?</p>
+<p>A development-only wrapper that calls components twice to catch side effects, warns about deprecated APIs, and helps find bugs early. No effect in production.</p>
+<p>Q3: What is prop drilling and how to solve it?</p>
+<p>Passing props through many levels of components that don’t need them. Solutions: Context API, state management libraries (Zustand/Redux), component composition.</p>
+<p>Q4: What is hydration?</p>
+<p>After SSR sends HTML to the browser, React “hydrates” it — attaches event listeners and state to the existing HTML. Mismatch between server and client HTML = hydration error.</p>
+<p>Q5: Explain the useEffect cleanup function.</p>
+<p>Runs before the next effect execution and on unmount. Used to cancel API requests, remove event listeners, clear timers, and close WebSocket connections.</p>
+<p>Q6: What are React Server Components?</p>
+<p>Components that run ONLY on the server. They can access databases directly, have zero client-side JS bundle cost, and cannot use state or effects. Introduced in Next.js 13 App Router.</p>
+<p>Q7: useState vs useReducer?</p>
+<p>useState: simple state (toggle, counter, single value). useReducer: complex state logic, multiple sub-values, when next state depends on previous. Similar to Redux pattern.</p>
+<p>Q8: What is the React Compiler (React Forget)?</p>
+<p>An experimental compiler that auto-memoises components and hooks, making React.memo, useMemo, and useCallback unnecessary. Being tested in Meta’s production apps.</p>
+<p>Q9: What is a key in React and why is it important?</p>
+<p>A special string attribute used during list rendering. It helps React identify which items changed, were added, or removed. Without stable keys, React re-renders the entire list and can introduce bugs with component state.</p>
+<p>Q10: What is the difference between useLayoutEffect and useEffect?</p>
+<p>useLayoutEffect fires synchronously after DOM mutations but BEFORE the browser paints. useEffect fires after paint. Use useLayoutEffect for DOM measurements to prevent visual flicker.</p>
+      </article>
+
+      <nav class="page-nav">
+        <a href="10-6-typescript-with-react.html">&#8592; TypeScript with React</a>
+        <span class="spacer"></span>
+        
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

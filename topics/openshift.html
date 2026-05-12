@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenShift — Complete Reference Guide 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e;
+  --ink2: #3d3d5c;
+  --ink3: #6b6b8a;
+  --bg: #ffffff;
+  --bg2: #f4f3f0;
+  --bg3: #eae8e4;
+  --accent: #2563eb;
+  --accent2: #1d4ed8;
+  --accent-bg: #eff6ff;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --amber: #d97706;
+  --amber-bg: #fffbeb;
+  --rose: #e11d48;
+  --rose-bg: #fff1f2;
+  --purple: #7c3aed;
+  --purple-bg: #f5f3ff;
+  --teal: #0d9488;
+  --teal-bg: #f0fdfa;
+  --coral: #ea580c;
+  --coral-bg: #fff7ed;
+  --border: #e2e0dc;
+  --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+
+@media print {
+  body { font-size: 10pt; line-height: 1.5; }
+  .no-print { display: none !important; }
+  .page-break { page-break-before: always; }
+  .card { break-inside: avoid; }
+  pre { font-size: 8pt; }
+  h1 { font-size: 22pt; }
+  h2 { font-size: 14pt; }
+  h3 { font-size: 11pt; }
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+/* Cover */
+.cover {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  text-align: center;
+  background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%);
+  color: white;
+  padding: 4rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute; top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(37,99,235,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 30%, rgba(124,58,237,0.1) 0%, transparent 50%);
+}
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+
+/* TOC */
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+
+/* Sections */
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+
+/* Cards */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+
+/* Code */
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+
+/* Callout */
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue  { background: var(--accent-bg);  border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg);   border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg);   border-left: 3px solid var(--amber); }
+.callout-rose  { background: var(--rose-bg);    border-left: 3px solid var(--rose); }
+.callout-purple{ background: var(--purple-bg);  border-left: 3px solid var(--purple); }
+.callout-teal  { background: var(--teal-bg);    border-left: 3px solid var(--teal); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+
+/* Pills */
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue   { background: var(--accent-bg); color: var(--accent2); }
+.pill-green  { background: var(--green-bg);  color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber  { background: var(--amber-bg);  color: var(--amber); }
+.pill-teal   { background: var(--teal-bg);   color: var(--teal); }
+.pill-coral  { background: var(--coral-bg);  color: var(--coral); }
+.pill-rose   { background: var(--rose-bg);   color: var(--rose); }
+
+/* Bullet lists */
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+/* Two col */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+/* Diagram (ASCII / pre-art) */
+.diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; margin: 1rem 0; font-family: var(--mono); font-size: 0.75rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink2); }
+
+/* Footer */
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+/* Guide shell */
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+
+@media (max-width: 1100px) { .sidebar { display: none; } }
+@media (max-width: 600px) { .cover h1 { font-size: 2.2rem; } .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← All Topics</a>
+  <h1>Interview Preparation Guide</h1>
+</header>
+
+<div class="topic-page">
+
+  <aside class="sidebar">
+    <p class="sidebar-title">OpenShift</p>
+    <nav><ul>
+      <li><a href="#s1"><span class="toc-num">01</span>Overview &amp; Architecture</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>Pods &amp; Containers</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>Deployments &amp; DeploymentConfigs</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>Services &amp; Routes</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>Storage &amp; PVCs</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>Security &amp; RBAC</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>Builds &amp; CI/CD</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>Networking</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>Monitoring &amp; Logging</a></li>
+    </ul></nav>
+  </aside>
+
+  <div class="main-scroll">
+
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference — April 2026</div>
+  <h1>OpenShift <span>Container Platform</span> Guide</h1>
+  <p class="cover-sub">Enterprise Kubernetes from architecture to production — pods, deployments, routing, storage, RBAC, CI/CD pipelines, networking, and observability in one complete reference.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">Kubernetes</span>
+    <span class="cover-tag">Pods &amp; Containers</span>
+    <span class="cover-tag">Deployments</span>
+    <span class="cover-tag">Routes &amp; Ingress</span>
+    <span class="cover-tag">RBAC &amp; SCC</span>
+    <span class="cover-tag">Builds &amp; CI/CD</span>
+    <span class="cover-tag">Networking (OVN)</span>
+    <span class="cover-tag">Persistent Storage</span>
+    <span class="cover-tag">Prometheus &amp; Grafana</span>
+  </div>
+  <div class="cover-date">v1.0 — Last updated April 2026</div>
+</div>
+
+<div class="container">
+
+<!-- TOC -->
+<div class="toc page-break">
+  <h2>Contents</h2>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">Overview &amp; Architecture</span></a>
+    <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">Pods &amp; Containers</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">Deployments &amp; DeploymentConfigs</span></a>
+    <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">Services &amp; Routes</span></a>
+    <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">Storage &amp; PVCs</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Security &amp; RBAC</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Builds &amp; CI/CD</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">Networking</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">Monitoring &amp; Logging</span></a>
+  </div>
+</div>
+
+<!-- ══ SECTION 1 ══ -->
+<div class="section page-break" id="s1">
+  <div class="section-num">Section 01</div>
+  <h2 class="section-title">Overview &amp; Architecture</h2>
+  <p class="lead">OpenShift Container Platform (OCP) is Red Hat's enterprise Kubernetes distribution — Kubernetes plus an opinionated developer experience, integrated CI/CD, stricter security defaults, and enterprise support. OCP 4.x is built on CoreOS and the Kubernetes Operator pattern.</p>
+
+  <h3>OpenShift vs Vanilla Kubernetes</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Feature</th><th>Vanilla Kubernetes</th><th>OpenShift 4.x</th></tr></thead>
+      <tbody>
+        <tr><td>Installation</td><td>Manual / kubeadm</td><td>Installer Provisioned Infrastructure (IPI) or UPI</td></tr>
+        <tr><td>OS</td><td>Any Linux</td><td>RHCOS (Red Hat CoreOS) — immutable, auto-updating</td></tr>
+        <tr><td>Container Runtime</td><td>containerd / CRI-O</td><td>CRI-O (default)</td></tr>
+        <tr><td>Ingress</td><td>Nginx Ingress Controller</td><td>HAProxy-based Router + Route objects</td></tr>
+        <tr><td>Registry</td><td>External</td><td>Built-in integrated image registry</td></tr>
+        <tr><td>CI/CD</td><td>External (Jenkins, Tekton)</td><td>OpenShift Pipelines (Tekton) built-in</td></tr>
+        <tr><td>Security</td><td>PSA (Pod Security Admission)</td><td>SCC (Security Context Constraints) — more granular</td></tr>
+        <tr><td>Web Console</td><td>Dashboard (basic)</td><td>Feature-rich developer + admin console</td></tr>
+        <tr><td>Updates</td><td>Manual</td><td>Cluster Version Operator (CVO) — over-the-air</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Control Plane Components</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>API Server</h4>
+      <p>Central REST endpoint for all cluster operations. Validates and persists state to etcd. All <code>oc</code> / <code>kubectl</code> commands talk here.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>etcd</h4>
+      <p>Distributed key-value store holding all cluster state. Typically 3 or 5 members for HA. Loss of quorum = read-only cluster.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Controller Manager</h4>
+      <p>Runs reconciliation loops — ReplicaSet controller, Deployment controller, Node controller, etc. Drives actual state toward desired state.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Scheduler</h4>
+      <p>Assigns pods to nodes based on resource requests, affinity/anti-affinity rules, taints/tolerations, and topology spread.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Cluster Version Operator</h4>
+      <p>OpenShift-specific. Manages the lifecycle of all cluster operators and coordinates safe over-the-air updates.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Machine Config Operator</h4>
+      <p>Manages RHCOS node configuration (kernel args, systemd units, files). Changes trigger a rolling node reboot.</p>
+    </div>
+  </div>
+
+  <h3>Cluster Architecture Diagram</h3>
+  <div class="diagram">
+┌──────────────────────────────────────────────────────┐
+│                  OPENSHIFT CLUSTER                   │
+│                                                      │
+│  ┌─────────────────────────────────────────────┐    │
+│  │           CONTROL PLANE (3 nodes)            │    │
+│  │  API Server │ etcd │ Scheduler │ Controllers │    │
+│  └─────────────────────────────────────────────┘    │
+│                         │                            │
+│       ┌─────────────────┼─────────────────┐          │
+│       ▼                 ▼                 ▼          │
+│  ┌─────────┐      ┌─────────┐      ┌─────────┐      │
+│  │ Worker  │      │ Worker  │      │ Worker  │      │
+│  │ Node 1  │      │ Node 2  │      │ Node 3  │      │
+│  │         │      │         │      │         │      │
+│  │ kubelet │      │ kubelet │      │ kubelet │      │
+│  │ CRI-O   │      │ CRI-O   │      │ CRI-O   │      │
+│  │ OVN-K8s │      │ OVN-K8s │      │ OVN-K8s │      │
+│  └─────────┘      └─────────┘      └─────────┘      │
+│                                                      │
+│  ┌──────────────────────────────────────────────┐    │
+│  │  Infrastructure: Router │ Registry │ Monitor │    │
+│  └──────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────┘</div>
+
+  <h3>Key CLI Commands</h3>
+  <pre><code>oc login https://api.cluster.example.com:6443 --token=...
+oc project my-namespace          # switch project (namespace)
+oc get nodes -o wide             # list nodes with IPs and roles
+oc get pods -A                   # all pods across all namespaces
+oc describe node worker-0        # detailed node info and conditions
+oc get clusterversion            # OCP version and update status
+oc get co                        # cluster operators and health status</code></pre>
+</div>
+
+<!-- ══ SECTION 2 ══ -->
+<div class="section page-break" id="s2">
+  <div class="section-num">Section 02</div>
+  <h2 class="section-title">Pods &amp; Containers</h2>
+  <p class="lead">A Pod is the smallest deployable unit in Kubernetes — one or more containers sharing a network namespace, IPC namespace, and (optionally) storage volumes. Containers in a pod communicate via <code>localhost</code> and are always co-scheduled.</p>
+
+  <h3>Pod Lifecycle</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Phase</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Pending</strong></td><td>Accepted by cluster; waiting for scheduling or image pull</td></tr>
+        <tr><td><strong>Running</strong></td><td>Bound to a node; at least one container is running</td></tr>
+        <tr><td><strong>Succeeded</strong></td><td>All containers exited with code 0</td></tr>
+        <tr><td><strong>Failed</strong></td><td>All containers terminated; at least one exited non-zero or was killed</td></tr>
+        <tr><td><strong>Unknown</strong></td><td>Pod state cannot be determined (node communication lost)</td></tr>
+        <tr><td><strong>CrashLoopBackOff</strong></td><td>Container keeps crashing; kubelet backs off restarts exponentially</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Pod Spec — Key Fields</h3>
+  <pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: my-app
+  labels:
+    app: my-app
+    version: v1
+spec:
+  containers:
+  - name: app
+    image: registry.example.com/my-app:v1
+    ports:
+    - containerPort: 8080
+    resources:
+      requests:
+        cpu: "250m"       # guaranteed minimum
+        memory: "256Mi"
+      limits:
+        cpu: "500m"       # hard cap — throttled if exceeded
+        memory: "512Mi"   # OOMKilled if exceeded
+    env:
+    - name: DB_HOST
+      valueFrom:
+        secretKeyRef:
+          name: db-credentials
+          key: host
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 8080
+      initialDelaySeconds: 10
+      periodSeconds: 15
+    readinessProbe:
+      httpGet:
+        path: /ready
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 10
+  initContainers:
+  - name: db-migrate
+    image: registry.example.com/my-app:v1
+    command: ["python", "manage.py", "migrate"]</code></pre>
+
+  <h3>Probes</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Probe</th><th>Failure Action</th><th>Use For</th></tr></thead>
+      <tbody>
+        <tr><td><strong>livenessProbe</strong></td><td>Container restarted</td><td>Detect deadlocks, infinite loops — is the app alive?</td></tr>
+        <tr><td><strong>readinessProbe</strong></td><td>Pod removed from Service endpoints</td><td>Is the app ready to accept traffic?</td></tr>
+        <tr><td><strong>startupProbe</strong></td><td>Container restarted if not passing before failureThreshold</td><td>Slow-starting apps — disables liveness until startup completes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Multi-Container Patterns</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Sidecar</h4>
+      <p>Extends main container. Examples: log shipper (Fluentd), service mesh proxy (Envoy/Istio), secrets agent (Vault).</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Init Container</h4>
+      <p>Runs to completion before app containers start. Used for DB migration, config generation, dependency checks.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Ambassador</h4>
+      <p>Proxy for outbound network calls. Handles retry, timeout, circuit-breaking on behalf of the main container.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Adapter</h4>
+      <p>Normalises output of the main container (e.g., converts proprietary metrics format to Prometheus exposition).</p>
+    </div>
+  </div>
+
+  <div class="callout callout-amber">
+    <strong>Resource Limits Are Critical in OpenShift</strong>
+    OpenShift's LimitRange objects can enforce default requests/limits per namespace. Pods without resource requests are assigned the BestEffort QoS class and are the first to be evicted under node pressure. Always set both <code>requests</code> and <code>limits</code>.
+  </div>
+</div>
+
+<!-- ══ SECTION 3 ══ -->
+<div class="section page-break" id="s3">
+  <div class="section-num">Section 03</div>
+  <h2 class="section-title">Deployments &amp; DeploymentConfigs</h2>
+  <p class="lead">Deployments are the standard Kubernetes workload abstraction for stateless applications. OpenShift's legacy DeploymentConfig (DC) adds image-change and config-change triggers, but Red Hat recommends migrating to standard Deployments in OCP 4.x.</p>
+
+  <h3>Deployment vs DeploymentConfig</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Deployment</th><th>DeploymentConfig (legacy)</th></tr></thead>
+      <tbody>
+        <tr><td>API Group</td><td>apps/v1 (Kubernetes)</td><td>apps.openshift.io/v1</td></tr>
+        <tr><td>Rollout controller</td><td>Deployment controller (control plane)</td><td>DeploymentConfig controller (OpenShift)</td></tr>
+        <tr><td>Image-change trigger</td><td>Via ImageStream + trigger annotation</td><td>Built-in ImageChangeTrigger</td></tr>
+        <tr><td>Lifecycle hooks</td><td>Not built-in (use init containers)</td><td>pre/mid/post hooks supported</td></tr>
+        <tr><td>Recreate strategy</td><td>Supported</td><td>Supported</td></tr>
+        <tr><td>Custom strategies</td><td>No</td><td>Custom strategy image</td></tr>
+        <tr><td>Recommendation</td><td>✓ Preferred (OCP 4.14+)</td><td>Deprecated — migrate away</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Deployment YAML</h3>
+  <pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+  namespace: production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1          # extra pods above desired during rollout
+      maxUnavailable: 0    # no downtime — all old pods stay until new are Ready
+  template:
+    metadata:
+      labels:
+        app: my-app
+        version: v2
+    spec:
+      containers:
+      - name: app
+        image: registry.example.com/my-app:v2
+        resources:
+          requests: { cpu: 250m, memory: 256Mi }
+          limits:   { cpu: 500m, memory: 512Mi }</code></pre>
+
+  <h3>Rollout Strategies</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Strategy</th><th>Behaviour</th><th>Downtime</th><th>Use When</th></tr></thead>
+      <tbody>
+        <tr><td><strong>RollingUpdate</strong></td><td>Gradually replaces old pods with new</td><td>Zero (if maxUnavailable=0)</td><td>Default — stateless services</td></tr>
+        <tr><td><strong>Recreate</strong></td><td>Terminates all old pods, then starts new</td><td>Yes</td><td>Single-instance, DB schema changes</td></tr>
+        <tr><td><strong>Blue/Green</strong></td><td>Two full deployments; switch Service selector</td><td>Zero</td><td>Instant rollback, need parallel environments</td></tr>
+        <tr><td><strong>Canary</strong></td><td>Route a % of traffic to new version via weights</td><td>Zero</td><td>Validate new version with subset of users</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Rollout Commands</h3>
+  <pre><code>oc rollout status deployment/my-app          # watch rollout progress
+oc rollout history deployment/my-app         # list revision history
+oc rollout undo deployment/my-app            # rollback to previous revision
+oc rollout undo deployment/my-app --to-revision=3
+oc set image deployment/my-app app=registry.example.com/my-app:v3
+oc scale deployment/my-app --replicas=5</code></pre>
+
+  <h3>Other Workload Types</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>StatefulSet</h4>
+      <p>Stable pod identity and storage. Each pod gets a unique ordinal name (<code>pod-0</code>, <code>pod-1</code>) and persistent volume. Used for databases, queues, Elasticsearch.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>DaemonSet</h4>
+      <p>Runs one pod per node (or per selected nodes). Used for log collectors (Fluentd), monitoring agents (node-exporter), CNI plugins, storage daemons.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Job / CronJob</h4>
+      <p>Run-to-completion workloads. Job: one-off tasks. CronJob: scheduled recurring tasks with standard cron syntax. Tracks completions and failures.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>HorizontalPodAutoscaler</h4>
+      <p>Scales replicas based on CPU, memory, or custom metrics. Works with Deployment, StatefulSet, ReplicaSet. Integrates with KEDA for event-driven scaling.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SECTION 4 ══ -->
+<div class="section page-break" id="s4">
+  <div class="section-num">Section 04</div>
+  <h2 class="section-title">Services &amp; Routes</h2>
+  <p class="lead">A Service provides a stable virtual IP (ClusterIP) and DNS name for a dynamic set of pods. A Route (OpenShift-specific) exposes a Service to external traffic via the cluster's HAProxy-based ingress router.</p>
+
+  <h3>Service Types</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Type</th><th>Accessibility</th><th>Use Case</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ClusterIP</strong></td><td>Internal only (default)</td><td>Service-to-service communication within cluster</td></tr>
+        <tr><td><strong>NodePort</strong></td><td>External via &lt;NodeIP&gt;:&lt;port&gt; (30000–32767)</td><td>Dev/test; not recommended for production in OpenShift</td></tr>
+        <tr><td><strong>LoadBalancer</strong></td><td>External via cloud LB (AWS ELB, Azure LB)</td><td>Cloud deployments needing dedicated external IP</td></tr>
+        <tr><td><strong>ExternalName</strong></td><td>CNAME to external DNS</td><td>Alias external services inside the cluster</td></tr>
+        <tr><td><strong>Headless</strong> (<code>clusterIP: None</code>)</td><td>DNS returns pod IPs directly</td><td>StatefulSets, service discovery without load balancing</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-svc
+spec:
+  selector:
+    app: my-app           # routes to pods with this label
+  ports:
+  - name: http
+    port: 80              # service port
+    targetPort: 8080      # container port
+  type: ClusterIP</code></pre>
+
+  <h3>OpenShift Routes</h3>
+  <p>Routes are OpenShift's Ingress abstraction backed by HAProxy. They expose a Service at a hostname, with optional TLS termination.</p>
+  <pre><code>apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: my-app-route
+spec:
+  host: my-app.apps.cluster.example.com
+  to:
+    kind: Service
+    name: my-app-svc
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge          # edge | passthrough | reencrypt
+    insecureEdgeTerminationPolicy: Redirect</code></pre>
+
+  <h3>TLS Termination Modes</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Mode</th><th>Where TLS Terminates</th><th>Traffic to Pod</th><th>Use When</th></tr></thead>
+      <tbody>
+        <tr><td><strong>edge</strong></td><td>At the router (HAProxy)</td><td>Plain HTTP</td><td>App doesn't handle TLS; cert managed at router</td></tr>
+        <tr><td><strong>passthrough</strong></td><td>At the pod (SNI routing)</td><td>Encrypted (TLS)</td><td>App handles its own TLS; router passes bytes through</td></tr>
+        <tr><td><strong>reencrypt</strong></td><td>At router, re-encrypted to pod</td><td>Different TLS cert</td><td>End-to-end encryption with separate internal cert</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>DNS Resolution Inside the Cluster</h3>
+  <pre><code># Service DNS:   &lt;service&gt;.&lt;namespace&gt;.svc.cluster.local
+# Short form within same namespace: &lt;service&gt;
+
+# Examples:
+curl http://my-app-svc                                 # same namespace
+curl http://my-app-svc.production.svc.cluster.local    # cross-namespace
+curl http://my-app-svc.production                      # short cross-ns form
+
+# StatefulSet pod DNS:
+# &lt;pod-name&gt;.&lt;headless-svc&gt;.&lt;namespace&gt;.svc.cluster.local
+# e.g.: postgres-0.postgres-headless.production.svc.cluster.local</code></pre>
+
+  <div class="callout callout-blue">
+    <strong>Route vs Ingress</strong>
+    OpenShift supports both Route (native) and Kubernetes Ingress objects. Both are handled by the OpenShift Router (HAProxy). Routes offer more features (per-route weights for canary, custom cert per route). Kubernetes Ingress is more portable across distributions.
+  </div>
+</div>
+
+<!-- ══ SECTION 5 ══ -->
+<div class="section page-break" id="s5">
+  <div class="section-num">Section 05</div>
+  <h2 class="section-title">Storage &amp; PVCs</h2>
+  <p class="lead">Kubernetes storage decouples provisioning (PersistentVolume) from consumption (PersistentVolumeClaim). StorageClasses enable dynamic provisioning — pods request storage by size and access mode without knowing the underlying infrastructure.</p>
+
+  <h3>Storage Object Hierarchy</h3>
+  <div class="diagram">
+StorageClass (defines provisioner + params)
+    │
+    ▼ dynamic provisioning
+PersistentVolume (PV) — cluster-level resource
+    │
+    ▼ bound (1:1)
+PersistentVolumeClaim (PVC) — namespace-level request
+    │
+    ▼ mounted
+Pod (via volumes[].persistentVolumeClaim)</div>
+
+  <h3>Access Modes</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Mode</th><th>Short</th><th>Meaning</th><th>Typical Storage</th></tr></thead>
+      <tbody>
+        <tr><td>ReadWriteOnce</td><td>RWO</td><td>One node can mount read-write</td><td>Block: EBS, Ceph RBD, iSCSI</td></tr>
+        <tr><td>ReadOnlyMany</td><td>ROX</td><td>Many nodes can mount read-only</td><td>NFS, CephFS (read-only)</td></tr>
+        <tr><td>ReadWriteMany</td><td>RWX</td><td>Many nodes can mount read-write</td><td>NFS, CephFS, Azure Files</td></tr>
+        <tr><td>ReadWriteOncePod</td><td>RWOP</td><td>Single pod only (k8s 1.22+)</td><td>Block storage, strictest isolation</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>PVC Example</h3>
+  <pre><code>apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: ocs-storagecluster-ceph-rbd   # ODF storage class
+  resources:
+    requests:
+      storage: 50Gi
+---
+# Mount in a Pod
+spec:
+  volumes:
+  - name: data
+    persistentVolumeClaim:
+      claimName: postgres-data
+  containers:
+  - name: postgres
+    volumeMounts:
+    - name: data
+      mountPath: /var/lib/postgresql/data</code></pre>
+
+  <h3>Storage Classes in OpenShift</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Storage Class</th><th>Provisioner</th><th>Access Modes</th><th>Use Case</th></tr></thead>
+      <tbody>
+        <tr><td>ocs-storagecluster-ceph-rbd</td><td>ODF / Ceph RBD</td><td>RWO</td><td>Databases, stateful apps (block)</td></tr>
+        <tr><td>ocs-storagecluster-cephfs</td><td>ODF / CephFS</td><td>RWO, RWX</td><td>Shared file storage, build artifacts</td></tr>
+        <tr><td>gp2 / gp3 (AWS)</td><td>EBS CSI</td><td>RWO</td><td>AWS block storage</td></tr>
+        <tr><td>azurefile</td><td>Azure File CSI</td><td>RWX</td><td>Azure shared file storage</td></tr>
+        <tr><td>local-storage</td><td>Local volume</td><td>RWO</td><td>High-performance NVMe on bare metal</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Reclaim Policies</h3>
+  <div class="two-col">
+    <div class="callout callout-rose">
+      <strong>Retain</strong>
+      PV is not deleted when PVC is removed. Data persists. Admin must manually reclaim or delete the PV. Safe for production databases.
+    </div>
+    <div class="callout callout-amber">
+      <strong>Delete</strong>
+      PV and underlying storage (EBS volume, Ceph image) are deleted when PVC is deleted. Default for dynamic provisioning. Use carefully.
+    </div>
+  </div>
+
+  <pre><code># Check PVC status
+oc get pvc -n production
+# NAME            STATUS   VOLUME     CAPACITY   ACCESS MODES   STORAGECLASS
+# postgres-data   Bound    pvc-abc1   50Gi       RWO            ceph-rbd
+
+oc describe pvc postgres-data   # shows events, binding details
+oc get pv pvc-abc1              # inspect the backing PersistentVolume</code></pre>
+</div>
+
+<!-- ══ SECTION 6 ══ -->
+<div class="section page-break" id="s6">
+  <div class="section-num">Section 06</div>
+  <h2 class="section-title">Security &amp; RBAC</h2>
+  <p class="lead">OpenShift has a multi-layered security model: RBAC controls <em>who can do what</em> to Kubernetes API objects; Security Context Constraints (SCCs) control <em>what a pod can do</em> on the host. Understanding both is essential for production deployments.</p>
+
+  <h3>RBAC Objects</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Object</th><th>Scope</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ClusterRole</strong></td><td>Cluster-wide</td><td>Defines permissions (verbs on resources) across all namespaces</td></tr>
+        <tr><td><strong>Role</strong></td><td>Namespace</td><td>Same as ClusterRole but scoped to one namespace</td></tr>
+        <tr><td><strong>ClusterRoleBinding</strong></td><td>Cluster-wide</td><td>Grants a ClusterRole to a user/group/SA cluster-wide</td></tr>
+        <tr><td><strong>RoleBinding</strong></td><td>Namespace</td><td>Grants a Role (or ClusterRole) to a subject within one namespace</td></tr>
+        <tr><td><strong>ServiceAccount</strong></td><td>Namespace</td><td>Identity for pods to call the API server with least privilege</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><code># Grant a user view access to a specific project
+oc adm policy add-role-to-user view alice -n my-project
+
+# Grant edit access cluster-wide
+oc adm policy add-cluster-role-to-user edit bob
+
+# Create a ServiceAccount and bind a Role
+oc create serviceaccount my-app-sa -n production
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: my-app-sa-binding
+  namespace: production
+subjects:
+- kind: ServiceAccount
+  name: my-app-sa
+  namespace: production
+roleRef:
+  kind: ClusterRole
+  name: view
+  apiGroup: rbac.authorization.k8s.io</code></pre>
+
+  <h3>Security Context Constraints (SCCs)</h3>
+  <p>SCCs are OpenShift's policy engine that controls what a pod is allowed to do at the host level — more powerful than Kubernetes PodSecurityAdmission.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>SCC</th><th>Privilege Level</th><th>Typical Use</th></tr></thead>
+      <tbody>
+        <tr><td><strong>restricted-v2</strong></td><td>Lowest (default)</td><td>Standard application pods — no root, no host access</td></tr>
+        <tr><td><strong>anyuid</strong></td><td>Medium</td><td>Apps needing a specific UID (e.g., most off-the-shelf images)</td></tr>
+        <tr><td><strong>nonroot-v2</strong></td><td>Medium</td><td>Any non-root UID; no privilege escalation</td></tr>
+        <tr><td><strong>hostnetwork-v2</strong></td><td>High</td><td>Pods that need to use the host's network stack</td></tr>
+        <tr><td><strong>privileged</strong></td><td>Highest</td><td>Full host access; only for CNI/CSI DaemonSets, node agents</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><code># Grant anyuid SCC to a ServiceAccount (allow non-root image)
+oc adm policy add-scc-to-user anyuid -z my-app-sa -n production
+
+# Check which SCC a pod is using
+oc get pod my-pod -o jsonpath='{.metadata.annotations.openshift\.io/scc}'
+
+# List all SCCs
+oc get scc</code></pre>
+
+  <h3>Secrets Management</h3>
+  <pre><code># Create a secret
+oc create secret generic db-creds \
+  --from-literal=username=admin \
+  --from-literal=password=s3cr3t
+
+# Create TLS secret from cert files
+oc create secret tls my-tls-secret \
+  --cert=tls.crt --key=tls.key
+
+# Reference in a Deployment (env var)
+env:
+- name: DB_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: db-creds
+      key: password
+
+# Reference as volume mount
+volumes:
+- name: tls
+  secret:
+    secretName: my-tls-secret</code></pre>
+
+  <div class="callout callout-purple">
+    <strong>Secrets Are Not Secret by Default</strong>
+    Kubernetes Secrets are base64-encoded, not encrypted, at rest by default. Enable etcd encryption at rest, use HashiCorp Vault via the Vault Agent Injector, or use OpenShift Secrets Store CSI Driver to inject secrets from an external vault into pods.
+  </div>
+</div>
+
+<!-- ══ SECTION 7 ══ -->
+<div class="section page-break" id="s7">
+  <div class="section-num">Section 07</div>
+  <h2 class="section-title">Builds &amp; CI/CD</h2>
+  <p class="lead">OpenShift provides first-class build primitives: BuildConfigs (legacy S2I / Docker builds) and OpenShift Pipelines (Tekton-based). The integrated image registry and ImageStreams complete the inner loop of build → tag → deploy.</p>
+
+  <h3>ImageStreams</h3>
+  <p>An ImageStream is a pointer to a series of container images — an abstraction over the image registry that lets Deployments trigger automatic rollouts when a new image is pushed.</p>
+  <pre><code># Create ImageStream
+oc create imagestream my-app
+
+# Tag an external image into the ImageStream
+oc tag docker.io/library/nginx:1.25 my-app:latest
+
+# Trigger a Deployment on ImageStream change
+oc set triggers deployment/my-app \
+  --from-image=my-app:latest \
+  -c app
+
+# Import image metadata from registry
+oc import-image my-app:latest --from=registry.example.com/my-app:latest --confirm</code></pre>
+
+  <h3>OpenShift Pipelines (Tekton)</h3>
+  <p>Tekton is a Kubernetes-native CI/CD framework. Pipelines are composed of reusable Tasks, with data passed via Workspaces (PVCs) and Parameters.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tekton Object</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Task</strong></td><td>A sequence of Steps (each a container). Reusable unit of work.</td></tr>
+        <tr><td><strong>TaskRun</strong></td><td>Instantiation of a Task with specific params and workspaces.</td></tr>
+        <tr><td><strong>Pipeline</strong></td><td>DAG of Tasks with shared workspaces and parameter passing.</td></tr>
+        <tr><td><strong>PipelineRun</strong></td><td>Instantiation of a Pipeline. Creates TaskRuns for each Task.</td></tr>
+        <tr><td><strong>Workspace</strong></td><td>Shared storage (PVC, ConfigMap, Secret) between Tasks in a Pipeline.</td></tr>
+        <tr><td><strong>Trigger / EventListener</strong></td><td>HTTP endpoint that creates PipelineRuns in response to Git webhooks.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><code">apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: build-and-deploy
+spec:
+  params:
+  - name: image-tag
+    type: string
+  workspaces:
+  - name: source
+  tasks:
+  - name: clone
+    taskRef:
+      name: git-clone
+      kind: ClusterTask
+    workspaces:
+    - name: output
+      workspace: source
+    params:
+    - name: url
+      value: https://github.com/example/my-app
+  - name: build-push
+    runAfter: [clone]
+    taskRef:
+      name: buildah
+      kind: ClusterTask
+    params:
+    - name: IMAGE
+      value: registry.example.com/my-app:$(params.image-tag)
+    workspaces:
+    - name: source
+      workspace: source
+  - name: deploy
+    runAfter: [build-push]
+    taskRef:
+      name: openshift-client
+      kind: ClusterTask
+    params:
+    - name: SCRIPT
+      value: oc rollout restart deployment/my-app</code></pre>
+
+  <h3>Source-to-Image (S2I)</h3>
+  <p>S2I is OpenShift's original build mechanism — injects source code into a builder image and produces a runnable image without writing a Dockerfile.</p>
+  <pre><code># New app from Git using S2I builder image
+oc new-app python:3.11~https://github.com/example/my-python-app
+
+# Trigger a new build manually
+oc start-build my-app-build --follow
+
+# Watch build logs
+oc logs -f bc/my-app-build</code></pre>
+
+  <div class="callout callout-green">
+    <strong>Tekton vs Jenkins vs GitHub Actions</strong>
+    Tekton runs inside the cluster (no external CI server), uses standard Kubernetes resources, and has no single point of failure. Jenkins is feature-rich but requires managing a separate server. GitHub Actions is best for open-source / cloud-hosted workloads. For OpenShift-native workflows, Tekton with OpenShift GitOps (ArgoCD) is the recommended pattern.
+  </div>
+</div>
+
+<!-- ══ SECTION 8 ══ -->
+<div class="section page-break" id="s8">
+  <div class="section-num">Section 08</div>
+  <h2 class="section-title">Networking</h2>
+  <p class="lead">OpenShift 4.x uses OVN-Kubernetes (Open Virtual Network) as its default CNI plugin, replacing the older OpenShift SDN. OVN-K provides per-namespace network isolation, NetworkPolicies, egress IPs, and hardware offload support.</p>
+
+  <h3>Network Stack</h3>
+  <div class="diagram">
+External Traffic
+      │
+      ▼
+  HAProxy Router (ingress)
+      │ Route/Ingress rules
+      ▼
+  Service (ClusterIP / kube-proxy / OVN)
+      │ label selector
+      ▼
+  Pod ← → Pod  (OVN-K overlay network: VXLAN/Geneve)
+      │
+      ▼
+  Egress (EgressIP / EgressFirewall)
+      │
+      ▼
+External Services / Internet</div>
+
+  <h3>NetworkPolicy</h3>
+  <p>NetworkPolicies are namespace-scoped and default-deny when applied — any pod not matching an Ingress rule is isolated.</p>
+  <pre><code">apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-to-backend
+  namespace: production
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432</code></pre>
+
+  <h3>EgressIP</h3>
+  <p>EgressIP assigns a stable, predictable source IP to traffic leaving the cluster from a specific namespace or set of pods. Critical for firewall allowlisting.</p>
+  <pre><code">apiVersion: k8s.ovn.org/v1
+kind: EgressIP
+metadata:
+  name: production-egress
+spec:
+  egressIPs:
+  - 10.0.0.100
+  namespaceSelector:
+    matchLabels:
+      environment: production</code></pre>
+
+  <h3>DNS and Service Discovery</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>DNS Name Pattern</th><th>Resolves To</th></tr></thead>
+      <tbody>
+        <tr><td><code>&lt;service&gt;</code></td><td>ClusterIP (same namespace only)</td></tr>
+        <tr><td><code>&lt;service&gt;.&lt;namespace&gt;</code></td><td>ClusterIP (cross-namespace)</td></tr>
+        <tr><td><code>&lt;service&gt;.&lt;namespace&gt;.svc</code></td><td>ClusterIP</td></tr>
+        <tr><td><code>&lt;service&gt;.&lt;namespace&gt;.svc.cluster.local</code></td><td>ClusterIP (FQDN)</td></tr>
+        <tr><td><code>&lt;pod-name&gt;.&lt;headless-svc&gt;.&lt;ns&gt;.svc.cluster.local</code></td><td>Pod IP directly (StatefulSet)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>OVN-Kubernetes Features</h3>
+  <div class="pills">
+    <span class="pill pill-blue">NetworkPolicy</span>
+    <span class="pill pill-blue">EgressIP</span>
+    <span class="pill pill-blue">EgressFirewall</span>
+    <span class="pill pill-blue">Multicast</span>
+    <span class="pill pill-blue">IPv4/IPv6 dual-stack</span>
+    <span class="pill pill-green">Hardware offload (SmartNIC)</span>
+    <span class="pill pill-green">Multi-network (Multus CNI)</span>
+    <span class="pill pill-teal">Cluster-scoped NetworkPolicy (Admin NP)</span>
+  </div>
+
+  <div class="callout callout-teal">
+    <strong>Service Mesh — OpenShift Service Mesh (Istio)</strong>
+    For advanced traffic management (circuit breaking, retries, mutual TLS, traffic splitting) use OpenShift Service Mesh (based on Istio + Envoy). It adds a sidecar proxy to every pod and provides observability via Kiali, distributed tracing (Jaeger), and metrics (Prometheus).
+  </div>
+</div>
+
+<!-- ══ SECTION 9 ══ -->
+<div class="section page-break" id="s9">
+  <div class="section-num">Section 09</div>
+  <h2 class="section-title">Monitoring &amp; Logging</h2>
+  <p class="lead">OpenShift ships with a fully managed monitoring stack (Prometheus + Alertmanager + Grafana) and a logging stack (OpenShift Logging based on Elasticsearch/Loki + Fluentd/Vector). Both are installed as Operators and are ready out of the box.</p>
+
+  <h3>Monitoring Stack Components</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Prometheus</h4>
+      <p>Time-series metrics database. Scrapes targets via ServiceMonitor/PodMonitor. Two instances: platform metrics + user-defined workloads.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Alertmanager</h4>
+      <p>Routes, deduplicates, and silences alerts fired by Prometheus rules. Supports PagerDuty, Slack, email, webhook receivers.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Grafana</h4>
+      <p>Dashboards for visualising Prometheus metrics. OpenShift ships read-only managed Grafana; deploy a custom instance for editable dashboards.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Thanos Querier</h4>
+      <p>Federates queries across platform and user-defined Prometheus instances. Powers the OpenShift console Observe page.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>kube-state-metrics</h4>
+      <p>Exposes Kubernetes object state as metrics (pod phases, deployment replicas, PVC capacity). Scraped automatically by platform Prometheus.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>node-exporter</h4>
+      <p>DaemonSet that exposes host-level hardware and OS metrics (CPU, memory, disk, network) per node.</p>
+    </div>
+  </div>
+
+  <h3>Exposing Application Metrics</h3>
+  <pre><code"># Enable user-defined monitoring in cluster-monitoring-config
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    enableUserWorkload: true
+---
+# ServiceMonitor — tells Prometheus how to scrape your app
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: my-app-monitor
+  namespace: production
+spec:
+  selector:
+    matchLabels:
+      app: my-app
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s</code></pre>
+
+  <h3>PrometheusRule — Custom Alerts</h3>
+  <pre><code>apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: my-app-alerts
+  namespace: production
+spec:
+  groups:
+  - name: my-app.rules
+    rules:
+    - alert: HighErrorRate
+      expr: |
+        rate(http_requests_total{status=~"5..",job="my-app"}[5m])
+        / rate(http_requests_total{job="my-app"}[5m]) > 0.05
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High error rate on {{ $labels.instance }}"
+        description: "Error rate is {{ $value | humanizePercentage }}"</code></pre>
+
+  <h3>Logging Stack</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Component</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Vector / Fluentd</strong></td><td>DaemonSet log collector. Reads container logs from <code>/var/log/pods/</code> and enriches with k8s metadata.</td></tr>
+        <tr><td><strong>Loki</strong></td><td>Log aggregation store (modern, label-indexed). Queried via LogQL. Preferred over Elasticsearch in OCP 5.x+.</td></tr>
+        <tr><td><strong>Elasticsearch</strong></td><td>Legacy full-text log store. Supports JSON field queries. High memory footprint.</td></tr>
+        <tr><td><strong>Kibana</strong></td><td>Visualization for Elasticsearch logs (legacy stack).</td></tr>
+        <tr><td><strong>LokiStack</strong></td><td>OCP-managed Loki with multi-tenancy; query via OpenShift Console Logs tab or Grafana.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Useful Observability Commands</h3>
+  <pre><code># View pod logs
+oc logs -f deployment/my-app -c app     # follow, specific container
+oc logs my-pod --previous               # logs from previous (crashed) instance
+oc logs --tail=100 my-pod               # last 100 lines
+
+# Events — often first place to look for failures
+oc get events -n production --sort-by='.lastTimestamp'
+oc describe pod my-pod | grep -A 20 Events
+
+# Resource usage
+oc adm top pods -n production
+oc adm top nodes
+
+# Debug a failing pod
+oc debug pod/my-pod                     # start debug shell in pod copy
+oc debug node/worker-0                  # start privileged debug pod on node
+oc exec -it my-pod -- /bin/sh           # exec into running pod</code></pre>
+
+  <div class="callout callout-green">
+    <strong>Four Golden Signals</strong>
+    Structure observability around Latency (how long requests take), Traffic (requests per second), Errors (rate of failed requests), and Saturation (how full the service is — CPU, queue depth). OpenShift's platform metrics provide all four out of the box for cluster components; instrument your application code for the same signals.
+  </div>
+
+  <div class="footer">
+    OpenShift Container Platform — Complete Reference Guide &nbsp;•&nbsp; April 2026 &nbsp;•&nbsp; v1.0
+  </div>
+
+</div><!-- /.container -->
+  </div><!-- /.main-scroll -->
+</div><!-- /.topic-page -->
+
+<!-- <footer class="guide-footer">OpenShift Container Platform — Complete Reference Guide</footer> -->
+
+</body>
+</html>

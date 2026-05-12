@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Testing – Python</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../python.html">Python</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Testing</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Python</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-1-advanced-language-features.html">Advanced Language Features</a></li>
+        <li><a href="03-2-decorators.html">Decorators</a></li>
+        <li><a href="04-3-generators.html">Generators</a></li>
+        <li><a href="05-4-async-await.html">Async / Await</a></li>
+        <li><a href="06-5-context-managers.html">Context Managers</a></li>
+        <li><a href="07-6-async-context-managers.html">Async Context Managers</a></li>
+        <li><a href="08-7-async-generators-their-uses.html">Async Generators &amp; Their Uses</a></li>
+        <li><a href="09-8-map-reduce-functional-programming.html">map, reduce &amp; Functional Programming</a></li>
+        <li><a href="10-9-dunder-magic-methods.html">Dunder (Magic) Methods</a></li>
+        <li><a href="11-10-duck-typing-protocols.html">Duck Typing &amp; Protocols</a></li>
+        <li><a href="12-11-python-data-science-ecosystem-libraries.html">Python Data Science &amp; Ecosystem Libraries</a></li>
+        <li><a href="13-12-metaprogramming.html">Metaprogramming</a></li>
+        <li class="active"><a href="14-13-testing.html" class="active">Testing</a></li>
+        <li><a href="15-14-async-io-libraries.html">Async I/O Libraries</a></li>
+        <li><a href="16-15-the-gil-global-interpreter-lock.html">The GIL (Global Interpreter Lock)</a></li>
+        <li><a href="17-16-quick-reference-cheatsheet.html">Quick Reference Cheatsheet</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>13. Testing</h1>
+<h3>13.1 pytest Fundamentals</h3>
+<pre><code>import pytest
+def test_addition():
+assert 1 + 1 == 2
+def test_exception():
+with pytest.raises(ValueError, match='invalid'):
+int('not_a_number')
+# Parametrize — run test with multiple inputs
+@pytest.mark.parametrize('input,expected', [
+('hello', 5), ('', 0), ('python', 6),
+])
+def test_string_length(input, expected):
+assert len(input) == expected</code></pre>
+<h3>13.2 Fixtures</h3>
+<pre><code>@pytest.fixture
+def db_session():
+session = create_test_session()
+yield session
+session.rollback()
+session.close()
+@pytest.fixture
+def sample_user(db_session):
+user = User(name='Alice', email='a@b.com')
+db_session.add(user)
+db_session.commit()
+return user
+def test_get_user(db_session, sample_user):
+found = db_session.query(User).get(sample_user.id)
+assert found.name == 'Alice'</code></pre>
+<h3>13.3 Mocking</h3>
+<pre><code>from unittest.mock import patch, MagicMock, AsyncMock
+@patch('app.services.email.send')
+def test_registration(mock_send):
+register_user('alice@example.com')
+mock_send.assert_called_once_with('alice@example.com', subject='Welcome!')
+# Async mocking
+@patch('app.client.fetch', new_callable=AsyncMock)
+async def test_fetch(mock_fetch):
+mock_fetch.return_value = {'status': 'ok'}
+result = await get_status()
+assert result == 'ok'</code></pre>
+<h3>13.4 Async Testing</h3>
+<pre><code>import pytest
+@pytest.mark.anyio  # or @pytest.mark.asyncio
+async def test_async_endpoint():
+async with AsyncClient(app=app, base_url='http://test') as client:
+response = await client.get('/users')
+assert response.status_code == 200
+assert len(response.json()) &gt; 0</code></pre>
+      </article>
+
+      <nav class="page-nav">
+        <a href="13-12-metaprogramming.html">&#8592; Metaprogramming</a>
+        <span class="spacer"></span>
+        <a href="15-14-async-io-libraries.html">Async I/O Libraries &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

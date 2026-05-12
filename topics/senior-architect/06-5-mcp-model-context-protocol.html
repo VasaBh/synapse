@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCP – MODEL CONTEXT PROTOCOL – Senior Architect</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../senior-architect.html">Senior Architect</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">MCP – MODEL CONTEXT PROTOCOL</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Senior Architect</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-1-core-architecture-fundamentals.html">CORE ARCHITECTURE FUNDAMENTALS</a></li>
+        <li><a href="03-2-microservices-deep-dive.html">MICROSERVICES – DEEP DIVE</a></li>
+        <li><a href="04-3-openshift-routing-load-balancing.html">OPENSHIFT – ROUTING &amp; LOAD BALANCING</a></li>
+        <li><a href="05-4-openshift-horizontal-vertical-scaling.html">OPENSHIFT – HORIZONTAL &amp; VERTICAL SCALING</a></li>
+        <li class="active"><a href="06-5-mcp-model-context-protocol.html" class="active">MCP – MODEL CONTEXT PROTOCOL</a></li>
+        <li><a href="07-6-agentic-ai-architecture.html">AGENTIC AI ARCHITECTURE</a></li>
+        <li><a href="08-7-interview-qa-cheat-sheet.html">INTERVIEW Q&amp;A CHEAT SHEET</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>5. MCP – MODEL CONTEXT PROTOCOL</h1>
+<h3>5.1 What is MCP?</h3>
+<p>MCP (Model Context Protocol) is an open standard created by Anthropic that defines how AI models connect to external tools, data sources, and services. It replaces ad-hoc tool integration with a standardised client-server architecture.</p>
+<h3>5.2 Architecture Overview</h3>
+<div class="table-wrap"><table>
+  <tr><th>Component</th><th>Role</th><th>Example</th></tr>
+  <tr><td>MCP Host</td><td>AI application that uses Claude / LLM</td><td>IDE plugin, chatbot, agent</td></tr>
+  <tr><td>MCP Client</td><td>Protocol client inside the host; manages sessions</td><td>Claude Desktop, custom app</td></tr>
+  <tr><td>MCP Server</td><td>Exposes tools, resources, prompts to the client</td><td>GitHub MCP, Slack MCP, custom DB server</td></tr>
+  <tr><td>Transport</td><td>Communication layer between client and server</td><td>stdio (local), HTTP+SSE (remote)</td></tr>
+</table></div>
+<h3>5.3 Core Primitives</h3>
+<p>Resources</p>
+<ul>
+  <li>Expose data that the AI can read: files, database records, API responses</li>
+  <li>URI-addressable (e.g., file:///project/src, postgres://db/users)</li>
+  <li>Can be static or dynamically generated on request</li>
+  <li>Analogous to GET endpoints — read-only data exposure</li>
+</ul>
+<p>Tools</p>
+<ul>
+  <li>Callable functions the AI can invoke to take actions</li>
+  <li>Each tool has a JSON Schema definition (name, description, input schema)</li>
+  <li>Examples: search_database, send_email, create_ticket, execute_query</li>
+  <li>The AI decides when and how to call tools based on context and user intent</li>
+  <li>Analogous to POST endpoints — side-effectful operations</li>
+</ul>
+<p>Prompts</p>
+<ul>
+  <li>Reusable, parameterised prompt templates stored on the server</li>
+  <li>Allow server to define standard workflows (e.g., 'code review prompt', 'bug report template')</li>
+  <li>User can invoke named prompts; server fills in context automatically</li>
+</ul>
+<p>Sampling</p>
+<ul>
+  <li>Allows MCP server to request LLM completions via the client</li>
+  <li>Enables agentic loops where the server itself needs AI reasoning</li>
+  <li>Server sends sampling/createMessage → client routes to LLM → result returned to server</li>
+</ul>
+<h3>5.4 Transport Mechanisms</h3>
+<div class="table-wrap"><table>
+  <tr><th>Transport</th><th>Use Case</th><th>Notes</th></tr>
+  <tr><td>stdio</td><td>Local servers (same machine)</td><td>Simple; process-based; no network exposure</td></tr>
+  <tr><td>HTTP + SSE</td><td>Remote/cloud MCP servers</td><td>Server-Sent Events for server→client streaming</td></tr>
+  <tr><td>WebSocket</td><td>Bidirectional real-time</td><td>Less common; emerging support</td></tr>
+</table></div>
+<h3>5.5 Security Considerations (Architect-level)</h3>
+<ul>
+  <li>Authentication – OAuth2 / API keys for remote servers; validate on every request</li>
+  <li>Authorisation – scope tool access per user/role; least privilege per session</li>
+  <li>Tool sandboxing – restrict what tools can access (filesystem, network, secrets)</li>
+  <li>Input validation – validate all tool arguments against JSON Schema before execution</li>
+  <li>Rate limiting – prevent AI from looping and hammering tools</li>
+  <li>Audit logging – log every tool call, arguments, and result for compliance</li>
+  <li>Prompt injection defence – validate that tool results don't contain malicious instructions</li>
+  <li>Human-in-the-loop – require approval before destructive/irreversible tool calls</li>
+</ul>
+<h3>5.6 MCP vs Traditional API Integration</h3>
+<div class="table-wrap"><table>
+  <tr><th>Aspect</th><th>Traditional API Integration</th><th>MCP</th></tr>
+  <tr><td>Integration code</td><td>Custom per API; bespoke adapters</td><td>Standardised protocol; reusable servers</td></tr>
+  <tr><td>Discovery</td><td>Manual API documentation reading</td><td>Tool/resource schema auto-discovered</td></tr>
+  <tr><td>Context passing</td><td>Developer manages context manually</td><td>Protocol handles context propagation</td></tr>
+  <tr><td>Multi-tool</td><td>Complex orchestration code required</td><td>LLM decides tool sequencing natively</td></tr>
+  <tr><td>Ecosystem</td><td>Siloed integrations</td><td>Growing ecosystem of shareable MCP servers</td></tr>
+</table></div>
+<h3>5.7 Enterprise MCP Design Patterns</h3>
+<ul>
+  <li>MCP Gateway – single entry point that routes to multiple MCP servers; centralises auth/logging</li>
+  <li>Tool Registry – catalogue of available tools with descriptions; dynamic tool discovery</li>
+  <li>Capability versioning – version your MCP server tools for backward compatibility</li>
+  <li>Caching layer – cache read-only resource responses to reduce downstream load</li>
+  <li>Async tools – for long-running operations, return a job ID and expose a status resource</li>
+</ul>
+<div class="callout tip">💡 Interview Tip: Expected question: 'How would you design an MCP server for our internal knowledge base?' Answer: expose documents as Resources (URI-addressed), create Tools for semantic search and summarisation, add authentication via OAuth2, implement rate limiting, and audit-log every access.</div>
+      </article>
+
+      <nav class="page-nav">
+        <a href="05-4-openshift-horizontal-vertical-scaling.html">&#8592; OPENSHIFT – HORIZONTAL &amp; VERTICAL SCALING</a>
+        <span class="spacer"></span>
+        <a href="07-6-agentic-ai-architecture.html">AGENTIC AI ARCHITECTURE &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autoscaling — Complete Reference Guide 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e;
+  --ink2: #3d3d5c;
+  --ink3: #6b6b8a;
+  --bg: #ffffff;
+  --bg2: #f4f3f0;
+  --bg3: #eae8e4;
+  --accent: #2563eb;
+  --accent2: #1d4ed8;
+  --accent-bg: #eff6ff;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --amber: #d97706;
+  --amber-bg: #fffbeb;
+  --rose: #e11d48;
+  --rose-bg: #fff1f2;
+  --purple: #7c3aed;
+  --purple-bg: #f5f3ff;
+  --teal: #0d9488;
+  --teal-bg: #f0fdfa;
+  --coral: #ea580c;
+  --coral-bg: #fff7ed;
+  --border: #e2e0dc;
+  --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+
+@media print {
+  body { font-size: 10pt; line-height: 1.5; }
+  .no-print { display: none !important; }
+  .page-break { page-break-before: always; }
+  section { page-break-inside: avoid; }
+  .card { break-inside: avoid; }
+  pre { font-size: 8pt; }
+  h1 { font-size: 22pt; }
+  h2 { font-size: 14pt; }
+  h3 { font-size: 11pt; }
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+.cover {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%);
+  color: white;
+  padding: 4rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(37,99,235,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 30%, rgba(124,58,237,0.1) 0%, transparent 50%);
+}
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+.diagram { background: #1e293b; border-radius: 10px; padding: 1.5rem; margin: 1rem 0; overflow-x: auto; }
+.diagram pre { background: none; border: none; color: #e2e8f0; font-size: 0.78rem; margin: 0; }
+
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+
+@media (max-width: 1100px) { .sidebar { display: none; } }
+@media (max-width: 600px) { .cover h1 { font-size: 2.2rem; } .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← All Topics</a>
+  <h1>Interview Preparation Guide</h1>
+</header>
+
+<div class="topic-page">
+
+  <aside class="sidebar">
+    <p class="sidebar-title">Autoscaling</p>
+    <nav>
+      <ul>
+        <li><a href="#s1"><span class="toc-num">01</span>Scaling Fundamentals</a></li>
+        <li><a href="#s2"><span class="toc-num">02</span>Horizontal Pod Autoscaler (HPA)</a></li>
+        <li><a href="#s3"><span class="toc-num">03</span>Vertical Pod Autoscaler (VPA)</a></li>
+        <li><a href="#s4"><span class="toc-num">04</span>Custom Metrics / KEDA</a></li>
+        <li><a href="#s5"><span class="toc-num">05</span>Cluster &amp; Machine Autoscaler</a></li>
+        <li><a href="#s6"><span class="toc-num">06</span>Knative Autoscaling</a></li>
+        <li><a href="#s7"><span class="toc-num">07</span>FastAPI Metrics</a></li>
+        <li><a href="#s8"><span class="toc-num">08</span>Limitations</a></li>
+        <li><a href="#s9"><span class="toc-num">09</span>Decision Guide</a></li>
+        <li><a href="#s10"><span class="toc-num">10</span>End-to-End Architecture</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <div class="main-scroll">
+
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference — April 2026</div>
+  <h1>Autoscaling <span>Deep Dive</span></h1>
+  <p class="cover-sub">HPA, VPA, KEDA, Knative, Cluster Autoscaler, and FastAPI custom metrics — the complete OpenShift autoscaling reference for senior engineers.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">HPA</span>
+    <span class="cover-tag">VPA</span>
+    <span class="cover-tag">KEDA</span>
+    <span class="cover-tag">Knative</span>
+    <span class="cover-tag">ClusterAutoscaler</span>
+    <span class="cover-tag">Prometheus</span>
+    <span class="cover-tag">FastAPI</span>
+    <span class="cover-tag">Scale-to-Zero</span>
+    <span class="cover-tag">custom.metrics.k8s.io</span>
+  </div>
+  <div class="cover-date">v1.0 — Last updated April 2026</div>
+</div>
+
+<div class="container">
+
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <div class="toc-grid">
+    <a href="#s1" class="toc-item"><span class="toc-num">01</span><span class="toc-label">Scaling Fundamentals</span></a>
+    <a href="#s2" class="toc-item"><span class="toc-num">02</span><span class="toc-label">Horizontal Pod Autoscaler (HPA)</span></a>
+    <a href="#s3" class="toc-item"><span class="toc-num">03</span><span class="toc-label">Vertical Pod Autoscaler (VPA)</span></a>
+    <a href="#s4" class="toc-item"><span class="toc-num">04</span><span class="toc-label">Custom Metrics Autoscaler (KEDA)</span></a>
+    <a href="#s5" class="toc-item"><span class="toc-num">05</span><span class="toc-label">Cluster and Machine Autoscaler</span></a>
+    <a href="#s6" class="toc-item"><span class="toc-num">06</span><span class="toc-label">OpenShift Serverless (Knative)</span></a>
+    <a href="#s7" class="toc-item"><span class="toc-num">07</span><span class="toc-label">FastAPI: Publishing Metrics</span></a>
+    <a href="#s8" class="toc-item"><span class="toc-num">08</span><span class="toc-label">What is NOT Possible — Limitations</span></a>
+    <a href="#s9" class="toc-item"><span class="toc-num">09</span><span class="toc-label">Decision Guide</span></a>
+    <a href="#s10" class="toc-item"><span class="toc-num">10</span><span class="toc-label">End-to-End Autoscaling Architecture</span></a>
+  </div>
+</div>
+
+<!-- SECTION 1 -->
+<div id="s1" class="section page-break">
+  <div class="section-num">SECTION 01</div>
+  <h2 class="section-title">Scaling Fundamentals</h2>
+  <p class="lead">Autoscaling adjusts compute resources dynamically in response to load. Understanding when to scale horizontally vs vertically, and at what layer (pod vs node), is the foundation for designing cost-efficient, resilient systems.</p>
+
+  <h3>Horizontal vs Vertical Scaling</h3>
+  <div class="two-col">
+    <div class="card card-accent">
+      <h4>Horizontal Scaling (Scale Out)</h4>
+      <p>Add more pod replicas to distribute load. Stateless services scale this way naturally. HPA and KEDA implement this. No downtime — new pods start alongside existing ones.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Vertical Scaling (Scale Up)</h4>
+      <p>Give each pod more CPU / memory. Necessary for memory-bound or single-threaded workloads. VPA implements this — requires pod restart which causes brief disruption.</p>
+    </div>
+  </div>
+
+  <h3>Autoscaling Layers in OpenShift</h3>
+  <div class="diagram">
+    <pre>
+  ┌─────────────────────────────────────────────────┐
+  │              APPLICATION LAYER                   │
+  │  HPA — scales pod replicas on CPU/memory        │
+  │  VPA — right-sizes pod requests/limits          │
+  │  KEDA — scales on any external metric           │
+  │  Knative — scale-to-zero serverless             │
+  └──────────────────────┬──────────────────────────┘
+                         │ Pods need more nodes
+                         ▼
+  ┌─────────────────────────────────────────────────┐
+  │              INFRASTRUCTURE LAYER                │
+  │  Cluster Autoscaler — adds/removes nodes        │
+  │  Machine Autoscaler — scales MachineSets        │
+  └─────────────────────────────────────────────────┘
+    </pre>
+  </div>
+
+  <h3>Metrics Sources</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Metrics API</th><th>Provider</th><th>Metrics Available</th><th>Used By</th></tr></thead>
+      <tbody>
+        <tr><td>metrics.k8s.io</td><td>metrics-server</td><td>CPU, Memory (resource metrics)</td><td>HPA v1, kubectl top</td></tr>
+        <tr><td>custom.metrics.k8s.io</td><td>Prometheus Adapter</td><td>Any Prometheus metric</td><td>HPA v2</td></tr>
+        <tr><td>external.metrics.k8s.io</td><td>KEDA, Prometheus Adapter</td><td>External queue depth, SaaS metrics</td><td>HPA v2, KEDA</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Stabilisation and Cooldown</h3>
+  <p>All autoscalers implement hysteresis to prevent thrashing — rapidly scaling up and down in response to transient spikes. Key parameters:</p>
+  <ul class="clean">
+    <li><strong>Scale-up stabilisation window:</strong> How long the autoscaler waits before acting on a scale-up trigger (default: 0s for HPA)</li>
+    <li><strong>Scale-down stabilisation window:</strong> How long to wait before scaling down — prevents premature removal of recently scaled pods (default: 300s for HPA)</li>
+    <li><strong>Scale rate limits:</strong> Maximum pods added/removed per period to prevent runaway scaling</li>
+  </ul>
+
+  <div class="callout callout-blue">
+    <strong>Interview Insight</strong>
+    The most common autoscaling failure is scaling down too aggressively. A 5-minute scale-down stabilisation window means a traffic spike must subside for 5 minutes before pods are removed. This is intentional — it costs more but prevents yo-yo oscillation.
+  </div>
+</div>
+
+<!-- SECTION 2 -->
+<div id="s2" class="section page-break">
+  <div class="section-num">SECTION 02</div>
+  <h2 class="section-title">Horizontal Pod Autoscaler (HPA)</h2>
+  <p class="lead">HPA automatically adjusts the number of pod replicas in a Deployment, ReplicaSet, or StatefulSet based on observed metrics. It is the primary autoscaling mechanism for stateless services in Kubernetes.</p>
+
+  <h3>HPA Algorithm</h3>
+  <p>HPA calculates the desired replica count using:</p>
+  <pre>desiredReplicas = ceil[currentReplicas × (currentMetricValue / desiredMetricValue)]</pre>
+  <p>For example, with 4 replicas at 80% CPU against a 50% target: <code>ceil[4 × (80/50)] = ceil[6.4] = 7</code> replicas.</p>
+
+  <h3>HPA v2 — Multi-Metric Scaling</h3>
+  <pre>apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: payment-api-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: payment-api
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60    # scale when avg CPU > 60%
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: AverageValue
+        averageValue: 512Mi       # scale when avg memory > 512Mi
+  - type: Pods
+    pods:
+      metric:
+        name: http_requests_per_second
+      target:
+        type: AverageValue
+        averageValue: "100"       # custom metric via Prometheus Adapter
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60        # allow doubling every 60s
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Pods
+        value: 2
+        periodSeconds: 60        # remove at most 2 pods per 60s</pre>
+
+  <h3>Resource Requests — Critical Prerequisite</h3>
+  <div class="callout callout-amber">
+    <strong>HPA Requires Resource Requests</strong>
+    HPA calculates utilisation as <code>actual / requested</code>. If a pod has no CPU request, HPA cannot compute utilisation and will refuse to scale. Always set <code>resources.requests.cpu</code> and <code>resources.requests.memory</code> on every container.
+  </div>
+
+  <h3>Custom Metrics via Prometheus Adapter</h3>
+  <p>The Prometheus Adapter bridges Prometheus metrics into the <code>custom.metrics.k8s.io</code> API, making them available to HPA:</p>
+  <pre># prometheus-adapter config rule
+rules:
+- seriesQuery: 'http_requests_total{namespace!="",pod!=""}'
+  resources:
+    overrides:
+      namespace: {resource: "namespace"}
+      pod: {resource: "pod"}
+  name:
+    matches: "^(.*)_total$"
+    as: "${1}_per_second"
+  metricsQuery: 'rate(<<.Series>>{<<.LabelMatchers>>}[2m])'</pre>
+
+  <h3>HPA with KEDA (Recommended)</h3>
+  <p>KEDA creates HPA objects under the hood but adds a richer ScaledObject abstraction that supports scale-to-zero and 60+ event sources. Prefer KEDA over raw HPA v2 for anything beyond basic CPU/memory scaling.</p>
+</div>
+
+<!-- SECTION 3 -->
+<div id="s3" class="section page-break">
+  <div class="section-num">SECTION 03</div>
+  <h2 class="section-title">Vertical Pod Autoscaler (VPA)</h2>
+  <p class="lead">VPA adjusts the CPU and memory requests/limits of running pods based on historical usage. It solves the "I don't know what to set for resource requests" problem and prevents OOMKill events on memory-hungry pods.</p>
+
+  <h3>VPA Components</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Recommender</h4>
+      <p>Watches pod resource usage via metrics-server and computes Lower Bound, Target, Upper Bound, and Uncapped Target recommendations.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Updater</h4>
+      <p>Evicts pods whose current requests are outside the recommended range (when <code>updateMode: Auto</code>). The pod is recreated with new requests by the Admission Controller.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Admission Controller</h4>
+      <p>Mutating webhook that patches resource requests/limits at pod creation time with VPA's recommendation.</p>
+    </div>
+  </div>
+
+  <pre>apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: payment-api-vpa
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: payment-api
+  updatePolicy:
+    updateMode: "Auto"   # Off | Initial | Recreation | Auto
+  resourcePolicy:
+    containerPolicies:
+    - containerName: payment-api
+      minAllowed:
+        cpu: 100m
+        memory: 128Mi
+      maxAllowed:
+        cpu: 4
+        memory: 4Gi
+      controlledResources: ["cpu", "memory"]</pre>
+
+  <h3>VPA Update Modes</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Mode</th><th>Behaviour</th><th>Use When</th></tr></thead>
+      <tbody>
+        <tr><td>Off</td><td>Recommendations only — no changes applied</td><td>Read-only analysis, initial tuning</td></tr>
+        <tr><td>Initial</td><td>Apply at pod creation, never evict running pods</td><td>Prefer stability, tolerate stale values</td></tr>
+        <tr><td>Recreation</td><td>Evict pods when out of range, new pod gets new values</td><td>Batch jobs, pods that can tolerate restarts</td></tr>
+        <tr><td>Auto</td><td>Same as Recreation today (In-place update planned)</td><td>Stateless services where brief restart is OK</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>VPA + HPA Conflict</h3>
+  <div class="callout callout-rose">
+    <strong>Do NOT combine VPA and HPA on the same metric</strong>
+    If both VPA and HPA target CPU, they fight: VPA increases requests (raising the denominator for HPA utilisation), causing HPA to scale down, causing CPU per pod to rise, causing VPA to increase requests again — an unstable loop. Safe combination: VPA manages memory + HPA scales on custom metrics (e.g., requests/s).
+  </div>
+
+  <h3>Reading VPA Recommendations</h3>
+  <pre>kubectl describe vpa payment-api-vpa
+
+  Recommendation:
+    Container Recommendations:
+      Container Name:  payment-api
+      Lower Bound:
+        Cpu:     100m
+        Memory:  262144k
+      Target:             ← apply this as requests
+        Cpu:     587m
+        Memory:  524288k
+      Uncapped Target:    ← without minAllowed/maxAllowed constraints
+        Cpu:     587m
+        Memory:  524288k
+      Upper Bound:        ← set as limits
+        Cpu:     1
+        Memory:  1Gi</pre>
+</div>
+
+<!-- SECTION 4 -->
+<div id="s4" class="section page-break">
+  <div class="section-num">SECTION 04</div>
+  <h2 class="section-title">Custom Metrics Autoscaler (KEDA)</h2>
+  <p class="lead">KEDA (Kubernetes Event-Driven Autoscaling) extends HPA to support scale-to-zero and 60+ event sources including Kafka, RabbitMQ, Prometheus, Azure Service Bus, Redis, and more — without writing custom Prometheus adapter configs.</p>
+
+  <h3>KEDA Architecture</h3>
+  <div class="diagram">
+    <pre>
+  External Source            KEDA                    Kubernetes
+  ─────────────          ──────────────            ──────────────
+  Kafka topic     ──▶   ScaledObject     ──▶   HorizontalPodAutoscaler
+  RabbitMQ queue  ──▶   (ScaledJob)      ──▶   Deployment replicas
+  Prometheus      ──▶   Metrics Server   ──▶   0 replicas (scale-to-zero)
+  AWS SQS                (GRPC bridge)
+    </pre>
+  </div>
+
+  <h3>ScaledObject — Deployment Scaling</h3>
+  <pre>apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: payment-processor-scaler
+spec:
+  scaleTargetRef:
+    name: payment-processor
+  minReplicaCount: 0          # scale-to-zero when idle
+  maxReplicaCount: 50
+  cooldownPeriod: 300
+  pollingInterval: 15
+  triggers:
+  - type: kafka
+    metadata:
+      bootstrapServers: kafka.svc:9092
+      consumerGroup: payment-group
+      topic: payment-events
+      lagThreshold: "100"     # 1 replica per 100 messages of lag
+      offsetResetPolicy: latest
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus.monitoring:9090
+      metricName: payment_queue_depth
+      query: sum(payment_queue_depth)
+      threshold: "50"</pre>
+
+  <h3>ScaledJob — Batch Job Scaling</h3>
+  <p>For batch workloads, KEDA can trigger individual Job runs per event rather than scaling a long-running Deployment:</p>
+  <pre>apiVersion: keda.sh/v1alpha1
+kind: ScaledJob
+metadata:
+  name: report-generator
+spec:
+  jobTargetRef:
+    template:
+      spec:
+        containers:
+        - name: report-gen
+          image: report-generator:latest
+        restartPolicy: OnFailure
+  minReplicaCount: 0
+  maxReplicaCount: 10
+  triggers:
+  - type: rabbitmq
+    metadata:
+      queueName: report-requests
+      queueLength: "1"          # 1 job per message</pre>
+
+  <h3>Popular KEDA Scalers</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Scaler</th><th>Trigger Metric</th><th>Common Use Case</th></tr></thead>
+      <tbody>
+        <tr><td>Kafka</td><td>Consumer group lag</td><td>Event-driven microservices</td></tr>
+        <tr><td>Prometheus</td><td>Any PromQL query</td><td>Custom application metrics</td></tr>
+        <tr><td>RabbitMQ</td><td>Queue depth</td><td>Task queues, async processing</td></tr>
+        <tr><td>AWS SQS</td><td>Number of messages</td><td>Cloud-native batch jobs</td></tr>
+        <tr><td>Redis Lists</td><td>List length</td><td>Background job workers</td></tr>
+        <tr><td>Cron</td><td>Time schedule</td><td>Pre-scale before known traffic spikes</td></tr>
+        <tr><td>CPU / Memory</td><td>Same as HPA</td><td>Drop-in HPA replacement with scale-to-zero</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Scale-to-Zero Behaviour</h3>
+  <p>When <code>minReplicaCount: 0</code>, KEDA scales the Deployment to zero when there are no events. The first event arriving causes KEDA to scale from 0→1 immediately (cold start). This cold-start latency (typically 5–30 seconds for container pull + JVM/Python startup) must be acceptable for your use case. For latency-sensitive services, set <code>minReplicaCount: 1</code>.</p>
+</div>
+
+<!-- SECTION 5 -->
+<div id="s5" class="section page-break">
+  <div class="section-num">SECTION 05</div>
+  <h2 class="section-title">Cluster and Machine Autoscaler (Node Scaling)</h2>
+  <p class="lead">Pod autoscalers (HPA/VPA/KEDA) scale workloads within the existing node pool. When pods cannot be scheduled due to insufficient node capacity, the Cluster Autoscaler provisions new nodes — and removes them when idle.</p>
+
+  <h3>Cluster Autoscaler (CA)</h3>
+  <p>CA monitors for pods in <code>Pending</code> state due to insufficient resources. It simulates adding nodes from each MachineSet and picks the one that would schedule the pending pods with the least waste.</p>
+
+  <div class="diagram">
+    <pre>
+  Pod cannot schedule (Pending) — "Insufficient CPU"
+         │
+         ▼
+  Cluster Autoscaler checks MachineSet capacity
+         │
+         ▼
+  New Machine provisioned (cloud API call)
+         │  ~3–5 minutes (bare metal: longer)
+         ▼
+  Node joins cluster, pods scheduled
+         │
+  [Idle node for 10 min]
+         │
+         ▼
+  CA drains node (evicts pods), removes Machine
+    </pre>
+  </div>
+
+  <pre>apiVersion: autoscaling.openshift.io/v1
+kind: ClusterAutoscaler
+metadata:
+  name: default
+spec:
+  resourceLimits:
+    maxNodesTotal: 24
+    cores:
+      min: 8
+      max: 96
+    memory:
+      min: 4
+      max: 384
+  scaleDown:
+    enabled: true
+    delayAfterAdd: 10m       # wait before considering scale-down
+    delayAfterDelete: 5m
+    unneededTime: 10m        # node must be idle for 10 min
+    utilizationThreshold: "0.5"  # below 50% = idle</pre>
+
+  <h3>Machine Autoscaler</h3>
+  <p>The Machine Autoscaler targets a specific <code>MachineSet</code> and defines its min/max bounds. CA uses these bounds when deciding which MachineSet to scale:</p>
+  <pre>apiVersion: autoscaling.openshift.io/v1beta1
+kind: MachineAutoscaler
+metadata:
+  name: worker-us-east-1a
+  namespace: openshift-machine-api
+spec:
+  minReplicas: 2
+  maxReplicas: 10
+  scaleTargetRef:
+    apiVersion: machine.openshift.io/v1beta1
+    kind: MachineSet
+    name: cluster-worker-us-east-1a</pre>
+
+  <h3>Node Selectors and Taints for Scale Groups</h3>
+  <p>In heterogeneous clusters, use node taints to reserve GPU or high-memory nodes for specific workloads. CA will only scale a MachineSet when a pod exists that tolerates its taint and cannot schedule elsewhere:</p>
+  <pre># GPU MachineSet taint
+spec:
+  template:
+    spec:
+      taints:
+      - key: nvidia.com/gpu
+        effect: NoSchedule
+
+# GPU pod toleration
+tolerations:
+- key: nvidia.com/gpu
+  operator: Exists
+  effect: NoSchedule</pre>
+
+  <h3>Scale-Down Safety</h3>
+  <ul class="clean">
+    <li>Pods with <code>PodDisruptionBudget</code> that would be violated are not evicted</li>
+    <li>Pods with local storage (<code>emptyDir</code>, <code>hostPath</code>) are not evicted by default</li>
+    <li>System pods in <code>kube-system</code> namespace block node removal unless annotated</li>
+    <li>Nodes with <code>cluster-autoscaler.kubernetes.io/scale-down-disabled: "true"</code> are never removed</li>
+  </ul>
+</div>
+
+<!-- SECTION 6 -->
+<div id="s6" class="section page-break">
+  <div class="section-num">SECTION 06</div>
+  <h2 class="section-title">OpenShift Serverless (Knative) Autoscaling</h2>
+  <p class="lead">OpenShift Serverless is built on Knative Serving and provides true scale-to-zero with request-based autoscaling. Unlike HPA which polls metrics, Knative's activator intercepts requests and buffers them during cold start.</p>
+
+  <h3>Knative Serving Architecture</h3>
+  <div class="diagram">
+    <pre>
+  Incoming Request
+        │
+        ▼
+  Knative Ingress (Kourier / Istio)
+        │
+        ├── Pods running? ──Yes──▶ Route to pod directly
+        │
+        └── No (0 replicas)
+              │
+              ▼
+        Activator (buffers request, ~100ms)
+              │
+              ▼
+        Autoscaler scales 0 → 1
+              │
+              ▼
+        Pod ready → Activator forwards buffered request
+    </pre>
+  </div>
+
+  <h3>Knative Service</h3>
+  <pre>apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: inference-api
+  namespace: ml-serving
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"          # scale to zero
+        autoscaling.knative.dev/maxScale: "20"
+        autoscaling.knative.dev/target: "10"           # 10 concurrent requests/pod
+        autoscaling.knative.dev/targetUtilizationPercentage: "70"
+        autoscaling.knative.dev/window: "60s"          # metrics averaging window
+        autoscaling.knative.dev/panicWindowPercentage: "10.0"
+        autoscaling.knative.dev/panicThresholdPercentage: "200.0"
+    spec:
+      containers:
+      - image: inference-api:latest
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi</pre>
+
+  <h3>Knative Autoscaler Algorithms</h3>
+  <div class="two-col">
+    <div class="card card-accent">
+      <h4>KPA (Knative Pod Autoscaler)</h4>
+      <p>Default. Scales on concurrent requests per pod. Has <strong>panic mode</strong>: when load spikes 200%+ of target within 10% of the window, it over-provisions immediately then normalises.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>HPA (Kubernetes HPA)</h4>
+      <p>Knative can delegate to standard HPA. Use when you need CPU/memory-based scaling or when KPA's concurrency model doesn't fit (e.g., CPU-intensive batch per request).</p>
+    </div>
+  </div>
+
+  <h3>Traffic Splitting (Revision-Based)</h3>
+  <pre>spec:
+  traffic:
+  - revisionName: inference-api-v1
+    percent: 80
+    tag: stable
+  - revisionName: inference-api-v2
+    percent: 20
+    tag: canary</pre>
+
+  <h3>Cold Start Mitigation</h3>
+  <ul class="clean">
+    <li>Set <code>minScale: 1</code> for latency-sensitive endpoints — no cold start, but no cost saving from zero-scaling</li>
+    <li>Use <code>minScale: 0</code> + initialise containers fast (avoid heavy imports at startup)</li>
+    <li>Pre-pull images via <code>ImagePullPolicy: IfNotPresent</code> on all worker nodes</li>
+    <li>Use readiness probes conservatively — activator will hold requests until ready</li>
+  </ul>
+</div>
+
+<!-- SECTION 7 -->
+<div id="s7" class="section page-break">
+  <div class="section-num">SECTION 07</div>
+  <h2 class="section-title">FastAPI: Publishing Metrics for Autoscaling</h2>
+  <p class="lead">FastAPI applications can expose Prometheus metrics that feed directly into HPA via the Prometheus Adapter or into KEDA's Prometheus scaler. This closes the loop: application-level signals drive infrastructure scaling.</p>
+
+  <h3>Instrumenting with prometheus-fastapi-instrumentator</h3>
+  <pre>from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_client import Gauge, Counter, Histogram
+
+app = FastAPI()
+
+# Auto-instruments: request count, latency histogram per route
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+
+# Custom business metric
+active_jobs = Gauge("active_processing_jobs", "Number of jobs currently being processed")
+job_queue_depth = Gauge("job_queue_depth", "Messages waiting in queue")
+processing_errors = Counter("processing_errors_total", "Total processing errors", ["error_type"])
+processing_duration = Histogram(
+    "processing_duration_seconds",
+    "Time to process a job",
+    buckets=[0.1, 0.5, 1.0, 2.5, 5.0, 10.0]
+)
+
+@app.post("/process")
+async def process_job(job: JobRequest):
+    active_jobs.inc()
+    with processing_duration.time():
+        try:
+            result = await do_work(job)
+            return result
+        except Exception as e:
+            processing_errors.labels(error_type=type(e).__name__).inc()
+            raise
+        finally:
+            active_jobs.dec()</pre>
+
+  <h3>ServiceMonitor — Prometheus Scrape Config</h3>
+  <pre>apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: payment-api-monitor
+  labels:
+    release: prometheus   # matches Prometheus operator selector
+spec:
+  selector:
+    matchLabels:
+      app: payment-api
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 15s
+    scrapeTimeout: 10s</pre>
+
+  <h3>Prometheus Adapter Rule</h3>
+  <pre>rules:
+- seriesQuery: 'job_queue_depth{namespace!="",pod!=""}'
+  resources:
+    overrides:
+      namespace: {resource: "namespace"}
+      pod: {resource: "pod"}
+  name:
+    as: "job_queue_depth"
+  metricsQuery: 'avg(<<.Series>>{<<.LabelMatchers>>})'</pre>
+
+  <h3>HPA Using Custom Metric</h3>
+  <pre>metrics:
+- type: Pods
+  pods:
+    metric:
+      name: job_queue_depth
+    target:
+      type: AverageValue
+      averageValue: "5"    # scale so each pod handles ≤5 queued jobs</pre>
+
+  <h3>KEDA ScaledObject Using Prometheus</h3>
+  <pre>triggers:
+- type: prometheus
+  metadata:
+    serverAddress: http://prometheus-operated.monitoring:9090
+    metricName: job_queue_depth
+    query: sum(job_queue_depth{namespace="production"})
+    threshold: "50"        # 1 replica per 50 queued jobs</pre>
+
+  <div class="callout callout-green">
+    <strong>Best Practice</strong>
+    Expose metrics at <code>/metrics</code> on a dedicated port (not the API port) and secure the API port but leave <code>/metrics</code> accessible only within the cluster via NetworkPolicy. This prevents leaking internal state externally while allowing Prometheus to scrape.
+  </div>
+</div>
+
+<!-- SECTION 8 -->
+<div id="s8" class="section page-break">
+  <div class="section-num">SECTION 08</div>
+  <h2 class="section-title">What is NOT Possible — Limitations</h2>
+  <p class="lead">Understanding what autoscaling cannot do is as important as knowing what it can. These are the hard constraints and common misconceptions you must be able to articulate in an interview.</p>
+
+  <h3>HPA Limitations</h3>
+  <div class="card-grid">
+    <div class="card">
+      <h4>Cannot scale StatefulSets safely</h4>
+      <p>HPA can target StatefulSets but scaling stateful pods without application-level support (e.g., cluster rebalancing for Kafka/Cassandra) causes data imbalance or unavailability.</p>
+    </div>
+    <div class="card">
+      <h4>Cannot scale to zero</h4>
+      <p>HPA minimum is 1 replica. Use KEDA or Knative for scale-to-zero semantics.</p>
+    </div>
+    <div class="card">
+      <h4>Metric lag</h4>
+      <p>HPA polls metrics every 15 seconds. A sudden 10× traffic spike may take 30–60s to trigger scaling, during which the existing pods may be overwhelmed.</p>
+    </div>
+    <div class="card">
+      <h4>No predictive scaling</h4>
+      <p>HPA is purely reactive. For predictable load patterns (daily peaks), use KEDA's Cron scaler to pre-scale before the load arrives.</p>
+    </div>
+  </div>
+
+  <h3>VPA Limitations</h3>
+  <ul class="clean">
+    <li><strong>Pod restart required:</strong> VPA (Auto/Recreation mode) evicts pods to apply new resource values — causes brief disruption</li>
+    <li><strong>No in-place update (yet):</strong> Kubernetes 1.27+ supports in-place pod resize but VPA's in-place mode is still alpha</li>
+    <li><strong>History window:</strong> VPA needs several days of data for accurate recommendations — not useful for brand-new deployments</li>
+    <li><strong>Cannot exceed node capacity:</strong> If maxAllowed is larger than any single node, pods will pend indefinitely</li>
+  </ul>
+
+  <h3>Cluster Autoscaler Limitations</h3>
+  <div class="callout callout-amber">
+    <strong>Node provisioning latency</strong>
+    Cloud VMs take 2–5 minutes to join the cluster. Bare-metal machines may take 10–20 minutes. HPA scales pods in seconds — if all existing nodes are full, pods will pend for minutes during node provisioning. Design with buffer capacity to absorb traffic spikes before CA catches up.
+  </div>
+
+  <ul class="clean">
+    <li>CA will NOT remove a node with any non-DaemonSet pod that cannot be rescheduled elsewhere</li>
+    <li>Pods with <code>local-storage</code> volumes block node scale-down</li>
+    <li>CA does not rebalance — a node may remain under-utilised if moving its pods would violate PodDisruptionBudgets</li>
+  </ul>
+
+  <h3>General Autoscaling Anti-Patterns</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Anti-Pattern</th><th>Problem</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>No resource requests set</td><td>HPA cannot compute utilisation; pods get BestEffort QoS (first evicted)</td><td>Always set requests and limits</td></tr>
+        <tr><td>maxReplicas too low</td><td>Service saturates during spikes even though autoscaler works correctly</td><td>Capacity plan — set max to handle peak × 2</td></tr>
+        <tr><td>HPA + VPA on CPU</td><td>Conflicting feedback loop (see Section 3)</td><td>Use VPA for memory only; HPA on custom metrics</td></tr>
+        <tr><td>minReplicas: 0 for latency-sensitive API</td><td>Cold start on first request after idle period</td><td>Keep minReplicas ≥ 1</td></tr>
+        <tr><td>No PodDisruptionBudget</td><td>CA may evict all pods of a deployment simultaneously during scale-down</td><td>Set PDB: minAvailable ≥ 1</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION 9 -->
+<div id="s9" class="section page-break">
+  <div class="section-num">SECTION 09</div>
+  <h2 class="section-title">Decision Guide — Which Autoscaler to Use?</h2>
+  <p class="lead">Choose the right autoscaler based on workload type, scaling signal, and latency tolerance.</p>
+
+  <h3>Decision Matrix</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Workload Type</th><th>Scaling Signal</th><th>Recommended</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Stateless HTTP API</td><td>CPU utilisation</td><td>HPA (CPU)</td><td>Simple, widely understood</td></tr>
+        <tr><td>Stateless HTTP API</td><td>Request rate</td><td>HPA + Prometheus Adapter</td><td>More accurate than CPU</td></tr>
+        <tr><td>Event-driven consumer</td><td>Kafka/SQS lag</td><td>KEDA</td><td>Scale-to-zero when no events</td></tr>
+        <tr><td>Batch / one-shot jobs</td><td>Queue message count</td><td>KEDA ScaledJob</td><td>Job per message semantics</td></tr>
+        <tr><td>ML inference endpoint</td><td>Concurrent requests</td><td>Knative (KPA)</td><td>Scale-to-zero + panic mode</td></tr>
+        <tr><td>Memory-bound service</td><td>Memory utilisation</td><td>VPA (recommendation mode)</td><td>Right-size requests, monitor</td></tr>
+        <tr><td>Unknown resource needs</td><td>Historical usage</td><td>VPA (Off mode)</td><td>Read recommendations, set manually</td></tr>
+        <tr><td>Pre-known traffic peak</td><td>Time schedule</td><td>KEDA Cron scaler</td><td>Pre-warm before traffic arrives</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Combining Autoscalers Safely</h3>
+  <div class="callout callout-blue">
+    <strong>Safe Combinations</strong>
+    <ul class="clean" style="margin-top:0.5rem">
+      <li>HPA (requests/s) + VPA (memory only) + Cluster Autoscaler — the recommended production stack</li>
+      <li>KEDA + Cluster Autoscaler — KEDA scales pods, CA provides nodes as needed</li>
+      <li>Knative + Cluster Autoscaler — Knative handles pod lifecycle, CA handles node lifecycle</li>
+    </ul>
+  </div>
+
+  <h3>Interview Quick Answers</h3>
+  <div class="card-grid">
+    <div class="card">
+      <h4>"How do you scale to zero?"</h4>
+      <p>KEDA with minReplicaCount: 0, or Knative Serving. Standard HPA minimum is 1.</p>
+    </div>
+    <div class="card">
+      <h4>"HPA isn't scaling fast enough"</h4>
+      <p>Reduce stabilisation window, switch trigger metric to leading indicator (queue depth) rather than lagging (CPU), or pre-scale with KEDA Cron.</p>
+    </div>
+    <div class="card">
+      <h4>"Pods are stuck Pending"</h4>
+      <p>Cluster Autoscaler not configured, maxNodesTotal reached, or node provisioning in progress. Check CA logs: <code>oc logs -n openshift-machine-api</code>.</p>
+    </div>
+    <div class="card">
+      <h4>"VPA keeps restarting my pods"</h4>
+      <p>Switch to updateMode: Initial or Off. Read recommendations and apply them manually to stabilise, then re-enable Auto.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 10 -->
+<div id="s10" class="section page-break">
+  <div class="section-num">SECTION 10</div>
+  <h2 class="section-title">End-to-End Autoscaling Architecture</h2>
+  <p class="lead">A production autoscaling stack combines pod-level autoscalers feeding off application metrics with node-level autoscalers that ensure capacity is always available. This section shows how all the pieces connect.</p>
+
+  <h3>Full Architecture Diagram</h3>
+  <div class="diagram">
+    <pre>
+  ┌────────────────────────────────────────────────────────────────────┐
+  │                     METRICS PIPELINE                               │
+  │                                                                    │
+  │  FastAPI /metrics ──▶ Prometheus ──▶ Prometheus Adapter            │
+  │                               └────▶ KEDA Metrics Server           │
+  │  metrics-server ──▶ HPA (resource metrics)                         │
+  └──────────────────────────────────┬─────────────────────────────────┘
+                                     │
+  ┌──────────────────────────────────▼─────────────────────────────────┐
+  │                     POD AUTOSCALERS                                │
+  │                                                                    │
+  │  HPA ──────────▶ Adjusts Deployment replicas (CPU/memory/custom)  │
+  │  KEDA ─────────▶ Adjusts replicas + scale-to-zero (queue/events)  │
+  │  Knative KPA ──▶ Concurrency-based, handles cold-start buffering  │
+  │  VPA ───────────▶ Recommends / adjusts resource requests          │
+  └──────────────────────────────────┬─────────────────────────────────┘
+                                     │ Pods Pending (no node capacity)
+  ┌──────────────────────────────────▼─────────────────────────────────┐
+  │                     NODE AUTOSCALERS                               │
+  │                                                                    │
+  │  Cluster Autoscaler ──▶ Detects Pending pods                      │
+  │        │                Selects best MachineSet to scale           │
+  │        ▼                                                           │
+  │  Machine Autoscaler ──▶ Scales MachineSet replicas                │
+  │        │                                                           │
+  │        ▼                                                           │
+  │  Cloud / Bare-Metal API ──▶ Provisions new VM / machine           │
+  └────────────────────────────────────────────────────────────────────┘
+    </pre>
+  </div>
+
+  <h3>Timing Characteristics</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Event</th><th>Typical Time</th><th>Bottleneck</th></tr></thead>
+      <tbody>
+        <tr><td>HPA detects metric spike</td><td>15–30s</td><td>Metrics scrape interval</td></tr>
+        <tr><td>KEDA detects queue growth</td><td>15–30s</td><td>pollingInterval setting</td></tr>
+        <tr><td>New pod scheduled to existing node</td><td>5–10s</td><td>Image pull (first time)</td></tr>
+        <tr><td>CA detects Pending pod</td><td>~30s</td><td>scan interval</td></tr>
+        <tr><td>Cloud VM provisioned</td><td>2–5 min</td><td>Cloud API + OS boot</td></tr>
+        <tr><td>Bare-metal node joins</td><td>10–20 min</td><td>PXE boot + OS install</td></tr>
+        <tr><td>Node scale-down (idle)</td><td>10+ min</td><td>unneededTime threshold</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>PodDisruptionBudgets — The Safety Net</h3>
+  <pre>apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: payment-api-pdb
+spec:
+  selector:
+    matchLabels:
+      app: payment-api
+  minAvailable: 2          # at least 2 pods always running
+  # OR: maxUnavailable: 1  # at most 1 pod down at a time</pre>
+
+  <p>PDBs are honoured by both CA (node drain) and VPA (pod eviction). Without a PDB, a scale-down event could simultaneously evict all replicas of a deployment that happens to be running on a single node.</p>
+
+  <h3>Observability Checklist</h3>
+  <ul class="clean">
+    <li>Alert on HPA at <code>maxReplicas</code> — means autoscaler is saturated, needs a higher max or more efficient code</li>
+    <li>Alert on pods stuck <code>Pending &gt; 5 minutes</code> — CA may have hit its node limit</li>
+    <li>Dashboard: replica count over time overlaid with request rate — validate autoscaling efficiency</li>
+    <li>Track VPA recommendations weekly — update requests/limits if Target drifts significantly</li>
+    <li>Monitor CA logs for "cannot remove node" messages — indicates PDB or local storage blocks</li>
+  </ul>
+
+  <div class="footer">Autoscaling — Complete Reference Guide · Interview Preparation · April 2026</div>
+</div>
+
+</div><!-- /.container -->
+</div><!-- /.main-scroll -->
+</div><!-- /.topic-page -->
+
+<footer class="guide-footer">Interview Preparation Guide</footer>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vertical Pod Autoscaler (VPA) – Autoscaling</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../autoscaling.html">Autoscaling</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Vertical Pod Autoscaler (VPA)</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Autoscaling</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-scaling-fundamentals.html">Scaling Fundamentals</a></li>
+        <li><a href="04-2-horizontal-pod-autoscaler-hpa.html">Horizontal Pod Autoscaler (HPA)</a></li>
+        <li class="active"><a href="05-3-vertical-pod-autoscaler-vpa.html" class="active">Vertical Pod Autoscaler (VPA)</a></li>
+        <li><a href="06-4-custom-metrics-autoscaler-keda.html">Custom Metrics Autoscaler (KEDA)</a></li>
+        <li><a href="07-5-cluster-and-machine-autoscaler-node-scaling.html">Cluster and Machine Autoscaler (Node Scaling)</a></li>
+        <li><a href="08-6-openshift-serverless-knative-autoscaling.html">OpenShift Serverless (Knative) Autoscaling</a></li>
+        <li><a href="09-7-fastapi-publishing-metrics-for-autoscaling.html">FastAPI: Publishing Metrics for Autoscaling</a></li>
+        <li><a href="10-8-what-is-not-possible-limitations.html">What is NOT Possible — Limitations</a></li>
+        <li><a href="11-9-decision-guide-which-autoscaler-to-use.html">Decision Guide — Which Autoscaler to Use?</a></li>
+        <li><a href="12-10-end-to-end-autoscaling-architecture.html">End-to-End Autoscaling Architecture</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>3. Vertical Pod Autoscaler (VPA)</h1>
+<p>The VPA Operator automatically adjusts the CPU and memory resource requests (and limits) for pods based on historical and current usage patterns. Instead of adding more pods, it makes existing pods the right size.</p>
+<pre><code>VPA Components
++---------------+     +--------------+     +-------------------+
+|  VPA          |     |  VPA         |     |  VPA Admission    |
+|  Recommender  |     |  Updater     |     |  Controller       |
+|               |     |              |     |                   |
+| Analyses      |     | Evicts pods  |     | Sets correct      |
+| historical &amp;  |     | with wrong   |     | resource requests |
+| current usage |     | resource     |     | on new pods       |
+| -&gt; generates  |     | values       |     | before admission  |
+| optimal values|     |              |     | to node           |
++---------------+     +--------------+     +-------------------+</code></pre>
+<h3>3.1 Update Modes</h3>
+<div class="table-wrap"><table>
+  <tr><th>Mode</th><th>Behaviour</th><th>Use Case</th></tr>
+  <tr><td>Off</td><td>Only generates recommendations. Does not modify pods. Dry-run mode.</td><td>Assess recommendations before enabling. Production auditing.</td></tr>
+  <tr><td>Initial</td><td>Sets resources only on newly created pods. Does not restart existing pods.</td><td>Gradual adoption. Applies to new deployments only.</td></tr>
+  <tr><td>Auto</td><td>Evicts and recreates pods with updated resource values. Full automation.</td><td>Non-critical workloads where brief restarts are acceptable.</td></tr>
+  <tr><td>Recreate</td><td>Same as Auto. Evicts pods so controllers recreate them with new values.</td><td>Same as Auto. Functionally identical.</td></tr>
+</table></div>
+<h3>3.2 Example: VPA Configuration</h3>
+<pre><code>apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+name: my-api-vpa
+spec:
+targetRef:
+apiVersion: apps/v1
+kind: Deployment
+name: my-api
+updatePolicy:
+updateMode: &quot;Auto&quot;
+resourcePolicy:
+containerPolicies:
+- containerName: &quot;*&quot;
+minAllowed:
+cpu: 100m
+memory: 128Mi
+maxAllowed:
+cpu: 2
+memory: 2Gi
+controlledResources:
+- cpu
+- memory</code></pre>
+<p>IMPORTANT: Do NOT use VPA and HPA on the same CPU/memory metrics simultaneously. They will conflict — HPA wants to add pods while VPA wants to resize them. You can safely combine VPA (managing CPU/memory) with KEDA (scaling on custom metrics like HTTP requests).</p>
+      </article>
+
+      <nav class="page-nav">
+        <a href="04-2-horizontal-pod-autoscaler-hpa.html">&#8592; Horizontal Pod Autoscaler (HPA)</a>
+        <span class="spacer"></span>
+        <a href="06-4-custom-metrics-autoscaler-keda.html">Custom Metrics Autoscaler (KEDA) &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

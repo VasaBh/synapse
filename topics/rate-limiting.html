@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rate Limiting &amp; High-Throughput Design &#8212; Complete Reference Guide 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e;
+  --ink2: #3d3d5c;
+  --ink3: #6b6b8a;
+  --bg: #ffffff;
+  --bg2: #f4f3f0;
+  --bg3: #eae8e4;
+  --accent: #2563eb;
+  --accent2: #1d4ed8;
+  --accent-bg: #eff6ff;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --amber: #d97706;
+  --amber-bg: #fffbeb;
+  --rose: #e11d48;
+  --rose-bg: #fff1f2;
+  --purple: #7c3aed;
+  --purple-bg: #f5f3ff;
+  --teal: #0d9488;
+  --teal-bg: #f0fdfa;
+  --coral: #ea580c;
+  --coral-bg: #fff7ed;
+  --border: #e2e0dc;
+  --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+
+@media print {
+  body { font-size: 10pt; line-height: 1.5; }
+  .no-print { display: none !important; }
+  .page-break { page-break-before: always; }
+  .card { break-inside: avoid; }
+  pre { font-size: 8pt; }
+  h1 { font-size: 22pt; }
+  h2 { font-size: 14pt; }
+  h3 { font-size: 11pt; }
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+.cover {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center;
+  background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%);
+  color: white; padding: 4rem 2rem; position: relative; overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(5,150,105,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 30%, rgba(37,99,235,0.12) 0%, transparent 50%);
+}
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 750px; }
+.cover h1 span { background: linear-gradient(135deg, #34d399, #60a5fa); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 640px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 700px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card-green { border-left: 3px solid var(--green); }
+.card-purple { border-left: 3px solid var(--purple); }
+.card-amber { border-left: 3px solid var(--amber); }
+.card-teal { border-left: 3px solid var(--teal); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout-teal { background: var(--teal-bg); border-left: 3px solid var(--teal); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+@media (max-width: 900px) { .three-col { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .three-col { grid-template-columns: 1fr; } }
+
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+.diagram { background: #1e293b; border-radius: 10px; padding: 1.5rem; margin: 1rem 0; overflow-x: auto; }
+.diagram pre { background: none; border: none; color: #e2e8f0; font-size: 0.78rem; margin: 0; }
+
+.algo-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; margin: 0.75rem 0; }
+.algo-box h4 { margin: 0 0 0.5rem; font-size: 0.9rem; }
+
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+
+@media (max-width: 1100px) { .sidebar { display: none; } }
+@media (max-width: 600px) { .cover h1 { font-size: 2.2rem; } .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">&#8592; All Topics</a>
+  <h1>Interview Preparation Guide</h1>
+</header>
+
+<div class="topic-page">
+  <aside class="sidebar">
+    <p class="sidebar-title">Rate Limiting &amp; Throughput</p>
+    <nav><ul>
+      <li><a href="#s1"><span class="toc-num">01</span>Fundamentals</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>Rate Limiting Algorithms</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>FastAPI Implementation</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>Distributed Rate Limiting</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>Queue Design: Kafka &amp; RabbitMQ</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>Response Channels</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>Ray Distributed Platform</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>10,000+ RPS Architecture</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>Capacity Planning</a></li>
+      <li><a href="#s10"><span class="toc-num">10</span>Decision Guide</a></li>
+    </ul></nav>
+  </aside>
+
+  <div class="main-scroll">
+
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference &#8212; April 2026</div>
+  <h1>Rate Limiting &amp; <span>High-Throughput Design</span></h1>
+  <p class="cover-sub">Algorithms, FastAPI implementation, distributed rate limiting, Kafka/RabbitMQ queuing, WebSocket/SSE/Webhook response channels, Ray distributed platform &#8212; the definitive guide to serving 10,000+ requests without degradation.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">Token Bucket</span>
+    <span class="cover-tag">Sliding Window</span>
+    <span class="cover-tag">FastAPI</span>
+    <span class="cover-tag">Redis</span>
+    <span class="cover-tag">Kafka</span>
+    <span class="cover-tag">RabbitMQ</span>
+    <span class="cover-tag">WebSocket</span>
+    <span class="cover-tag">SSE</span>
+    <span class="cover-tag">Webhook</span>
+    <span class="cover-tag">Ray</span>
+    <span class="cover-tag">10k+ RPS</span>
+  </div>
+  <div class="cover-date">v1.0 &#8212; Last updated April 2026</div>
+</div>
+
+<div class="container">
+
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <div class="toc-grid">
+    <a href="#s1" class="toc-item"><span class="toc-num">01</span><span class="toc-label">Rate Limiting &amp; Throttling Fundamentals</span></a>
+    <a href="#s2" class="toc-item"><span class="toc-num">02</span><span class="toc-label">Rate Limiting Algorithms — Deep Dive</span></a>
+    <a href="#s3" class="toc-item"><span class="toc-num">03</span><span class="toc-label">FastAPI Implementation — All Patterns</span></a>
+    <a href="#s4" class="toc-item"><span class="toc-num">04</span><span class="toc-label">Distributed Rate Limiting with Redis</span></a>
+    <a href="#s5" class="toc-item"><span class="toc-num">05</span><span class="toc-label">Queue Design: Kafka &amp; RabbitMQ</span></a>
+    <a href="#s6" class="toc-item"><span class="toc-num">06</span><span class="toc-label">Response Channels: Webhook / WebSocket / SSE</span></a>
+    <a href="#s7" class="toc-item"><span class="toc-num">07</span><span class="toc-label">Ray Distributed Platform</span></a>
+    <a href="#s8" class="toc-item"><span class="toc-num">08</span><span class="toc-label">10,000+ RPS Architecture</span></a>
+    <a href="#s9" class="toc-item"><span class="toc-num">09</span><span class="toc-label">Capacity Planning</span></a>
+    <a href="#s10" class="toc-item"><span class="toc-num">10</span><span class="toc-label">Decision Guide &amp; Cheat Sheet</span></a>
+  </div>
+</div>
+
+<!-- ===== SECTION 1 ===== -->
+<div id="s1" class="section page-break">
+  <div class="section-num">SECTION 01</div>
+  <h2 class="section-title">Rate Limiting &amp; Throttling Fundamentals</h2>
+  <p class="lead">Rate limiting and throttling are the primary defences against resource exhaustion, abuse, and cascade failures. Every production API needs them — the question is where to enforce them and at what granularity.</p>
+
+  <h3>Rate Limiting vs Throttling</h3>
+  <div class="two-col">
+    <div class="card card-accent">
+      <h4>Rate Limiting</h4>
+      <p>Hard ceiling on request volume per time window. Requests <em>exceeding</em> the limit are rejected immediately with HTTP 429. Protects the server from being overwhelmed. The client must retry later.</p>
+    </div>
+    <div class="card card-green">
+      <h4>Throttling</h4>
+      <p>Soft control that slows down processing rather than rejecting. Excess requests are queued or delayed. Provides a smoother experience but consumes memory for the queue. Often combined with rate limiting.</p>
+    </div>
+  </div>
+
+  <h3>Why Rate Limiting is Non-Negotiable</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>DDoS / Brute Force Protection</h4>
+      <p>A single malicious client sending 50,000 req/s can exhaust all database connections and memory before a human can react.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Fair Resource Distribution</h4>
+      <p>Without limits, one power user can consume 90% of capacity, degrading service for all others. Rate limits enforce fairness.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Cost Control</h4>
+      <p>APIs calling paid third-party services (LLM APIs, payment processors, SMS) need hard limits to prevent runaway billing from bugs or abuse.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>SLA Preservation</h4>
+      <p>Downstream services have their own limits. Propagating excess load causes cascading 429s and circuit breaker trips. Rate limit at the source.</p>
+    </div>
+  </div>
+
+  <h3>Rate Limiting Dimensions</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Dimension</th><th>Key</th><th>Example</th><th>Granularity</th></tr></thead>
+      <tbody>
+        <tr><td>Per IP</td><td>client IP</td><td>100 req/min per IP</td><td>Coarse — stops DDoS but not API key abuse</td></tr>
+        <tr><td>Per API Key / User</td><td>api_key or user_id</td><td>1000 req/hour per key</td><td>Fine — per customer SLA enforcement</td></tr>
+        <tr><td>Per Endpoint</td><td>route path</td><td>/search: 10/s, /health: unlimited</td><td>Targeted — protect expensive endpoints</td></tr>
+        <tr><td>Per Tenant</td><td>tenant_id</td><td>Tier-based: free=100/h, pro=10k/h</td><td>Business model enforcement</td></tr>
+        <tr><td>Global</td><td>service-wide</td><td>Max 50k req/min across all clients</td><td>Circuit breaker at service level</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>HTTP 429 Response Standard</h3>
+  <pre>HTTP/1.1 429 Too Many Requests
+Content-Type: application/json
+Retry-After: 30                    # seconds until limit resets
+X-RateLimit-Limit: 1000            # total allowed per window
+X-RateLimit-Remaining: 0           # remaining in current window
+X-RateLimit-Reset: 1714500000      # Unix timestamp of window reset
+
+{
+  "error": "rate_limit_exceeded",
+  "message": "You have exceeded 1000 requests per hour. Retry after 30 seconds.",
+  "retry_after": 30
+}</pre>
+
+  <div class="callout callout-blue">
+    <strong>Always return Retry-After</strong>
+    Without <code>Retry-After</code>, clients in a retry loop will hammer your API continuously, creating a self-amplifying load spike. With it, clients back off intelligently and the load naturally spreads out.
+  </div>
+</div>
+
+<!-- ===== SECTION 2 ===== -->
+<div id="s2" class="section page-break">
+  <div class="section-num">SECTION 02</div>
+  <h2 class="section-title">Rate Limiting Algorithms &#8212; Deep Dive</h2>
+  <p class="lead">The choice of algorithm determines how precisely you control traffic, how much memory you consume, and whether clients experience sudden cliffs or smooth degradation.</p>
+
+  <h3>1. Fixed Window Counter</h3>
+  <div class="algo-box">
+    <h4>How it works</h4>
+    <p style="font-size:0.88rem; color:var(--ink2); margin:0.25rem 0 0.5rem">Divide time into fixed windows (e.g., 00:00&#8211;01:00). Count requests per key per window. Reset counter at window boundary.</p>
+  </div>
+  <div class="diagram">
+    <pre>
+  Window: 12:00:00 - 12:01:00   Limit: 100 req/min
+  ─────────────────────────────────────────────────
+  12:00:30 ──── 100 requests arrive ──── counter=100 (ALLOWED)
+  12:00:59 ────   1 request arrives  ──── counter=101 (REJECTED ✗)
+  12:01:00 ──── counter RESETS to 0
+  12:01:00 ──── 100 requests arrive ──── counter=100 (ALLOWED)
+
+  Problem: 200 requests in 1 second straddling the boundary (burst exploit)
+    </pre>
+  </div>
+  <div class="two-col">
+    <div class="card card-green">
+      <h4>Pros</h4>
+      <p>O(1) space per key. Trivially implemented with Redis INCR + EXPIRE. Simple to reason about for billing (hourly/daily quotas).</p>
+    </div>
+    <div class="card card-amber">
+      <h4>Cons</h4>
+      <p>Boundary burst: a client can send 2&#215; limit in 2&#215; period straddling the boundary. Counters reset synchronously — thundering herd at window start.</p>
+    </div>
+  </div>
+
+  <h3>2. Sliding Window Log</h3>
+  <div class="algo-box">
+    <h4>How it works</h4>
+    <p style="font-size:0.88rem; color:var(--ink2); margin:0.25rem 0 0.5rem">Store a timestamp for each request in a sorted set. On each request, remove timestamps older than the window, count remaining — if &lt; limit, allow and add new timestamp.</p>
+  </div>
+  <pre># Redis sorted set implementation
+ZADD rate:user123 &lt;now_ms&gt; &lt;request_id&gt;
+ZREMRANGEBYSCORE rate:user123 0 &lt;(now_ms - window_ms)&gt;
+count = ZCARD rate:user123
+EXPIRE rate:user123 &lt;window_seconds&gt;</pre>
+  <div class="two-col">
+    <div class="card card-green">
+      <h4>Pros</h4>
+      <p>Perfectly accurate — no boundary burst. The count at any moment reflects the true sliding window.</p>
+    </div>
+    <div class="card card-amber">
+      <h4>Cons</h4>
+      <p>O(requests) space per user. A high-volume user stores thousands of timestamps. Expensive ZREMRANGEBYSCORE on every request.</p>
+    </div>
+  </div>
+
+  <h3>3. Sliding Window Counter (Hybrid) &#8212; Recommended</h3>
+  <div class="algo-box">
+    <h4>How it works</h4>
+    <p style="font-size:0.88rem; color:var(--ink2); margin:0.25rem 0 0.5rem">Blend the current fixed window count with the previous window count, weighted by how far into the current window we are. Approximates sliding window with O(1) space.</p>
+  </div>
+  <div class="diagram">
+    <pre>
+  Elapsed = position in current window / window size
+
+  estimated_count = prev_window_count * (1 - elapsed) + current_window_count
+
+  Example: window=60s, elapsed=30s (50%)
+  prev_count=80, current_count=40
+  estimated = 80 * 0.5 + 40 = 80  (vs limit 100 → ALLOWED)
+    </pre>
+  </div>
+  <div class="two-col">
+    <div class="card card-green">
+      <h4>Pros</h4>
+      <p>O(1) space (only 2 counters per key). Very accurate — Cloudflare uses this and reports &lt;0.003% error rate vs true sliding window.</p>
+    </div>
+    <div class="card card-green">
+      <h4>Cons</h4>
+      <p>Slight approximation error near window boundaries. Not suitable for strict financial rate limiting where exact counts are auditable requirements.</p>
+    </div>
+  </div>
+
+  <h3>4. Token Bucket &#8212; Best for Burst-Tolerant APIs</h3>
+  <div class="algo-box">
+    <h4>How it works</h4>
+    <p style="font-size:0.88rem; color:var(--ink2); margin:0.25rem 0 0.5rem">A bucket holds up to <em>capacity</em> tokens. Tokens refill at a fixed <em>rate</em>. Each request consumes one token. If the bucket is empty, the request is rejected. The bucket can accumulate tokens up to capacity, allowing short bursts.</p>
+  </div>
+  <div class="diagram">
+    <pre>
+  Capacity: 10 tokens   Refill rate: 1 token/second
+  ─────────────────────────────────────────────────
+  t=0   bucket=10
+  t=0   5 requests arrive ──── bucket=5 (ALLOWED)
+  t=0   6 requests arrive ──── 5 allowed, 1 REJECTED (bucket=0)
+  t=5   5 tokens refill ────── bucket=5
+  t=5   3 requests arrive ──── bucket=2 (ALLOWED)
+
+  Allows bursts up to bucket capacity, then enforces sustained rate
+    </pre>
+  </div>
+  <pre># Token bucket with Redis Lua script (atomic)
+local key = KEYS[1]
+local capacity = tonumber(ARGV[1])     -- 10
+local refill_rate = tonumber(ARGV[2])  -- 1 token/second
+local now = tonumber(ARGV[3])          -- current timestamp (ms)
+local tokens_requested = tonumber(ARGV[4])  -- usually 1
+
+local bucket = redis.call('HMGET', key, 'tokens', 'last_refill')
+local tokens = tonumber(bucket[1]) or capacity
+local last_refill = tonumber(bucket[2]) or now
+
+-- Calculate tokens to add based on elapsed time
+local elapsed = (now - last_refill) / 1000.0
+local new_tokens = math.min(capacity, tokens + elapsed * refill_rate)
+
+if new_tokens >= tokens_requested then
+  redis.call('HMSET', key, 'tokens', new_tokens - tokens_requested, 'last_refill', now)
+  redis.call('EXPIRE', key, math.ceil(capacity / refill_rate) + 1)
+  return 1  -- allowed
+else
+  redis.call('HMSET', key, 'tokens', new_tokens, 'last_refill', now)
+  return 0  -- rejected
+end</pre>
+
+  <h3>5. Leaky Bucket &#8212; Best for Smooth Output Rate</h3>
+  <div class="algo-box">
+    <h4>How it works</h4>
+    <p style="font-size:0.88rem; color:var(--ink2); margin:0.25rem 0 0.5rem">Requests fill a queue (the "bucket"). A processor drains the queue at a fixed rate. If the queue is full, new requests are dropped. Unlike token bucket, outbound processing is always at constant rate &#8212; no bursts reach the backend.</p>
+  </div>
+  <div class="two-col">
+    <div class="card card-green">
+      <h4>Best for</h4>
+      <p>Protecting rate-sensitive downstream systems (payment processors, rate-limited 3rd-party APIs). Output is always smooth regardless of input spikes.</p>
+    </div>
+    <div class="card card-amber">
+      <h4>Trade-off</h4>
+      <p>Requests wait in queue under load &#8212; adds latency. Queue overflow still drops requests. Requires persistent queue storage (Redis list, Kafka).</p>
+    </div>
+  </div>
+
+  <h3>Algorithm Comparison</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Algorithm</th><th>Memory</th><th>Burst</th><th>Accuracy</th><th>Best For</th></tr></thead>
+      <tbody>
+        <tr><td>Fixed Window</td><td>O(1)</td><td>2&#215; at boundary</td><td>Approximate</td><td>Daily/hourly billing quotas</td></tr>
+        <tr><td>Sliding Window Log</td><td>O(requests)</td><td>None</td><td>Exact</td><td>Strict per-second limits, small traffic</td></tr>
+        <tr><td>Sliding Window Counter</td><td>O(1)</td><td>None</td><td>~99.997%</td><td>Production APIs at scale (Cloudflare default)</td></tr>
+        <tr><td>Token Bucket</td><td>O(1)</td><td>Up to capacity</td><td>Exact</td><td>APIs that should allow occasional bursts</td></tr>
+        <tr><td>Leaky Bucket</td><td>O(queue)</td><td>None (smooth)</td><td>Exact</td><td>Smoothing output to rate-sensitive downstream</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== SECTION 3 ===== -->
+<div id="s3" class="section page-break">
+  <div class="section-num">SECTION 03</div>
+  <h2 class="section-title">FastAPI Implementation &#8212; All Patterns</h2>
+  <p class="lead">FastAPI offers multiple levels for implementing rate limiting, from simple in-process counters for development to production-grade Redis-backed distributed limiters.</p>
+
+  <h3>Pattern 1 &#8212; slowapi (Simplest)</h3>
+  <p><code>slowapi</code> is a Starlette/FastAPI port of Flask-Limiter using token bucket algorithm in memory or Redis.</p>
+  <pre>from fastapi import FastAPI, Request
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+limiter = Limiter(key_func=get_remote_address)  # key by IP
+app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+@app.get("/search")
+@limiter.limit("10/minute")        # 10 requests per minute per IP
+async def search(request: Request, q: str):
+    return {"results": await do_search(q)}
+
+@app.get("/report")
+@limiter.limit("2/hour")           # expensive endpoint
+async def report(request: Request):
+    return {"data": await generate_report()}</pre>
+
+  <h3>Pattern 2 &#8212; Redis Token Bucket Middleware (Production)</h3>
+  <pre>import time, redis.asyncio as aioredis
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import JSONResponse
+
+app = FastAPI()
+redis_client = aioredis.from_url("redis://localhost:6379")
+
+# Lua script for atomic token bucket check
+TOKEN_BUCKET_SCRIPT = """
+local key      = KEYS[1]
+local capacity = tonumber(ARGV[1])
+local rate     = tonumber(ARGV[2])
+local now      = tonumber(ARGV[3])
+
+local data = redis.call('HMGET', key, 'tokens', 'ts')
+local tokens = tonumber(data[1]) or capacity
+local last_ts = tonumber(data[2]) or now
+
+local delta   = math.max(0, now - last_ts)
+local refill  = math.min(capacity, tokens + delta * rate / 1000)
+
+if refill < 1 then
+    redis.call('HMSET', key, 'tokens', refill, 'ts', now)
+    return {0, math.ceil((1 - refill) / rate * 1000)}
+end
+
+redis.call('HMSET', key, 'tokens', refill - 1, 'ts', now)
+redis.call('PEXPIRE', key, math.ceil(capacity / rate * 1000) + 5000)
+return {1, 0}
+"""
+
+bucket_script = redis_client.register_script(TOKEN_BUCKET_SCRIPT)
+
+class RateLimitConfig:
+    def __init__(self, capacity: int, rate_per_sec: float):
+        self.capacity = capacity
+        self.rate_per_sec = rate_per_sec
+
+# Per-endpoint limits
+LIMITS = {
+    "/api/search":  RateLimitConfig(capacity=20,  rate_per_sec=5),
+    "/api/infer":   RateLimitConfig(capacity=5,   rate_per_sec=1),
+    "/api/report":  RateLimitConfig(capacity=2,   rate_per_sec=0.1),
+    "default":      RateLimitConfig(capacity=100, rate_per_sec=20),
+}
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    api_key = request.headers.get("X-API-Key", request.client.host)
+    path = request.url.path
+    cfg = LIMITS.get(path, LIMITS["default"])
+
+    key = f"rl:{api_key}:{path}"
+    now_ms = int(time.time() * 1000)
+
+    result = await bucket_script(
+        keys=[key],
+        args=[cfg.capacity, cfg.rate_per_sec, now_ms]
+    )
+    allowed, retry_after_ms = result
+
+    if not allowed:
+        return JSONResponse(
+            status_code=429,
+            content={"error": "rate_limit_exceeded", "retry_after_ms": retry_after_ms},
+            headers={
+                "Retry-After": str(retry_after_ms // 1000 + 1),
+                "X-RateLimit-Limit": str(cfg.capacity),
+                "X-RateLimit-Remaining": "0",
+            }
+        )
+
+    response = await call_next(request)
+    response.headers["X-RateLimit-Limit"] = str(cfg.capacity)
+    return response</pre>
+
+  <h3>Pattern 3 &#8212; Tiered Rate Limiting by API Key Plan</h3>
+  <pre>from enum import Enum
+
+class Plan(str, Enum):
+    FREE = "free"
+    PRO = "pro"
+    ENTERPRISE = "enterprise"
+
+PLAN_LIMITS = {
+    Plan.FREE:       {"requests_per_hour": 100,   "burst": 10},
+    Plan.PRO:        {"requests_per_hour": 10_000, "burst": 200},
+    Plan.ENTERPRISE: {"requests_per_hour": 500_000, "burst": 5000},
+}
+
+async def get_plan_for_key(api_key: str) -&gt; Plan:
+    # Cached in Redis to avoid DB hit on every request
+    cached = await redis_client.get(f"plan:{api_key}")
+    if cached:
+        return Plan(cached.decode())
+    plan = await db.get_plan(api_key)
+    await redis_client.setex(f"plan:{api_key}", 300, plan.value)  # cache 5 min
+    return plan
+
+@app.middleware("http")
+async def tiered_rate_limit(request: Request, call_next):
+    api_key = request.headers.get("X-API-Key")
+    if not api_key:
+        return JSONResponse(status_code=401, content={"error": "missing_api_key"})
+
+    plan = await get_plan_for_key(api_key)
+    limits = PLAN_LIMITS[plan]
+    # ... apply sliding window counter with plan-specific limits
+    return await call_next(request)</pre>
+
+  <h3>Pattern 4 &#8212; Dependency-Based Rate Limit (per route)</h3>
+  <pre>from fastapi import Depends
+
+class RateLimiter:
+    def __init__(self, requests: int, window: int):
+        self.requests = requests
+        self.window = window  # seconds
+
+    async def __call__(self, request: Request):
+        key = f"rl:{request.client.host}:{request.url.path}"
+        count = await redis_client.incr(key)
+        if count == 1:
+            await redis_client.expire(key, self.window)
+        remaining = max(0, self.requests - count)
+        if count &gt; self.requests:
+            raise HTTPException(
+                status_code=429,
+                detail="Rate limit exceeded",
+                headers={
+                    "Retry-After": str(await redis_client.ttl(key)),
+                    "X-RateLimit-Remaining": "0"
+                }
+            )
+        return remaining
+
+# Reusable rate limit dependencies
+search_limit  = RateLimiter(requests=10, window=60)
+infer_limit   = RateLimiter(requests=5,  window=60)
+
+@app.get("/search", dependencies=[Depends(search_limit)])
+async def search(q: str):
+    return {"results": await do_search(q)}
+
+@app.post("/infer", dependencies=[Depends(infer_limit)])
+async def infer(payload: InferRequest):
+    return {"output": await model.predict(payload)}</pre>
+
+  <h3>Circuit Breaker Integration</h3>
+  <pre>from circuitbreaker import circuit
+
+@app.post("/payment")
+@circuit(failure_threshold=5, recovery_timeout=30, expected_exception=Exception)
+async def create_payment(payload: PaymentRequest):
+    # After 5 consecutive failures, circuit opens for 30s
+    # Returns CircuitBreakerError immediately without calling downstream
+    return await payment_service.charge(payload)</pre>
+</div>
+
+<!-- ===== SECTION 4 ===== -->
+<div id="s4" class="section page-break">
+  <div class="section-num">SECTION 04</div>
+  <h2 class="section-title">Distributed Rate Limiting with Redis</h2>
+  <p class="lead">In-process rate limiters break when you scale horizontally &#8212; each pod has its own counter, so N pods allow N times the intended limit. Redis provides a single shared counter visible to all instances.</p>
+
+  <h3>The Problem with Local Rate Limiting</h3>
+  <div class="diagram">
+    <pre>
+  WITHOUT distributed rate limiting (WRONG):
+  ────────────────────────────────────────────────
+  Client ─── 100 req/min limit ─── Load Balancer
+                                       │
+                          ┌────────────┼────────────┐
+                          ▼            ▼            ▼
+                       Pod A         Pod B         Pod C
+                      counter:33   counter:33   counter:33
+                      (each allows 100 → total: 300 requests slip through)
+
+  WITH Redis distributed rate limiting (CORRECT):
+  ─────────────────────────────────────────────────────
+  Client ─── 100 req/min limit ─── Load Balancer
+                                       │
+                          ┌────────────┼────────────┐
+                          ▼            ▼            ▼
+                       Pod A         Pod B         Pod C
+                          └──────────▶ Redis ◀──────┘
+                                   counter:100
+                               (shared across all pods)
+    </pre>
+  </div>
+
+  <h3>Redis Sliding Window Counter (Atomic Lua)</h3>
+  <pre>SLIDING_WINDOW_SCRIPT = """
+local key = KEYS[1]
+local window = tonumber(ARGV[1])     -- seconds
+local limit  = tonumber(ARGV[2])     -- max requests
+local now    = tonumber(ARGV[3])     -- current time (ms)
+
+-- Two keys: current window counter and previous window counter
+local curr_key = key .. ':' .. math.floor(now / (window * 1000))
+local prev_key = key .. ':' .. (math.floor(now / (window * 1000)) - 1)
+
+local curr_count = tonumber(redis.call('GET', curr_key) or 0)
+local prev_count = tonumber(redis.call('GET', prev_key) or 0)
+
+-- Weight: how far through current window (0.0 to 1.0)
+local elapsed_frac = (now % (window * 1000)) / (window * 1000)
+local estimated = prev_count * (1 - elapsed_frac) + curr_count
+
+if estimated >= limit then
+    return {0, math.ceil((1 - elapsed_frac) * window)}  -- rejected, retry_after
+end
+
+redis.call('INCR', curr_key)
+redis.call('EXPIRE', curr_key, window * 2)
+return {1, 0}  -- allowed
+"""</pre>
+
+  <h3>Redis Cluster for High-Throughput Rate Limiting</h3>
+  <p>At 100k+ req/s, a single Redis node can become a bottleneck. Use Redis Cluster with key sharding &#8212; each user's rate limit key maps to a specific shard, distributing the INCR load:</p>
+  <pre># Redis Cluster: keys distribute across shards automatically
+# Ensure user-specific counters go to same shard using hash tags
+key = f"rl:{{user:{user_id}}}:{endpoint}"
+# {user:123} forces all keys for user 123 to same slot
+# Enables Lua scripts (which require single-slot atomicity)</pre>
+
+  <h3>Rate Limiting at the OpenShift HAProxy Layer</h3>
+  <p>For coarse-grained limits, offload to HAProxy before traffic reaches pods &#8212; zero application code required:</p>
+  <pre>apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: api-route
+  annotations:
+    haproxy.router.openshift.io/rate-limit-connections: "true"
+    haproxy.router.openshift.io/rate-limit-connections.rate-http: "100"  # 100 req/s per IP
+    haproxy.router.openshift.io/rate-limit-connections.concurrent-tcp: "50"
+    haproxy.router.openshift.io/timeout: 30s</pre>
+
+  <h3>Rate Limiting at Istio / Envoy Layer</h3>
+  <pre>apiVersion: networking.istio.io/v1alpha1
+kind: EnvoyFilter
+metadata:
+  name: api-rate-limit
+spec:
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.filters.http.ratelimit
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.http.ratelimit.v3.RateLimit
+          domain: production
+          rate_limit_service:
+            grpc_service:
+              envoy_grpc:
+                cluster_name: rate_limit_cluster  # external ratelimit service</pre>
+
+  <div class="callout callout-blue">
+    <strong>Layered Rate Limiting Architecture</strong>
+    Best practice is three layers: (1) HAProxy/Istio at ingress for coarse IP-based protection, (2) Redis-backed application rate limiter for per-user/per-key precision, (3) circuit breaker per downstream call. Each layer catches a different abuse pattern.
+  </div>
+</div>
+
+<!-- ===== SECTION 5 ===== -->
+<div id="s5" class="section page-break">
+  <div class="section-num">SECTION 05</div>
+  <h2 class="section-title">Queue Design: Kafka &amp; RabbitMQ</h2>
+  <p class="lead">Queues decouple the rate at which requests arrive from the rate at which they are processed. This is the single most effective tool for absorbing traffic bursts without dropping requests or overloading backends.</p>
+
+  <h3>When to Queue Instead of Reject</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Strategy</th><th>Client Experience</th><th>When to Use</th></tr></thead>
+      <tbody>
+        <tr><td>Reject (429)</td><td>Immediate failure, must retry</td><td>Stateless reads, cheap ops, abuse prevention</td></tr>
+        <tr><td>Queue + Async response</td><td>202 Accepted, poll for result</td><td>Expensive jobs: ML inference, report generation</td></tr>
+        <tr><td>Queue + WebSocket push</td><td>Wait, receive result when ready</td><td>Interactive tools, real-time dashboards</td></tr>
+        <tr><td>Queue + Webhook callback</td><td>Fire and forget, notified on completion</td><td>B2B integrations, long-running workflows</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Kafka &#8212; Architecture &amp; Design Decisions</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Topics &amp; Partitions</h4>
+      <p>A topic is split into partitions. Each partition is an ordered, immutable log. Max parallelism = number of partitions (one consumer per partition in a group).</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Consumer Groups</h4>
+      <p>Multiple consumers sharing a group each process different partitions. Scale consumers by adding instances — up to partition count. Beyond that, consumers idle.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Retention</h4>
+      <p>Messages persist even after consumption (configurable: time or size). Replay events, feed multiple consumers independently, recover from failures by re-reading.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Ordering</h4>
+      <p>Ordering guaranteed <em>within a partition</em>. Use partition key (e.g., user_id) to ensure all events for a user go to the same partition and are processed in order.</p>
+    </div>
+  </div>
+
+  <h3>Kafka FastAPI Producer Pattern</h3>
+  <pre>from aiokafka import AIOKafkaProducer
+from fastapi import FastAPI, BackgroundTasks
+import json, uuid
+
+app = FastAPI()
+producer: AIOKafkaProducer = None
+
+@app.on_event("startup")
+async def startup():
+    global producer
+    producer = AIOKafkaProducer(
+        bootstrap_servers="kafka:9092",
+        value_serializer=lambda v: json.dumps(v).encode(),
+        compression_type="gzip",
+        acks="all",                       # wait for all replicas to acknowledge
+        max_batch_size=65536,             # 64KB batch for throughput
+        linger_ms=5,                      # wait 5ms to batch more messages
+        enable_idempotence=True,          # exactly-once semantics on producer
+    )
+    await producer.start()
+
+@app.on_event("shutdown")
+async def shutdown():
+    await producer.stop()
+
+@app.post("/infer", status_code=202)
+async def submit_inference(request: InferRequest):
+    job_id = str(uuid.uuid4())
+
+    await producer.send_and_wait(
+        topic="inference-jobs",
+        key=request.model_id.encode(),   # partition by model for ordering
+        value={
+            "job_id": job_id,
+            "model": request.model_id,
+            "payload": request.data,
+            "submitted_at": time.time(),
+            "callback_url": request.webhook_url,
+        }
+    )
+
+    return {
+        "job_id": job_id,
+        "status": "queued",
+        "status_url": f"/jobs/{job_id}",
+        "estimated_wait_s": await estimate_wait()
+    }</pre>
+
+  <h3>Kafka Consumer &#8212; Idempotent Worker</h3>
+  <pre>from aiokafka import AIOKafkaConsumer
+
+async def start_workers(num_workers: int = 4):
+    consumer = AIOKafkaConsumer(
+        "inference-jobs",
+        bootstrap_servers="kafka:9092",
+        group_id="inference-workers",
+        auto_offset_reset="earliest",
+        enable_auto_commit=False,         # manual commit for at-least-once
+        max_poll_records=10,              # process 10 at a time
+        session_timeout_ms=30000,
+        heartbeat_interval_ms=3000,
+    )
+    await consumer.start()
+
+    async for msg in consumer:
+        job = json.loads(msg.value)
+        job_id = job["job_id"]
+
+        # Idempotency check: skip if already processed
+        if await redis.exists(f"processed:{job_id}"):
+            await consumer.commit()
+            continue
+
+        try:
+            result = await run_inference(job["payload"], job["model"])
+            await store_result(job_id, result)
+            await redis.setex(f"processed:{job_id}", 86400, "1")  # 24h dedup window
+
+            # Notify client via webhook if provided
+            if job.get("callback_url"):
+                await send_webhook(job["callback_url"], job_id, result)
+
+            await consumer.commit()
+
+        except Exception as e:
+            # Don't commit: Kafka will redeliver to another consumer
+            await send_to_dead_letter_queue(job, str(e))
+            await consumer.commit()  # prevent infinite redelivery after DLQ</pre>
+
+  <h3>RabbitMQ &#8212; Architecture &amp; Design Decisions</h3>
+  <div class="two-col">
+    <div class="card card-green">
+      <h4>When to Choose RabbitMQ</h4>
+      <p>Complex routing logic (topic exchanges, header-based routing). Task queues where each message processed by exactly one consumer. Per-message TTL and priority queues. Smaller scale (&lt;50k msg/s).</p>
+    </div>
+    <div class="card card-amber">
+      <h4>When to Choose Kafka</h4>
+      <p>Event streaming with replay. Multiple independent consumers reading same events. Very high throughput (&gt;100k msg/s). Event sourcing / audit log. Long retention (days to weeks).</p>
+    </div>
+  </div>
+
+  <pre>import aio_pika
+
+async def publish_job(channel, job: dict):
+    await channel.default_exchange.publish(
+        aio_pika.Message(
+            body=json.dumps(job).encode(),
+            content_type="application/json",
+            delivery_mode=aio_pika.DeliveryMode.PERSISTENT,  # survive broker restart
+            priority=job.get("priority", 0),                  # 0-9 priority
+            expiration=str(300 * 1000),                       # 5 min TTL in ms
+            headers={"x-job-id": job["job_id"]},
+        ),
+        routing_key="inference.jobs",
+    )
+
+# Consumer with prefetch (flow control)
+async def start_consumer(channel):
+    await channel.set_qos(prefetch_count=5)  # max 5 unacked messages at once
+
+    queue = await channel.declare_queue(
+        "inference.jobs",
+        durable=True,
+        arguments={
+            "x-dead-letter-exchange": "dlx",   # failed msgs go here
+            "x-dead-letter-routing-key": "inference.dead",
+            "x-max-priority": 9,
+        }
+    )
+
+    async with queue.iterator() as q_iter:
+        async for message in q_iter:
+            async with message.process(requeue=False):  # ack on success, nack on exception
+                job = json.loads(message.body)
+                await process_job(job)</pre>
+
+  <h3>Queue Capacity Planning</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Metric</th><th>Formula</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>Queue depth at peak</td><td>arrival_rate &#215; (1/processing_rate) &#215; burst_duration</td><td>1000/s &#215; 2s processing &#215; 30s burst = 60,000 messages</td></tr>
+        <tr><td>Min consumers needed</td><td>ceil(arrival_rate / messages_per_consumer_per_sec)</td><td>ceil(1000 / 10) = 100 consumers</td></tr>
+        <tr><td>Lag recovery time</td><td>queue_depth / (consumer_throughput - arrival_rate)</td><td>60,000 / (200-100) = 600s lag recovery</td></tr>
+        <tr><td>Kafka partition count</td><td>ceil(target_throughput / per_partition_throughput)</td><td>ceil(100,000 / 10,000) = 10 partitions</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== SECTION 6 ===== -->
+<div id="s6" class="section page-break">
+  <div class="section-num">SECTION 06</div>
+  <h2 class="section-title">Response Channels: Webhook / WebSocket / SSE</h2>
+  <p class="lead">Once a request is queued for async processing, the client needs to receive the result. The choice of delivery channel depends on client type, latency requirements, and connection persistence needs.</p>
+
+  <h3>Channel Selection Guide</h3>
+  <div class="diagram">
+    <pre>
+  Is the client a server (B2B)?
+       |
+       Yes ──&gt; Webhook (push to client's endpoint)
+       |
+       No (browser / app)
+          |
+          +── Does client need bi-directional communication?
+          |        Yes ──&gt; WebSocket
+          |
+          +── Does client need server-push updates only?
+          |        Yes ──&gt; SSE (Server-Sent Events)
+          |
+          +── Can client poll?
+                   Yes ──&gt; REST polling with Retry-After header
+    </pre>
+  </div>
+
+  <h3>WebSocket &#8212; Real-Time Bi-Directional</h3>
+  <p>WebSocket upgrades an HTTP connection to a persistent full-duplex TCP connection. Both client and server can send messages at any time without request-response overhead.</p>
+  <pre>from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+import asyncio, json
+
+app = FastAPI()
+
+# Connection manager: tracks all active connections
+class ConnectionManager:
+    def __init__(self):
+        self.connections: dict[str, WebSocket] = {}
+
+    async def connect(self, job_id: str, ws: WebSocket):
+        await ws.accept()
+        self.connections[job_id] = ws
+
+    def disconnect(self, job_id: str):
+        self.connections.pop(job_id, None)
+
+    async def send_update(self, job_id: str, data: dict):
+        ws = self.connections.get(job_id)
+        if ws:
+            try:
+                await ws.send_json(data)
+            except Exception:
+                self.disconnect(job_id)
+
+manager = ConnectionManager()
+
+@app.websocket("/ws/jobs/{job_id}")
+async def job_updates(websocket: WebSocket, job_id: str):
+    await manager.connect(job_id, websocket)
+    try:
+        while True:
+            # Server pushes progress updates
+            status = await get_job_status(job_id)
+            await websocket.send_json({
+                "job_id": job_id,
+                "status": status.state,
+                "progress": status.progress,
+                "result": status.result if status.state == "done" else None,
+            })
+            if status.state in ("done", "failed"):
+                break
+            await asyncio.sleep(0.5)   # push every 500ms
+    except WebSocketDisconnect:
+        manager.disconnect(job_id)
+
+# Worker notifies via WebSocket when job completes
+async def notify_completion(job_id: str, result: dict):
+    await manager.send_update(job_id, {"status": "done", "result": result})</pre>
+
+  <h3>WebSocket Capacity</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Metric</th><th>Value</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Connections per process</td><td>~10,000&#8211;50,000</td><td>Depends on RAM; each connection ~10&#8211;30KB overhead</td></tr>
+        <tr><td>Messages per second</td><td>~100,000+</td><td>Per server, small messages (&lt;1KB)</td></tr>
+        <tr><td>Scale out</td><td>Redis Pub/Sub for broadcast</td><td>Each pod subscribes; messages fan out</td></tr>
+        <tr><td>Timeout / keepalive</td><td>Ping every 30s</td><td>Detect dead connections; load balancers close idle TCP after 60s</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <pre># Redis Pub/Sub for WebSocket fan-out across pods
+import aioredis
+
+async def pubsub_listener(channel_name: str):
+    pubsub = redis_client.pubsub()
+    await pubsub.subscribe(channel_name)
+    async for message in pubsub.listen():
+        if message["type"] == "message":
+            job_id, data = json.loads(message["data"])
+            await manager.send_update(job_id, data)
+
+# Worker publishes to Redis; all pods relay to connected clients
+async def publish_result(job_id: str, result: dict):
+    await redis_client.publish("job_updates", json.dumps([job_id, result]))</pre>
+
+  <h3>Server-Sent Events (SSE) &#8212; Simpler Server Push</h3>
+  <p>SSE is a <strong>unidirectional</strong> HTTP streaming connection from server to client. The browser has native <code>EventSource</code> support with automatic reconnect. Much simpler than WebSocket when you only need server &#8594; client push.</p>
+  <pre>from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+import asyncio, json
+
+app = FastAPI()
+
+async def sse_generator(job_id: str):
+    while True:
+        status = await get_job_status(job_id)
+        data = json.dumps({
+            "job_id": job_id,
+            "status": status.state,
+            "progress": status.progress
+        })
+        yield f"event: job_update\ndata: {data}\n\n"  # SSE format
+
+        if status.state in ("done", "failed"):
+            yield f"event: close\ndata: {{}}\n\n"
+            break
+
+        await asyncio.sleep(1)
+
+@app.get("/jobs/{job_id}/stream")
+async def stream_job_status(job_id: str):
+    return StreamingResponse(
+        sse_generator(job_id),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",  # disable Nginx buffering
+            "Connection": "keep-alive",
+        }
+    )</pre>
+  <pre>// Client-side SSE (vanilla JS)
+const eventSource = new EventSource('/jobs/abc123/stream');
+
+eventSource.addEventListener('job_update', (e) => {
+  const data = JSON.parse(e.data);
+  updateProgressBar(data.progress);
+});
+
+eventSource.addEventListener('close', () => {
+  eventSource.close();
+  showResult();
+});</pre>
+
+  <h3>Webhook &#8212; Async Push to Client's Server</h3>
+  <pre>import httpx
+
+async def send_webhook(callback_url: str, job_id: str, result: dict, max_retries: int = 3):
+    payload = {
+        "event": "job.completed",
+        "job_id": job_id,
+        "result": result,
+        "timestamp": time.time(),
+    }
+
+    # Sign payload for security (HMAC-SHA256)
+    import hmac, hashlib
+    body = json.dumps(payload, sort_keys=True).encode()
+    signature = hmac.new(WEBHOOK_SECRET.encode(), body, hashlib.sha256).hexdigest()
+
+    for attempt in range(max_retries):
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                resp = await client.post(
+                    callback_url,
+                    content=body,
+                    headers={
+                        "Content-Type": "application/json",
+                        "X-Webhook-Signature": f"sha256={signature}",
+                        "X-Webhook-ID": job_id,
+                        "X-Webhook-Timestamp": str(int(time.time())),
+                    }
+                )
+                if resp.status_code &lt; 300:
+                    return  # success
+                if resp.status_code &lt; 500:
+                    break   # client error, don't retry 4xx
+        except Exception:
+            pass
+
+        # Exponential backoff: 1s, 2s, 4s, ...
+        await asyncio.sleep(2 ** attempt)</pre>
+
+  <h3>Channel Comparison at a Glance</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Channel</th><th>Direction</th><th>Latency</th><th>Scale / Conn Limit</th><th>Best For</th></tr></thead>
+      <tbody>
+        <tr><td>REST Polling</td><td>Client initiates</td><td>~poll_interval</td><td>Stateless, easy</td><td>Simple status checks, &lt;10k clients</td></tr>
+        <tr><td>WebSocket</td><td>Bi-directional</td><td>&lt;100ms</td><td>~50k per pod; Redis fan-out</td><td>Chat, live trading, collaborative tools</td></tr>
+        <tr><td>SSE</td><td>Server &#8594; client only</td><td>&lt;100ms</td><td>~50k per pod (lighter)</td><td>Live dashboards, notifications, progress</td></tr>
+        <tr><td>Webhook</td><td>Server &#8594; client server</td><td>Seconds (retries)</td><td>Unlimited (stateless)</td><td>B2B integrations, payment callbacks</td></tr>
+        <tr><td>gRPC streaming</td><td>Both</td><td>&lt;50ms</td><td>~100k per pod</td><td>Service-to-service streaming (internal)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== SECTION 7 ===== -->
+<div id="s7" class="section page-break">
+  <div class="section-num">SECTION 07</div>
+  <h2 class="section-title">Ray Distributed Platform</h2>
+  <p class="lead">Ray is a distributed Python framework for scaling compute across a cluster. It transforms a FastAPI endpoint into a parallelised, autoscaling workload that can handle 10,000s of concurrent requests by distributing work across CPU/GPU nodes.</p>
+
+  <h3>Ray Core Primitives</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>@ray.remote (Tasks)</h4>
+      <p>Any Python function decorated with @ray.remote executes asynchronously in a worker process (potentially on a different node). Returns a Future (ObjectRef).</p>
+    </div>
+    <div class="card card-accent">
+      <h4>@ray.remote (Actors)</h4>
+      <p>Stateful workers &#8212; classes decorated with @ray.remote. Each actor instance is a long-lived process holding state. Used for model serving, connection pools, counters.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>ray.get()</h4>
+      <p>Synchronously wait for a list of ObjectRefs to complete. ray.wait() for non-blocking partial completion. Both support batching for efficient retrieval.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Placement Groups</h4>
+      <p>Reserve CPU/GPU resources across nodes in "bundles". Used to co-locate actors that communicate frequently, or to reserve GPU for model replicas.</p>
+    </div>
+  </div>
+
+  <h3>Ray Serve &#8212; Production ML Serving</h3>
+  <p>Ray Serve is a scalable model serving library built on Ray. It handles HTTP routing, replica autoscaling, batching, and model composition natively.</p>
+  <pre>import ray
+from ray import serve
+from fastapi import FastAPI
+import torch
+
+app = FastAPI()
+ray.init(address="auto")  # connect to existing Ray cluster
+serve.start(detached=True)
+
+@serve.deployment(
+    num_replicas=4,                   # start with 4 replicas
+    ray_actor_options={"num_gpus": 1, "num_cpus": 2},
+    autoscaling_config={
+        "min_replicas": 2,
+        "max_replicas": 20,
+        "target_num_ongoing_requests_per_replica": 10,
+        "scale_up_delay_s": 5,
+        "scale_down_delay_s": 60,
+    },
+    max_concurrent_queries=100,       # queue depth per replica
+)
+@serve.ingress(app)
+class InferenceService:
+    def __init__(self):
+        self.model = torch.load("model.pt").cuda()
+        self.model.eval()
+
+    @app.post("/infer")
+    async def infer(self, request: InferRequest):
+        with torch.no_grad():
+            tensor = preprocess(request.data)
+            output = self.model(tensor.cuda())
+            return {"result": postprocess(output)}
+
+# Bind and deploy
+InferenceHandle = InferenceService.bind()
+serve.run(InferenceHandle, route_prefix="/api")</pre>
+
+  <h3>Ray Serve Batching &#8212; GPU Efficiency</h3>
+  <p>Batching is critical for GPU throughput. A single GPU processes a batch of 64 inputs in nearly the same time as 1 input. Ray Serve's <code>@serve.batch</code> decorator accumulates concurrent requests into a single batch call:</p>
+  <pre>from ray import serve
+import asyncio
+
+@serve.deployment(num_replicas=2, ray_actor_options={"num_gpus": 1})
+class BatchedInference:
+    def __init__(self):
+        self.model = load_model()
+
+    @serve.batch(max_batch_size=64, batch_wait_timeout_s=0.05)
+    async def handle_batch(self, inputs: list[str]) -&gt; list[dict]:
+        # Called with up to 64 requests batched together
+        # GPU processes 64 at cost of ~1 — massive throughput gain
+        results = self.model.predict_batch(inputs)  # single GPU call
+        return [{"result": r} for r in results]
+
+    async def __call__(self, request: Request) -&gt; dict:
+        data = (await request.json())["input"]
+        return await self.handle_batch(data)   # transparently batched</pre>
+
+  <h3>Ray Tasks for Parallel CPU Work</h3>
+  <pre>@ray.remote
+def process_record(record: dict) -&gt; dict:
+    # Runs in parallel worker process — CPU-bound work
+    return heavy_computation(record)
+
+@app.post("/batch-process")
+async def batch_process(records: list[dict]):
+    # Submit all records to Ray in parallel
+    futures = [process_record.remote(r) for r in records]
+
+    # Collect as they complete (not all at once — avoid OOM)
+    results = []
+    while futures:
+        ready, futures = ray.wait(futures, num_returns=min(10, len(futures)))
+        results.extend(ray.get(ready))
+
+    return {"results": results}</pre>
+
+  <h3>Ray + Kafka Integration (High-Throughput Pipeline)</h3>
+  <pre>from ray import serve
+from aiokafka import AIOKafkaConsumer
+
+@ray.remote
+class KafkaWorker:
+    def __init__(self, worker_id: int):
+        self.worker_id = worker_id
+        self.model = load_model()
+
+    async def run(self):
+        consumer = AIOKafkaConsumer(
+            "inference-jobs",
+            bootstrap_servers="kafka:9092",
+            group_id=f"ray-workers-{self.worker_id}",
+        )
+        await consumer.start()
+        async for msg in consumer:
+            job = json.loads(msg.value)
+            result = self.model.predict(job["payload"])
+            await publish_result(job["job_id"], result)
+
+# Launch N Ray workers consuming from Kafka
+workers = [KafkaWorker.remote(i) for i in range(16)]
+[w.run.remote() for w in workers]  # all running in parallel across cluster</pre>
+</div>
+
+<!-- ===== SECTION 8 ===== -->
+<div id="s8" class="section page-break">
+  <div class="section-num">SECTION 08</div>
+  <h2 class="section-title">10,000+ RPS Architecture</h2>
+  <p class="lead">Serving 10,000 requests per second requires designing every layer for throughput: from accepting connections to processing work to returning results. No single component can be the bottleneck.</p>
+
+  <h3>Complete High-Throughput Architecture</h3>
+  <div class="diagram">
+    <pre>
+  ┌──────────────────────────────────────────────────────────────────┐
+  │  INGRESS LAYER                                                    │
+  │  GSLB ──▶ F5 BIG-IP (SSL offload) ──▶ OpenShift HAProxy Router  │
+  │  Rate limit at HAProxy: coarse IP-based 429 before hitting pods  │
+  └──────────────────────────────────┬───────────────────────────────┘
+                                     │
+  ┌──────────────────────────────────▼───────────────────────────────┐
+  │  API GATEWAY LAYER (FastAPI + Redis)                              │
+  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
+  │  │ Pod 1    │  │ Pod 2    │  │ Pod 3    │  │ Pod N    │        │
+  │  │ uvicorn  │  │ uvicorn  │  │ uvicorn  │  │ uvicorn  │        │
+  │  │ workers=4│  │ workers=4│  │ workers=4│  │ workers=4│        │
+  │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘        │
+  │       └─────────────┴──────────────┴──────────────┘              │
+  │                            │                                      │
+  │              Redis Cluster (rate limits, job state)               │
+  └──────────────────────────────┬───────────────────────────────────┘
+                                 │ fast requests: return immediately
+                                 │ slow requests: enqueue and return 202
+  ┌──────────────────────────────▼───────────────────────────────────┐
+  │  MESSAGE QUEUE LAYER                                              │
+  │  Kafka (16 partitions, 3 replicas)                               │
+  │  Topics: inference-jobs, report-jobs, notification-jobs           │
+  └──────────────────────────────┬───────────────────────────────────┘
+                                 │
+  ┌──────────────────────────────▼───────────────────────────────────┐
+  │  PROCESSING LAYER (Ray Cluster)                                   │
+  │  Ray Head + 8 worker nodes                                        │
+  │  Ray Serve: 20 replicas, batch_size=64, GPU &#215;4 per node        │
+  │  Autoscale: min=4, max=80 replicas based on queue depth          │
+  └──────────────────────────────┬───────────────────────────────────┘
+                                 │
+  ┌──────────────────────────────▼───────────────────────────────────┐
+  │  RESPONSE LAYER                                                   │
+  │  WebSocket: active browser clients waiting for result            │
+  │  SSE: progress streaming for long-running jobs                   │
+  │  Webhook: B2B callbacks with HMAC signature                      │
+  │  REST poll: /jobs/{id}/status for simple integrations            │
+  └──────────────────────────────────────────────────────────────────┘
+    </pre>
+  </div>
+
+  <h3>FastAPI for Maximum Throughput</h3>
+  <pre># Dockerfile: Gunicorn + Uvicorn workers for production
+# CMD: gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker
+#      -b 0.0.0.0:8000 --timeout 120 --graceful-timeout 30
+
+# Connection pooling (critical for DB/Redis performance)
+from contextlib import asynccontextmanager
+import asyncpg, redis.asyncio as aioredis
+from fastapi import FastAPI
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # DB pool: min 10, max 100 connections per pod
+    app.state.db = await asyncpg.create_pool(
+        DATABASE_URL, min_size=10, max_size=100, command_timeout=10
+    )
+    # Redis pool
+    app.state.redis = aioredis.from_url(
+        REDIS_URL, max_connections=50, decode_responses=True
+    )
+    yield
+    await app.state.db.close()
+    await app.state.redis.aclose()
+
+app = FastAPI(lifespan=lifespan)
+
+# Response compression (reduces bandwidth, improves throughput under load)
+from fastapi.middleware.gzip import GZipMiddleware
+app.add_middleware(GZipMiddleware, minimum_size=500)
+
+# Keep-alive and connection reuse (critical for high-throughput)
+# Set in uvicorn: --timeout-keep-alive 75 (matches ALB idle timeout)</pre>
+
+  <h3>KEDA + Kafka: Auto-Scale Workers on Queue Depth</h3>
+  <pre>apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: inference-worker-scaler
+spec:
+  scaleTargetRef:
+    name: inference-worker
+  minReplicaCount: 4        # always warm
+  maxReplicaCount: 80       # 80 workers max
+  cooldownPeriod: 60
+  triggers:
+  - type: kafka
+    metadata:
+      bootstrapServers: kafka.svc:9092
+      consumerGroup: inference-workers
+      topic: inference-jobs
+      lagThreshold: "50"    # 1 new replica per 50 messages lag
+      offsetResetPolicy: latest</pre>
+
+  <h3>Database Patterns for High RPS</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Read Replicas</h4>
+      <p>Route all SELECT queries to read replicas. Write to primary only. 80% of most APIs are reads — this alone multiplies read capacity by replica count.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Write-Behind Cache</h4>
+      <p>Write to Redis (instant), return 200. Background job flushes to DB. Suitable for non-critical writes (analytics, view counts). Risk: data loss on cache failure.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Connection Pooling (PgBouncer)</h4>
+      <p>PostgreSQL max_connections ~500. 80 pods × 10 workers × 10 pool = 8000 connections &#8212; DB crashes. PgBouncer multiplexes thousands of app connections onto 100 real DB connections.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Partial Caching (Redis + TTL)</h4>
+      <p>Cache hot query results in Redis. Pattern: cache-aside (read-through). Invalidate on write. 99% cache hit ratio reduces DB load by 100&#215;.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SECTION 9 ===== -->
+<div id="s9" class="section page-break">
+  <div class="section-num">SECTION 09</div>
+  <h2 class="section-title">Capacity Planning</h2>
+  <p class="lead">Capacity planning is the difference between a system that survives its first traffic spike and one that collapses. These formulas and rules of thumb apply to any production workload.</p>
+
+  <h3>Throughput Envelope Per Component</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Component</th><th>Typical Max Throughput</th><th>Limiting Factor</th><th>Scale-Out Method</th></tr></thead>
+      <tbody>
+        <tr><td>FastAPI pod (uvicorn, async)</td><td>2,000&#8211;5,000 req/s</td><td>CPU, event loop saturation</td><td>More pods (HPA)</td></tr>
+        <tr><td>FastAPI pod (sync, blocking)</td><td>200&#8211;500 req/s</td><td>Thread pool exhaustion</td><td>Switch to async + more pods</td></tr>
+        <tr><td>Redis (single node)</td><td>100,000&#8211;200,000 ops/s</td><td>CPU (single-threaded)</td><td>Redis Cluster, read replicas</td></tr>
+        <tr><td>PostgreSQL (primary)</td><td>5,000&#8211;20,000 simple queries/s</td><td>I/O, WAL writes</td><td>Read replicas, PgBouncer, CQRS</td></tr>
+        <tr><td>Kafka partition</td><td>~10,000 msgs/s write</td><td>Disk I/O per partition</td><td>More partitions</td></tr>
+        <tr><td>RabbitMQ queue</td><td>~20,000&#8211;50,000 msgs/s</td><td>Memory, disk flush</td><td>Shovel/Federation, clustering</td></tr>
+        <tr><td>OpenShift HAProxy router</td><td>~100,000 req/s per router pod</td><td>CPU</td><td>Multiple IngressController replicas</td></tr>
+        <tr><td>Ray Serve (CPU batch)</td><td>~50,000 req/s per node</td><td>CPU cores</td><td>More Ray worker nodes</td></tr>
+        <tr><td>Ray Serve (GPU inference)</td><td>~1,000&#8211;10,000 infer/s</td><td>GPU FLOPS, memory bandwidth</td><td>More GPU nodes, larger batch_size</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Little's Law &#8212; The Fundamental Formula</h3>
+  <div class="callout callout-blue">
+    <strong>L = &#955; &#215; W</strong>
+    <p style="margin-top:0.5rem; font-size:0.88rem">
+      <strong>L</strong> = average number of requests in the system (concurrency)<br>
+      <strong>&#955;</strong> = arrival rate (requests/second)<br>
+      <strong>W</strong> = average time a request spends in the system (latency in seconds)
+    </p>
+    <p style="margin-top:0.5rem; font-size:0.88rem">
+      Example: 1,000 req/s, 200ms avg latency &#8594; 200 concurrent requests in-flight at any moment.<br>
+      Your connection pool, thread pool, and in-flight request limit must all be &#8805; 200.
+    </p>
+  </div>
+
+  <h3>Sizing FastAPI Workers</h3>
+  <pre># Rule of thumb for Gunicorn worker count
+# workers = (2 * CPU_cores) + 1   -- for CPU-bound sync code
+# workers = CPU_cores             -- for async (uvicorn) code: event loop per worker
+# threads per worker = 1          -- async workers: threads not needed
+
+# Example: 8-core pod, async FastAPI
+# workers = 8, max concurrency per worker = thousands (event loop)
+
+# Memory per worker: ~100-200MB for Python + model imports
+# 8 workers × 200MB = 1.6GB RAM per pod
+
+# k8s resource request
+resources:
+  requests:
+    cpu: "2"
+    memory: "2Gi"
+  limits:
+    cpu: "4"      # allow burst
+    memory: "3Gi"</pre>
+
+  <h3>Rate Limit Numbers by Use Case</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>API Type</th><th>Free Tier</th><th>Pro Tier</th><th>Enterprise</th></tr></thead>
+      <tbody>
+        <tr><td>REST CRUD (cheap)</td><td>100/hour</td><td>10,000/hour</td><td>Unlimited + quota</td></tr>
+        <tr><td>Search / Read-heavy</td><td>60/min</td><td>600/min</td><td>6,000/min</td></tr>
+        <tr><td>LLM inference</td><td>10/min, 100/day</td><td>100/min, 10k/day</td><td>SLA-based (tokens/min)</td></tr>
+        <tr><td>File upload</td><td>5/min, 10MB max</td><td>60/min, 100MB max</td><td>Custom</td></tr>
+        <tr><td>Webhook send</td><td>100/hour</td><td>1,000/hour</td><td>10,000/hour</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Headroom Rules</h3>
+  <ul class="clean">
+    <li>Design for <strong>3&#215; peak load</strong> &#8212; peaks are often 2&#8211;3&#215; the average, and load tests miss pathological patterns</li>
+    <li>Keep CPU utilisation under <strong>60% at peak</strong> &#8212; the last 40% headroom absorbs spikes before autoscaler responds (30s lag)</li>
+    <li>Set <code>maxReplicas</code> to <strong>2&#215; expected peak</strong> pods &#8212; autoscaler is reactive, not predictive</li>
+    <li>Rate limit at <strong>80% of measured capacity</strong> &#8212; the 20% buffer absorbs measurement variance and prevents cliff-edge degradation</li>
+    <li>Pre-scale with KEDA Cron <strong>5 minutes before</strong> known traffic events (market open, batch job trigger)</li>
+  </ul>
+</div>
+
+<!-- ===== SECTION 10 ===== -->
+<div id="s10" class="section page-break">
+  <div class="section-num">SECTION 10</div>
+  <h2 class="section-title">Decision Guide &amp; Cheat Sheet</h2>
+  <p class="lead">A consolidated reference for making the right architectural choice given workload characteristics, team size, and operational constraints.</p>
+
+  <h3>Rate Limiting: Algorithm Selector</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Need</th><th>Use</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Billing quotas (daily/monthly)</td><td>Fixed Window</td><td>Simple, auditable, aligns with billing periods</td></tr>
+        <tr><td>Strict per-second accuracy</td><td>Sliding Window Log</td><td>Exact counts, no boundary exploit</td></tr>
+        <tr><td>Production at scale, balanced</td><td>Sliding Window Counter</td><td>O(1) memory, 99.997% accurate, Cloudflare standard</td></tr>
+        <tr><td>APIs that benefit from bursting</td><td>Token Bucket</td><td>Allow short bursts, enforce sustained rate</td></tr>
+        <tr><td>Smooth output to rate-sensitive sink</td><td>Leaky Bucket (queue)</td><td>Constant output rate regardless of input spikes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Queue: Kafka vs RabbitMQ Selector</h3>
+  <div class="two-col">
+    <div class="card card-green">
+      <h4>Choose Kafka when</h4>
+      <ul class="clean" style="margin-top:0.4rem">
+        <li>Need event replay / re-processing</li>
+        <li>Multiple independent consumers same events</li>
+        <li>&gt;50k messages/second throughput</li>
+        <li>Event sourcing / audit log required</li>
+        <li>Messages must be retained long-term</li>
+      </ul>
+    </div>
+    <div class="card card-amber">
+      <h4>Choose RabbitMQ when</h4>
+      <ul class="clean" style="margin-top:0.4rem">
+        <li>Complex routing logic (topic/fanout/header exchanges)</li>
+        <li>Each message must be processed exactly once</li>
+        <li>Priority queues needed</li>
+        <li>Per-message TTL required</li>
+        <li>Simpler ops &amp; smaller scale (&lt;50k/s)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Response Channel Selector</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Scenario</th><th>Channel</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td>Live trading dashboard (browser)</td><td>WebSocket</td><td>Bi-directional, &lt;100ms latency, persistent</td></tr>
+        <tr><td>ML job progress bar (browser)</td><td>SSE</td><td>Server &#8594; client only, simpler, auto-reconnect</td></tr>
+        <tr><td>B2B payment notification</td><td>Webhook</td><td>Server-to-server, HMAC signed, retryable</td></tr>
+        <tr><td>Simple status polling</td><td>REST GET /jobs/{id}</td><td>Simplest, no persistent connection, easy to debug</td></tr>
+        <tr><td>Internal service streaming</td><td>gRPC streaming</td><td>Typed, efficient, bi-directional, service-to-service</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Ray Platform: When to Use</h3>
+  <div class="card-grid">
+    <div class="card card-green">
+      <h4>Use Ray Serve</h4>
+      <p>ML inference with GPU. Batching critical (64+ req per GPU call). Autoscaling replicas. Model A/B testing. Multi-model pipelines (chain models).</p>
+    </div>
+    <div class="card card-teal">
+      <h4>Use Ray Tasks</h4>
+      <p>Embarrassingly parallel CPU work. Batch data processing. Fan-out &#8594; fan-in patterns. Parallelising Python loops across cluster cores.</p>
+    </div>
+    <div class="card card-purple">
+      <h4>Use Ray Actors</h4>
+      <p>Stateful workers. Shared model instances. Rate-limited downstream clients (one Actor = one connection, shared by many callers).</p>
+    </div>
+    <div class="card card-amber">
+      <h4>Don't use Ray for</h4>
+      <p>Simple stateless CRUD APIs (uvicorn is enough). Low-concurrency workloads. When operational complexity &gt; benefit. When Celery/KEDA workers suffice.</p>
+    </div>
+  </div>
+
+  <h3>Full System Design for 10k+ RPS: Quick Checklist</h3>
+  <div class="callout callout-green">
+    <strong>Architecture checklist</strong>
+    <ul class="clean" style="margin-top:0.5rem">
+      <li>&#10003; Async FastAPI with uvicorn &#8212; no blocking I/O in handlers</li>
+      <li>&#10003; Redis Cluster for shared rate limit counters (distributed)</li>
+      <li>&#10003; 3-layer rate limiting: HAProxy (IP) &#8594; Redis middleware (user) &#8594; circuit breaker (downstream)</li>
+      <li>&#10003; Accept-Queue pattern: expensive ops return 202 + Kafka publish immediately</li>
+      <li>&#10003; KEDA ScaledObject on Kafka lag &#8212; scale workers with queue depth</li>
+      <li>&#10003; Ray Serve with batch_size=64 for GPU workloads</li>
+      <li>&#10003; PgBouncer before PostgreSQL &#8212; multiplex 10,000 app connections onto 100 DB connections</li>
+      <li>&#10003; Read replicas for all SELECT queries</li>
+      <li>&#10003; Redis cache with TTL for hot query results</li>
+      <li>&#10003; WebSocket/SSE/Webhook for async result delivery &#8212; no polling</li>
+      <li>&#10003; PodDisruptionBudget &#8212; prevent all replicas evicted simultaneously</li>
+      <li>&#10003; Topology spread constraints &#8212; pods across zones for HA</li>
+      <li>&#10003; Retry-After header on every 429 &#8212; prevent retry thundering herd</li>
+      <li>&#10003; Idempotency keys on all consumer workers &#8212; safe to redeliver</li>
+    </ul>
+  </div>
+
+  <h3>Key Interview Answers</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+      <tbody>
+        <tr><td>Why not use fixed window?</td><td>Allows 2&#215; limit at window boundary. Use sliding window counter instead for production.</td></tr>
+        <tr><td>How do you rate limit across 20 pods?</td><td>Redis shared counter with Lua atomic script. Local counters multiply the limit by pod count.</td></tr>
+        <tr><td>WebSocket vs SSE?</td><td>WebSocket for bi-directional (client can send). SSE for server-push only &#8212; simpler, uses HTTP, auto-reconnects.</td></tr>
+        <tr><td>How does Ray Serve autoscale?</td><td>Monitors <code>num_ongoing_requests</code> per replica. Scales out when above target, in when below, with configurable delays.</td></tr>
+        <tr><td>Kafka vs RabbitMQ for 100k/s?</td><td>Kafka &#8212; RabbitMQ peaks at ~50k/s; Kafka handles 1M+/s per partition. Also need replay &#8212; Kafka retains messages.</td></tr>
+        <tr><td>How to handle 10,000 requests in one burst?</td><td>Ingress: reject obvious abuse at HAProxy. Application: token bucket per user. Overflow: Kafka queue. Workers: Ray Serve with batching. Response: SSE/WebSocket push.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pills">
+    <span class="pill pill-blue">Sliding Window Counter</span>
+    <span class="pill pill-blue">Token Bucket</span>
+    <span class="pill pill-green">Redis Lua Atomic</span>
+    <span class="pill pill-green">FastAPI Middleware</span>
+    <span class="pill pill-teal">Kafka Consumer Group</span>
+    <span class="pill pill-teal">KEDA ScaledObject</span>
+    <span class="pill pill-purple">Ray Serve Batching</span>
+    <span class="pill pill-purple">WebSocket Fan-Out</span>
+    <span class="pill pill-amber">Little's Law</span>
+    <span class="pill pill-coral">3x Headroom Rule</span>
+  </div>
+
+  <div class="footer">Rate Limiting &amp; High-Throughput Design &#183; Interview Preparation &#183; April 2026</div>
+</div>
+
+</div><!-- /.container -->
+</div><!-- /.main-scroll -->
+</div><!-- /.topic-page -->
+
+<footer class="guide-footer">Interview Preparation Guide</footer>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scaling Fundamentals – Autoscaling</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../autoscaling.html">Autoscaling</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Scaling Fundamentals</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Autoscaling</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li class="active"><a href="03-1-scaling-fundamentals.html" class="active">Scaling Fundamentals</a></li>
+        <li><a href="04-2-horizontal-pod-autoscaler-hpa.html">Horizontal Pod Autoscaler (HPA)</a></li>
+        <li><a href="05-3-vertical-pod-autoscaler-vpa.html">Vertical Pod Autoscaler (VPA)</a></li>
+        <li><a href="06-4-custom-metrics-autoscaler-keda.html">Custom Metrics Autoscaler (KEDA)</a></li>
+        <li><a href="07-5-cluster-and-machine-autoscaler-node-scaling.html">Cluster and Machine Autoscaler (Node Scaling)</a></li>
+        <li><a href="08-6-openshift-serverless-knative-autoscaling.html">OpenShift Serverless (Knative) Autoscaling</a></li>
+        <li><a href="09-7-fastapi-publishing-metrics-for-autoscaling.html">FastAPI: Publishing Metrics for Autoscaling</a></li>
+        <li><a href="10-8-what-is-not-possible-limitations.html">What is NOT Possible — Limitations</a></li>
+        <li><a href="11-9-decision-guide-which-autoscaler-to-use.html">Decision Guide — Which Autoscaler to Use?</a></li>
+        <li><a href="12-10-end-to-end-autoscaling-architecture.html">End-to-End Autoscaling Architecture</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>1. Scaling Fundamentals</h1>
+<p>Scaling is the process of adjusting compute resources to match application demand. In a containerised platform like OpenShift, scaling operates at multiple layers — from individual pod resources to the number of pod replicas to the number of cluster nodes.</p>
+<h3>1.1 Horizontal vs Vertical Scaling</h3>
+<div class="table-wrap"><table>
+  <tr><th>Aspect</th><th>Horizontal Scaling</th><th>Vertical Scaling</th></tr>
+  <tr><td>What changes</td><td>Number of pod instances (replicas). Adding/removing copies of the application.</td><td>CPU and memory allocated to existing pods. Making each instance bigger/smaller.</td></tr>
+  <tr><td>Direction</td><td>Scale Out (add replicas) / Scale In (remove replicas).</td><td>Scale Up (add resources) / Scale Down (reduce resources).</td></tr>
+  <tr><td>Best for</td><td>Stateless applications, web APIs, microservices. Traffic-driven workloads.</td><td>Stateful apps, databases, single-threaded workloads, right-sizing resource requests.</td></tr>
+  <tr><td>Disruption</td><td>None — new pods are added alongside existing ones.</td><td>Pod must be restarted with new resource values (VPA evicts the pod).</td></tr>
+  <tr><td>OpenShift tool</td><td>HPA, KEDA, Knative, manual oc scale.</td><td>VPA Operator.</td></tr>
+</table></div>
+<h3>1.2 Node-Level Scaling</h3>
+<p>Beyond pods, OpenShift can also scale the cluster infrastructure itself by adding or removing worker nodes. This is infrastructure-level horizontal scaling managed by the Cluster Autoscaler and Machine Autoscaler, which interact with the cloud provider or virtualisation platform to provision new VMs when pod demand exceeds current cluster capacity.</p>
+<pre><code>COMPLETE AUTOSCALING LAYERS IN OPENSHIFT
+Layer 1: Pod Replicas (Horizontal)             Layer 2: Pod Resources (Vertical)
++----------------------------------+           +----------------------------------+
+|  HPA / KEDA / Knative            |           |  VPA Operator                    |
+|                                  |           |                                  |
+|  Scales: number of pod replicas   |           |  Scales: CPU &amp; memory per pod    |
+|  Trigger: CPU, memory, custom     |           |  Trigger: historical usage data  |
+|           metrics, concurrency    |           |  Action: evicts + recreates pods  |
++----------------------------------+           +----------------------------------+
+Layer 3: Cluster Nodes (Infrastructure)
++--------------------------------------------------------------+
+|  Cluster Autoscaler + Machine Autoscaler                      |
+|                                                              |
+|  Scales: number of worker nodes (VMs)                        |
+|  Trigger: pods in Pending state (no schedulable node)         |
+|  Action: adds/removes Machines from MachineSets              |
++--------------------------------------------------------------+</code></pre>
+      </article>
+
+      <nav class="page-nav">
+        <a href="02-table-of-contents.html">&#8592; Table of Contents</a>
+        <span class="spacer"></span>
+        <a href="04-2-horizontal-pod-autoscaler-hpa.html">Horizontal Pod Autoscaler (HPA) &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

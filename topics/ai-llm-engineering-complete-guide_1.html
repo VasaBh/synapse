@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI & LLM Engineering — Complete Reference Guide 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e;
+  --ink2: #3d3d5c;
+  --ink3: #6b6b8a;
+  --bg: #ffffff;
+  --bg2: #f4f3f0;
+  --bg3: #eae8e4;
+  --accent: #2563eb;
+  --accent2: #1d4ed8;
+  --accent-bg: #eff6ff;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --amber: #d97706;
+  --amber-bg: #fffbeb;
+  --rose: #e11d48;
+  --rose-bg: #fff1f2;
+  --purple: #7c3aed;
+  --purple-bg: #f5f3ff;
+  --teal: #0d9488;
+  --teal-bg: #f0fdfa;
+  --coral: #ea580c;
+  --coral-bg: #fff7ed;
+  --border: #e2e0dc;
+  --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+
+/* Print */
+@media print {
+  body { font-size: 10pt; line-height: 1.5; }
+  .no-print { display: none !important; }
+  .page-break { page-break-before: always; }
+  section { page-break-inside: avoid; }
+  .card { break-inside: avoid; }
+  pre { font-size: 8pt; }
+  h1 { font-size: 22pt; }
+  h2 { font-size: 14pt; }
+  h3 { font-size: 11pt; }
+}
+
+/* Layout */
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+/* Cover */
+.cover {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%);
+  color: white;
+  padding: 4rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(37,99,235,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 30%, rgba(124,58,237,0.1) 0%, transparent 50%);
+}
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+
+/* TOC */
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+
+/* Sections */
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+
+/* Cards */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+.card .badge { display: inline-block; font-family: var(--mono); font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 4px; margin-bottom: 0.4rem; font-weight: 500; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+
+/* Code */
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+
+/* Diagram boxes */
+.diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; margin: 1rem 0; font-family: var(--mono); font-size: 0.75rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink2); }
+
+/* Callout */
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+
+/* Badge pills */
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+
+/* Bullet lists */
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+/* Flow arrow */
+.flow-arrow { text-align: center; color: var(--ink3); font-size: 1.2rem; margin: 0.3rem 0; }
+
+/* Two col */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+/* Separator */
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+
+/* Footer */
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+/* ── Guide shell (header / sidebar / layout) ── */
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← All Topics</a>
+  <h1>Interview Preparation Guide</h1>
+</header>
+
+<div class="topic-page">
+
+  <!-- ── Sidebar navigation ── -->
+  <aside class="sidebar">
+    <p class="sidebar-title">AI / LLM Engineering</p>
+    <nav>
+      <ul>
+        <li><a href="#s1"><span class="toc-num">01</span>LLM Engineering Fundamentals</a></li>
+        <li><a href="#s2"><span class="toc-num">02</span>OpenAI API &amp; GPT Models</a></li>
+        <li><a href="#s3"><span class="toc-num">03</span>Anthropic Claude API</a></li>
+        <li><a href="#s4"><span class="toc-num">04</span>OpenAI vs Anthropic</a></li>
+        <li><a href="#s5"><span class="toc-num">05</span>RAG</a></li>
+        <li><a href="#s6"><span class="toc-num">06</span>Agentic AI</a></li>
+        <li><a href="#s7"><span class="toc-num">07</span>LangChain &amp; LangGraph</a></li>
+        <li><a href="#s8"><span class="toc-num">08</span>LiteLLM</a></li>
+        <li><a href="#s9"><span class="toc-num">09</span>Vector Databases</a></li>
+        <li><a href="#s10"><span class="toc-num">10</span>Model Context Protocol</a></li>
+        <li><a href="#s11"><span class="toc-num">11</span>Prompt Engineering</a></li>
+        <li><a href="#s12"><span class="toc-num">12</span>End-to-End Architecture</a></li>
+        <li><a href="#s13"><span class="toc-num">13</span>Applied Example</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ── Main scrollable content ── -->
+  <div class="main-scroll">
+
+<!-- ════════════════════════════════════════ COVER ════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference — April 2026</div>
+  <h1>AI & LLM <span>Engineering</span> Guide</h1>
+  <p class="cover-sub">From fundamentals to production architecture. OpenAI, Anthropic Claude, RAG, vector databases, agentic AI, LangChain, LiteLLM, MCP, and prompt engineering — all in one reference.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">LLM Engineering</span>
+    <span class="cover-tag">OpenAI API</span>
+    <span class="cover-tag">Anthropic Claude</span>
+    <span class="cover-tag">RAG</span>
+    <span class="cover-tag">Agentic AI</span>
+    <span class="cover-tag">LangChain</span>
+    <span class="cover-tag">LiteLLM</span>
+    <span class="cover-tag">MCP</span>
+    <span class="cover-tag">Vector Databases</span>
+    <span class="cover-tag">Prompt Engineering</span>
+    <span class="cover-tag">OpenAI GPT Models</span>
+  </div>
+  <div class="cover-date">v2.0 — Last updated 28 April 2026</div>
+</div>
+
+<div class="container">
+
+<!-- ════════════════════════════════════════ TOC ════════════════════════════════════════ -->
+<div class="toc page-break">
+  <h2>Contents</h2>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">LLM Engineering Fundamentals</span></a>
+    <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">OpenAI API & GPT Models</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">Anthropic Claude API</span></a>
+    <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">OpenAI vs Anthropic Comparison</span></a>
+    <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">RAG (Retrieval-Augmented Generation)</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Agentic AI</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">LangChain & LangGraph</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">LiteLLM</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">Vector Databases</span></a>
+    <a class="toc-item" href="#s10"><span class="toc-num">10</span><span class="toc-label">Model Context Protocol (MCP)</span></a>
+    <a class="toc-item" href="#s11"><span class="toc-num">11</span><span class="toc-label">Prompt Engineering</span></a>
+    <a class="toc-item" href="#s12"><span class="toc-num">12</span><span class="toc-label">End-to-End Architecture (Interactive)</span></a>
+    <a class="toc-item" href="#s13"><span class="toc-num">13</span><span class="toc-label">Applied: Commodities Risk Analytics Platform</span></a>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ SECTION 1 ════════════════════════════════════════ -->
+<div class="section page-break" id="s1">
+  <div class="section-num">Section 01</div>
+  <h2 class="section-title">LLM Engineering Fundamentals</h2>
+  <p class="lead">A Large Language Model (LLM) is a deep neural network based on the Transformer architecture that predicts the next token in a sequence. Modern LLMs are decoder-only architectures trained via self-supervised learning and refined through RLHF or Constitutional AI.</p>
+
+  <h3>Core Concepts</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Concept</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Tokens</td><td>Units LLMs process. ~¾ of a word. "engineering" = 2 tokens. Vocabularies: 32K–256K tokens.</td></tr>
+        <tr><td>Context Window</td><td>Total tokens the model sees at once: system prompt + history + documents + query. GPT-5.4: 270K–1.05M, Claude: 200K, Gemini 2.5: 2M.</td></tr>
+        <tr><td>Temperature</td><td>Randomness control. 0 = deterministic. 0.7 = balanced. 1.0+ = creative. Lower for code/facts.</td></tr>
+        <tr><td>Embeddings</td><td>Dense vector representations capturing semantic meaning. Used for similarity search, clustering, RAG. Dimensions: 256–3072.</td></tr>
+        <tr><td>Attention</td><td>Core Transformer mechanism. Every token attends to every other (n² relationships). Enables long-range dependencies.</td></tr>
+        <tr><td>Inference</td><td>Two phases: Prefill (process input in parallel) and Decode (generate output token-by-token autoregressively).</td></tr>
+        <tr><td>Top-P / Top-K</td><td>Sampling strategies. Top-P (nucleus): smallest token set with cumulative prob ≥ P. Top-K: K highest-probability tokens.</td></tr>
+        <tr><td>Fine-tuning</td><td>Further training on domain data. Expensive. Alternatives: RAG (cheaper) or prompt engineering (cheapest).</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Key API Parameters</h3>
+  <div class="card-grid">
+    <div class="card"><h4><code>model</code></h4><p>Which model to use (gpt-5.4, claude-sonnet-4-20250514)</p></div>
+    <div class="card"><h4><code>messages</code></h4><p>Array of conversation messages with roles (system, user, assistant)</p></div>
+    <div class="card"><h4><code>max_tokens</code></h4><p>Maximum tokens the model can generate in response</p></div>
+    <div class="card"><h4><code>temperature</code></h4><p>Randomness control (0–2). Use 0 for deterministic tasks.</p></div>
+    <div class="card"><h4><code>tools</code></h4><p>Array of tool/function schemas the model can call</p></div>
+    <div class="card"><h4><code>stream</code></h4><p>If true, response tokens streamed as generated via SSE</p></div>
+  </div>
+
+  <div class="callout callout-amber">
+    <strong>Lost-in-the-Middle Problem</strong>
+    LLMs perform best on information at the beginning and end of the context window, with degraded attention to content in the middle. All models tested showed accuracy drops past certain context thresholds — how you structure context matters as much as what you include.
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ SECTION 2 ════════════════════════════════════════ -->
+<div class="section page-break" id="s2">
+  <div class="section-num">Section 02</div>
+  <h2 class="section-title">OpenAI API & GPT Models</h2>
+  <p class="lead">OpenAI provides the broadest model ecosystem with text generation, embeddings, image generation, speech, and vision. The GPT-5.4 family (March 2026) is the current flagship, combining coding, reasoning, and computer use in one unified architecture.</p>
+
+  <h3>GPT-5.4 Family (Current Flagship — March 2026)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Model</th><th>Context</th><th>Input $/1M</th><th>Output $/1M</th><th>Best For</th></tr></thead>
+      <tbody>
+        <tr><td>GPT-5.4</td><td>270K</td><td>$2.50</td><td>$15.00</td><td>Flagship. Coding (57.7% SWE-bench Pro), computer use, knowledge work. Default choice for new projects.</td></tr>
+        <tr><td>GPT-5.4 Mini</td><td>270K</td><td>$0.75</td><td>$4.50</td><td>80% of flagship quality at ~6x lower cost. Production chatbots, content gen, lightweight code completion.</td></tr>
+        <tr><td>GPT-5.4 Nano</td><td>270K</td><td>$0.20</td><td>$1.25</td><td>Ultra-budget. Classification, tagging, extraction, routing. Near-zero cost at scale.</td></tr>
+        <tr><td>GPT-5.4 Pro</td><td>270K</td><td>$30.00</td><td>$180.00</td><td>Maximum intelligence. Complex multi-step reasoning. PhD-level analysis. Only when standard isn't enough.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Other Model Families</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Model</th><th>Context</th><th>Input $/1M</th><th>Output $/1M</th><th>Best For</th></tr></thead>
+      <tbody>
+        <tr><td>GPT-5.5</td><td>1.05M</td><td>$5.00</td><td>$30.00</td><td>Latest (Apr 2026). 60% fewer hallucinations vs 5.4. Natively omnimodal. Premium tier.</td></tr>
+        <tr><td>GPT-4.1</td><td>1M</td><td>$2.00</td><td>$8.00</td><td>1M token context. Entire codebases, long legal docs, book-length content.</td></tr>
+        <tr><td>GPT-4.1 Nano</td><td>1M</td><td>$0.10</td><td>$0.40</td><td>Cheapest OpenAI model. Long-context work at budget prices.</td></tr>
+        <tr><td>o3</td><td>200K</td><td>$2.00</td><td>$8.00</td><td>Chain-of-thought reasoning. Math, logic, scientific analysis, competitive programming.</td></tr>
+        <tr><td>o4-mini</td><td>200K</td><td>$1.10</td><td>$4.40</td><td>Budget reasoning model. Good reasoning at lower cost than o3.</td></tr>
+        <tr><td>GPT-4o</td><td>128K</td><td>$2.50</td><td>$10.00</td><td>Legacy. Still available but GPT-5.4 Mini is cheaper and better. Not recommended for new projects.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>Production Cost Strategy</strong>
+    Route 70% of traffic to Nano/Mini + 25% to Standard + 5% to Pro/Thinking. This saves 60–80% vs single-tier. A chatbot processing 10K queries/day costs ~$10/month on GPT-5.4 Mini vs ~$70/month on flagship.
+  </div>
+
+  <h3>Core API Features</h3>
+  <div class="pills">
+    <span class="pill pill-blue">Chat Completions</span>
+    <span class="pill pill-blue">Function / Tool Calling</span>
+    <span class="pill pill-blue">Structured Outputs</span>
+    <span class="pill pill-blue">Vision</span>
+    <span class="pill pill-blue">Embeddings</span>
+    <span class="pill pill-blue">Batch API (50% off)</span>
+    <span class="pill pill-blue">Realtime API</span>
+    <span class="pill pill-blue">Moderation</span>
+  </div>
+
+  <h3>Example: Chat Completion</h3>
+<pre><code>from openai import OpenAI
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-5.4",
+    messages=[
+        {"role": "system", "content": "You are a cloud architect."},
+        {"role": "user", "content": "Explain Kubernetes networking."}
+    ],
+    temperature=0.7,
+    max_tokens=1000
+)
+print(response.choices[0].message.content)</code></pre>
+
+  <h3>Example: Function Calling</h3>
+<pre><code>tools = [{
+    "type": "function",
+    "function": {
+        "name": "get_weather",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string"},
+                "unit": {"type": "string", "enum": ["celsius","fahrenheit"]}
+            },
+            "required": ["location"]
+        }
+    }
+}]
+response = client.chat.completions.create(
+    model="gpt-5.4", tools=tools, tool_choice="auto",
+    messages=[{"role": "user", "content": "Weather in London?"}]
+)
+tool_call = response.choices[0].message.tool_calls[0]</code></pre>
+</div>
+
+<!-- ════════════════════════════════════════ SECTION 3 ════════════════════════════════════════ -->
+<div class="section page-break" id="s3">
+  <div class="section-num">Section 03</div>
+  <h2 class="section-title">Anthropic Claude API</h2>
+  <p class="lead">Claude models are built with Constitutional AI — trained against a set of principles with a focus on safety, long-context understanding, and coding. Claude holds 54% enterprise coding market share as of early 2026.</p>
+
+  <h3>Current Models (2026)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Model</th><th>Context</th><th>Input $/1M</th><th>Output $/1M</th><th>Best For</th></tr></thead>
+      <tbody>
+        <tr><td>Claude Opus 4.6</td><td>200K</td><td>$15.00</td><td>$75.00</td><td>Most capable. Complex multi-step reasoning. Leads SWE-bench Verified.</td></tr>
+        <tr><td>Claude Sonnet 4.6</td><td>200K</td><td>$3.00</td><td>$15.00</td><td>Balanced speed + quality. Default for most production use cases.</td></tr>
+        <tr><td>Claude Haiku 4.5</td><td>200K</td><td>$1.00</td><td>$5.00</td><td>Fast, cost-efficient. High-volume classification, extraction, chat.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Core API Features</h3>
+  <div class="pills">
+    <span class="pill pill-purple">Messages API</span>
+    <span class="pill pill-purple">Tool Use</span>
+    <span class="pill pill-purple">Extended Thinking</span>
+    <span class="pill pill-purple">Prompt Caching (90% savings)</span>
+    <span class="pill pill-purple">Vision + PDF</span>
+    <span class="pill pill-purple">Citations</span>
+    <span class="pill pill-purple">Computer Use</span>
+    <span class="pill pill-purple">Claude Code</span>
+    <span class="pill pill-purple">Batches (50% off)</span>
+  </div>
+
+  <h3>Example: Messages API</h3>
+<pre><code>import anthropic
+client = anthropic.Anthropic()
+
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    system="You are a senior cloud architect specialising in OpenShift.",
+    messages=[
+        {"role": "user", "content": "Explain service mesh architecture."}
+    ]
+)
+print(message.content[0].text)</code></pre>
+
+  <h3>Example: Tool Use</h3>
+<pre><code>tools = [{
+    "name": "get_stock_price",
+    "description": "Gets current stock price for a ticker symbol.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "ticker": {"type": "string", "description": "Stock ticker"}
+        },
+        "required": ["ticker"]
+    }
+}]
+response = client.messages.create(
+    model="claude-sonnet-4-20250514", max_tokens=1024,
+    tools=tools,
+    messages=[{"role": "user", "content": "Apple stock price?"}]
+)
+for block in response.content:
+    if block.type == "tool_use":
+        print(f"Tool: {block.name}, Input: {block.input}")</code></pre>
+</div>
+
+<!-- ════════════════════════════════════════ SECTION 4 ════════════════════════════════════════ -->
+<div class="section page-break" id="s4">
+  <div class="section-num">Section 04</div>
+  <h2 class="section-title">OpenAI vs Anthropic — Key Differences</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Aspect</th><th>OpenAI</th><th>Anthropic Claude</th></tr></thead>
+      <tbody>
+        <tr><td>System Prompt</td><td>Message with <code>role: "system"</code> in messages array</td><td>Separate top-level <code>system</code> parameter</td></tr>
+        <tr><td>Response</td><td><code>choices[0].message.content</code> (string)</td><td><code>content[]</code> array of blocks (text, tool_use)</td></tr>
+        <tr><td>Tool Calling</td><td><code>tools</code> param. Parallel multi-tool calls.</td><td><code>tools</code> param. Sequential calls. Returns tool_use blocks.</td></tr>
+        <tr><td>Reasoning</td><td>Hidden thinking tokens (billed, not visible)</td><td>Extended thinking: reasoning tokens visible + inspectable</td></tr>
+        <tr><td>Safety</td><td>RLHF + Model Spec + Moderation API</td><td>Constitutional AI: self-judges against principles</td></tr>
+        <tr><td>Strengths</td><td>Broadest ecosystem: vision, audio, DALL-E, realtime</td><td>Long docs, coding (54% enterprise), safety, reliability</td></tr>
+        <tr><td>SDK</td><td>Native OpenAI SDK</td><td>Anthropic SDK + OpenAI compatibility layer</td></tr>
+        <tr><td>Message Rules</td><td>System role allowed in messages</td><td>Strict user → assistant alternation required</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ SECTION 5 ════════════════════════════════════════ -->
+<div class="section page-break" id="s5">
+  <div class="section-num">Section 05</div>
+  <h2 class="section-title">RAG (Retrieval-Augmented Generation)</h2>
+  <p class="lead">RAG connects LLMs to private enterprise data. It retrieves relevant documents from your knowledge base and injects them as context before generation — eliminating hallucinations and knowledge cutoff issues.</p>
+
+  <div class="diagram">User Query → Embed Query → Vector Search (Top-K) → Retrieve Chunks → Augment Prompt → LLM Generates Grounded Answer</div>
+
+  <h3>Chunking Strategies</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Strategy</th><th>How It Works</th><th>Best For</th></tr></thead>
+      <tbody>
+        <tr><td>Fixed-size</td><td>Split every N tokens/chars with overlap (e.g., 512 tokens, 50 overlap)</td><td>Simple, predictable. Good starting point.</td></tr>
+        <tr><td>Recursive</td><td>Try splitting by paragraph → sentence → word. Falls through hierarchy.</td><td>Most common. Good general-purpose.</td></tr>
+        <tr><td>Semantic</td><td>Split at topic boundaries detected by embedding similarity.</td><td>Highest quality. ~9% recall improvement.</td></tr>
+        <tr><td>Document-aware</td><td>Split respecting headings, sections, tables, code blocks.</td><td>Technical docs, legal contracts, papers.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Embedding Models</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Model</th><th>Dimensions</th><th>Provider</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>text-embedding-3-small</td><td>1536</td><td>OpenAI</td><td>Best cost/performance ratio. $0.02/1M tokens.</td></tr>
+        <tr><td>text-embedding-3-large</td><td>3072</td><td>OpenAI</td><td>Highest quality from OpenAI.</td></tr>
+        <tr><td>voyage-3-large</td><td>1024</td><td>Voyage AI</td><td>Outperforms OpenAI by 9–20%.</td></tr>
+        <tr><td>all-MiniLM-L6-v2</td><td>384</td><td>Open source</td><td>Free, fast. Good for prototyping.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Advanced RAG Patterns</h3>
+  <div class="card-grid">
+    <div class="card card-accent"><h4>Query Transformation</h4><p>Rewrite/expand queries before retrieval for better matching.</p></div>
+    <div class="card card-accent"><h4>Hybrid Search</h4><p>Combine dense vectors + BM25 keyword. Fuse with Reciprocal Rank Fusion.</p></div>
+    <div class="card card-accent"><h4>Re-ranking</h4><p>Re-score results with cross-encoder (Cohere Rerank) for higher precision.</p></div>
+    <div class="card card-accent"><h4>GraphRAG</h4><p>Combine knowledge graphs with vector retrieval for relationship reasoning.</p></div>
+    <div class="card card-accent"><h4>Agentic RAG</h4><p>Agent decides when/what to retrieve. Multi-step retrieval + self-correction.</p></div>
+    <div class="card card-accent"><h4>Contextual Retrieval</h4><p>Add doc-level context to each chunk before embedding (Anthropic technique).</p></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ SECTION 6 ════════════════════════════════════════ -->
+<div class="section page-break" id="s6">
+  <div class="section-num">Section 06</div>
+  <h2 class="section-title">Agentic AI</h2>
+  <p class="lead">An AI Agent is an LLM that can reason, decide which tools to use, execute actions, observe results, and iterate. Multi-agent workflows grew 327% in the second half of 2025.</p>
+
+  <div class="diagram">User Input → [THINK] Reason about task → [DECIDE] Choose tools → [ACT] Execute tool → [OBSERVE] Process results → REPEAT or RESPOND</div>
+
+  <h3>Agent Frameworks</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Framework</th><th>Architecture</th><th>Strengths</th><th>Best For</th></tr></thead>
+      <tbody>
+        <tr><td>LangGraph</td><td>Directed graph with explicit state. Nodes = functions, edges = transitions.</td><td>47M+ monthly downloads. Most flexible. Cyclical workflows.</td><td>Complex stateful workflows. Provider-agnostic.</td></tr>
+        <tr><td>Claude Agent SDK</td><td>Minimal abstraction. Tool-calling loop with native tool use.</td><td>Simple, direct. Extended thinking for reasoning.</td><td>Single-agent + complex tools. Anthropic ecosystem.</td></tr>
+        <tr><td>OpenAI Agents SDK</td><td>Production-ready. Handoffs between specialised agents.</td><td>Guardrails, tracing. Released March 2025.</td><td>OpenAI ecosystem. Multi-agent handoffs.</td></tr>
+        <tr><td>CrewAI</td><td>Role-based multi-agent. Agents have roles, goals, backstories.</td><td>Intuitive collaboration. Delegation.</td><td>Team-like agent collaboration.</td></tr>
+        <tr><td>Strands (AWS)</td><td>Provider-agnostic. Native Bedrock + AgentCore.</td><td>AWS ecosystem. Managed deployment.</td><td>AWS-centric teams.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ SECTION 7 ════════════════════════════════════════ -->
+<div class="section page-break" id="s7">
+  <div class="section-num">Section 07</div>
+  <h2 class="section-title">LangChain & LangGraph</h2>
+  <p class="lead">LangChain provides abstractions for models, prompts, chains, agents, memory, and retrieval. LangGraph extends it with graph-based stateful agent orchestration.</p>
+
+  <h3>Core Components</h3>
+  <div class="card-grid">
+    <div class="card"><h4>Models</h4><p>Wrappers for OpenAI, Anthropic, HuggingFace, Ollama, Bedrock, 50+ providers.</p></div>
+    <div class="card"><h4>Chains (LCEL)</h4><p>Sequential pipelines: prompt → LLM → output parser. Composable via pipe operator.</p></div>
+    <div class="card"><h4>Agents</h4><p>LLMs that dynamically decide which tools to use. ReAct and function-calling agents.</p></div>
+    <div class="card"><h4>Memory</h4><p>Buffer, Summary, VectorStore memory for persistent multi-turn context.</p></div>
+    <div class="card"><h4>Retrievers</h4><p>VectorStore, MultiQuery, ContextualCompression, Ensemble retrievers.</p></div>
+    <div class="card"><h4>LangSmith</h4><p>Observability: tracing, debugging, evaluating LLM applications in production.</p></div>
+  </div>
+
+  <h3>Example: RAG Chain</h3>
+<pre><code>from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain.chains import RetrievalQA
+
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+vectorstore = Chroma(embedding_function=embeddings, persist_directory="./db")
+retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+
+qa_chain = RetrievalQA.from_chain_type(
+    llm=ChatOpenAI(model="gpt-5.4", temperature=0),
+    retriever=retriever,
+    return_source_documents=True,
+)
+result = qa_chain.invoke({"query": "What is our refund policy?"})</code></pre>
+
+  <div class="callout callout-amber">
+    <strong>Adoption Note</strong>
+    45% of developers who experimented with LangChain never deployed to production, and 23% eventually removed it. Many teams are moving to lighter alternatives: direct SDK calls, LiteLLM, or provider-specific SDKs. Evaluate whether the abstraction layer is needed for your use case.
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ SECTION 8 ════════════════════════════════════════ -->
+<div class="section page-break" id="s8">
+  <div class="section-num">Section 08</div>
+  <h2 class="section-title">LiteLLM</h2>
+  <p class="lead">The go-to open-source proxy for teams unifying access across 100+ LLM providers with an OpenAI-compatible interface. Run as a Python SDK or as a standalone proxy server (API gateway for LLMs).</p>
+
+  <h3>Key Features</h3>
+  <div class="card-grid">
+    <div class="card"><h4>Unified API</h4><p>Same <code>completion()</code> call works with all providers. Swap model string only.</p></div>
+    <div class="card"><h4>Proxy Server</h4><p>Run as API gateway. Your app talks to one endpoint; LiteLLM routes.</p></div>
+    <div class="card"><h4>Load Balancing</h4><p>Distribute across providers. Round-robin, least-busy routing.</p></div>
+    <div class="card"><h4>Fallback Routing</h4><p>If provider fails/rate-limited, auto-retry another.</p></div>
+    <div class="card"><h4>Cost Tracking</h4><p>Track spend per user/team/key. Budget limits.</p></div>
+    <div class="card"><h4>Caching</h4><p>Redis or in-memory. Reduce repeated API calls.</p></div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <h4>SDK Usage</h4>
+<pre><code>from litellm import completion
+
+# Same interface, any provider
+resp = completion(
+    model="gpt-5.4",
+    messages=[{"role":"user",
+               "content":"Hello"}])
+
+resp = completion(
+    model="claude-sonnet-4-20250514",
+    messages=[{"role":"user",
+               "content":"Hello"}])
+
+resp = completion(
+    model="ollama/llama3.1",
+    messages=[{"role":"user",
+               "content":"Hello"}])</code></pre>
+    </div>
+    <div>
+      <h4>Proxy Config</h4>
+<pre><code># litellm_config.yaml
+model_list:
+  - model_name: gpt-5.4
+    litellm_params:
+      model: openai/gpt-5.4
+      api_key: sk-xxx
+  - model_name: claude-sonnet
+    litellm_params:
+      model: anthropic/claude-sonnet-4
+      api_key: sk-ant-xxx
+
+router_settings:
+  routing_strategy: least-busy
+  num_retries: 3
+  fallbacks:
+    - gpt-5.4: [claude-sonnet]</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ SECTION 9 ════════════════════════════════════════ -->
+<div class="section page-break" id="s9">
+  <div class="section-num">Section 09</div>
+  <h2 class="section-title">Vector Databases</h2>
+  <p class="lead">Store high-dimensional vector embeddings and enable fast approximate nearest-neighbour (ANN) search. The backbone of RAG, semantic search, and recommendations.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Database</th><th>Type</th><th>Language</th><th>Hybrid Search</th><th>Best For</th><th>Hosting</th></tr></thead>
+      <tbody>
+        <tr><td>Pinecone</td><td>Managed</td><td>N/A</td><td>Yes</td><td>Zero-ops production, auto-scaling</td><td>SaaS only</td></tr>
+        <tr><td>Weaviate</td><td>Open source</td><td>Go</td><td>Yes</td><td>Auto-vectorisation, GraphQL API</td><td>Self-host + Cloud</td></tr>
+        <tr><td>Milvus</td><td>Open source</td><td>Go/C++</td><td>Yes</td><td>Massive scale (billions), GPU accel.</td><td>Self-host + Zilliz</td></tr>
+        <tr><td>Qdrant</td><td>Open source</td><td>Rust</td><td>Yes</td><td>Performance + complex filtering</td><td>Self-host + Cloud</td></tr>
+        <tr><td>ChromaDB</td><td>Open source</td><td>Python</td><td>No</td><td>Prototyping, local development</td><td>In-process</td></tr>
+        <tr><td>pgvector</td><td>Extension</td><td>C</td><td>No*</td><td>Existing Postgres stack, SQL</td><td>Any Postgres host</td></tr>
+        <tr><td>FAISS</td><td>Library</td><td>C++</td><td>No</td><td>Research, benchmarks, GPU-optimised</td><td>In-process</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-green">
+    <strong>Decision Guide</strong>
+    Need zero ops? → Pinecone. Already using Postgres? → pgvector. Need hybrid search + filtering? → Qdrant or Weaviate. Massive scale (billions)? → Milvus. Quick prototyping? → ChromaDB.
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ SECTION 10 ════════════════════════════════════════ -->
+<div class="section page-break" id="s10">
+  <div class="section-num">Section 10</div>
+  <h2 class="section-title">Model Context Protocol (MCP)</h2>
+  <p class="lead">The open standard (Anthropic, Nov 2024) that standardises how AI systems integrate with external tools. Called "USB-C for AI" — turns the N×M integration problem into N+M. Now governed by the Linux Foundation (AAIF).</p>
+
+  <div class="diagram">         HOST (Claude Desktop / ChatGPT / Cursor)
+         ┌─────────┬─────────┬─────────┐
+         │Client 1 │Client 2 │Client 3 │
+         └────┬────┘────┬────┘────┬────┘
+              │stdio    │HTTP/SSE │stdio
+              ▼         ▼         ▼
+         ┌────────┐┌────────┐┌────────┐
+         │ GitHub ││Postgres││ Slack  │
+         │ Server ││ Server ││ Server │
+         └────────┘└────────┘└────────┘</div>
+
+  <h3>Three Primitives</h3>
+  <div class="card-grid">
+    <div class="card" style="border-left:3px solid var(--coral)"><h4>Tools</h4><p>Actions the model invokes. Similar to function calling but standardised and discoverable at runtime.</p></div>
+    <div class="card" style="border-left:3px solid var(--teal)"><h4>Resources</h4><p>Read-only context. Like GET endpoints. Files, DB records, API responses. No side effects.</p></div>
+    <div class="card" style="border-left:3px solid var(--purple)"><h4>Prompts</h4><p>Reusable templates the server exposes. "Summarise this PR", "Review this SQL query".</p></div>
+  </div>
+
+  <h3>MCP vs Function Calling</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Aspect</th><th>Function Calling</th><th>MCP</th></tr></thead>
+      <tbody>
+        <tr><td>Scope</td><td>Single provider's API feature</td><td>Cross-provider open standard</td></tr>
+        <tr><td>Discovery</td><td>App hardcodes schemas in API call</td><td>Client discovers tools dynamically at runtime</td></tr>
+        <tr><td>Ownership</td><td>Vendor-specific (each provider has own format)</td><td>Linux Foundation / AAIF</td></tr>
+        <tr><td>Portability</td><td>Build once per provider</td><td>Build once, all MCP clients can use it</td></tr>
+        <tr><td>Capabilities</td><td>Tools only</td><td>Tools + Resources + Prompts</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Adoption Timeline</h3>
+  <div class="pills">
+    <span class="pill pill-coral">Nov 2024: Anthropic launches</span>
+    <span class="pill pill-blue">Mar 2025: OpenAI adopts</span>
+    <span class="pill pill-green">Apr 2025: Google DeepMind</span>
+    <span class="pill pill-amber">Nov 2025: Spec update</span>
+    <span class="pill pill-purple">Dec 2025: Linux Foundation</span>
+    <span class="pill pill-teal">Mar 2026: 97M monthly downloads</span>
+  </div>
+
+  <h3>Example: MCP Server (Python)</h3>
+<pre><code>from mcp.server import Server
+from mcp.types import Tool, TextContent
+
+server = Server("weather-server")
+
+@server.list_tools()
+async def list_tools():
+    return [Tool(
+        name="get_weather",
+        description="Get weather for a city",
+        inputSchema={
+            "type": "object",
+            "properties": {"city": {"type": "string"}},
+            "required": ["city"]
+        }
+    )]
+
+@server.call_tool()
+async def call_tool(name: str, arguments: dict):
+    if name == "get_weather":
+        return [TextContent(type="text",
+            text=f"Weather in {arguments['city']}: 18°C")]</code></pre>
+</div>
+
+<!-- ════════════════════════════════════════ SECTION 11 ════════════════════════════════════════ -->
+<div class="section page-break" id="s11">
+  <div class="section-num">Section 11</div>
+  <h2 class="section-title">Prompt Engineering</h2>
+  <p class="lead">The discipline of designing inputs that guide LLMs toward accurate, relevant outputs. 58 catalogued techniques as of 2025 — here are the essential ones.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Technique</th><th>How It Works</th><th>When to Use</th></tr></thead>
+      <tbody>
+        <tr><td>Zero-Shot</td><td>Task with no examples. Relies on pre-trained knowledge.</td><td>Simple tasks, classification, Q&A.</td></tr>
+        <tr><td>Few-Shot</td><td>2–5 examples before the task. Model learns the pattern.</td><td>When output format/tone matters.</td></tr>
+        <tr><td>Chain-of-Thought</td><td>"Think step by step." Explicit reasoning before answering.</td><td>Math, logic, multi-step, debugging.</td></tr>
+        <tr><td>Role / Persona</td><td>"You are a senior K8s architect." Shapes expertise + tone.</td><td>Domain-specific tasks.</td></tr>
+        <tr><td>Self-Consistency</td><td>Multiple reasoning paths, majority answer.</td><td>High-stakes decisions.</td></tr>
+        <tr><td>Prompt Chaining</td><td>Break into sub-prompts. Output feeds next input.</td><td>Multi-step: research → outline → draft.</td></tr>
+        <tr><td>ReAct</td><td>Alternate reasoning + action (tool calls). Agent foundation.</td><td>Agentic tasks with tool use.</td></tr>
+        <tr><td>Meta-Prompting</td><td>Ask model to generate/improve its own prompt.</td><td>Prompt optimisation.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>System Prompt Best Practices</h3>
+  <ul class="clean">
+    <li><strong>Be specific:</strong> Define role, task, constraints, output format explicitly.</li>
+    <li><strong>Use delimiters:</strong> XML tags, triple backticks, markdown headers to separate context from instructions.</li>
+    <li><strong>Positive instructions:</strong> "Do X" rather than "Don't do Y". Models follow positive framing better.</li>
+    <li><strong>Output format:</strong> Specify exactly: JSON, markdown, bullets, table. Use structured outputs for programmatic use.</li>
+    <li><strong>Examples:</strong> Include 1–3 input/output pairs showing desired behaviour.</li>
+    <li><strong>Temperature:</strong> 0 for deterministic/factual. 0.7–1.0 for creative/brainstorming.</li>
+  </ul>
+
+  <h3>Example: Production System Prompt</h3>
+<pre><code>system = """
+You are a senior cloud infrastructure advisor for a Fortune 500 company.
+
+## Role
+- Expert guidance on OpenShift, Kubernetes, cloud architecture
+- Always cite specific tools, commands, or YAML when relevant
+- If unsure, say so rather than guessing
+
+## Output Format
+- Markdown headers for sections
+- Code blocks with language tags
+- Max 500 words unless asked otherwise
+
+## Constraints
+- Do NOT recommend deprecated/EOL software
+- Always mention security implications
+- Assume production environment unless told otherwise
+"""</code></pre>
+</div>
+
+<!-- ════════════════════════════════════════ SECTION 12 ════════════════════════════════════════ -->
+<div class="section page-break" id="s12">
+  <div class="section-num">Section 12</div>
+  <h2 class="section-title">End-to-End Architecture — Interactive</h2>
+  <p class="lead">How all components connect in a production LLM application. Each layer below is expandable — click to reveal technology options, communication protocols, and alternatives at every tier.</p>
+
+  <style>
+    .arch-tier{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:4px;transition:border-color .15s}
+    .arch-tier:hover{border-color:#aaa}
+    .arch-head{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .12s}
+    .arch-head:hover{background:var(--bg2)}
+    .arch-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+    .arch-title{font-size:0.88rem;font-weight:600;color:var(--ink);flex:1}
+    .arch-proto{font-family:var(--mono);font-size:0.68rem;color:var(--ink3);flex-shrink:0}
+    .arch-chev{font-size:0.68rem;color:var(--ink3);transition:transform .15s;flex-shrink:0}
+    .arch-chev.open{transform:rotate(90deg)}
+    .arch-body{display:none;padding:2px 14px 12px 35px;font-size:0.82rem;color:var(--ink2);line-height:1.65}
+    .arch-body.open{display:block}
+    .arch-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:5px;margin:6px 0}
+    .arch-opt{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 9px}
+    .arch-opt b{display:block;font-size:0.78rem;font-weight:600;color:var(--ink)}
+    .arch-opt span{font-size:0.72rem;color:var(--ink3)}
+    .arch-opt.feat{border:2px solid var(--accent)}
+    .arch-comm{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:0.72rem;margin:3px 0}
+    .arch-comm i{font-style:normal;color:var(--accent);font-weight:600}
+    .arch-pill{display:inline-block;font-family:var(--mono);font-size:0.65rem;padding:2px 7px;border-radius:12px;margin:1px 2px}
+    .pill-b2{background:var(--accent-bg);color:var(--accent)}
+    .pill-g2{background:var(--green-bg);color:var(--green)}
+    .pill-a2{background:var(--amber-bg);color:var(--amber)}
+    .pill-r2{background:var(--rose-bg);color:var(--rose)}
+    .pill-p2{background:var(--purple-bg);color:var(--purple)}
+    .pill-t2{background:var(--teal-bg);color:var(--teal)}
+    .arch-arrow{text-align:center;height:16px;line-height:16px;color:var(--ink3);font-size:0.7rem}
+    .arch-label{font-size:0.7rem;color:var(--ink3);text-align:center;margin:0 0 2px}
+    .arch-sub{font-size:0.78rem;font-weight:600;color:var(--ink3);margin:8px 0 3px}
+    .arch-fan{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin:3px 0}
+    .arch-row{display:flex;gap:4px;margin:3px 0}
+    @media print{.arch-body{display:block!important}.arch-chev{display:none}}
+  </style>
+
+  <!-- TIER 1 -->
+  <div class="arch-tier" onclick="archTog(this)">
+    <div class="arch-head"><span class="arch-dot" style="background:#2563eb"></span><span class="arch-title">1 · User / client application</span><span class="arch-proto">HTTPS · WS · SSE</span><span class="arch-chev">▶</span></div>
+    <div class="arch-body">
+      <p>Entry point. Sends natural language queries, renders streamed responses, handles authentication and session management.</p>
+      <div class="arch-sub">Technology options</div>
+      <div class="arch-opts">
+        <div class="arch-opt feat"><b>React / Next.js</b><span>Vercel AI SDK, streaming UI</span></div>
+        <div class="arch-opt"><b>CLI / terminal</b><span>Claude Code, custom agents</span></div>
+        <div class="arch-opt"><b>IDE plugin</b><span>VS Code, Cursor, Windsurf</span></div>
+        <div class="arch-opt"><b>Chat platform</b><span>Slack bot, Teams, Discord</span></div>
+      </div>
+      <div class="arch-sub">Communication</div>
+      <div class="arch-comm"><i>↓</i> HTTP POST /v1/messages or /v1/chat/completions</div>
+      <div class="arch-comm"><i>↑</i> SSE stream: data: {"choices":[...]} per token</div>
+      <span class="arch-pill pill-b2">REST</span><span class="arch-pill pill-b2">WebSocket</span><span class="arch-pill pill-b2">SSE streaming</span>
+    </div>
+  </div>
+  <div class="arch-arrow">↓</div>
+
+  <!-- TIER 2 -->
+  <div class="arch-tier" onclick="archTog(this)">
+    <div class="arch-head"><span class="arch-dot" style="background:#059669"></span><span class="arch-title">2 · LLM gateway / proxy</span><span class="arch-proto">OpenAI-compat API</span><span class="arch-chev">▶</span></div>
+    <div class="arch-body">
+      <p>Single unified endpoint. Translates to provider formats, handles load balancing, fallback, rate limits, cost tracking, and response caching.</p>
+      <div class="arch-sub">Technology options</div>
+      <div class="arch-opts">
+        <div class="arch-opt feat"><b>LiteLLM</b><span>100+ providers, OSS, most popular</span></div>
+        <div class="arch-opt"><b>Portkey</b><span>Enterprise gateway, observability</span></div>
+        <div class="arch-opt"><b>AWS Bedrock</b><span>Managed, multi-model access</span></div>
+        <div class="arch-opt"><b>Direct SDK calls</b><span>No proxy, zero overhead</span></div>
+      </div>
+      <div class="arch-sub">Communication</div>
+      <div class="arch-comm"><i>↓</i> Translates OpenAI format → provider-specific (Anthropic, Bedrock, etc.)</div>
+      <div class="arch-comm"><i>↑</i> Normalises responses back to OpenAI format</div>
+      <span class="arch-pill pill-g2">Load balance</span><span class="arch-pill pill-g2">Retry + fallback</span><span class="arch-pill pill-g2">Cost track</span><span class="arch-pill pill-g2">Redis cache</span>
+    </div>
+  </div>
+  <div class="arch-arrow">↓</div>
+
+  <!-- TIER 3 -->
+  <div class="arch-tier" onclick="archTog(this)">
+    <div class="arch-head"><span class="arch-dot" style="background:#7c3aed"></span><span class="arch-title">3 · LLM providers</span><span class="arch-proto">Chat completions · Tool use</span><span class="arch-chev">▶</span></div>
+    <div class="arch-body">
+      <p>Inference engines. Receive messages + tool schemas, return generated text or tool_use requests. Model selection drives quality vs cost trade-off.</p>
+      <div class="arch-sub">Frontier models (proprietary APIs)</div>
+      <div class="arch-opts">
+        <div class="arch-opt"><b>OpenAI GPT-5.4</b><span>$2.50/$15 · 270K ctx · flagship</span></div>
+        <div class="arch-opt"><b>Claude Sonnet 4.6</b><span>$3/$15 · 200K ctx · coding leader</span></div>
+        <div class="arch-opt"><b>Gemini 2.5 Pro</b><span>2M ctx · multimodal · Google</span></div>
+        <div class="arch-opt"><b>o3 reasoning</b><span>$2/$8 · chain-of-thought · math</span></div>
+      </div>
+      <div class="arch-sub">Budget models</div>
+      <div class="arch-opts">
+        <div class="arch-opt"><b>GPT-5.4 Mini</b><span>$0.75/$4.50 · 80% of flagship</span></div>
+        <div class="arch-opt"><b>GPT-5.4 Nano</b><span>$0.20/$1.25 · classification</span></div>
+        <div class="arch-opt"><b>Claude Haiku 4.5</b><span>$1/$5 · fast, cost-efficient</span></div>
+        <div class="arch-opt"><b>GPT-4.1 Nano</b><span>$0.10/$0.40 · cheapest OpenAI</span></div>
+      </div>
+      <div class="arch-sub">Open source / self-hosted</div>
+      <div class="arch-opts">
+        <div class="arch-opt"><b>Llama 3.1</b><span>Meta · via Ollama / vLLM</span></div>
+        <div class="arch-opt"><b>Mistral Large</b><span>EU-based · MOE architecture</span></div>
+        <div class="arch-opt"><b>DeepSeek V3</b><span>$0.07/$0.42 · budget king</span></div>
+        <div class="arch-opt"><b>Ollama (local)</b><span>Local inference server, GPU</span></div>
+      </div>
+      <div class="arch-sub">Communication</div>
+      <div class="arch-comm"><i>↓</i> Returns content[]: text blocks + tool_use blocks</div>
+      <div class="arch-comm"><i>↑</i> If tool_use: agent executes tool, sends result back (loop)</div>
+      <span class="arch-pill pill-p2">Streaming</span><span class="arch-pill pill-p2">Tool calling</span><span class="arch-pill pill-p2">Vision</span><span class="arch-pill pill-p2">Embeddings</span><span class="arch-pill pill-a2">Extended thinking</span>
+    </div>
+  </div>
+  <div class="arch-arrow">↓</div>
+
+  <!-- TIER 4 -->
+  <div class="arch-tier" onclick="archTog(this)">
+    <div class="arch-head"><span class="arch-dot" style="background:#d97706"></span><span class="arch-title">4 · Agent orchestration</span><span class="arch-proto">ReAct loop · State graph</span><span class="arch-chev">▶</span></div>
+    <div class="arch-body">
+      <p>The brain. Receives query, reasons about it, decides whether to answer directly, retrieve context (RAG), or call external tools (MCP). Manages the iterative think → act → observe loop and conversation memory.</p>
+      <div class="arch-sub">Framework options</div>
+      <div class="arch-opts">
+        <div class="arch-opt feat"><b>LangGraph</b><span>Graph state, 47M+ downloads, most flexible</span></div>
+        <div class="arch-opt"><b>Claude Agent SDK</b><span>Minimal abstraction, native tool loop</span></div>
+        <div class="arch-opt"><b>OpenAI Agents SDK</b><span>Handoffs, guardrails, tracing</span></div>
+        <div class="arch-opt"><b>CrewAI</b><span>Multi-agent, role-based collaboration</span></div>
+      </div>
+      <div class="arch-sub">Communication</div>
+      <div class="arch-comm"><i>↑</i> Sends messages[] + tools[] to LLM provider</div>
+      <div class="arch-comm"><i>↓</i> Calls RAG for context · MCP for tools · Memory for history</div>
+      <span class="arch-pill pill-a2">Think</span><span class="arch-pill pill-a2">Decide</span><span class="arch-pill pill-a2">Act</span><span class="arch-pill pill-a2">Observe</span><span class="arch-pill pill-a2">Repeat</span>
+    </div>
+  </div>
+
+  <div class="arch-label">Agent calls three subsystems in parallel ↓</div>
+
+  <!-- FAN: RAG / MCP / Memory -->
+  <div class="arch-fan">
+    <div class="arch-tier" onclick="archTog(this)">
+      <div class="arch-head" style="padding:8px 10px"><span class="arch-dot" style="background:#0d9488"></span><span class="arch-title" style="font-size:0.8rem">5a · RAG pipeline</span><span class="arch-chev" style="font-size:0.6rem">▶</span></div>
+      <div class="arch-body">
+        <p>Embed query → vector search → top-K chunks → augment prompt with context.</p>
+        <div class="arch-sub">Chunking</div>
+        <span class="arch-pill pill-t2">Fixed</span><span class="arch-pill pill-t2">Recursive</span><span class="arch-pill pill-t2">Semantic</span>
+        <div class="arch-sub">Embedding</div>
+        <span class="arch-pill pill-b2">OAI-3-small</span><span class="arch-pill pill-b2">Voyage-3</span><span class="arch-pill pill-b2">MiniLM</span>
+        <div class="arch-sub">Advanced</div>
+        <span class="arch-pill pill-a2">Hybrid</span><span class="arch-pill pill-a2">Rerank</span><span class="arch-pill pill-a2">GraphRAG</span>
+        <div class="arch-comm" style="margin-top:4px"><i>↓</i> Queries vector DB via SDK</div>
+      </div>
+    </div>
+
+    <div class="arch-tier" style="border-color:var(--accent)" onclick="archTog(this)">
+      <div class="arch-head" style="padding:8px 10px"><span class="arch-dot" style="background:#ea580c"></span><span class="arch-title" style="font-size:0.8rem">5b · MCP layer</span><span class="arch-chev" style="font-size:0.6rem">▶</span></div>
+      <div class="arch-body">
+        <p>Universal tool integration. JSON-RPC 2.0 over stdio or HTTP/SSE. 10K+ servers.</p>
+        <div class="arch-sub">Primitives</div>
+        <span class="arch-pill pill-r2">Tools</span><span class="arch-pill pill-g2">Resources</span><span class="arch-pill pill-b2">Prompts</span>
+        <div class="arch-sub">Servers</div>
+        <span class="arch-pill pill-b2">GitHub</span><span class="arch-pill pill-b2">Slack</span><span class="arch-pill pill-b2">Postgres</span><span class="arch-pill pill-b2">Jira</span>
+        <div class="arch-comm" style="margin-top:4px"><i>↔</i> JSON-RPC 2.0 bidirectional</div>
+      </div>
+    </div>
+
+    <div class="arch-tier" onclick="archTog(this)">
+      <div class="arch-head" style="padding:8px 10px"><span class="arch-dot" style="background:#888"></span><span class="arch-title" style="font-size:0.8rem">5c · Memory</span><span class="arch-chev" style="font-size:0.6rem">▶</span></div>
+      <div class="arch-body">
+        <p>Conversation context across turns.</p>
+        <span class="arch-pill pill-b2">Buffer</span><span class="arch-pill pill-b2">Summary</span><span class="arch-pill pill-a2">Vector store</span>
+        <div class="arch-sub">Storage</div>
+        <span class="arch-pill pill-g2">Redis</span><span class="arch-pill pill-g2">Postgres</span><span class="arch-pill pill-g2">In-memory</span>
+      </div>
+    </div>
+  </div>
+  <div class="arch-arrow">↓</div>
+
+  <!-- TIER 6: Vector DB -->
+  <div class="arch-tier" onclick="archTog(this)">
+    <div class="arch-head"><span class="arch-dot" style="background:#1d4ed8"></span><span class="arch-title">6 · Vector database</span><span class="arch-proto">HNSW · Cosine sim</span><span class="arch-chev">▶</span></div>
+    <div class="arch-body">
+      <p>Stores embeddings. ANN search with sub-ms latency at billions of vectors. Returns chunks + metadata + similarity scores.</p>
+      <div class="arch-sub">Managed</div>
+      <div class="arch-opts"><div class="arch-opt feat"><b>Pinecone</b><span>SaaS, zero-ops, auto-scale, serverless</span></div></div>
+      <div class="arch-sub">Open source</div>
+      <div class="arch-opts">
+        <div class="arch-opt"><b>Qdrant</b><span>Rust, filtering, hybrid search</span></div>
+        <div class="arch-opt"><b>Weaviate</b><span>Go, auto-vectorise, GraphQL</span></div>
+        <div class="arch-opt"><b>Milvus</b><span>C++/Go, GPU, billion-scale</span></div>
+      </div>
+      <div class="arch-sub">Existing stack</div>
+      <div class="arch-opts">
+        <div class="arch-opt"><b>pgvector</b><span>Postgres extension, SQL</span></div>
+        <div class="arch-opt"><b>ChromaDB</b><span>Python, in-process, prototyping</span></div>
+        <div class="arch-opt"><b>FAISS</b><span>Meta, GPU, research library</span></div>
+      </div>
+      <span class="arch-pill pill-b2">gRPC / REST</span><span class="arch-pill pill-b2">HNSW index</span><span class="arch-pill pill-b2">Metadata filter</span>
+    </div>
+  </div>
+  <div class="arch-arrow">↓</div>
+
+  <!-- Cross-cutting -->
+  <div style="display:flex;gap:4px;margin:3px 0">
+    <div class="arch-tier" style="flex:1" onclick="archTog(this)">
+      <div class="arch-head" style="padding:8px 10px"><span class="arch-dot" style="background:#e11d48"></span><span class="arch-title" style="font-size:0.8rem">7 · Prompt engineering</span><span class="arch-chev" style="font-size:0.6rem">▶</span></div>
+      <div class="arch-body">
+        <p>Cross-cutting: applied at every LLM interaction — system prompt, tool descriptions, RAG context injection, output parsing.</p>
+        <span class="arch-pill pill-r2">Zero-shot</span><span class="arch-pill pill-r2">Few-shot</span><span class="arch-pill pill-r2">CoT</span><span class="arch-pill pill-r2">ReAct</span><span class="arch-pill pill-r2">JSON schema</span>
+      </div>
+    </div>
+    <div class="arch-tier" style="flex:1" onclick="archTog(this)">
+      <div class="arch-head" style="padding:8px 10px"><span class="arch-dot" style="background:#d97706"></span><span class="arch-title" style="font-size:0.8rem">8 · Observability</span><span class="arch-chev" style="font-size:0.6rem">▶</span></div>
+      <div class="arch-body">
+        <p>Traces, cost, latency, evals across all layers.</p>
+        <span class="arch-pill pill-a2">LangSmith</span><span class="arch-pill pill-a2">Helicone</span><span class="arch-pill pill-a2">Braintrust</span><span class="arch-pill pill-a2">Phoenix</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>Request Flow</h3>
+  <ol style="padding-left:1.5rem;color:var(--ink2);font-size:0.85rem;line-height:2;">
+    <li>User sends a natural language query through the client application</li>
+    <li>LiteLLM gateway routes to optimal LLM provider (cost, latency, fallback rules)</li>
+    <li>Agent framework receives query, parses intent, decides: answer directly / retrieve context / call tools</li>
+    <li>If RAG needed: embed query → search vector DB → retrieve top-K chunks → inject as context</li>
+    <li>If tools needed: agent calls MCP servers (GitHub, Slack, DB, etc.) via JSON-RPC 2.0</li>
+    <li>Memory reads/writes conversation history and session state for multi-turn context</li>
+    <li>LLM generates grounded response using retrieved context + tool results + history</li>
+    <li>Response streamed back (SSE) to user through the application with source citations</li>
+  </ol>
+
+  <h3>Technology Selection Guide</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Need</th><th>Recommended</th><th>Alternative</th></tr></thead>
+      <tbody>
+        <tr><td>Best general-purpose LLM</td><td>Claude Sonnet 4.6 or GPT-5.4</td><td>Llama 3.1 (self-hosted, zero cost)</td></tr>
+        <tr><td>Best for coding</td><td>Claude (54% enterprise market)</td><td>GPT-5.4, Cursor IDE</td></tr>
+        <tr><td>Budget / high-volume</td><td>GPT-5.4 Nano ($0.20/$1.25)</td><td>Claude Haiku 4.5 ($1/$5)</td></tr>
+        <tr><td>Multi-provider gateway</td><td>LiteLLM (open source)</td><td>Portkey, AWS Bedrock</td></tr>
+        <tr><td>Vector store (RAG)</td><td>Pinecone (zero-ops) or Qdrant</td><td>pgvector (existing Postgres)</td></tr>
+        <tr><td>Agent framework</td><td>LangGraph (most flexible)</td><td>Claude Agent SDK, OpenAI Agents SDK</td></tr>
+        <tr><td>Tool integration</td><td>MCP (industry standard)</td><td>Direct function calling (simpler)</td></tr>
+        <tr><td>Observability</td><td>LangSmith</td><td>Helicone, Braintrust, Phoenix</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ SECTION 13 ════════════════════════════════════════ -->
+<div class="section page-break" id="s13">
+  <div class="section-num">Section 13</div>
+  <h2 class="section-title">Applied Example: Commodities Risk Analytics Platform</h2>
+  <p class="lead">A real-world adaptation of the generic architecture for a commodities trading desk — natural language querying over historical market data for seasonality analysis, realized volatility surfaces, VaR computation, and backtesting.</p>
+
+  <!-- COMMODITIES TIER 1 -->
+  <div class="arch-tier" onclick="archTog(this)">
+    <div class="arch-head"><span class="arch-dot" style="background:#2563eb"></span><span class="arch-title">1 · Analyst interface</span><span class="arch-proto">React · Streamlit</span><span class="arch-chev">▶</span></div>
+    <div class="arch-body">
+      <p>Risk analysts and quant traders query in natural language. Charts render inline. Supports follow-ups ("now show crude WTI 2015–2023", "overlay with Henry Hub gas").</p>
+      <div class="arch-sub">Example queries</div>
+      <div class="diagram" style="font-size:0.75rem;padding:0.8rem">"Show me the 5-year seasonal pattern for Brent crude"
+"What was realized vol for WTI at 30d, 60d, 90d windows in 2022?"
+"Backtest a mean-reversion strategy on TTF gas using 2-sigma bands"
+"Compare VaR at 95% and 99% for our nat gas portfolio this quarter"</div>
+      <div class="arch-sub">Technology options</div>
+      <div class="arch-opts">
+        <div class="arch-opt feat"><b>React + Recharts</b><span>Interactive charts, streaming</span></div>
+        <div class="arch-opt"><b>Streamlit</b><span>Quick internal dashboards</span></div>
+        <div class="arch-opt"><b>Jupyter + LLM</b><span>Quant notebook interface</span></div>
+        <div class="arch-opt"><b>Excel plugin</b><span>Analysts stay in Excel</span></div>
+      </div>
+      <div class="arch-comm"><i>↓</i> POST /api/query {prompt, portfolio_id, date_range}</div>
+      <div class="arch-comm"><i>↑</i> SSE: text + chart_data JSON + source citations</div>
+    </div>
+  </div>
+  <div class="arch-arrow">↓</div>
+
+  <!-- COMMODITIES TIER 2 -->
+  <div class="arch-tier" onclick="archTog(this)">
+    <div class="arch-head"><span class="arch-dot" style="background:#059669"></span><span class="arch-title">2 · LiteLLM gateway — intelligent routing</span><span class="arch-proto">70/25/5 split</span><span class="arch-chev">▶</span></div>
+    <div class="arch-body">
+      <p>Routes by query complexity. Simple lookups to budget models, analysis to standard, complex risk computations to reasoning models. Sensitive data stays on-prem.</p>
+      <div class="arch-sub">Routing strategy</div>
+      <div class="arch-opts">
+        <div class="arch-opt"><b>GPT-5.4 Nano</b><span>Simple: "WTI price today" (70%)</span></div>
+        <div class="arch-opt feat"><b>Claude Sonnet 4.6</b><span>Analysis: seasonality, vol (25%)</span></div>
+        <div class="arch-opt"><b>o3 reasoning</b><span>Complex: VaR, Greeks calcs (5%)</span></div>
+        <div class="arch-opt"><b>Llama 3.1 local</b><span>Sensitive data: stays on-prem</span></div>
+      </div>
+      <span class="arch-pill pill-g2">70% budget</span><span class="arch-pill pill-b2">25% standard</span><span class="arch-pill pill-a2">5% reasoning</span>
+    </div>
+  </div>
+  <div class="arch-arrow">↓</div>
+
+  <!-- COMMODITIES TIER 3 -->
+  <div class="arch-tier" onclick="archTog(this)">
+    <div class="arch-head"><span class="arch-dot" style="background:#d97706"></span><span class="arch-title">3 · Risk analytics agent</span><span class="arch-proto">LangGraph state machine</span><span class="arch-chev">▶</span></div>
+    <div class="arch-body">
+      <p>Orchestrates the full query lifecycle. Parses intent (seasonality? vol? backtest?), retrieves historical data, calls risk models, generates charts, cites sources.</p>
+      <div class="arch-sub">Agent workflow</div>
+      <div class="diagram" style="font-size:0.72rem;padding:0.8rem">1. Parse intent:  "seasonality" + commodity="Brent" + years="5yr"
+2. Retrieve:      RAG fetches historical price data + research reports
+3. Compute:       MCP calls Python risk engine (seasonal decomposition)
+4. Visualize:     Generates Recharts-compatible JSON for chart rendering
+5. Narrate:       LLM explains the pattern with citations to data sources</div>
+      <div class="arch-sub">Tools the agent can call (MCP servers)</div>
+      <div class="arch-opts">
+        <div class="arch-opt"><b>price_history()</b><span>Fetch OHLCV from time-series DB</span></div>
+        <div class="arch-opt"><b>calc_realized_vol()</b><span>Rolling vol: 10d/21d/63d/252d</span></div>
+        <div class="arch-opt"><b>seasonal_decompose()</b><span>STL decomposition, monthly avg</span></div>
+        <div class="arch-opt"><b>run_backtest()</b><span>Strategy sim, Sharpe, drawdown</span></div>
+        <div class="arch-opt"><b>compute_var()</b><span>Historical/parametric VaR 95/99</span></div>
+        <div class="arch-opt"><b>search_research()</b><span>RAG: analyst reports, methodology</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arch-label">Agent calls three subsystems ↓</div>
+
+  <div class="arch-fan">
+    <div class="arch-tier" onclick="archTog(this)">
+      <div class="arch-head" style="padding:8px 10px"><span class="arch-dot" style="background:#0d9488"></span><span class="arch-title" style="font-size:0.78rem">4a · Market data RAG</span><span class="arch-chev" style="font-size:0.6rem">▶</span></div>
+      <div class="arch-body">
+        <p>Retrieves historical price data, research reports, regulatory filings, and methodology documents.</p>
+        <div class="arch-sub">Document types</div>
+        <span class="arch-pill pill-t2">Price OHLCV</span><span class="arch-pill pill-t2">Analyst reports</span><span class="arch-pill pill-t2">Risk methodology</span><span class="arch-pill pill-t2">Reg filings</span>
+        <div class="arch-sub">Data sources embedded</div>
+        <span class="arch-pill pill-b2">ICE</span><span class="arch-pill pill-b2">CME</span><span class="arch-pill pill-b2">Bloomberg</span><span class="arch-pill pill-b2">Internal</span>
+      </div>
+    </div>
+
+    <div class="arch-tier" style="border-color:var(--accent)" onclick="archTog(this)">
+      <div class="arch-head" style="padding:8px 10px"><span class="arch-dot" style="background:#ea580c"></span><span class="arch-title" style="font-size:0.78rem">4b · MCP: Risk engine</span><span class="arch-chev" style="font-size:0.6rem">▶</span></div>
+      <div class="arch-body">
+        <p>Python/NumPy risk computation engine exposed as MCP tools.</p>
+        <span class="arch-pill pill-r2">realized_vol</span><span class="arch-pill pill-r2">VaR</span><span class="arch-pill pill-r2">backtest</span><span class="arch-pill pill-r2">Greeks</span><span class="arch-pill pill-r2">seasonal</span>
+      </div>
+    </div>
+
+    <div class="arch-tier" onclick="archTog(this)">
+      <div class="arch-head" style="padding:8px 10px"><span class="arch-dot" style="background:#888"></span><span class="arch-title" style="font-size:0.78rem">4c · Session state</span><span class="arch-chev" style="font-size:0.6rem">▶</span></div>
+      <div class="arch-body">
+        <p>Tracks selected commodities, date ranges, active portfolio, chart state for follow-ups.</p>
+        <span class="arch-pill pill-b2">Portfolio ctx</span><span class="arch-pill pill-b2">Date range</span><span class="arch-pill pill-b2">Chart state</span>
+      </div>
+    </div>
+  </div>
+  <div class="arch-arrow">↓</div>
+
+  <!-- COMMODITIES TIER 5: Data Layer -->
+  <div class="arch-tier" onclick="archTog(this)">
+    <div class="arch-head"><span class="arch-dot" style="background:#1d4ed8"></span><span class="arch-title">5 · Data layer — dual database</span><span class="arch-proto">Vector DB + Time-series DB</span><span class="arch-chev">▶</span></div>
+    <div class="arch-body">
+      <p>Key insight: commodities platforms need <strong>two databases</strong> — a vector store for semantic search over research docs, and a time-series database for fast OHLCV aggregation.</p>
+      <div class="arch-sub">Vector store (research, reports, methodology)</div>
+      <div class="arch-opts">
+        <div class="arch-opt feat"><b>Qdrant</b><span>OSS, hybrid search, filter by commodity/date</span></div>
+        <div class="arch-opt"><b>pgvector</b><span>If already on Postgres for positions</span></div>
+        <div class="arch-opt"><b>Pinecone</b><span>Managed, if no ops capacity</span></div>
+      </div>
+      <div class="arch-sub">Time-series (OHLCV, curves, vol surfaces)</div>
+      <div class="arch-opts">
+        <div class="arch-opt feat"><b>TimescaleDB</b><span>Postgres + hypertables, fast agg</span></div>
+        <div class="arch-opt"><b>ClickHouse</b><span>Columnar, OLAP-optimised</span></div>
+        <div class="arch-opt"><b>InfluxDB</b><span>Native time-series, Flux query</span></div>
+        <div class="arch-opt"><b>Arctic (Man AHL)</b><span>Quant finance specific, pandas</span></div>
+      </div>
+      <div class="arch-sub">Data ingestion feeds</div>
+      <div class="arch-opts">
+        <div class="arch-opt"><b>ICE</b><span>Brent, Gasoil, Power, Emissions</span></div>
+        <div class="arch-opt"><b>CME / NYMEX</b><span>WTI, Henry Hub, RBOB</span></div>
+        <div class="arch-opt"><b>Bloomberg B-PIPE</b><span>Real-time + historical bulk</span></div>
+        <div class="arch-opt"><b>Refinitiv / LSEG</b><span>Eikon, Datascope</span></div>
+      </div>
+      <div class="arch-comm"><i>→</i> Daily batch: ingest EOD prices, forward curves, vol surfaces</div>
+      <div class="arch-comm"><i>→</i> Weekly: re-embed new research reports into vector store</div>
+    </div>
+  </div>
+  <div class="arch-arrow">↓</div>
+
+  <!-- COMMODITIES USE CASES -->
+  <div class="arch-tier" onclick="archTog(this)">
+    <div class="arch-head"><span class="arch-dot" style="background:#7c3aed"></span><span class="arch-title">6 · Analytics use cases</span><span class="arch-proto">What the platform answers</span><span class="arch-chev">▶</span></div>
+    <div class="arch-body">
+      <h4 style="margin:0.5rem 0 0.3rem;font-size:0.85rem">Seasonality Analysis</h4>
+      <p>Decomposes multi-year price history into trend + seasonal + residual (STL). The agent fetches 5+ years of daily data, runs <code>seasonal_decompose()</code>, and generates an overlay chart showing typical monthly patterns.</p>
+      <div class="diagram" style="font-size:0.7rem;padding:0.7rem">price_history("Brent",2019,2024) → seasonal_decompose(method="STL")
+  → chart: monthly avg overlay
+  → LLM: "Brent shows consistent Q1 weakness and Q4 strength..."</div>
+
+      <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem">Realized Volatility Surface</h4>
+      <p>Computes rolling realized vol at multiple windows (10d, 21d, 63d, 126d, 252d). Outputs a vol surface heatmap. Compares current implied vol vs realized to flag expensive/cheap options.</p>
+      <div class="diagram" style="font-size:0.7rem;padding:0.7rem">price_history("WTI",2020,2024) → calc_realized_vol(windows=[10,21,63,126,252])
+  → chart: heatmap + term structure
+  → LLM: "Current 30d realized (28%) vs implied (34%) — skew suggests..."</div>
+
+      <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem">Backtesting</h4>
+      <p>Simulates a trading strategy over historical data. Agent takes strategy parameters, runs against OHLCV, returns P&L curve, Sharpe ratio, max drawdown, win rate.</p>
+      <div class="diagram" style="font-size:0.7rem;padding:0.7rem">parse_strategy("mean reversion, 2σ, 21d MA") → price_history("TTF Gas",2018,2024)
+  → run_backtest(strategy, data)
+  → chart: equity curve + drawdown
+  → LLM: "Sharpe 1.42, max DD -18%, win rate 58%, best year 2022..."</div>
+
+      <h4 style="margin:0.8rem 0 0.3rem;font-size:0.85rem">Value at Risk (VaR)</h4>
+      <p>Computes portfolio VaR using historical simulation or parametric method. Fetches positions, retrieves historical returns, computes correlation matrix, outputs VaR at 95%/99% with component breakdown.</p>
+      <div class="diagram" style="font-size:0.7rem;padding:0.7rem">get_portfolio("energy_desk") → price_history([instruments], 2yr)
+  → compute_var(method="historical", confidence=[0.95,0.99])
+  → chart: VaR breakdown by instrument
+  → LLM: "1-day 99% VaR is $2.4M, largest contributor is WTI..."</div>
+    </div>
+  </div>
+
+  <h3>Layer Mapping: Generic → Commodities</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Generic Layer</th><th>Commodities Implementation</th><th>Key Difference</th></tr></thead>
+      <tbody>
+        <tr><td>User app</td><td>Analyst dashboard (React + Recharts)</td><td>Domain-specific charts: vol surfaces, seasonal overlays, equity curves</td></tr>
+        <tr><td>LLM gateway</td><td>LiteLLM with 70/25/5 routing</td><td>Sensitive portfolio data routes to on-prem Llama only</td></tr>
+        <tr><td>Agent framework</td><td>LangGraph with risk-specific tools</td><td>Intent parser: seasonality vs vol vs backtest vs VaR</td></tr>
+        <tr><td>RAG pipeline</td><td>Market data RAG (ICE, CME, Bloomberg)</td><td>Embeddings include commodity type + date metadata for filtering</td></tr>
+        <tr><td>MCP layer</td><td>Python risk engine as MCP tools</td><td>realized_vol(), seasonal_decompose(), backtest(), VaR()</td></tr>
+        <tr><td>Vector DB</td><td>Qdrant + TimescaleDB (dual)</td><td>Dual database: vectors for research, time-series for OHLCV</td></tr>
+        <tr><td>Memory</td><td>Session state (portfolio, dates)</td><td>Tracks selected commodities and chart state for follow-ups</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ FOOTER ════════════════════════════════════════ -->
+<div class="footer">
+  AI & LLM Engineering — Complete Reference Guide  •  April 2026  •  v3.0
+</div>
+
+</div>
+
+<script>
+function archTog(el){
+  const b=el.querySelector('.arch-body');
+  const c=el.querySelector('.arch-chev');
+  if(!b||!c)return;
+  const isOpen=b.classList.contains('open');
+  if(!isOpen){b.classList.add('open');c.classList.add('open');}
+  else{b.classList.remove('open');c.classList.remove('open');}
+}
+</script>
+
+  </div><!-- /.main-scroll -->
+</div><!-- /.topic-page -->
+
+<footer class="guide-footer">Interview Preparation Guide</footer>
+
+</body>
+</html>

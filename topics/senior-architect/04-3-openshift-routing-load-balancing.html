@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OPENSHIFT – ROUTING &amp; LOAD BALANCING – Senior Architect</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../senior-architect.html">Senior Architect</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">OPENSHIFT – ROUTING &amp; LOAD BALANCING</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Senior Architect</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-1-core-architecture-fundamentals.html">CORE ARCHITECTURE FUNDAMENTALS</a></li>
+        <li><a href="03-2-microservices-deep-dive.html">MICROSERVICES – DEEP DIVE</a></li>
+        <li class="active"><a href="04-3-openshift-routing-load-balancing.html" class="active">OPENSHIFT – ROUTING &amp; LOAD BALANCING</a></li>
+        <li><a href="05-4-openshift-horizontal-vertical-scaling.html">OPENSHIFT – HORIZONTAL &amp; VERTICAL SCALING</a></li>
+        <li><a href="06-5-mcp-model-context-protocol.html">MCP – MODEL CONTEXT PROTOCOL</a></li>
+        <li><a href="07-6-agentic-ai-architecture.html">AGENTIC AI ARCHITECTURE</a></li>
+        <li><a href="08-7-interview-qa-cheat-sheet.html">INTERVIEW Q&amp;A CHEAT SHEET</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>3. OPENSHIFT – ROUTING &amp; LOAD BALANCING</h1>
+<h3>3.1 OpenShift Router vs Kubernetes Ingress</h3>
+<div class="table-wrap"><table>
+  <tr><th>Feature</th><th>OpenShift Route</th><th>Kubernetes Ingress</th></tr>
+  <tr><td>Object type</td><td>Route (OpenShift-native)</td><td>Ingress (K8s standard)</td></tr>
+  <tr><td>Default controller</td><td>HAProxy Router</td><td>Various (NGINX, Traefik, etc.)</td></tr>
+  <tr><td>TLS termination</td><td>Edge / Passthrough / Re-encrypt</td><td>TLS via Secret annotation</td></tr>
+  <tr><td>Weight-based routing</td><td>Native (route weights)</td><td>Via annotations (controller-specific)</td></tr>
+  <tr><td>Wildcard routes</td><td>Supported natively</td><td>Controller-dependent</td></tr>
+</table></div>
+<h3>3.2 TLS Termination Modes</h3>
+<ul>
+  <li>Edge – TLS terminates at the router; internal traffic is plain HTTP</li>
+  <li>Passthrough – TLS passes all the way to the pod; router cannot inspect traffic</li>
+  <li>Re-encrypt – router terminates TLS, re-encrypts for pod; full encryption end-to-end</li>
+</ul>
+<h3>3.3 Service Types &amp; Load Balancing</h3>
+<div class="table-wrap"><table>
+  <tr><th>Service Type</th><th>Scope</th><th>Use Case</th></tr>
+  <tr><td>ClusterIP</td><td>Internal only</td><td>Service-to-service communication</td></tr>
+  <tr><td>NodePort</td><td>External via node IP:port</td><td>Dev/test; not for production</td></tr>
+  <tr><td>LoadBalancer</td><td>External via cloud LB</td><td>Production external access (cloud providers)</td></tr>
+  <tr><td>ExternalName</td><td>DNS alias</td><td>Access external services via K8s DNS</td></tr>
+</table></div>
+<p>Load Balancing Algorithms</p>
+<ul>
+  <li>Round Robin (default) – requests distributed evenly across pods</li>
+  <li>Least Connections – route to pod with fewest active connections</li>
+  <li>Session Affinity (Sticky Sessions) – route same client to same pod via cookie/IP hash</li>
+  <li>Random – useful for stateless services with unpredictable load</li>
+</ul>
+<h3>3.4 Traffic Splitting &amp; Deployment Strategies</h3>
+<p>Blue-Green Deployment</p>
+<ul>
+  <li>Two identical environments (blue=live, green=new version)</li>
+  <li>Switch traffic by changing route target; instant rollback by switching back</li>
+  <li>Requires double the resources during cutover</li>
+</ul>
+<p>Canary Deployment via Route Weights</p>
+<ul>
+  <li>Split traffic between stable and canary service using weight property</li>
+  <li>Example: 90% → stable, 10% → canary</li>
+  <li>Gradually shift weight as confidence grows; roll back by setting canary weight to 0</li>
+</ul>
+<p>A/B Testing</p>
+<ul>
+  <li>Route specific users (by header, cookie) to different versions</li>
+  <li>Requires custom annotations or service mesh (Istio) for fine-grained control</li>
+</ul>
+<h3>3.5 Health Checks</h3>
+<div class="table-wrap"><table>
+  <tr><th>Probe</th><th>Purpose</th><th>Failure Action</th></tr>
+  <tr><td>Liveness Probe</td><td>Is the container alive?</td><td>Restart the container</td></tr>
+  <tr><td>Readiness Probe</td><td>Is the container ready for traffic?</td><td>Remove from load balancer endpoint</td></tr>
+  <tr><td>Startup Probe</td><td>Has the app finished initialising?</td><td>Block liveness/readiness checks</td></tr>
+</table></div>
+<h3>3.6 Network Policies &amp; Security</h3>
+<ul>
+  <li>Network Policies – pod-level firewall rules; whitelist ingress/egress per pod label</li>
+  <li>Default deny all – create explicit allow rules for each communication path</li>
+  <li>mTLS via Istio service mesh – encrypt and authenticate pod-to-pod traffic</li>
+  <li>RBAC – control who can create/modify Routes, Services, NetworkPolicies</li>
+  <li>SCC (Security Context Constraints) – OpenShift-specific; controls pod privileges, volume types, user IDs</li>
+</ul>
+<div class="callout tip">💡 Interview Tip: Know the difference between Route and Ingress. OpenShift supports both, but Routes are more feature-rich and native. Explain when you'd use each.</div>
+      </article>
+
+      <nav class="page-nav">
+        <a href="03-2-microservices-deep-dive.html">&#8592; MICROSERVICES – DEEP DIVE</a>
+        <span class="spacer"></span>
+        <a href="05-4-openshift-horizontal-vertical-scaling.html">OPENSHIFT – HORIZONTAL &amp; VERTICAL SCALING &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

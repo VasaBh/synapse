@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CORE ARCHITECTURE FUNDAMENTALS – Senior Architect</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../senior-architect.html">Senior Architect</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">CORE ARCHITECTURE FUNDAMENTALS</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Senior Architect</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li class="active"><a href="02-1-core-architecture-fundamentals.html" class="active">CORE ARCHITECTURE FUNDAMENTALS</a></li>
+        <li><a href="03-2-microservices-deep-dive.html">MICROSERVICES – DEEP DIVE</a></li>
+        <li><a href="04-3-openshift-routing-load-balancing.html">OPENSHIFT – ROUTING &amp; LOAD BALANCING</a></li>
+        <li><a href="05-4-openshift-horizontal-vertical-scaling.html">OPENSHIFT – HORIZONTAL &amp; VERTICAL SCALING</a></li>
+        <li><a href="06-5-mcp-model-context-protocol.html">MCP – MODEL CONTEXT PROTOCOL</a></li>
+        <li><a href="07-6-agentic-ai-architecture.html">AGENTIC AI ARCHITECTURE</a></li>
+        <li><a href="08-7-interview-qa-cheat-sheet.html">INTERVIEW Q&amp;A CHEAT SHEET</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>1. CORE ARCHITECTURE FUNDAMENTALS</h1>
+<p>A Senior Architect must demonstrate mastery of foundational principles and know when and why to apply each pattern.</p>
+<h3>1.1 Key Principles</h3>
+<ul>
+  <li>CAP Theorem – Consistency, Availability, Partition Tolerance (pick any 2 in a distributed system)</li>
+  <li>SOLID – Single Responsibility, Open/Closed, Liskov, Interface Segregation, Dependency Inversion</li>
+  <li>12-Factor App – methodology for building scalable, maintainable SaaS applications</li>
+  <li>DRY / KISS / YAGNI – avoid repetition, keep it simple, don't over-engineer</li>
+  <li>Conway's Law – system architecture mirrors communication structure of the organisation</li>
+</ul>
+<h3>1.2 Architecture Styles</h3>
+<div class="table-wrap"><table>
+  <tr><th>Style</th><th>Best For</th><th>Trade-offs</th></tr>
+  <tr><td>Monolith</td><td>Small teams, rapid MVP</td><td>Hard to scale independently; tight coupling</td></tr>
+  <tr><td>Microservices</td><td>Large teams, independent deployability</td><td>Distributed complexity; network overhead</td></tr>
+  <tr><td>Event-Driven</td><td>Async workflows, high throughput</td><td>Eventual consistency; harder to debug</td></tr>
+  <tr><td>Serverless</td><td>Bursty / unpredictable workloads</td><td>Cold starts; vendor lock-in</td></tr>
+  <tr><td>CQRS+Event Src</td><td>Audit trails, complex domains</td><td>Complexity; read/write model sync</td></tr>
+</table></div>
+<h3>1.3 Design Patterns to Know</h3>
+<p>Creational / Structural</p>
+<ul>
+  <li>Factory, Abstract Factory, Builder, Singleton (use sparingly)</li>
+  <li>Adapter, Facade, Decorator, Proxy</li>
+</ul>
+<p>Distributed Systems</p>
+<ul>
+  <li>Saga Pattern – manage distributed transactions without 2PC</li>
+  <li>Strangler Fig – incremental migration from monolith to microservices</li>
+  <li>Sidecar – offload cross-cutting concerns (logging, tracing) to companion process</li>
+  <li>Anti-Corruption Layer – protect domain model when integrating legacy systems</li>
+  <li>Bulkhead – isolate failures so one service doesn't sink the fleet</li>
+</ul>
+<h3>1.4 High Availability &amp; Fault Tolerance</h3>
+<ul>
+  <li>Active-Active vs Active-Passive failover</li>
+  <li>RPO (Recovery Point Objective) vs RTO (Recovery Time Objective)</li>
+  <li>Chaos Engineering – deliberately inject failures (Netflix Simian Army, LitmusChaos)</li>
+  <li>Graceful degradation – serve reduced functionality rather than hard failure</li>
+</ul>
+<div class="callout tip">💡 Interview Tip: Always frame your answers around trade-offs. Never say 'X is always better than Y' — say 'X is preferable when… because…'</div>
+      </article>
+
+      <nav class="page-nav">
+        <a href="01-_intro.html">&#8592; _intro</a>
+        <span class="spacer"></span>
+        <a href="03-2-microservices-deep-dive.html">MICROSERVICES – DEEP DIVE &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

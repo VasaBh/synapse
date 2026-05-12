@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>React Hooks (Deep Dive) – React</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../react.html">React</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">React Hooks (Deep Dive)</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">React</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-1-react-fundamentals.html">React Fundamentals</a></li>
+        <li class="active"><a href="03-2-react-hooks-deep-dive.html" class="active">React Hooks (Deep Dive)</a></li>
+        <li><a href="04-3-how-react-works-internally.html">How React Works Internally</a></li>
+        <li><a href="05-4-nodejs-vite-the-react-ecosystem.html">Node.js, Vite &amp; The React Ecosystem</a></li>
+        <li><a href="06-5-advanced-patterns-concepts.html">Advanced Patterns &amp; Concepts</a></li>
+        <li><a href="07-1-compound-components.html">Compound Components</a></li>
+        <li><a href="08-2-render-props.html">Render Props</a></li>
+        <li><a href="09-3-higher-order-components-hoc.html">Higher-Order Components (HOC)</a></li>
+        <li><a href="10-6-typescript-with-react.html">TypeScript with React</a></li>
+        <li><a href="11-7-top-interview-questions-rapid-fire.html">Top Interview Questions — Rapid Fire</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>2. React Hooks (Deep Dive)</h1>
+<h3>2.1 useState — State Management</h3>
+<pre><code>const [state, setState] = useState(initialValue);</code></pre>
+<p>Key Behaviours</p>
+<pre><code>Functional update: When new state depends on old state, use setState(prev =&gt; prev + 1)
+Lazy initialization: Pass a function to useState for expensive initial computations: useState(() =&gt; computeExpensiveValue())</code></pre>
+<ul>
+  <li>Batching: Multiple setState calls in the same event handler are batched into a single re-render.</li>
+</ul>
+<div class="table-wrap"><table>
+  <tr><th>⚠️ Objects &amp; Arrays — Always Create New References user.name = “Bob”; setUser(user) won’t trigger a re-render. Use setUser({ ...user, name: “Bob” }) to create a new object.</th></tr>
+</table></div>
+<h3>2.2 useEffect — Side Effects</h3>
+<pre><code>useEffect(() =&gt; {
+// EFFECT runs after render
+return () =&gt; { /* CLEANUP before next effect or unmount */ };
+}, [dependencies]);</code></pre>
+<p>Dependency Array Controls When It Runs</p>
+<div class="table-wrap"><table>
+  <tr><th>Dependency</th><th>Behaviour</th></tr>
+  <tr><td>useEffect(() =&gt; { ... })</td><td>Runs after EVERY render (usually wrong)</td></tr>
+  <tr><td>useEffect(() =&gt; { ... }, [])</td><td>Runs ONCE on mount only</td></tr>
+  <tr><td>useEffect(() =&gt; { ... }, [id])</td><td>Runs when ‘id’ changes</td></tr>
+</table></div>
+<p>Real-World Example: API Fetch with Cleanup</p>
+<pre><code>useEffect(() =&gt; {
+let cancelled = false;
+async function fetchUser() {
+const res = await fetch(`/api/users/${id}`);
+const data = await res.json();
+if (!cancelled) setUser(data);
+}
+fetchUser();
+return () =&gt; { cancelled = true; }; // Prevent race conditions
+}, [id]);</code></pre>
+<h3>2.3 useRef — Persistent Mutable Value</h3>
+<p>useRef holds a mutable value that does NOT cause re-renders when changed. Two main uses:</p>
+<ul>
+  <li>DOM Access: Get a reference to a DOM element (e.g., focus an input).</li>
+  <li>Persist values: Store interval IDs, previous values, or any mutable value across renders without triggering re-render.</li>
+</ul>
+<pre><code>function TextInput() {
+const inputRef = useRef(null);
+const focusInput = () =&gt; inputRef.current.focus();
+return &lt;input ref={inputRef} /&gt;;
+}</code></pre>
+<h3>2.4 useMemo &amp; useCallback — Performance</h3>
+<p>useMemo caches a computed VALUE. useCallback caches a FUNCTION reference.</p>
+<pre><code>// useMemo — expensive computation runs only when 'items' changes
+const sortedList = useMemo(() =&gt; {
+return items.sort((a, b) =&gt; a.price - b.price);
+}, [items]);
+// useCallback — stable function reference for memoized children
+const handleSubmit = useCallback((data) =&gt; {
+submitForm(data);
+}, [submitForm]);</code></pre>
+<div class="table-wrap"><table>
+  <tr><th>When to Use (and When NOT to) ✅ Use when: passing callbacks to React.memo children, expensive computations, stable refs for useEffect deps. ❌ Don’t use for: simple calculations, inline handlers — premature optimization adds complexity.</th></tr>
+</table></div>
+<h3>2.5 useContext — Avoiding Prop Drilling</h3>
+<p>Context provides data to deeply nested components without passing props through every level.</p>
+<pre><code>// 1. Create: const ThemeContext = React.createContext(&quot;light&quot;);
+// 2. Provide at top level:
+&lt;ThemeContext.Provider value={{ theme, setTheme }}&gt;
+&lt;Header /&gt;
+&lt;/ThemeContext.Provider&gt;
+// 3. Consume anywhere below:
+const { theme, setTheme } = useContext(ThemeContext);</code></pre>
+<div class="table-wrap"><table>
+  <tr><th>⚠️ Performance Warning When context value changes, ALL consumers re-render. For frequently changing values (e.g., mouse position), use state management libraries instead.</th></tr>
+</table></div>
+<h3>2.6 Custom Hooks — Reusable Logic</h3>
+<pre><code>Custom hooks extract reusable stateful logic. They always start with use.
+function useLocalStorage(key, initialValue) {
+const [value, setValue] = useState(() =&gt; {
+const stored = localStorage.getItem(key);
+return stored ? JSON.parse(stored) : initialValue;
+});
+useEffect(() =&gt; {
+localStorage.setItem(key, JSON.stringify(value));
+}, [key, value]);
+return [value, setValue];
+}
+// Usage — works just like useState:
+const [theme, setTheme] = useLocalStorage(&quot;theme&quot;, &quot;dark&quot;);</code></pre>
+      </article>
+
+      <nav class="page-nav">
+        <a href="02-1-react-fundamentals.html">&#8592; React Fundamentals</a>
+        <span class="spacer"></span>
+        <a href="04-3-how-react-works-internally.html">How React Works Internally &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

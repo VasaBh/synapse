@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCP &amp; Tool Use — Synapse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e; --ink2: #3d3d5c; --ink3: #6b6b8a;
+  --bg: #ffffff; --bg2: #f4f3f0; --bg3: #eae8e4;
+  --accent: #2563eb; --accent2: #1d4ed8; --accent-bg: #eff6ff;
+  --green: #059669; --green-bg: #ecfdf5;
+  --amber: #d97706; --amber-bg: #fffbeb;
+  --rose: #e11d48; --rose-bg: #fff1f2;
+  --purple: #7c3aed; --purple-bg: #f5f3ff;
+  --teal: #0d9488; --teal-bg: #f0fdfa;
+  --coral: #ea580c; --coral-bg: #fff7ed;
+  --border: #e2e0dc; --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+@media print {
+  body { font-size: 10pt; } .no-print { display: none !important; }
+  .page-break { page-break-before: always; } .card { break-inside: avoid; }
+  pre { font-size: 8pt; } h1 { font-size: 22pt; } h2 { font-size: 14pt; }
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+.cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%); color: white; padding: 4rem 2rem; position: relative; overflow: hidden; }
+.cover::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 50%, rgba(37,99,235,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(124,58,237,0.1) 0%, transparent 50%); }
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+.diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; margin: 1rem 0; font-family: var(--mono); font-size: 0.75rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink2); }
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← Synapse</a>
+  <h1>MCP &amp; Tool Use</h1>
+</header>
+
+<div class="topic-page">
+  <aside class="sidebar">
+    <p class="sidebar-title">MCP &amp; Tool Use</p>
+    <nav><ul>
+      <li><a href="#s1"><span class="toc-num">01</span>LLM Tool Use Fundamentals</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>Tool Design Patterns</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>Model Context Protocol</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>Building MCP Servers (Python)</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>Building MCP Servers (TypeScript)</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>Structured Outputs</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>Parallel Tool Calls</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>Tool Security</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>Agent Integration</a></li>
+    </ul></nav>
+  </aside>
+
+  <div class="main-scroll">
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference — May 2026</div>
+  <h1>MCP &amp; <span>Tool Use</span></h1>
+  <p class="cover-sub">Extending LLMs with tools — from OpenAI/Anthropic function calling to Anthropic's Model Context Protocol for standardised, composable tool integration.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">Function Calling</span>
+    <span class="cover-tag">Tool Design</span>
+    <span class="cover-tag">MCP</span>
+    <span class="cover-tag">JSON Schema</span>
+    <span class="cover-tag">Instructor</span>
+    <span class="cover-tag">Structured Output</span>
+    <span class="cover-tag">Parallel Tools</span>
+    <span class="cover-tag">MCP Servers</span>
+    <span class="cover-tag">Security</span>
+  </div>
+  <div class="cover-date">v1.0 — Last updated May 2026</div>
+</div>
+
+<div class="container">
+<div class="toc page-break">
+  <h2>Contents</h2>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">LLM Tool Use Fundamentals</span></a>
+    <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">Tool Design Patterns</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">Model Context Protocol (MCP)</span></a>
+    <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">Building MCP Servers (Python)</span></a>
+    <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">Building MCP Servers (TypeScript)</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Structured Outputs</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Parallel Tool Calls</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">Tool Security</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">Agent Integration</span></a>
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+<div class="section page-break" id="s1">
+  <div class="section-num">Section 01</div>
+  <h2 class="section-title">LLM Tool Use Fundamentals</h2>
+  <p class="lead">Tool use allows LLMs to call external functions — APIs, databases, calculators, search engines — turning them from text generators into action-capable agents. Both OpenAI and Anthropic support tool use natively through their APIs.</p>
+
+  <div class="diagram">User: "What's Apple's stock price and today's weather in London?"
+       │
+       ▼
+  LLM decides to call tools:
+  ┌─────────────────────────────────┐
+  │  tool_call: get_stock("AAPL")   │
+  │  tool_call: get_weather("London")│
+  └─────────────────────────────────┘
+       │
+       ▼
+  Application executes tools (in parallel)
+       │
+       ▼
+  Results sent back to LLM as tool_result messages
+       │
+       ▼
+  LLM generates final grounded answer</div>
+
+  <h3>OpenAI vs Anthropic Tool Calling API</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Aspect</th><th>OpenAI</th><th>Anthropic Claude</th></tr></thead>
+    <tbody>
+      <tr><td>Tool definition</td><td><code>tools[].function.parameters</code> (JSON Schema)</td><td><code>tools[].input_schema</code> (JSON Schema)</td></tr>
+      <tr><td>Tool choice</td><td><code>tool_choice: "auto" / "required" / {name}</code></td><td><code>tool_choice: {type: "auto/any/tool"}</code></td></tr>
+      <tr><td>Tool call in response</td><td><code>choices[0].message.tool_calls[]</code></td><td><code>content[].type == "tool_use"</code></td></tr>
+      <tr><td>Submitting result</td><td><code>{role:"tool", tool_call_id:..., content:...}</code></td><td><code>{role:"user", content:[{type:"tool_result"...}]}</code></td></tr>
+      <tr><td>Parallel calls</td><td>Yes — multiple tool_calls in one response</td><td>Yes — multiple tool_use blocks</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Full Tool Calling Example (OpenAI)</h3>
+<pre><code>from openai import OpenAI
+import json
+
+client = OpenAI()
+
+tools = [{
+    "type": "function",
+    "function": {
+        "name": "get_stock_price",
+        "description": "Get the current stock price for a given ticker symbol.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "ticker": {"type": "string", "description": "Stock ticker, e.g. AAPL"},
+                "currency": {"type": "string", "enum": ["USD", "GBP", "EUR"], "default": "USD"}
+            },
+            "required": ["ticker"]
+        }
+    }
+}]
+
+messages = [{"role": "user", "content": "What is Apple's stock price?"}]
+
+# First call — model decides to use a tool
+response = client.chat.completions.create(
+    model="gpt-4o-mini", tools=tools, tool_choice="auto", messages=messages
+)
+tool_call = response.choices[0].message.tool_calls[0]
+args = json.loads(tool_call.function.arguments)  # {"ticker": "AAPL"}
+
+# Execute the tool
+result = {"price": 213.45, "currency": "USD"}
+
+# Second call — submit result
+messages += [
+    response.choices[0].message,  # assistant message with tool_calls
+    {"role": "tool", "tool_call_id": tool_call.id, "content": json.dumps(result)}
+]
+final = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+print(final.choices[0].message.content)</code></pre>
+
+  <div class="callout callout-blue">
+    <strong>Tool descriptions are part of your prompt</strong>
+    The quality of your tool's <code>description</code> field directly determines how accurately the model selects and invokes it. Write descriptions as if explaining to a junior developer which function to call and when.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+<div class="section page-break" id="s2">
+  <div class="section-num">Section 02</div>
+  <h2 class="section-title">Tool Design Patterns</h2>
+  <p class="lead">Good tool design is as important as good prompt design. Poorly named, vague, or overlapping tools cause the model to select the wrong tool, pass wrong arguments, or fail silently.</p>
+
+  <div class="card-grid">
+    <div class="card card-accent"><h4>Atomic Tools</h4><p>One tool, one responsibility. <code>search_documents</code> not <code>search_and_summarise_documents</code>. Compose in application code.</p></div>
+    <div class="card card-accent"><h4>Read vs Write</h4><p>Separate read tools (no side effects) from write tools (create/update/delete). Annotate clearly in descriptions.</p></div>
+    <div class="card card-accent"><h4>Idempotent Writes</h4><p>Write tools should be safe to call twice. Accept an optional <code>idempotency_key</code> for critical operations.</p></div>
+    <div class="card card-accent"><h4>Rich Error Messages</h4><p>Return structured errors: <code>{"error": "not_found", "message": "...", "suggestion": "..."}</code>. Models use these to self-correct.</p></div>
+  </div>
+
+  <h3>Well-Designed Tool Definition</h3>
+<pre><code>search_tool = {
+    "type": "function",
+    "function": {
+        "name": "search_knowledge_base",
+        "description": (
+            "Search the internal knowledge base for relevant documents. "
+            "Use this when the user asks a question about company policies, "
+            "products, or procedures. Do NOT use for general world knowledge."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Natural language search query. Be specific."
+                },
+                "top_k": {
+                    "type": "integer",
+                    "description": "Number of results to return (1-10). Default 5.",
+                    "default": 5,
+                    "minimum": 1,
+                    "maximum": 10
+                },
+                "category": {
+                    "type": "string",
+                    "enum": ["policy", "product", "procedure", "all"],
+                    "description": "Filter by document category. Use 'all' if unsure.",
+                    "default": "all"
+                }
+            },
+            "required": ["query"]
+        }
+    }
+}</code></pre>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Property</th><th>Best Practice</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>name</td><td>verb_noun, snake_case, specific</td><td><code>search_documents</code> not <code>search</code></td></tr>
+      <tr><td>description</td><td>When to use AND when NOT to use</td><td>"Use for product FAQs. Do NOT use for pricing."</td></tr>
+      <tr><td>parameters</td><td>Include description + enum where possible</td><td><code>"enum": ["asc", "desc"]</code></td></tr>
+      <tr><td>required</td><td>Only truly required fields. Use defaults for optional.</td><td><code>"required": ["query"]</code></td></tr>
+      <tr><td>error response</td><td>Structured JSON with error code + suggestion</td><td><code>{"error": "rate_limited", "retry_after": 5}</code></td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+<div class="section page-break" id="s3">
+  <div class="section-num">Section 03</div>
+  <h2 class="section-title">Model Context Protocol (MCP)</h2>
+  <p class="lead">MCP is an open standard (created by Anthropic, Nov 2024) for connecting AI models to external tools and data sources. It standardises the interface between AI hosts (Claude, Cursor, VS Code) and MCP servers (tools, databases, APIs) using JSON-RPC 2.0.</p>
+
+  <div class="diagram">┌─────────────────────────────────────────────────────────────────┐
+│                    MCP ARCHITECTURE                             │
+│                                                                 │
+│   HOST (Claude Desktop / Claude Code / Cursor)                  │
+│     │                                                           │
+│     └──► MCP CLIENT (manages connections)                       │
+│               │                                                 │
+│               │  JSON-RPC 2.0                                   │
+│               │  (stdio or SSE transport)                       │
+│               │                                                 │
+│     ┌─────────┼──────────────────────────┐                      │
+│     │         │                          │                      │
+│  MCP Server   MCP Server          MCP Server                    │
+│  (filesystem) (GitHub API)        (Postgres)                    │
+│     │              │                    │                       │
+│  [Tools]       [Resources]         [Prompts]                    │
+└─────────────────────────────────────────────────────────────────┘</div>
+
+  <h3>MCP Primitives</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Primitive</th><th>Direction</th><th>Description</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>Tools</td><td>Server → Client</td><td>Functions the LLM can call to take actions</td><td><code>create_file</code>, <code>run_query</code></td></tr>
+      <tr><td>Resources</td><td>Server → Client</td><td>Data the LLM can read (like files or DB rows)</td><td><code>file://README.md</code>, <code>db://users/42</code></td></tr>
+      <tr><td>Prompts</td><td>Server → Client</td><td>Pre-built prompt templates with arguments</td><td><code>code_review</code>, <code>summarise_doc</code></td></tr>
+      <tr><td>Sampling</td><td>Client → Server</td><td>Server asks the LLM to generate text (agentic)</td><td>Server requests LLM completion mid-flow</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="card-grid">
+    <div class="card"><h4>filesystem</h4><p>Read/write local files and directories.</p></div>
+    <div class="card"><h4>github</h4><p>Search repos, read files, manage issues/PRs.</p></div>
+    <div class="card"><h4>postgres</h4><p>Read-only SQL queries against a Postgres DB.</p></div>
+    <div class="card"><h4>slack</h4><p>Read channels, post messages, manage threads.</p></div>
+    <div class="card"><h4>puppeteer</h4><p>Browser automation — screenshots, clicks, forms.</p></div>
+    <div class="card"><h4>memory</h4><p>Persistent key-value memory across sessions.</p></div>
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>MCP = USB-C for AI tools</strong>
+    Write one MCP server and it works with any MCP-compatible host: Claude Desktop, Claude Code, Cursor, Cline, VS Code Copilot. No more per-integration glue code.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+<div class="section page-break" id="s4">
+  <div class="section-num">Section 04</div>
+  <h2 class="section-title">Building MCP Servers (Python)</h2>
+  <p class="lead">The <code>mcp</code> Python SDK (by Anthropic) provides a decorator-based API for exposing tools, resources, and prompts. A minimal server is under 30 lines of code.</p>
+
+<pre><code>from mcp.server.fastmcp import FastMCP
+import httpx
+
+mcp = FastMCP("Weather Service")
+
+@mcp.tool()
+async def get_weather(city: str, units: str = "celsius") -> dict:
+    """Get current weather for a city. Units: celsius or fahrenheit."""
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            "https://wttr.in/{city}",
+            params={"format": "j1"},
+        )
+        data = r.json()
+        temp = data["current_condition"][0]["temp_C"]
+        if units == "fahrenheit":
+            temp = int(temp) * 9 // 5 + 32
+        return {"city": city, "temperature": temp, "units": units}
+
+@mcp.resource("weather://forecast/{city}")
+async def weather_forecast(city: str) -> str:
+    """3-day forecast resource for a city."""
+    return f"Forecast data for {city}..."
+
+@mcp.prompt()
+def weather_report_prompt(city: str) -> str:
+    """Generate a weather report prompt template."""
+    return f"Write a friendly weather report for {city} based on the current conditions."
+
+if __name__ == "__main__":
+    mcp.run()  # stdio transport (default)</code></pre>
+
+  <h3>Transport Options</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Transport</th><th>Use Case</th><th>Pros</th><th>Cons</th></tr></thead>
+    <tbody>
+      <tr><td>stdio</td><td>Local tools, CLI integration</td><td>Simple, no networking, secure</td><td>Single client only</td></tr>
+      <tr><td>SSE (HTTP)</td><td>Remote servers, multiple clients</td><td>Multi-client, firewall-friendly</td><td>More setup, auth needed</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Claude Desktop Config</h3>
+<pre><code>// claude_desktop_config.json  (~/.config/Claude/claude_desktop_config.json)
+{
+  "mcpServers": {
+    "weather": {
+      "command": "python",
+      "args": ["/path/to/weather_server.py"],
+      "env": { "WEATHER_API_KEY": "your-key" }
+    }
+  }
+}</code></pre>
+
+  <div class="callout callout-green">
+    <strong>FastMCP auto-generates schemas</strong>
+    FastMCP reads Python type annotations and docstrings to generate JSON Schema tool definitions automatically. No manual schema writing required.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+<div class="section page-break" id="s5">
+  <div class="section-num">Section 05</div>
+  <h2 class="section-title">Building MCP Servers (TypeScript)</h2>
+  <p class="lead">The TypeScript SDK is the reference implementation — most official Anthropic MCP servers are written in TypeScript. It provides full type safety and is the best choice for production servers.</p>
+
+<pre><code>import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
+
+const server = new McpServer({ name: "todo-server", version: "1.0.0" });
+const todos: { id: number; text: string; done: boolean }[] = [];
+
+// Tool: add a todo
+server.tool(
+  "add_todo",
+  "Add a new todo item to the list",
+  { text: z.string().describe("The todo item text") },
+  async ({ text }) => {
+    const todo = { id: todos.length + 1, text, done: false };
+    todos.push(todo);
+    return { content: [{ type: "text", text: `Added todo #${todo.id}: ${text}` }] };
+  }
+);
+
+// Tool: list todos
+server.tool("list_todos", "List all todo items", {}, async () => {
+  const list = todos.map(t => `${t.done ? "✓" : "○"} #${t.id}: ${t.text}`).join("\n");
+  return { content: [{ type: "text", text: list || "No todos yet." }] };
+});
+
+// Resource: expose todos as a resource
+server.resource(
+  "todos://all",
+  new ResourceTemplate("todos://all", { list: undefined }),
+  async () => ({
+    contents: [{ uri: "todos://all", text: JSON.stringify(todos, null, 2), mimeType: "application/json" }]
+  })
+);
+
+// Start server
+const transport = new StdioServerTransport();
+await server.connect(transport);</code></pre>
+
+  <div class="callout callout-green">
+    <strong>Use Zod for input schemas</strong>
+    The TypeScript SDK accepts Zod schemas for tool parameters. Zod provides runtime validation + auto-generated JSON Schema — the best of both worlds.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+<div class="section page-break" id="s6">
+  <div class="section-num">Section 06</div>
+  <h2 class="section-title">Structured Outputs</h2>
+  <p class="lead">Structured outputs guarantee the LLM returns valid JSON matching a precise schema. This eliminates brittle regex parsing and makes LLM output a first-class typed object in your application.</p>
+
+  <div class="diagram">User Request → LLM → [JSON mode / Structured Output] → Validated Schema
+                                                    │
+                              ┌─────────────────────┤
+                              │                     │
+                        Valid JSON            Validation Error
+                              │                     │
+                         Pydantic model       Retry with error
+                              │               (Instructor)
+                         Application logic</div>
+
+  <h3>Instructor — Pydantic Extraction</h3>
+<pre><code>import instructor
+from openai import OpenAI
+from pydantic import BaseModel, Field
+from typing import Optional
+
+client = instructor.from_openai(OpenAI())
+
+class CompanyInfo(BaseModel):
+    name: str = Field(description="Company legal name")
+    founded: Optional[int] = Field(description="Year founded, if mentioned")
+    headquarters: str = Field(description="City and country of HQ")
+    employees: Optional[int] = Field(description="Approximate employee count")
+    sector: str = Field(description="Primary business sector")
+
+result = client.chat.completions.create(
+    model="gpt-4o-mini",
+    response_model=CompanyInfo,
+    messages=[{
+        "role": "user",
+        "content": "Anthropic is an AI safety company founded in 2021, "
+                   "headquartered in San Francisco, USA, with ~500 employees."
+    }]
+)
+print(result)
+# CompanyInfo(name='Anthropic', founded=2021, headquarters='San Francisco, USA', ...)</code></pre>
+
+  <h3>Nested Models &amp; Lists</h3>
+<pre><code>class LineItem(BaseModel):
+    description: str
+    quantity: int
+    unit_price: float
+
+class Invoice(BaseModel):
+    vendor: str
+    invoice_number: str
+    line_items: list[LineItem]
+    total: float
+
+invoice = client.chat.completions.create(
+    model="gpt-4o-mini",
+    response_model=Invoice,
+    messages=[{"role": "user", "content": invoice_text}]
+)</code></pre>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Approach</th><th>Reliability</th><th>Schema Support</th><th>Models</th><th>Retry on Error</th></tr></thead>
+    <tbody>
+      <tr><td>JSON mode</td><td>High (valid JSON, not schema)</td><td>None — model guesses</td><td>Most OpenAI/Anthropic</td><td>No</td></tr>
+      <tr><td>Structured outputs (strict)</td><td>Very high (schema enforced)</td><td>Full JSON Schema subset</td><td>gpt-4o, gpt-4o-mini</td><td>No</td></tr>
+      <tr><td>Instructor</td><td>Very high + retries</td><td>Full Pydantic</td><td>Any OpenAI-compatible</td><td>Yes (configurable)</td></tr>
+      <tr><td>Outlines / guidance</td><td>Guaranteed (constrained decoding)</td><td>Full JSON Schema</td><td>Local models only</td><td>N/A</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+<div class="section page-break" id="s7">
+  <div class="section-num">Section 07</div>
+  <h2 class="section-title">Parallel Tool Calls</h2>
+  <p class="lead">Modern LLMs can request multiple tool calls in a single response. Your application should execute them concurrently with <code>asyncio.gather</code>, then return all results in a single follow-up message.</p>
+
+  <div class="diagram">LLM Response:
+  tool_calls = [
+    {"id": "call_1", "function": "get_stock", "args": {"ticker": "AAPL"}},
+    {"id": "call_2", "function": "get_stock", "args": {"ticker": "MSFT"}},
+    {"id": "call_3", "function": "get_weather", "args": {"city": "London"}}
+  ]
+       │
+       ▼  asyncio.gather() — all 3 in parallel
+  [result_1, result_2, result_3]  (~100ms total vs ~300ms sequential)
+       │
+       ▼  Submit all results in one message
+  LLM generates final answer</div>
+
+<pre><code>import asyncio
+import json
+from openai import AsyncOpenAI
+
+client = AsyncOpenAI()
+
+async def execute_tool(tool_call) -> dict:
+    name = tool_call.function.name
+    args = json.loads(tool_call.function.arguments)
+    # Route to actual tool implementation
+    if name == "get_stock_price":
+        return {"price": 213.45, "ticker": args["ticker"]}
+    if name == "get_weather":
+        return {"temp": 18, "city": args["city"], "condition": "Cloudy"}
+    return {"error": f"Unknown tool: {name}"}
+
+async def handle_parallel_tools(messages: list) -> str:
+    response = await client.chat.completions.create(
+        model="gpt-4o-mini", tools=tools, tool_choice="auto", messages=messages
+    )
+    msg = response.choices[0].message
+
+    if not msg.tool_calls:
+        return msg.content
+
+    # Execute all tool calls in parallel
+    results = await asyncio.gather(*[execute_tool(tc) for tc in msg.tool_calls])
+
+    # Submit all results at once
+    messages.append(msg)
+    for tc, result in zip(msg.tool_calls, results):
+        messages.append({
+            "role": "tool",
+            "tool_call_id": tc.id,
+            "content": json.dumps(result)
+        })
+
+    final = await client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+    return final.choices[0].message.content</code></pre>
+
+  <div class="callout callout-amber">
+    <strong>Claude makes sequential calls by default</strong>
+    OpenAI models tend to batch parallel tool calls in one response; Claude often makes sequential calls. Test both. For Claude, you may need to explicitly instruct it to gather multiple pieces of information simultaneously.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+<div class="section page-break" id="s8">
+  <div class="section-num">Section 08</div>
+  <h2 class="section-title">Tool Security</h2>
+  <p class="lead">Tools that interact with external systems introduce attack surface. The three main threats are prompt injection (malicious content in tool results), tool abuse (LLM calling dangerous tools unexpectedly), and data exfiltration via tool outputs.</p>
+
+  <div class="diagram">User Input → [Input sanitisation] → LLM
+                                          │
+                                    tool_call decision
+                                          │
+                              [Authorisation check]
+                                          │
+                        ┌─────────────────┴──────────────────┐
+                    Allowed                              Denied
+                        │                                    │
+              [Sandboxed execution]               Return error to LLM
+                        │
+                    Tool result
+                        │
+                [Output filtering]  ← strip secrets / PII
+                        │
+                    Return to LLM</div>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Attack</th><th>Description</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>Prompt injection</td><td>Tool result contains "Ignore previous instructions..."</td><td>Wrap results in XML tags; instruct model to treat tool results as data only</td></tr>
+      <tr><td>Tool abuse</td><td>Model calls <code>delete_database</code> unexpectedly</td><td>Require user confirmation for destructive tools; whitelist allowed tools per session</td></tr>
+      <tr><td>Data exfiltration</td><td>Model encodes secrets in a <code>web_search</code> query</td><td>Log all tool calls; block outbound tool calls with sensitive data patterns</td></tr>
+      <tr><td>Resource exhaustion</td><td>Model calls an expensive tool in a loop</td><td>Per-session tool call budget; rate limiting per tool</td></tr>
+    </tbody>
+  </table></div>
+
+<pre><code>from functools import wraps
+import logging
+
+ALLOWED_TOOLS = {"search_documents", "get_weather", "calculate"}
+DANGEROUS_TOOLS = {"delete_records", "send_email", "execute_code"}
+
+def require_confirmation(tool_name: str) -> bool:
+    """Prompt user before executing high-risk tools."""
+    if tool_name in DANGEROUS_TOOLS:
+        answer = input(f"⚠️  Allow tool '{tool_name}'? [y/N]: ")
+        return answer.lower() == "y"
+    return True
+
+def sanitise_tool_result(result: str) -> str:
+    """Strip injection attempts from tool results."""
+    injection_patterns = [
+        "ignore previous instructions",
+        "system prompt:",
+        "new instructions:",
+    ]
+    lowered = result.lower()
+    for pattern in injection_patterns:
+        if pattern in lowered:
+            logging.warning(f"Potential prompt injection detected in tool result")
+            return "[Tool result redacted due to security policy]"
+    return result</code></pre>
+
+  <div class="callout callout-rose">
+    <strong>Never pass unsanitised LLM outputs to shell tools</strong>
+    If you have a <code>run_shell_command</code> tool, the LLM could be tricked into running arbitrary commands via a crafted document. Always sandbox code execution in Docker or a language-level sandbox (e.g., RestrictedPython).
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 9 ══════════════════════════ -->
+<div class="section page-break" id="s9">
+  <div class="section-num">Section 09</div>
+  <h2 class="section-title">Agent Integration</h2>
+  <p class="lead">MCP tools integrate cleanly into LangChain, LangGraph, CrewAI, and Pydantic AI. The key pattern is wrapping MCP tool calls as framework-native tool objects so the orchestrator can invoke them transparently.</p>
+
+  <div class="diagram">Agent (LangGraph)
+    │
+    ├─ State: messages, tool_results
+    │
+    ├─ llm_node: call LLM with tools registered
+    │       │
+    │       └─► LLM returns tool_call(s)
+    │
+    └─ tool_node: execute tool calls
+            │
+            ├─ MCP Client → stdio/SSE → MCP Server
+            │       └─► execute tool → return result
+            │
+            └─► Add tool_results to state → back to llm_node</div>
+
+  <h3>Wrapping MCP Tools in LangChain</h3>
+<pre><code>from langchain_core.tools import StructuredTool
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+async def create_langchain_mcp_tools(server_script: str) -> list:
+    """Wrap all tools from an MCP server as LangChain StructuredTools."""
+    server_params = StdioServerParameters(command="python", args=[server_script])
+
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            mcp_tools = await session.list_tools()
+
+            lc_tools = []
+            for tool in mcp_tools.tools:
+                async def call_tool(name=tool.name, **kwargs):
+                    async with stdio_client(server_params) as (r, w):
+                        async with ClientSession(r, w) as s:
+                            await s.initialize()
+                            result = await s.call_tool(name, arguments=kwargs)
+                            return result.content[0].text
+
+                lc_tools.append(StructuredTool(
+                    name=tool.name,
+                    description=tool.description,
+                    func=call_tool,
+                    coroutine=call_tool,
+                ))
+    return lc_tools</code></pre>
+
+  <div class="card-grid">
+    <div class="card card-accent"><h4>Dynamic Tool Registration</h4><p>Discover available MCP servers at runtime. Register only the tools relevant to the current task context.</p></div>
+    <div class="card card-accent"><h4>Tool Retrieval with RAG</h4><p>With 100+ tools, embed tool descriptions. At query time, retrieve the top-K relevant tools to pass to the LLM — avoids token bloat.</p></div>
+    <div class="card card-accent"><h4>Graceful Degradation</h4><p>Catch tool execution errors and return structured error messages. The LLM can self-correct or inform the user rather than crashing.</p></div>
+    <div class="card card-accent"><h4>Audit Logging</h4><p>Log every tool call: timestamp, tool name, arguments, result, latency. Essential for debugging multi-step agent traces.</p></div>
+  </div>
+
+  <h3>Further Reading</h3>
+  <ul class="clean">
+    <li><a href="https://modelcontextprotocol.io/introduction" target="_blank">MCP Official Specification</a></li>
+    <li><a href="https://docs.anthropic.com/en/docs/agents-and-tools/mcp" target="_blank">Anthropic MCP Documentation</a></li>
+    <li><a href="https://github.com/modelcontextprotocol/python-sdk" target="_blank">MCP Python SDK (GitHub)</a></li>
+    <li><a href="https://github.com/modelcontextprotocol/typescript-sdk" target="_blank">MCP TypeScript SDK (GitHub)</a></li>
+    <li><a href="https://github.com/punkpeye/awesome-mcp-servers" target="_blank">Awesome MCP Servers (community list)</a></li>
+    <li><a href="https://python.useinstructor.com/" target="_blank">Instructor Library Documentation</a></li>
+  </ul>
+</div>
+
+<div class="footer">Synapse · MCP &amp; Tool Use · May 2026</div>
+</div><!-- /container -->
+  </div><!-- /main-scroll -->
+</div><!-- /topic-page -->
+<footer class="guide-footer">Synapse &middot; AI &amp; LLM Engineering</footer>
+</body>
+</html>

@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Load Balancing — Complete Reference Guide 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e;
+  --ink2: #3d3d5c;
+  --ink3: #6b6b8a;
+  --bg: #ffffff;
+  --bg2: #f4f3f0;
+  --bg3: #eae8e4;
+  --accent: #2563eb;
+  --accent2: #1d4ed8;
+  --accent-bg: #eff6ff;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --amber: #d97706;
+  --amber-bg: #fffbeb;
+  --rose: #e11d48;
+  --rose-bg: #fff1f2;
+  --purple: #7c3aed;
+  --purple-bg: #f5f3ff;
+  --teal: #0d9488;
+  --teal-bg: #f0fdfa;
+  --coral: #ea580c;
+  --coral-bg: #fff7ed;
+  --border: #e2e0dc;
+  --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+
+@media print {
+  body { font-size: 10pt; line-height: 1.5; }
+  .no-print { display: none !important; }
+  .page-break { page-break-before: always; }
+  section { page-break-inside: avoid; }
+  .card { break-inside: avoid; }
+  pre { font-size: 8pt; }
+  h1 { font-size: 22pt; }
+  h2 { font-size: 14pt; }
+  h3 { font-size: 11pt; }
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+.cover {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%);
+  color: white;
+  padding: 4rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(37,99,235,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 30%, rgba(13,148,136,0.1) 0%, transparent 50%);
+}
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #60a5fa, #34d399); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+.diagram { background: #1e293b; border-radius: 10px; padding: 1.5rem; margin: 1rem 0; overflow-x: auto; }
+.diagram pre { background: none; border: none; color: #e2e8f0; font-size: 0.78rem; margin: 0; }
+
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+
+@media (max-width: 1100px) { .sidebar { display: none; } }
+@media (max-width: 600px) { .cover h1 { font-size: 2.2rem; } .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← All Topics</a>
+  <h1>Interview Preparation Guide</h1>
+</header>
+
+<div class="topic-page">
+
+  <aside class="sidebar">
+    <p class="sidebar-title">Load Balancing</p>
+    <nav>
+      <ul>
+        <li><a href="#s1"><span class="toc-num">01</span>Fundamentals</a></li>
+        <li><a href="#s2"><span class="toc-num">02</span>Inside OpenShift</a></li>
+        <li><a href="#s3"><span class="toc-num">03</span>External Load Balancers</a></li>
+        <li><a href="#s4"><span class="toc-num">04</span>External LBs with OpenShift</a></li>
+        <li><a href="#s5"><span class="toc-num">05</span>Canary Deployments</a></li>
+        <li><a href="#s6"><span class="toc-num">06</span>Production &amp; COB/DR</a></li>
+        <li><a href="#s7"><span class="toc-num">07</span>End-to-End Stack</a></li>
+        <li><a href="#s8"><span class="toc-num">08</span>Decision Guide</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <div class="main-scroll">
+
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference — April 2026</div>
+  <h1>Load <span>Balancing</span> Guide</h1>
+  <p class="cover-sub">Algorithms, HAProxy routes, service mesh, external load balancers, canary deployments, COB/DR strategies — the complete OpenShift load balancing reference for senior engineers.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">HAProxy</span>
+    <span class="cover-tag">OpenShift Routes</span>
+    <span class="cover-tag">Ingress</span>
+    <span class="cover-tag">MetalLB</span>
+    <span class="cover-tag">Istio</span>
+    <span class="cover-tag">Canary</span>
+    <span class="cover-tag">GSLB</span>
+    <span class="cover-tag">COB/DR</span>
+    <span class="cover-tag">F5 BIG-IP</span>
+    <span class="cover-tag">Round Robin</span>
+  </div>
+  <div class="cover-date">v1.0 — Last updated April 2026</div>
+</div>
+
+<div class="container">
+
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <div class="toc-grid">
+    <a href="#s1" class="toc-item"><span class="toc-num">01</span><span class="toc-label">API &amp; Traffic Load Balancing Fundamentals</span></a>
+    <a href="#s2" class="toc-item"><span class="toc-num">02</span><span class="toc-label">Load Balancing Inside OpenShift</span></a>
+    <a href="#s3" class="toc-item"><span class="toc-num">03</span><span class="toc-label">Load Balancing Outside OpenShift (External)</span></a>
+    <a href="#s4" class="toc-item"><span class="toc-num">04</span><span class="toc-label">How to Use External LBs with OpenShift</span></a>
+    <a href="#s5" class="toc-item"><span class="toc-num">05</span><span class="toc-label">Canary Deployments in OpenShift</span></a>
+    <a href="#s6" class="toc-item"><span class="toc-num">06</span><span class="toc-label">Load Balancing: Production &amp; COB/DR</span></a>
+    <a href="#s7" class="toc-item"><span class="toc-num">07</span><span class="toc-label">Complete Load Balancing Stack — End-to-End</span></a>
+    <a href="#s8" class="toc-item"><span class="toc-num">08</span><span class="toc-label">Decision Guide — Which Approach to Use?</span></a>
+  </div>
+</div>
+
+<!-- SECTION 1 -->
+<div id="s1" class="section page-break">
+  <div class="section-num">SECTION 01</div>
+  <h2 class="section-title">API &amp; Traffic Load Balancing Fundamentals</h2>
+  <p class="lead">Load balancing distributes incoming traffic across multiple backend instances to maximise availability, throughput, and fault tolerance. Understanding the algorithms and layers is essential before tackling Kubernetes-specific implementations.</p>
+
+  <h3>Core Algorithms</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Round Robin</h4>
+      <p>Requests distributed sequentially to each server in turn. Simple and stateless — best for homogeneous backends with similar response times.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Weighted Round Robin</h4>
+      <p>Each server assigned a weight proportional to its capacity. A 4-core server can receive 2× the requests of a 2-core server.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Least Connections</h4>
+      <p>New request routed to the server with fewest active connections. Excellent for long-lived connections (WebSocket, gRPC streams).</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Least Response Time</h4>
+      <p>Combines fewest connections with fastest historical response time. Used by Envoy/Istio outlier detection.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>IP Hash / Consistent Hash</h4>
+      <p>Client IP (or header) hashed to a fixed backend. Provides session affinity without sticky-session cookies.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Random with Two Choices</h4>
+      <p>Pick 2 random backends, send to the less loaded one. Approaches optimal with O(1) overhead — used in modern service meshes.</p>
+    </div>
+  </div>
+
+  <h3>OSI Layer Distinctions</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Layer</th><th>Type</th><th>Visibility</th><th>Examples</th><th>Use Case</th></tr></thead>
+      <tbody>
+        <tr><td>L4 (Transport)</td><td>TCP/UDP LB</td><td>IP + Port only</td><td>MetalLB, AWS NLB</td><td>Raw throughput, non-HTTP</td></tr>
+        <tr><td>L7 (Application)</td><td>HTTP/HTTPS LB</td><td>Headers, URL, cookies</td><td>HAProxy, Nginx, Istio</td><td>Routing, canary, auth</td></tr>
+        <tr><td>DNS</td><td>GSLB</td><td>DNS query</td><td>F5 GTM, Route 53</td><td>Multi-site, DR failover</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Health Checks</h3>
+  <p>Load balancers remove unhealthy backends via <strong>active probes</strong> (periodic HTTP GET to <code>/health</code>) and <strong>passive detection</strong> (tracking 5xx responses). In Kubernetes, readiness probes feed the endpoint slice; a pod not ready is removed from all service endpoints immediately.</p>
+
+  <div class="callout callout-blue">
+    <strong>Interview Key Point</strong>
+    Distinguish between <em>liveness</em> (should this pod be killed?) and <em>readiness</em> (should traffic flow here?). A pod can be live but not ready — it stays alive but receives zero traffic until it passes the readiness probe.
+  </div>
+
+  <h3>Session Persistence (Sticky Sessions)</h3>
+  <p>Required when application state lives in-process rather than in an external store. Implemented via:</p>
+  <ul class="clean">
+    <li><strong>Cookie-based:</strong> LB inserts a <code>SERVERID</code> cookie; subsequent requests route to same backend</li>
+    <li><strong>IP-hash:</strong> same client IP always maps to same backend (breaks behind NAT/CGNAT)</li>
+    <li><strong>Header-based:</strong> route on a custom header (e.g., <code>X-Session-ID</code>)</li>
+  </ul>
+
+  <div class="callout callout-amber">
+    <strong>Caution</strong>
+    Sticky sessions undermine horizontal scaling — a popular session concentrates load on one pod. Prefer externalising state to Redis or a database so any pod can serve any request.
+  </div>
+
+  <h3>Connection Draining (Graceful Removal)</h3>
+  <p>When a pod is removed (scale-down, deployment rollout), the LB stops sending <em>new</em> connections but allows existing connections to complete — typically with a 30–60 second drain window. In OpenShift this is handled by the <code>terminationGracePeriodSeconds</code> field on the pod plus the router's connection drain setting.</p>
+</div>
+
+<!-- SECTION 2 -->
+<div id="s2" class="section page-break">
+  <div class="section-num">SECTION 02</div>
+  <h2 class="section-title">Load Balancing Inside OpenShift</h2>
+  <p class="lead">OpenShift provides multiple layers of traffic distribution within the cluster, each serving a distinct purpose from pod-to-pod communication to external ingress.</p>
+
+  <h3>kube-proxy / iptables / IPVS</h3>
+  <p>At the lowest level, Kubernetes Services are implemented by <code>kube-proxy</code> which programs either <strong>iptables</strong> rules (random probabilistic selection) or <strong>IPVS</strong> virtual servers (true LB with multiple algorithms). IPVS is preferred at scale because iptables rule evaluation is O(n) while IPVS is O(1).</p>
+
+  <div class="diagram">
+    <pre>
+  Client Pod
+      │
+      ▼  (ClusterIP: 10.96.x.x)
+  kube-proxy / IPVS
+      │
+      ├──▶ Pod A (10.244.1.5:8080)
+      ├──▶ Pod B (10.244.2.7:8080)
+      └──▶ Pod C (10.244.3.2:8080)
+    </pre>
+  </div>
+
+  <h3>Kubernetes Services</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Service Type</th><th>Reachability</th><th>Load Balancing</th><th>When to Use</th></tr></thead>
+      <tbody>
+        <tr><td>ClusterIP</td><td>Cluster-internal only</td><td>iptables/IPVS random</td><td>Microservice-to-microservice</td></tr>
+        <tr><td>NodePort</td><td>Each node's IP + port</td><td>Round-robin via kube-proxy</td><td>Dev/test, edge cases</td></tr>
+        <tr><td>LoadBalancer</td><td>External IP via cloud LB</td><td>Cloud LB → NodePort → pod</td><td>Direct external exposure</td></tr>
+        <tr><td>Headless (ClusterIP: None)</td><td>DNS returns pod IPs</td><td>Client-side (DNS)</td><td>StatefulSets, gRPC</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>OpenShift HAProxy Router</h3>
+  <p>The <strong>OpenShift Router</strong> is an HAProxy instance running in the <code>openshift-ingress</code> namespace. It watches Route resources and dynamically updates its configuration. By default it uses <strong>round-robin</strong> but supports:</p>
+  <ul class="clean">
+    <li><strong>leastconn</strong> — via <code>haproxy.router.openshift.io/balance: leastconn</code> annotation</li>
+    <li><strong>random</strong> — via <code>haproxy.router.openshift.io/balance: random</code></li>
+    <li><strong>source</strong> — IP-based stickiness</li>
+    <li><strong>cookie</strong> — session cookie stickiness via <code>haproxy.router.openshift.io/disable_cookies: "false"</code></li>
+  </ul>
+
+  <pre>apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: my-api
+  annotations:
+    haproxy.router.openshift.io/balance: leastconn
+    haproxy.router.openshift.io/timeout: 60s
+    haproxy.router.openshift.io/rate-limit-connections: "true"
+spec:
+  host: my-api.apps.cluster.example.com
+  to:
+    kind: Service
+    name: my-api-svc
+    weight: 100
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect</pre>
+
+  <h3>Route Weights — Traffic Splitting</h3>
+  <p>A Route can reference multiple backends with weights, enabling A/B testing and canary rollouts natively:</p>
+  <pre>spec:
+  to:
+    kind: Service
+    name: my-api-v1
+    weight: 90           # 90% to stable
+  alternateBackends:
+  - kind: Service
+    name: my-api-v2
+    weight: 10           # 10% to canary</pre>
+
+  <h3>Ingress Operator</h3>
+  <p>The <strong>IngressController</strong> custom resource (managed by the Ingress Operator) configures the router deployment. You can run multiple router instances with different <code>routeSelector</code> labels to segregate traffic between teams or environments:</p>
+  <pre>apiVersion: operator.openshift.io/v1
+kind: IngressController
+metadata:
+  name: internal
+  namespace: openshift-ingress-operator
+spec:
+  replicas: 3
+  routeSelector:
+    matchLabels:
+      router: internal
+  endpointPublishingStrategy:
+    type: LoadBalancerService</pre>
+
+  <h3>Service Mesh (OpenShift Service Mesh / Istio)</h3>
+  <p>For fine-grained L7 control, OpenShift Service Mesh (based on Istio) uses Envoy sidecar proxies to implement:</p>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>VirtualService</h4>
+      <p>Header-based routing, percentage splits, retries, timeouts, fault injection.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>DestinationRule</h4>
+      <p>Load balancing algorithm, connection pool, outlier detection, mTLS policy per subset.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>PeerAuthentication</h4>
+      <p>mTLS between services — encrypts east-west traffic without application changes.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Gateway</h4>
+      <p>Istio ingress gateway replaces HAProxy router for mesh-managed services.</p>
+    </div>
+  </div>
+
+  <pre>apiVersion: networking.istio.io/v1alpha1
+kind: DestinationRule
+metadata:
+  name: my-api
+spec:
+  host: my-api
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_CONN
+    outlierDetection:
+      consecutiveErrors: 5
+      interval: 10s
+      baseEjectionTime: 30s   # eject unhealthy pod for 30s
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2</pre>
+</div>
+
+<!-- SECTION 3 -->
+<div id="s3" class="section page-break">
+  <div class="section-num">SECTION 03</div>
+  <h2 class="section-title">Load Balancing Outside OpenShift (External)</h2>
+  <p class="lead">Traffic reaching OpenShift from the internet or corporate network passes through one or more external load balancing layers before hitting the cluster's ingress. Understanding this chain is critical for diagnosing latency, SSL offload, and failover behaviour.</p>
+
+  <h3>Hardware Load Balancers</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>F5 BIG-IP</h4>
+      <p>Enterprise-grade appliance/virtual. Full L4–L7 control, iRules scripting, SSL offload, WAF, APM. Common in financial services. Integrates with OpenShift via the F5 BIG-IP Controller Operator.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Citrix ADC (NetScaler)</h4>
+      <p>Similar capability to F5. Integrates via the Citrix Ingress Controller. Provides content switching, responder policies, and AppExpert scripting.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Fortinet FortiADC</h4>
+      <p>Security-focused ADC with integrated DDoS protection and WAF. Used where security and compliance are primary drivers.</p>
+    </div>
+  </div>
+
+  <h3>Software / Cloud Load Balancers</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Product</th><th>Layer</th><th>Key Feature</th><th>On-Prem?</th></tr></thead>
+      <tbody>
+        <tr><td>HAProxy (standalone)</td><td>L4/L7</td><td>High performance, stats socket, VRRP HA</td><td>Yes</td></tr>
+        <tr><td>Nginx / Nginx Plus</td><td>L7</td><td>Upstream groups, active health checks (Plus)</td><td>Yes</td></tr>
+        <tr><td>AWS ALB</td><td>L7</td><td>Path/header routing, WAF, Lambda targets</td><td>No (AWS)</td></tr>
+        <tr><td>AWS NLB</td><td>L4</td><td>Static IP, ultra-low latency, TCP/UDP</td><td>No (AWS)</td></tr>
+        <tr><td>GCP Cloud LB</td><td>L7 global</td><td>Anycast IP, Cloud Armor, URL maps</td><td>No (GCP)</td></tr>
+        <tr><td>Azure Front Door</td><td>L7 global</td><td>CDN + LB + WAF, anycast PoPs</td><td>No (Azure)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Global Server Load Balancing (GSLB)</h3>
+  <p>GSLB operates at the DNS layer to route users to the closest or healthiest data centre. A DNS query for <code>api.example.com</code> is answered with the IP of the best available site based on health, latency, or geography.</p>
+
+  <div class="diagram">
+    <pre>
+  Client DNS query: api.example.com
+          │
+    ┌─────▼──────┐
+    │  GSLB DNS  │  (F5 GTM / Route 53 / NS1)
+    └─────┬──────┘
+          │  Health probes to both sites
+    ┌─────┴──────────────┐
+    ▼                    ▼
+  Site A (Primary)    Site B (DR/COB)
+  10.0.0.1            10.0.0.2
+  OpenShift Cluster 1  OpenShift Cluster 2
+    </pre>
+  </div>
+
+  <h3>MetalLB — Bare-Metal Load Balancer</h3>
+  <p>On bare-metal or on-premise OpenShift clusters without a cloud provider, <strong>MetalLB</strong> implements the <code>LoadBalancer</code> service type by advertising IPs via:</p>
+  <ul class="clean">
+    <li><strong>Layer 2 mode:</strong> ARP/NDP announcement — one node owns the IP, others are standby. Simple but single-node throughput limited.</li>
+    <li><strong>BGP mode:</strong> Peered with routers; every node advertises the IP — true ECMP load balancing at the network layer.</li>
+  </ul>
+  <pre>apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: production-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - 192.168.10.100-192.168.10.120
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: l2-advert
+  namespace: metallb-system</pre>
+</div>
+
+<!-- SECTION 4 -->
+<div id="s4" class="section page-break">
+  <div class="section-num">SECTION 04</div>
+  <h2 class="section-title">How to Use External Load Balancers with OpenShift</h2>
+  <p class="lead">Integrating corporate or cloud load balancers with OpenShift requires mapping external network constructs to Kubernetes Service and Route objects. There are three primary integration patterns.</p>
+
+  <h3>Pattern 1 — External LB → OpenShift Router (HAProxy)</h3>
+  <p>The most common enterprise pattern. The external LB (F5, Nginx) terminates client connections and forwards to the OpenShift Router's NodePort or LoadBalancer IP. The router then handles TLS re-encryption or passthrough and routes to the correct Service.</p>
+
+  <div class="diagram">
+    <pre>
+  Internet
+      │
+  F5 BIG-IP  (L7 — SSL offload, WAF, rate limiting)
+      │
+  OpenShift Router  (HAProxy — Route matching, LB across pods)
+      │
+  Service (ClusterIP)
+      │
+  Pod replicas
+    </pre>
+  </div>
+
+  <h3>F5 BIG-IP Controller Operator</h3>
+  <p>The F5 operator watches OpenShift Route and ConfigMap resources and automatically programs the BIG-IP virtual servers. This removes manual F5 configuration when services are created or scaled:</p>
+  <pre># ConfigMap tells F5 controller which BIG-IP partition to manage
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: f5-bigip-ctlr-config
+  namespace: kube-system
+data:
+  config: |
+    {
+      "bigip-partition": "openshift",
+      "openshift-sdn-name": "/Common/openshift_vxlan",
+      "pool-member-type": "cluster",
+      "balance": "least-connections-member"
+    }</pre>
+
+  <h3>Pattern 2 — External LB → NodePort Direct</h3>
+  <p>The external LB forwards directly to a <code>NodePort</code> service, bypassing the OpenShift Router entirely. Useful for non-HTTP protocols (gRPC, database, MQTT) or when HAProxy's overhead is undesirable.</p>
+  <ul class="clean">
+    <li>Each worker node exposes the NodePort (30000–32767 range) on its external IP</li>
+    <li>External LB health-checks each node and distributes TCP traffic</li>
+    <li>kube-proxy/IPVS then routes within the cluster</li>
+    <li>No URL-based routing — one NodePort per service</li>
+  </ul>
+
+  <h3>Pattern 3 — External LB → MetalLB LoadBalancer Service</h3>
+  <p>MetalLB assigns a stable external IP to each Service of type <code>LoadBalancer</code>. The external LB points to these IPs. Best for bare-metal clusters needing per-service IP addresses.</p>
+
+  <div class="callout callout-blue">
+    <strong>SSL Termination Options</strong>
+    <ul class="clean" style="margin-top:0.5rem">
+      <li><strong>Edge:</strong> TLS terminated at the OpenShift Router; backend traffic is plain HTTP</li>
+      <li><strong>Passthrough:</strong> TLS passed through unmodified to the pod (pod holds the cert)</li>
+      <li><strong>Re-encrypt:</strong> TLS terminated at router, new TLS connection to backend pod</li>
+      <li><strong>At external LB:</strong> External LB terminates TLS; sends HTTP to OpenShift Router</li>
+    </ul>
+  </div>
+
+  <h3>Health Check Coordination</h3>
+  <p>Both the external LB and OpenShift must agree on pod health. Configure the external LB to probe <code>/healthz</code> on the OpenShift Router's NodePort. The router is healthy only when at least one backend pod passes its readiness probe. This creates a single health signal propagated outward.</p>
+
+  <h3>Timeout Alignment</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Layer</th><th>Timeout Setting</th><th>Recommended</th></tr></thead>
+      <tbody>
+        <tr><td>External LB (F5)</td><td>Connection timeout</td><td>>Router timeout</td></tr>
+        <tr><td>OpenShift Router</td><td>haproxy.router.openshift.io/timeout</td><td>Based on p99 latency + buffer</td></tr>
+        <tr><td>Service</td><td>terminationGracePeriodSeconds</td><td>≥ Router drain time</td></tr>
+        <tr><td>Application</td><td>HTTP server read/write timeout</td><td>Shortest of the chain</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION 5 -->
+<div id="s5" class="section page-break">
+  <div class="section-num">SECTION 05</div>
+  <h2 class="section-title">Canary Deployments in OpenShift</h2>
+  <p class="lead">A canary deployment routes a small percentage of production traffic to a new version of a service, allowing real-world validation before full rollout. OpenShift supports multiple mechanisms with varying granularity.</p>
+
+  <h3>Mechanism 1 — Route Weights (Native OpenShift)</h3>
+  <p>The simplest approach — split traffic between two Services using the <code>alternateBackends</code> field on a Route:</p>
+  <pre>apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: payment-api
+spec:
+  host: payment.apps.example.com
+  to:
+    kind: Service
+    name: payment-v1
+    weight: 95
+  alternateBackends:
+  - kind: Service
+    name: payment-v2
+    weight: 5
+  port:
+    targetPort: http</pre>
+
+  <div class="callout callout-green">
+    <strong>Progressive Delivery</strong>
+    Start at 5% → monitor error rate and p99 latency → move to 20% → 50% → 100%. If metrics degrade, set canary weight back to 0 immediately. The switch is instantaneous — no redeployment needed.
+  </div>
+
+  <h3>Mechanism 2 — Argo Rollouts</h3>
+  <p>Argo Rollouts provides a Rollout CRD that replaces Deployment for advanced strategies:</p>
+  <pre>apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: payment-api
+spec:
+  replicas: 10
+  strategy:
+    canary:
+      canaryService: payment-canary
+      stableService: payment-stable
+      trafficRouting:
+        istio:
+          virtualService:
+            name: payment-vsvc
+      steps:
+      - setWeight: 5
+      - pause: {duration: 5m}
+      - analysis:
+          templates:
+          - templateName: error-rate
+      - setWeight: 20
+      - pause: {duration: 10m}
+      - setWeight: 50
+      - pause: {duration: 10m}</pre>
+
+  <h3>Mechanism 3 — Istio VirtualService</h3>
+  <p>For header-based canary (e.g., internal users see new version, external see stable):</p>
+  <pre>apiVersion: networking.istio.io/v1alpha1
+kind: VirtualService
+metadata:
+  name: payment-api
+spec:
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: payment-api
+        subset: v2
+  - route:
+    - destination:
+        host: payment-api
+        subset: v1
+      weight: 95
+    - destination:
+        host: payment-api
+        subset: v2
+      weight: 5</pre>
+
+  <h3>Canary Metrics to Monitor</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Error Rate</h4>
+      <p>HTTP 5xx % for canary vs stable. Alert if canary error rate exceeds stable + 1%.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>p99 Latency</h4>
+      <p>99th percentile response time. Canary must not exceed stable + 50ms threshold.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>CPU / Memory</h4>
+      <p>New version may have a memory leak invisible in unit tests. Monitor over 30-minute soak window.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Business KPIs</h4>
+      <p>Conversion rate, transaction success rate. Ultimate canary gate — technical metrics can lie.</p>
+    </div>
+  </div>
+
+  <h3>Rollback Strategy</h3>
+  <ul class="clean">
+    <li>Route weights: set canary weight to 0 — instant traffic cutover</li>
+    <li>Argo Rollouts: <code>kubectl argo rollouts abort payment-api</code> — reverts to stable within seconds</li>
+    <li>Istio: revert VirtualService weight via GitOps (ArgoCD re-syncs in &lt;30s)</li>
+    <li>Always keep the previous stable Deployment running until canary is fully promoted</li>
+  </ul>
+</div>
+
+<!-- SECTION 6 -->
+<div id="s6" class="section page-break">
+  <div class="section-num">SECTION 06</div>
+  <h2 class="section-title">Load Balancing Between Production and COB/DR Environments</h2>
+  <p class="lead">Continuity of Business (COB) and Disaster Recovery (DR) environments require load balancing that operates above the cluster level, directing traffic between geographically separated sites based on health and policy.</p>
+
+  <h3>COB vs DR Distinction</h3>
+  <div class="two-col">
+    <div class="card card-accent">
+      <h4>COB (Continuity of Business)</h4>
+      <p>Active-active or active-warm-standby. Both sites handle production traffic simultaneously. Used for planned maintenance windows — traffic is shifted before taking a site offline. RTO near-zero.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>DR (Disaster Recovery)</h4>
+      <p>Active-passive. DR site is cold or warm standby. Activated only on primary site failure. RTO typically 15–60 minutes for warm standby. Data replication lag is the primary risk.</p>
+    </div>
+  </div>
+
+  <h3>GSLB Failover Patterns</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Pattern</th><th>DNS TTL</th><th>Failover Time</th><th>Complexity</th></tr></thead>
+      <tbody>
+        <tr><td>Active-Active (equal weights)</td><td>30s</td><td>N/A (continuous)</td><td>High — data sync required</td></tr>
+        <tr><td>Active-Passive (health check)</td><td>30s</td><td>TTL + probe interval ≈ 60s</td><td>Medium</td></tr>
+        <tr><td>Active-Warm (ratio 90/10)</td><td>30s</td><td>Ratio shift ≈ 30s</td><td>Medium</td></tr>
+        <tr><td>Manual failover</td><td>300s</td><td>Manual + TTL propagation</td><td>Low</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>F5 GTM / BIG-IP DNS Configuration</h3>
+  <pre># Simplified F5 GTM pool configuration concept
+Wide IP: api.example.com
+  Pool: primary-site
+    Member: 10.10.1.100  (OpenShift Cluster A router VIP)
+    Monitor: HTTP /healthz every 5s, 2 failures = down
+    Priority: 10
+  Pool: dr-site
+    Member: 10.20.1.100  (OpenShift Cluster B router VIP)
+    Monitor: HTTP /healthz every 5s
+    Priority: 20  (lower priority = standby)
+  Load Balancing Method: Global Availability (primary first)</pre>
+
+  <h3>Data Replication Considerations</h3>
+  <div class="callout callout-amber">
+    <strong>The Split-Brain Problem</strong>
+    In active-active setups, writes may occur at both sites simultaneously. You need a consensus mechanism (Galera, CockroachDB, Cassandra multi-region) or a primary-per-shard strategy to prevent conflicting writes. Load balancing alone cannot solve data consistency.
+  </div>
+
+  <ul class="clean">
+    <li><strong>Database:</strong> PostgreSQL streaming replication (async lag risk) or synchronous (latency penalty)</li>
+    <li><strong>Object storage:</strong> MinIO site replication or AWS S3 CRR</li>
+    <li><strong>Cache (Redis):</strong> Redis Enterprise active-active (CRDT-based) for conflict-free replication</li>
+    <li><strong>Kafka:</strong> MirrorMaker 2 for cross-datacenter topic replication</li>
+  </ul>
+
+  <h3>Traffic Shifting for Maintenance</h3>
+  <pre>## Pre-maintenance runbook — shift traffic from Site A to Site B
+# 1. Reduce Site A weight to 10% (monitor error rates)
+kubectl patch route production-api -p '{"spec":{"to":{"weight":10}}}'
+
+# 2. Wait for in-flight requests to drain (check active connections)
+watch -n5 "oc rsh -n openshift-ingress router-pod haproxy -c /var/lib/haproxy/conf/haproxy.config -vd"
+
+# 3. Update GSLB to remove Site A
+#    (F5 GTM UI or iControl REST API call)
+
+# 4. Perform maintenance
+# 5. Reverse steps to restore Site A</pre>
+</div>
+
+<!-- SECTION 7 -->
+<div id="s7" class="section page-break">
+  <div class="section-num">SECTION 07</div>
+  <h2 class="section-title">Complete Load Balancing Stack — End-to-End</h2>
+  <p class="lead">A production request to a financial services API traverses at least five distinct load balancing layers. Understanding each hop is critical for performance analysis, security review, and incident diagnosis.</p>
+
+  <h3>Full Traffic Path</h3>
+  <div class="diagram">
+    <pre>
+  ┌────────────────────────────────────────────────────────────────┐
+  │                         INTERNET                               │
+  └──────────────────────────────┬─────────────────────────────────┘
+                                 │ HTTPS request to api.example.com
+                                 ▼
+  ┌──────────────────────────────────────────────────────────────────┐
+  │  Layer 1: GSLB (F5 GTM / Route 53)                              │
+  │  - Resolves api.example.com to Site A or Site B IP              │
+  │  - Health monitoring every 5s, TTL 30s                          │
+  └──────────────────────────────┬─────────────────────────────────┘
+                                 │ TCP to Site A VIP
+                                 ▼
+  ┌──────────────────────────────────────────────────────────────────┐
+  │  Layer 2: External Hardware LB (F5 BIG-IP)                      │
+  │  - SSL termination (or passthrough)                              │
+  │  - WAF inspection, DDoS protection                               │
+  │  - Distributes to OpenShift Router VIP nodes                     │
+  └──────────────────────────────┬─────────────────────────────────┘
+                                 │ HTTP/HTTPS to Router NodePort
+                                 ▼
+  ┌──────────────────────────────────────────────────────────────────┐
+  │  Layer 3: OpenShift HAProxy Router                               │
+  │  - Route matching (host + path)                                  │
+  │  - LB across pods via Service endpoint slice                     │
+  │  - TLS re-encryption, rate limiting, sticky sessions             │
+  └──────────────────────────────┬─────────────────────────────────┘
+                                 │ HTTP to ClusterIP
+                                 ▼
+  ┌──────────────────────────────────────────────────────────────────┐
+  │  Layer 4: kube-proxy / IPVS (Service)                            │
+  │  - ClusterIP → Pod IP translation                                │
+  │  - Random / round-robin at network layer                         │
+  └──────────────────────────────┬─────────────────────────────────┘
+                                 │ TCP to Pod IP:Port
+                                 ▼
+  ┌──────────────────────────────────────────────────────────────────┐
+  │  Layer 5: (Optional) Istio Envoy Sidecar                         │
+  │  - Least-conn LB, circuit breaking, retries, mTLS               │
+  │  - Telemetry to Jaeger / Prometheus                              │
+  └──────────────────────────────┬─────────────────────────────────┘
+                                 │
+                                 ▼
+                        Application Pod (FastAPI)
+    </pre>
+  </div>
+
+  <h3>Latency Budget Per Layer</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Layer</th><th>Added Latency</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>GSLB DNS resolution</td><td>1–5ms (cached)</td><td>Client DNS cache hides most of this</td></tr>
+        <tr><td>F5 BIG-IP processing</td><td>0.5–2ms</td><td>TLS offload adds ~1ms on hardware</td></tr>
+        <tr><td>HAProxy routing</td><td>0.3–1ms</td><td>Highly optimised in-memory routing table</td></tr>
+        <tr><td>kube-proxy/IPVS NAT</td><td>&lt;0.1ms</td><td>Kernel-level, negligible</td></tr>
+        <tr><td>Istio Envoy sidecar</td><td>0.5–3ms</td><td>Depends on policy complexity</td></tr>
+        <tr><td><strong>Total overhead</strong></td><td><strong>~3–11ms</strong></td><td>Measure with distributed tracing</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Observability Across the Stack</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>F5 Analytics</h4>
+      <p>Virtual server throughput, connection rate, SSL transaction rate. Export to Splunk/Datadog via logging profiles.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>HAProxy Stats</h4>
+      <p>Built-in stats socket exposes req/s, error rates, queue depth per backend. Scraped by Prometheus via haproxy-exporter.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Istio Telemetry</h4>
+      <p>Request duration histogram, upstream retries, circuit breaker state — all in Prometheus format. Visualised in Kiali.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Distributed Tracing</h4>
+      <p>Jaeger/Zipkin traces span all layers when correlation headers (B3 / W3C traceparent) are propagated end-to-end.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 8 -->
+<div id="s8" class="section page-break">
+  <div class="section-num">SECTION 08</div>
+  <h2 class="section-title">Decision Guide — Which Approach to Use?</h2>
+  <p class="lead">Choosing the right load balancing strategy depends on protocol, traffic patterns, team capability, and infrastructure constraints. Use this guide as a starting point.</p>
+
+  <h3>Quick Decision Matrix</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Requirement</th><th>Recommended Approach</th><th>Alternative</th></tr></thead>
+      <tbody>
+        <tr><td>Simple HTTP routing, single cluster</td><td>OpenShift Route (HAProxy)</td><td>Nginx Ingress</td></tr>
+        <tr><td>Fine-grained traffic splitting</td><td>Istio VirtualService</td><td>Argo Rollouts</td></tr>
+        <tr><td>Canary with automated rollback</td><td>Argo Rollouts + Prometheus analysis</td><td>Route weights (manual)</td></tr>
+        <tr><td>gRPC / WebSocket (long-lived)</td><td>Headless Service + client-side LB</td><td>Istio with leastconn</td></tr>
+        <tr><td>Bare-metal external IP</td><td>MetalLB (BGP mode)</td><td>NodePort + external LB</td></tr>
+        <tr><td>Multi-site failover</td><td>F5 GTM / Route 53 GSLB</td><td>Anycast BGP</td></tr>
+        <tr><td>Enterprise compliance + WAF</td><td>F5 BIG-IP → OpenShift Router</td><td>AWS ALB with WAF rules</td></tr>
+        <tr><td>Zero-trust mTLS east-west</td><td>Istio PeerAuthentication STRICT</td><td>Linkerd (lighter weight)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Complexity vs Control Trade-off</h3>
+  <div class="diagram">
+    <pre>
+  Control
+    ▲
+    │  Istio Service Mesh ────────────────────────────────● (high control, high complexity)
+    │
+    │  F5 BIG-IP + GTM ─────────────────────────────●
+    │
+    │  Argo Rollouts ────────────────────────────●
+    │
+    │  OpenShift Router (HAProxy) ──────────●
+    │
+    │  kube-proxy / Services ──────●
+    │
+    └────────────────────────────────────────────────────▶ Complexity
+    </pre>
+  </div>
+
+  <h3>Red Flags to Avoid</h3>
+  <div class="callout callout-rose">
+    <strong>Common Mistakes</strong>
+    <ul class="clean" style="margin-top:0.5rem">
+      <li>Setting external LB timeout shorter than the application's p99 — causes spurious 504s</li>
+      <li>Using sticky sessions with stateless microservices — creates hot spots, defeats auto-scaling</li>
+      <li>Running Istio service mesh without operators who can maintain it — complexity debt</li>
+      <li>Low DNS TTL (1s) for GSLB without understanding client DNS behaviour — may not reduce failover time if clients cache aggressively</li>
+      <li>Canary without automated analysis — human reaction time too slow for rapid error spikes</li>
+    </ul>
+  </div>
+
+  <h3>Interview Cheat Sheet</h3>
+  <div class="card-grid">
+    <div class="card">
+      <h4>HAProxy balance leastconn</h4>
+      <p>Use for long-lived connections (WebSocket, streaming) where round-robin would overload slow pods.</p>
+    </div>
+    <div class="card">
+      <h4>Route alternateBackends</h4>
+      <p>Fastest canary mechanism in OpenShift — purely declarative, no mesh required.</p>
+    </div>
+    <div class="card">
+      <h4>Headless Service</h4>
+      <p>DNS returns all pod IPs. Client does LB. Required for gRPC over HTTP/2 (h2c multiplexing defeats server-side LB).</p>
+    </div>
+    <div class="card">
+      <h4>GSLB TTL</h4>
+      <p>Keep at 30s for active failover scenarios. Lower TTL amplifies DNS query load; higher slows failover.</p>
+    </div>
+    <div class="card">
+      <h4>Connection draining</h4>
+      <p>Set <code>terminationGracePeriodSeconds</code> ≥ HAProxy timeout to prevent 503s during pod shutdown.</p>
+    </div>
+    <div class="card">
+      <h4>Outlier detection</h4>
+      <p>Istio's passive health check — ejects pods returning consecutive errors for baseEjectionTime before retrying.</p>
+    </div>
+  </div>
+
+  <div class="footer">Load Balancing — Complete Reference Guide · Interview Preparation · April 2026</div>
+</div>
+
+</div><!-- /.main-scroll -->
+</div><!-- /.topic-page -->
+
+<!-- <footer class="guide-footer">Interview Preparation Guide</footer> -->
+</body>
+</html>

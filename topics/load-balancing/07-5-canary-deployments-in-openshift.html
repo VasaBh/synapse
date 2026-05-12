@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canary Deployments in OpenShift – Load Balancing</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../load-balancing.html">Load Balancing</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Canary Deployments in OpenShift</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Load Balancing</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-api-traffic-load-balancing-fundamentals.html">API &amp; Traffic Load Balancing Fundamentals</a></li>
+        <li><a href="04-2-load-balancing-inside-openshift.html">Load Balancing Inside OpenShift</a></li>
+        <li><a href="05-3-load-balancing-outside-openshift-external.html">Load Balancing Outside OpenShift (External)</a></li>
+        <li><a href="06-4-how-to-use-external-load-balancers-with-openshift.html">How to Use External Load Balancers WITH OpenShift</a></li>
+        <li class="active"><a href="07-5-canary-deployments-in-openshift.html" class="active">Canary Deployments in OpenShift</a></li>
+        <li><a href="08-6-load-balancing-between-production-and-cobdr-environments.html">Load Balancing Between Production and COB/DR Environments</a></li>
+        <li><a href="09-7-complete-load-balancing-stack-end-to-end.html">Complete Load Balancing Stack — End-to-End</a></li>
+        <li><a href="10-8-decision-guide-which-approach-to-use.html">Decision Guide — Which Approach to Use?</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>5. Canary Deployments in OpenShift</h1>
+<p>A canary deployment is a progressive delivery strategy where a new version of an application is rolled out to a small percentage of production traffic first. The new version is monitored, and if it performs well, traffic is gradually increased until 100% flows to the new version. If issues are detected, the canary is rolled back with minimal user impact.</p>
+<pre><code>Canary Deployment Traffic Flow
+100% traffic           90/10 split            50/50 split          100% to v2
++--------+          +--------+             +--------+           +--------+
+|   v1   |    --&gt;   | v1 90% |     --&gt;     | v1 50% |   --&gt;    |   v2   |
+|  100%  |          | v2 10% |             | v2 50% |          |  100%  |
++--------+          +--------+             +--------+          +--------+
+Phase 1             Phase 2                Phase 3              Phase 4
+(before)          (canary start)         (ramping up)         (full rollout)</code></pre>
+<h3>5.1 Method 1: Native OpenShift Routes (Simple Canary)</h3>
+<p>The simplest approach uses Route weight manipulation. No additional tooling is needed beyond the oc CLI.</p>
+<pre><code># Step 1: Ensure roundrobin algorithm (required for weighted backends)
+oc annotate route/my-api haproxy.router.openshift.io/balance=roundrobin
+# Step 2: Start canary - 95% stable, 5% canary
+oc set route-backends my-api my-api-stable=95 my-api-canary=5
+# Step 3: Monitor metrics, increase if healthy
+oc set route-backends my-api my-api-stable=80 my-api-canary=20
+# Step 4: Continue ramping
+oc set route-backends my-api my-api-stable=50 my-api-canary=50
+# Step 5: Full rollout
+oc set route-backends my-api my-api-stable=0 my-api-canary=100
+# ROLLBACK (if issues detected):
+oc set route-backends my-api my-api-stable=100 my-api-canary=0</code></pre>
+<h3>5.2 Method 2: Service Mesh (Istio) Canary</h3>
+<p>Service Mesh provides more powerful canary deployments with percentage-based traffic splitting independent of replica counts, and header-based routing for targeted testing.</p>
+<p>Example — Percentage-based canary:</p>
+<pre><code>apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+name: my-api
+spec:
+hosts:
+- my-api
+http:
+- route:
+- destination:
+host: my-api
+subset: stable
+weight: 90
+- destination:
+host: my-api
+subset: canary
+weight: 10</code></pre>
+<p>Example — Header-based canary (only testers see canary):</p>
+<pre><code>apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+name: my-api
+spec:
+hosts:
+- my-api
+http:
+# Match: requests with x-canary: true header go to canary
+- match:
+- headers:
+x-canary:
+exact: &quot;true&quot;
+route:
+- destination:
+host: my-api
+subset: canary
+# Default: everything else goes to stable
+- route:
+- destination:
+host: my-api
+subset: stable</code></pre>
+<h3>5.3 Method 3: Argo Rollouts (Automated Canary)</h3>
+<p>Argo Rollouts automates the entire canary lifecycle. It integrates with both OpenShift Service Mesh (Istio) and native OpenShift Routes to progressively shift traffic through defined steps, with optional automated analysis and rollback.</p>
+<pre><code>Argo Rollouts Automated Canary Flow
+Rollout      VirtualService /           Monitoring /      Decision
+Controller   Route Update                Analysis
+|                                         |
++--&gt; setWeight: 10% -----&gt; Monitor -----&gt; OK? ---&gt; Yes --+
+|                                                        |
++--&gt; setWeight: 30% &lt;-----------------------------------+
+|                          Monitor -----&gt; OK? ---&gt; Yes --+
+|                                                        |
++--&gt; setWeight: 60% &lt;-----------------------------------+
+|                          Monitor -----&gt; OK? ---&gt; Yes --+
+|                                                        |
++--&gt; setWeight: 100% (promote) &lt;------------------------+
+|
++--&gt; [If FAIL at any step] --&gt; Rollback to 0% canary</code></pre>
+<p>Example — Argo Rollout with Istio traffic management:</p>
+<pre><code>apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+name: my-api
+spec:
+replicas: 5
+strategy:
+canary:
+canaryService: my-api-canary
+stableService: my-api-stable
+trafficRouting:
+istio:
+virtualServices:
+- name: my-api-vsvc
+routes:
+- primary
+steps:
+- setWeight: 10
+- pause: { duration: 5m }      # Wait 5 mins, monitor
+- setWeight: 30
+- pause: { duration: 5m }
+- setWeight: 60
+- pause: { duration: 5m }
+# After final step, auto-promotes to 100%</code></pre>
+<p>Example — Argo Rollout with native OpenShift Routes (no Service Mesh):</p>
+<pre><code>apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+name: my-api
+spec:
+strategy:
+canary:
+canaryService: my-api-canary
+stableService: my-api-stable
+trafficRouting:
+plugins:
+argoproj-labs/openshift:
+routes:
+- my-api-route
+steps:
+- setWeight: 20
+- pause: {}                    # Pause indefinitely, manual promote
+- setWeight: 40
+- pause: { duration: 10 }
+- setWeight: 80
+- pause: { duration: 10 }</code></pre>
+      </article>
+
+      <nav class="page-nav">
+        <a href="06-4-how-to-use-external-load-balancers-with-openshift.html">&#8592; How to Use External Load Balancers WITH OpenShift</a>
+        <span class="spacer"></span>
+        <a href="08-6-load-balancing-between-production-and-cobdr-environments.html">Load Balancing Between Production and COB/DR Environments &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Advanced Features — Complete Reference Guide 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e;
+  --ink2: #3d3d5c;
+  --ink3: #6b6b8a;
+  --bg: #ffffff;
+  --bg2: #f4f3f0;
+  --bg3: #eae8e4;
+  --accent: #2563eb;
+  --accent2: #1d4ed8;
+  --accent-bg: #eff6ff;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --amber: #d97706;
+  --amber-bg: #fffbeb;
+  --rose: #e11d48;
+  --rose-bg: #fff1f2;
+  --purple: #7c3aed;
+  --purple-bg: #f5f3ff;
+  --teal: #0d9488;
+  --teal-bg: #f0fdfa;
+  --coral: #ea580c;
+  --coral-bg: #fff7ed;
+  --border: #e2e0dc;
+  --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+
+@media print {
+  body { font-size: 10pt; line-height: 1.5; }
+  .no-print { display: none !important; }
+  .page-break { page-break-before: always; }
+  section { page-break-inside: avoid; }
+  .card { break-inside: avoid; }
+  pre { font-size: 8pt; }
+  h1 { font-size: 22pt; }
+  h2 { font-size: 14pt; }
+  h3 { font-size: 11pt; }
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+/* Cover */
+.cover {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%);
+  color: white;
+  padding: 4rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(37,99,235,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 30%, rgba(124,58,237,0.1) 0%, transparent 50%);
+}
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+
+/* TOC */
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+
+/* Sections */
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+
+/* Cards */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+
+/* Code */
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+
+/* Callout */
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+
+/* Pills */
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+
+/* Bullet lists */
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+/* Two col */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+/* Separator */
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+
+/* Footer */
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+/* Guide shell */
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+
+@media (max-width: 1100px) {
+  .sidebar { display: none; }
+}
+@media (max-width: 600px) {
+  .cover h1 { font-size: 2.2rem; }
+  .two-col { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← All Topics</a>
+  <h1>Interview Preparation Guide</h1>
+</header>
+
+<div class="topic-page">
+
+  <aside class="sidebar">
+    <p class="sidebar-title">Python Advanced</p>
+    <nav>
+      <ul>
+        <li><a href="#s1"><span class="toc-num">01</span>Advanced Language Features</a></li>
+        <li><a href="#s2"><span class="toc-num">02</span>Decorators</a></li>
+        <li><a href="#s3"><span class="toc-num">03</span>Generators</a></li>
+        <li><a href="#s4"><span class="toc-num">04</span>Async / Await</a></li>
+        <li><a href="#s5"><span class="toc-num">05</span>Context Managers</a></li>
+        <li><a href="#s6"><span class="toc-num">06</span>Async Context Managers</a></li>
+        <li><a href="#s7"><span class="toc-num">07</span>Async Generators</a></li>
+        <li><a href="#s8"><span class="toc-num">08</span>map, reduce &amp; Functional</a></li>
+        <li><a href="#s9"><span class="toc-num">09</span>Dunder (Magic) Methods</a></li>
+        <li><a href="#s10"><span class="toc-num">10</span>Duck Typing &amp; Protocols</a></li>
+        <li><a href="#s11"><span class="toc-num">11</span>Data Science Ecosystem</a></li>
+        <li><a href="#s12"><span class="toc-num">12</span>Metaprogramming</a></li>
+        <li><a href="#s13"><span class="toc-num">13</span>Testing</a></li>
+        <li><a href="#s14"><span class="toc-num">14</span>Async I/O Libraries</a></li>
+        <li><a href="#s15"><span class="toc-num">15</span>The GIL</a></li>
+        <li><a href="#s16"><span class="toc-num">16</span>Quick Reference Cheatsheet</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <div class="main-scroll">
+
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference — April 2026</div>
+  <h1>Python <span>Advanced Features</span> Guide</h1>
+  <p class="cover-sub">Decorators, generators, async/await, metaprogramming, the GIL, duck typing, testing, and the full Python ecosystem — everything you need for senior-level technical interviews.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">Decorators</span>
+    <span class="cover-tag">Generators</span>
+    <span class="cover-tag">Async / Await</span>
+    <span class="cover-tag">Context Managers</span>
+    <span class="cover-tag">Dunder Methods</span>
+    <span class="cover-tag">Metaprogramming</span>
+    <span class="cover-tag">GIL</span>
+    <span class="cover-tag">pytest</span>
+    <span class="cover-tag">Duck Typing</span>
+    <span class="cover-tag">Functional Programming</span>
+  </div>
+  <div class="cover-date">v1.0 — Last updated April 2026</div>
+</div>
+
+<div class="container">
+
+<!-- TOC -->
+<div class="toc page-break">
+  <h2>Contents</h2>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">Advanced Language Features</span></a>
+    <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">Decorators</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">Generators</span></a>
+    <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">Async / Await</span></a>
+    <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">Context Managers</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Async Context Managers</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Async Generators &amp; Their Uses</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">map, reduce &amp; Functional Programming</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">Dunder (Magic) Methods</span></a>
+    <a class="toc-item" href="#s10"><span class="toc-num">10</span><span class="toc-label">Duck Typing &amp; Protocols</span></a>
+    <a class="toc-item" href="#s11"><span class="toc-num">11</span><span class="toc-label">Python Data Science &amp; Ecosystem Libraries</span></a>
+    <a class="toc-item" href="#s12"><span class="toc-num">12</span><span class="toc-label">Metaprogramming</span></a>
+    <a class="toc-item" href="#s13"><span class="toc-num">13</span><span class="toc-label">Testing</span></a>
+    <a class="toc-item" href="#s14"><span class="toc-num">14</span><span class="toc-label">Async I/O Libraries</span></a>
+    <a class="toc-item" href="#s15"><span class="toc-num">15</span><span class="toc-label">The GIL (Global Interpreter Lock)</span></a>
+    <a class="toc-item" href="#s16"><span class="toc-num">16</span><span class="toc-label">Quick Reference Cheatsheet</span></a>
+  </div>
+</div>
+
+<!-- ══ SECTION 1 ══ -->
+<div class="section page-break" id="s1">
+  <div class="section-num">Section 01</div>
+  <h2 class="section-title">Advanced Language Features</h2>
+  <p class="lead">Python's power comes from composable, expressive language features — closures, comprehensions, unpacking, type hints, and flexible function signatures that let you write concise, readable, and highly capable code.</p>
+
+  <h3>*args and **kwargs</h3>
+  <p><code>*args</code> captures positional extras as a tuple; <code>**kwargs</code> captures keyword extras as a dict. Together they enable variadic APIs and decorator forwarding.</p>
+  <pre><code>def log(level, *args, sep=" ", **meta):
+    print(f"[{level}]", sep.join(str(a) for a in args), meta)
+
+log("INFO", "user", "logged in", sep="-", user_id=42)
+# [INFO] user-logged in {'user_id': 42}</code></pre>
+
+  <h3>Closures</h3>
+  <p>A closure is a function that captures variables from its enclosing scope. The captured variables live in the function's <code>__closure__</code> attribute as <em>cells</em>.</p>
+  <pre><code>def make_multiplier(n):
+    def multiply(x):
+        return x * n   # n is a free variable — captured in closure
+    return multiply
+
+double = make_multiplier(2)
+print(double(5))  # 10
+print(double.__closure__[0].cell_contents)  # 2</code></pre>
+
+  <h3>Comprehensions</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Form</th><th>Syntax</th><th>Returns</th></tr></thead>
+      <tbody>
+        <tr><td>List</td><td><code>[expr for x in it if cond]</code></td><td><code>list</code></td></tr>
+        <tr><td>Dict</td><td><code>{k: v for k, v in it}</code></td><td><code>dict</code></td></tr>
+        <tr><td>Set</td><td><code>{expr for x in it}</code></td><td><code>set</code></td></tr>
+        <tr><td>Generator</td><td><code>(expr for x in it)</code></td><td>generator (lazy)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Unpacking &amp; Walrus Operator</h3>
+  <pre><code>first, *rest = [1, 2, 3, 4]      # first=1, rest=[2,3,4]
+a, b = b, a                        # swap without temp variable
+
+# Walrus := — assign and test in one expression
+if (n := len(data)) > 10:
+    print(f"Too long: {n} items")</code></pre>
+
+  <h3>Type Hints (Python 3.10+)</h3>
+  <pre><code>from typing import TypeVar, Generic
+
+T = TypeVar("T")
+
+def first(items: list[T]) -> T | None:
+    return items[0] if items else None
+
+# Union shorthand (3.10+)
+def parse(value: int | str | None) -> str:
+    return str(value) if value is not None else ""</code></pre>
+
+  <div class="callout callout-blue">
+    <strong>Interview Tip</strong>
+    Type hints are not enforced at runtime — they are annotations for static analysis tools (mypy, pyright) and documentation. Use <code>from __future__ import annotations</code> to defer evaluation and support forward references.
+  </div>
+</div>
+
+<!-- ══ SECTION 2 ══ -->
+<div class="section page-break" id="s2">
+  <div class="section-num">Section 02</div>
+  <h2 class="section-title">Decorators</h2>
+  <p class="lead">A decorator is a callable that takes a function (or class) and returns a replacement. They implement the <em>wrapper pattern</em> — adding behaviour before or after a function without modifying its source.</p>
+
+  <h3>Anatomy of a Decorator</h3>
+  <pre><code>import functools
+
+def my_decorator(func):
+    @functools.wraps(func)          # preserves __name__, __doc__, etc.
+    def wrapper(*args, **kwargs):
+        print("before")
+        result = func(*args, **kwargs)
+        print("after")
+        return result
+    return wrapper
+
+@my_decorator
+def greet(name):
+    print(f"Hello, {name}")
+
+# Equivalent to: greet = my_decorator(greet)</code></pre>
+
+  <div class="callout callout-amber">
+    <strong>Always use @functools.wraps</strong>
+    Without it, the wrapper hides the original function's <code>__name__</code>, <code>__doc__</code>, and <code>__module__</code>, breaking introspection, logging, and test frameworks.
+  </div>
+
+  <h3>Parameterised Decorators</h3>
+  <pre><code>def retry(times=3, exceptions=(Exception,)):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            for attempt in range(times):
+                try:
+                    return func(*args, **kwargs)
+                except exceptions as e:
+                    if attempt == times - 1:
+                        raise
+            return None
+        return wrapper
+    return decorator
+
+@retry(times=5, exceptions=(ConnectionError,))
+def fetch(url): ...</code></pre>
+
+  <h3>Class Decorators</h3>
+  <pre><code>class Singleton:
+    def __init__(self, cls):
+        self._cls = cls
+        self._instance = None
+        functools.update_wrapper(self, cls)
+
+    def __call__(self, *args, **kwargs):
+        if self._instance is None:
+            self._instance = self._cls(*args, **kwargs)
+        return self._instance
+
+@Singleton
+class Config:
+    def __init__(self): self.debug = False</code></pre>
+
+  <h3>Built-in Decorators</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4><code>@property</code></h4>
+      <p>Turns a method into a read-only attribute. Pair with <code>@x.setter</code> for write access. Enables validation without changing the public API.</p>
+    </div>
+    <div class="card card-accent">
+      <h4><code>@staticmethod</code></h4>
+      <p>No implicit first argument. Pure utility function scoped to the class namespace. Cannot access <code>self</code> or <code>cls</code>.</p>
+    </div>
+    <div class="card card-accent">
+      <h4><code>@classmethod</code></h4>
+      <p>Receives <code>cls</code> (the class) as first argument. Used for alternative constructors: <code>dict.fromkeys()</code>, <code>datetime.fromisoformat()</code>.</p>
+    </div>
+    <div class="card card-accent">
+      <h4><code>@functools.cache</code></h4>
+      <p>Memoises a function (unbounded LRU). Use <code>@functools.lru_cache(maxsize=128)</code> for bounded caching. Thread-safe.</p>
+    </div>
+    <div class="card card-accent">
+      <h4><code>@dataclasses.dataclass</code></h4>
+      <p>Auto-generates <code>__init__</code>, <code>__repr__</code>, <code>__eq__</code>, and optionally <code>__hash__</code>, <code>__lt__</code>, <code>__slots__</code>.</p>
+    </div>
+    <div class="card card-accent">
+      <h4><code>@abstractmethod</code></h4>
+      <p>Marks a method as abstract in an ABC. Subclasses must implement it or they cannot be instantiated.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SECTION 3 ══ -->
+<div class="section page-break" id="s3">
+  <div class="section-num">Section 03</div>
+  <h2 class="section-title">Generators</h2>
+  <p class="lead">A generator is a function that uses <code>yield</code> to produce values lazily, one at a time, suspending execution between calls. They enable memory-efficient iteration over potentially infinite sequences.</p>
+
+  <h3>yield vs return</h3>
+  <pre><code>def countdown(n):
+    while n > 0:
+        yield n      # suspend here, return value to caller
+        n -= 1       # resume here on next()
+
+gen = countdown(3)
+print(next(gen))   # 3
+print(next(gen))   # 2
+list(countdown(3)) # [3, 2, 1] — exhausts the generator</code></pre>
+
+  <h3>yield from</h3>
+  <p><code>yield from</code> delegates to a sub-generator, forwarding values, return values, and thrown exceptions — essential for generator composition.</p>
+  <pre><code>def chain(*iterables):
+    for it in iterables:
+        yield from it       # equivalent to: for item in it: yield item
+
+def flatten(nested):
+    for item in nested:
+        if isinstance(item, list):
+            yield from flatten(item)
+        else:
+            yield item</code></pre>
+
+  <h3>send() and Two-Way Communication</h3>
+  <pre><code>def accumulator():
+    total = 0
+    while True:
+        value = yield total   # yield sends total out, receives value in
+        if value is None:
+            break
+        total += value
+
+acc = accumulator()
+next(acc)           # prime the generator (advance to first yield)
+acc.send(10)        # 10
+acc.send(20)        # 30</code></pre>
+
+  <h3>Generator Expressions vs List Comprehensions</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>List Comprehension</th><th>Generator Expression</th></tr></thead>
+      <tbody>
+        <tr><td>Syntax</td><td><code>[f(x) for x in it]</code></td><td><code>(f(x) for x in it)</code></td></tr>
+        <tr><td>Evaluation</td><td>Eager — all at once</td><td>Lazy — one at a time</td></tr>
+        <tr><td>Memory</td><td>O(n) — stores all items</td><td>O(1) — one item at a time</td></tr>
+        <tr><td>Reusable</td><td>Yes</td><td>No — exhausted after one pass</td></tr>
+        <tr><td>Use when</td><td>Need random access, len(), reuse</td><td>Streaming, large/infinite data</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>itertools — Generator Combinators</h3>
+  <div class="pills">
+    <span class="pill pill-blue">itertools.chain</span>
+    <span class="pill pill-blue">itertools.islice</span>
+    <span class="pill pill-blue">itertools.takewhile</span>
+    <span class="pill pill-blue">itertools.dropwhile</span>
+    <span class="pill pill-blue">itertools.groupby</span>
+    <span class="pill pill-blue">itertools.product</span>
+    <span class="pill pill-blue">itertools.combinations</span>
+    <span class="pill pill-blue">itertools.permutations</span>
+    <span class="pill pill-teal">itertools.count (infinite)</span>
+    <span class="pill pill-teal">itertools.cycle (infinite)</span>
+    <span class="pill pill-teal">itertools.repeat (infinite)</span>
+  </div>
+
+  <div class="callout callout-green">
+    <strong>Memory Pattern</strong>
+    Processing a 10 GB log file with a generator pipeline reads one line at a time — constant memory. With a list comprehension it would load the entire file into RAM.
+  </div>
+</div>
+
+<!-- ══ SECTION 4 ══ -->
+<div class="section page-break" id="s4">
+  <div class="section-num">Section 04</div>
+  <h2 class="section-title">Async / Await</h2>
+  <p class="lead">Python's async model is cooperative multitasking on a single thread via an <em>event loop</em>. It excels at I/O-bound concurrency — network calls, database queries, file I/O — where threads would mostly sleep.</p>
+
+  <h3>Core Concepts</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Coroutine</h4>
+      <p>An <code>async def</code> function. Calling it returns a coroutine object — it doesn't execute until awaited or scheduled.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Event Loop</h4>
+      <p>The scheduler that runs coroutines. Only one task runs at a time; tasks yield control at <code>await</code> points.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>Task</h4>
+      <p><code>asyncio.create_task(coro())</code> schedules a coroutine to run concurrently. Returns a <code>Task</code> (a <code>Future</code> subclass).</p>
+    </div>
+    <div class="card card-accent">
+      <h4>await</h4>
+      <p>Suspends the current coroutine and gives control back to the event loop until the awaitable completes.</p>
+    </div>
+  </div>
+
+  <h3>Patterns</h3>
+  <pre><code>import asyncio
+import aiohttp
+
+# Sequential — each waits for the previous
+async def fetch_sequential(urls):
+    async with aiohttp.ClientSession() as session:
+        for url in urls:
+            async with session.get(url) as resp:
+                print(await resp.text())
+
+# Concurrent — all fire simultaneously
+async def fetch_concurrent(urls):
+    async with aiohttp.ClientSession() as session:
+        tasks = [session.get(url) for url in urls]
+        responses = await asyncio.gather(*tasks)
+        return [await r.text() for r in responses]
+
+asyncio.run(fetch_concurrent(urls))</code></pre>
+
+  <h3>asyncio.gather vs asyncio.TaskGroup</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>asyncio.gather</th><th>asyncio.TaskGroup (3.11+)</th></tr></thead>
+      <tbody>
+        <tr><td>Error handling</td><td>Returns exceptions or raises first</td><td>Cancels all tasks on any failure</td></tr>
+        <tr><td>Cancellation</td><td>Manual</td><td>Automatic structured concurrency</td></tr>
+        <tr><td>Return value</td><td>List of results</td><td>Access via task.result()</td></tr>
+        <tr><td>Use when</td><td>Need all results, tolerate partial failure</td><td>Structured concurrency, 3.11+</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Common Pitfalls</h3>
+  <div class="callout callout-rose">
+    <strong>Blocking the Event Loop</strong>
+    Calling a blocking function (file I/O, <code>requests</code>, CPU work) inside a coroutine freezes all other tasks. Use <code>asyncio.to_thread()</code> or <code>loop.run_in_executor()</code> to offload to a thread pool.
+  </div>
+
+  <pre><code># Wrong — blocks the event loop
+async def bad():
+    data = open("file.txt").read()   # synchronous
+
+# Correct — offload to thread pool
+async def good():
+    data = await asyncio.to_thread(open("file.txt").read)
+
+# Or use aiofiles
+import aiofiles
+async def better():
+    async with aiofiles.open("file.txt") as f:
+        data = await f.read()</code></pre>
+</div>
+
+<!-- ══ SECTION 5 ══ -->
+<div class="section page-break" id="s5">
+  <div class="section-num">Section 05</div>
+  <h2 class="section-title">Context Managers</h2>
+  <p class="lead">Context managers implement the <code>with</code> statement protocol, guaranteeing setup and teardown regardless of exceptions — the canonical resource-management pattern in Python.</p>
+
+  <h3>Protocol: __enter__ / __exit__</h3>
+  <pre><code>class DatabaseConnection:
+    def __enter__(self):
+        self.conn = connect_db()
+        return self.conn          # bound to `as` target
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.conn.close()
+        return False              # False = don't suppress exceptions
+                                  # True  = suppress (swallow) exceptions
+
+with DatabaseConnection() as conn:
+    conn.execute("SELECT 1")</code></pre>
+
+  <h3>contextlib.contextmanager</h3>
+  <p>Turns a generator into a context manager — everything before <code>yield</code> is the enter, everything after is the exit.</p>
+  <pre><code>from contextlib import contextmanager
+
+@contextmanager
+def temp_directory():
+    path = pathlib.Path(tempfile.mkdtemp())
+    try:
+        yield path                # __enter__ returns this
+    finally:
+        shutil.rmtree(path)       # __exit__ — always runs
+
+with temp_directory() as tmp:
+    (tmp / "data.csv").write_text("id,value\n1,42")</code></pre>
+
+  <h3>contextlib Utilities</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Utility</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>contextlib.suppress(*exc)</code></td><td>Silently swallows listed exception types</td></tr>
+        <tr><td><code>contextlib.nullcontext(val)</code></td><td>No-op context manager, useful in conditional <code>with</code></td></tr>
+        <tr><td><code>contextlib.ExitStack</code></td><td>Dynamically compose multiple context managers</td></tr>
+        <tr><td><code>contextlib.redirect_stdout</code></td><td>Redirect stdout to a file-like object</td></tr>
+        <tr><td><code>contextlib.closing(obj)</code></td><td>Calls <code>obj.close()</code> on exit</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>__exit__ return value</strong>
+    Returning a truthy value from <code>__exit__</code> suppresses the exception — the <code>with</code> block continues as if nothing happened. Almost always return <code>False</code> or <code>None</code>. Suppression is appropriate for <code>contextlib.suppress</code>-style helpers only.
+  </div>
+</div>
+
+<!-- ══ SECTION 6 ══ -->
+<div class="section page-break" id="s6">
+  <div class="section-num">Section 06</div>
+  <h2 class="section-title">Async Context Managers</h2>
+  <p class="lead">Async context managers extend the context manager protocol to work inside <code>async def</code> functions, supporting <code>await</code> in both setup and teardown phases.</p>
+
+  <h3>Protocol: __aenter__ / __aexit__</h3>
+  <pre><code>class AsyncDBConnection:
+    async def __aenter__(self):
+        self.conn = await connect_db_async()
+        return self.conn
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.conn.aclose()
+        return False
+
+async def main():
+    async with AsyncDBConnection() as conn:
+        await conn.execute("SELECT 1")</code></pre>
+
+  <h3>contextlib.asynccontextmanager</h3>
+  <pre><code>from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def managed_session(base_url: str):
+    async with aiohttp.ClientSession(base_url) as session:
+        try:
+            yield session
+        finally:
+            pass  # ClientSession.__aexit__ handles cleanup
+
+async def fetch():
+    async with managed_session("https://api.example.com") as s:
+        resp = await s.get("/data")
+        return await resp.json()</code></pre>
+
+  <h3>Sync vs Async Context Managers</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Sync</th><th>Async</th></tr></thead>
+      <tbody>
+        <tr><td>Protocol</td><td><code>__enter__</code> / <code>__exit__</code></td><td><code>__aenter__</code> / <code>__aexit__</code></td></tr>
+        <tr><td>Statement</td><td><code>with obj as x</code></td><td><code>async with obj as x</code></td></tr>
+        <tr><td>Can await</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Helper</td><td><code>@contextmanager</code></td><td><code>@asynccontextmanager</code></td></tr>
+        <tr><td>Typical use</td><td>Files, locks, DB connections (sync)</td><td>HTTP sessions, async DB, async locks</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ SECTION 7 ══ -->
+<div class="section page-break" id="s7">
+  <div class="section-num">Section 07</div>
+  <h2 class="section-title">Async Generators &amp; Their Uses</h2>
+  <p class="lead">Async generators combine <code>async def</code> with <code>yield</code>, allowing lazy production of values that involve async operations — essential for streaming data from async sources.</p>
+
+  <h3>Basic Async Generator</h3>
+  <pre><code>import asyncio
+
+async def ticker(interval: float, count: int):
+    for i in range(count):
+        await asyncio.sleep(interval)
+        yield i                          # suspends with yielded value
+
+async def consume():
+    async for tick in ticker(0.1, 5):   # async for iterates async generators
+        print(f"Tick {tick}")</code></pre>
+
+  <h3>Streaming HTTP Responses</h3>
+  <pre><code>import aiohttp
+
+async def stream_lines(url: str):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            async for line in resp.content:
+                yield line.decode().strip()
+
+async def process():
+    async for line in stream_lines("https://api.example.com/stream"):
+        print(line)</code></pre>
+
+  <h3>Async Generator Protocols</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Feature</th><th>Sync Generator</th><th>Async Generator</th></tr></thead>
+      <tbody>
+        <tr><td>Function keyword</td><td><code>def</code></td><td><code>async def</code></td></tr>
+        <tr><td>Iteration</td><td><code>for x in gen</code></td><td><code>async for x in gen</code></td></tr>
+        <tr><td>Comprehension</td><td><code>(x for x in it)</code></td><td>Not directly supported</td></tr>
+        <tr><td>Close</td><td><code>gen.close()</code></td><td><code>await gen.aclose()</code></td></tr>
+        <tr><td>Can use</td><td><code>yield</code>, <code>yield from</code></td><td><code>yield</code>, <code>await</code> (not <code>yield from</code>)</td></tr>
+        <tr><td>Collect all</td><td><code>list(gen)</code></td><td><code>[x async for x in gen]</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-purple">
+    <strong>aclose() is mandatory</strong>
+    Async generators hold open async resources. Always close them with <code>await gen.aclose()</code> or use <code>async with</code> / <code>async for</code> which handle this automatically.
+  </div>
+</div>
+
+<!-- ══ SECTION 8 ══ -->
+<div class="section page-break" id="s8">
+  <div class="section-num">Section 08</div>
+  <h2 class="section-title">map, reduce &amp; Functional Programming</h2>
+  <p class="lead">Python supports first-class functions, closures, and higher-order functions that enable a functional style. While not a pure functional language, Python's tools enable clean, composable data transformations.</p>
+
+  <h3>map / filter / reduce</h3>
+  <pre><code>from functools import reduce
+
+nums = [1, 2, 3, 4, 5]
+
+squares    = list(map(lambda x: x**2, nums))         # [1, 4, 9, 16, 25]
+evens      = list(filter(lambda x: x % 2 == 0, nums)) # [2, 4]
+total      = reduce(lambda acc, x: acc + x, nums)     # 15
+
+# Prefer comprehensions for readability
+squares = [x**2 for x in nums]
+evens   = [x for x in nums if x % 2 == 0]</code></pre>
+
+  <h3>functools</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Function</th><th>Purpose</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><code>partial(fn, *args)</code></td><td>Freeze arguments to create a specialised function</td><td><code>double = partial(mul, 2)</code></td></tr>
+        <tr><td><code>reduce(fn, it)</code></td><td>Fold iterable to a single value left-to-right</td><td><code>reduce(add, [1,2,3])</code> → 6</td></tr>
+        <tr><td><code>lru_cache(maxsize)</code></td><td>Memoize function results (bounded)</td><td><code>@lru_cache(128)</code></td></tr>
+        <tr><td><code>cache</code></td><td>Memoize with no size limit (3.9+)</td><td><code>@cache</code></td></tr>
+        <tr><td><code>wraps(fn)</code></td><td>Copy metadata to wrapper function</td><td>Used inside decorators</td></tr>
+        <tr><td><code>singledispatch</code></td><td>Generic function — dispatch on first arg type</td><td>Type-based overloading</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>lambda</h3>
+  <p>Anonymous single-expression functions. Use for short callbacks; for anything complex, use a named function for readability.</p>
+  <pre><code>data = [{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]
+sorted_data = sorted(data, key=lambda d: d["age"])
+
+# operator module avoids lambdas in common patterns
+from operator import attrgetter, itemgetter
+sorted_data = sorted(data, key=itemgetter("age"))</code></pre>
+
+  <h3>Composition Pattern</h3>
+  <pre><code>from functools import reduce
+
+def compose(*fns):
+    """Compose functions right-to-left: compose(f, g)(x) == f(g(x))"""
+    return reduce(lambda f, g: lambda *a, **kw: f(g(*a, **kw)), fns)
+
+pipeline = compose(str.strip, str.lower, str.title)
+pipeline("  hello world  ")  # "Hello World"</code></pre>
+</div>
+
+<!-- ══ SECTION 9 ══ -->
+<div class="section page-break" id="s9">
+  <div class="section-num">Section 09</div>
+  <h2 class="section-title">Dunder (Magic) Methods</h2>
+  <p class="lead">Dunder methods (double-underscore methods) are the hooks Python uses to implement operator overloading, container protocols, context managers, and object lifecycle — making custom objects behave like built-ins.</p>
+
+  <h3>Object Lifecycle</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Method</th><th>Called when</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>__new__(cls)</code></td><td>Object creation (before __init__)</td><td>Returns the new instance; needed for immutable types</td></tr>
+        <tr><td><code>__init__(self)</code></td><td>Object initialisation</td><td>Receives the already-created instance</td></tr>
+        <tr><td><code>__del__(self)</code></td><td>Object garbage collected</td><td>Unreliable timing; avoid for critical cleanup</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Representation</h3>
+  <pre><code>class Point:
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+
+    def __repr__(self):           # unambiguous; used in REPL, logs, repr()
+        return f"Point({self.x!r}, {self.y!r})"
+
+    def __str__(self):            # human-friendly; used by print(), str()
+        return f"({self.x}, {self.y})"
+
+    def __format__(self, spec):   # f"{p:.2f}" support
+        return f"({self.x:{spec}}, {self.y:{spec}})"</code></pre>
+
+  <h3>Comparison &amp; Hashing</h3>
+  <pre><code>from functools import total_ordering
+
+@total_ordering   # derive all comparisons from __eq__ and one of __lt__/__gt__
+class Version:
+    def __init__(self, major, minor):
+        self.major, self.minor = major, minor
+
+    def __eq__(self, other):
+        return (self.major, self.minor) == (other.major, other.minor)
+
+    def __lt__(self, other):
+        return (self.major, self.minor) < (other.major, other.minor)
+
+    def __hash__(self):           # required if __eq__ is defined
+        return hash((self.major, self.minor))</code></pre>
+
+  <h3>Container Protocol</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Method</th><th>Called by</th></tr></thead>
+      <tbody>
+        <tr><td><code>__len__(self)</code></td><td><code>len(obj)</code>, truthiness</td></tr>
+        <tr><td><code>__getitem__(self, key)</code></td><td><code>obj[key]</code>, iteration fallback</td></tr>
+        <tr><td><code>__setitem__(self, key, val)</code></td><td><code>obj[key] = val</code></td></tr>
+        <tr><td><code>__delitem__(self, key)</code></td><td><code>del obj[key]</code></td></tr>
+        <tr><td><code>__contains__(self, item)</code></td><td><code>item in obj</code></td></tr>
+        <tr><td><code>__iter__(self)</code></td><td><code>for x in obj</code>, <code>iter(obj)</code></td></tr>
+        <tr><td><code>__next__(self)</code></td><td><code>next(obj)</code> on iterators</td></tr>
+        <tr><td><code>__reversed__(self)</code></td><td><code>reversed(obj)</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Arithmetic Operators</h3>
+  <div class="pills">
+    <span class="pill pill-blue">__add__ (+)</span>
+    <span class="pill pill-blue">__sub__ (-)</span>
+    <span class="pill pill-blue">__mul__ (*)</span>
+    <span class="pill pill-blue">__truediv__ (/)</span>
+    <span class="pill pill-blue">__floordiv__ (//)</span>
+    <span class="pill pill-blue">__mod__ (%)</span>
+    <span class="pill pill-blue">__pow__ (**)</span>
+    <span class="pill pill-blue">__matmul__ (@)</span>
+    <span class="pill pill-teal">__radd__ (reflected +)</span>
+    <span class="pill pill-teal">__iadd__ (+=)</span>
+  </div>
+</div>
+
+<!-- ══ SECTION 10 ══ -->
+<div class="section page-break" id="s10">
+  <div class="section-num">Section 10</div>
+  <h2 class="section-title">Duck Typing &amp; Protocols</h2>
+  <p class="lead">"If it walks like a duck and quacks like a duck, it's a duck." Python checks <em>behaviour</em> at runtime, not class hierarchy. Protocols formalise this with structural subtyping — statically checked without inheritance.</p>
+
+  <h3>Duck Typing in Practice</h3>
+  <pre><code># Any object with .write() works — no base class required
+def save(file_like, data):
+    file_like.write(data)       # duck-typed: file, StringIO, socket, mock
+
+from io import StringIO
+buf = StringIO()
+save(buf, "hello")
+print(buf.getvalue())  # hello</code></pre>
+
+  <h3>Abstract Base Classes (ABCs)</h3>
+  <pre><code">from abc import ABC, abstractmethod
+
+class Shape(ABC):
+    @abstractmethod
+    def area(self) -> float: ...
+
+    @abstractmethod
+    def perimeter(self) -> float: ...
+
+    def describe(self):                 # concrete method on ABC
+        return f"area={self.area():.2f}"
+
+class Circle(Shape):
+    def __init__(self, r): self.r = r
+    def area(self): return 3.14159 * self.r ** 2
+    def perimeter(self): return 2 * 3.14159 * self.r
+
+# Shape()   → TypeError: Can't instantiate abstract class</code></pre>
+
+  <h3>typing.Protocol (Structural Subtyping)</h3>
+  <pre><code">from typing import Protocol, runtime_checkable
+
+@runtime_checkable
+class Drawable(Protocol):
+    def draw(self) -> None: ...
+
+class Circle:                   # no inheritance from Drawable
+    def draw(self): print("○")
+
+class Square:
+    def draw(self): print("□")
+
+def render(shape: Drawable):    # static type checker accepts any Drawable
+    shape.draw()
+
+isinstance(Circle(), Drawable)  # True — runtime check via @runtime_checkable</code></pre>
+
+  <h3>ABCs vs Protocols</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>ABCs</th><th>Protocols</th></tr></thead>
+      <tbody>
+        <tr><td>Mechanism</td><td>Nominal (inheritance)</td><td>Structural (duck typing)</td></tr>
+        <tr><td>Requires inheritance</td><td>Yes (or __subclasshook__)</td><td>No</td></tr>
+        <tr><td>Runtime check</td><td>isinstance() always</td><td>Only with @runtime_checkable</td></tr>
+        <tr><td>Enforcement</td><td>@abstractmethod raises TypeError</td><td>Static analysis only</td></tr>
+        <tr><td>Use when</td><td>Shared implementation, plugin registries</td><td>Loose coupling, third-party types</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ SECTION 11 ══ -->
+<div class="section page-break" id="s11">
+  <div class="section-num">Section 11</div>
+  <h2 class="section-title">Python Data Science &amp; Ecosystem Libraries</h2>
+  <p class="lead">Python dominates data science through a mature ecosystem of interoperable libraries, all sharing the NumPy array as the common data currency.</p>
+
+  <h3>Core Libraries</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Library</th><th>Purpose</th><th>Key Types / APIs</th></tr></thead>
+      <tbody>
+        <tr><td><strong>NumPy</strong></td><td>N-dimensional arrays, linear algebra, FFT</td><td><code>ndarray</code>, broadcasting, ufuncs</td></tr>
+        <tr><td><strong>Pandas</strong></td><td>Labelled tabular data, time-series</td><td><code>DataFrame</code>, <code>Series</code>, groupby, merge</td></tr>
+        <tr><td><strong>Matplotlib</strong></td><td>2D/3D plotting</td><td><code>pyplot</code>, Axes, Figure</td></tr>
+        <tr><td><strong>Seaborn</strong></td><td>Statistical visualisation (wraps Matplotlib)</td><td><code>sns.heatmap</code>, <code>sns.pairplot</code></td></tr>
+        <tr><td><strong>Scikit-learn</strong></td><td>Classical ML (classification, regression, clustering)</td><td>Estimator API: fit/predict/transform</td></tr>
+        <tr><td><strong>SciPy</strong></td><td>Scientific algorithms (stats, optimisation, signal)</td><td><code>scipy.stats</code>, <code>scipy.optimize</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Deep Learning &amp; LLM Frameworks</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Library</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><strong>PyTorch</strong></td><td>Dynamic computation graphs, GPU tensors, autograd. Preferred for research.</td></tr>
+        <tr><td><strong>TensorFlow / Keras</strong></td><td>Production ML, TFLite (mobile), TFX (pipelines). Keras is the high-level API.</td></tr>
+        <tr><td><strong>Hugging Face Transformers</strong></td><td>Pre-trained LLMs, fine-tuning, tokenizers, Datasets. 500K+ models.</td></tr>
+        <tr><td><strong>LangChain / LangGraph</strong></td><td>LLM orchestration, agents, RAG pipelines.</td></tr>
+        <tr><td><strong>JAX</strong></td><td>NumPy-like API + JIT + autograd + XLA. Google Research, DeepMind.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>NumPy Broadcasting Rules</h3>
+  <pre><code>import numpy as np
+
+a = np.array([[1, 2, 3]])    # shape (1, 3)
+b = np.array([[1], [2], [3]])# shape (3, 1)
+a + b                        # broadcasts to (3, 3)
+
+# Rules: align shapes right-to-left; size-1 dims expand; mismatched non-1 dims → error
+# (3,) + (3,)   → (3,)     ✓
+# (1,3) + (3,1) → (3,3)    ✓
+# (2,3) + (3,)  → (2,3)    ✓  (3,) treated as (1,3))
+# (2,3) + (2,)  → Error    ✗</code></pre>
+
+  <h3>Pandas Performance Tips</h3>
+  <ul class="clean">
+    <li>Use <code>.loc</code>/<code>.iloc</code> instead of chained indexing to avoid <code>SettingWithCopyWarning</code></li>
+    <li>Prefer <code>pd.Categorical</code> for low-cardinality string columns — 5–10× less memory</li>
+    <li>Use <code>df.query()</code> for readable, numexpr-accelerated filtering</li>
+    <li><code>pd.read_csv(dtype=...)</code> — specify dtypes upfront for large files</li>
+    <li>Replace <code>df.apply(row_func, axis=1)</code> with vectorised numpy operations where possible</li>
+  </ul>
+</div>
+
+<!-- ══ SECTION 12 ══ -->
+<div class="section page-break" id="s12">
+  <div class="section-num">Section 12</div>
+  <h2 class="section-title">Metaprogramming</h2>
+  <p class="lead">Metaprogramming means code that writes or modifies code. Python's data model — metaclasses, descriptors, <code>__init_subclass__</code>, and <code>exec</code>/<code>eval</code> — enables powerful frameworks like Django ORM, dataclasses, and Pydantic.</p>
+
+  <h3>Metaclasses</h3>
+  <p>A metaclass is the class of a class. <code>type</code> is the default metaclass for all classes. Metaclasses intercept class creation.</p>
+  <pre><code">class SingletonMeta(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+class Config(metaclass=SingletonMeta):
+    def __init__(self): self.debug = False
+
+Config() is Config()  # True</code></pre>
+
+  <h3>__init_subclass__ — Lightweight Plugin System</h3>
+  <pre><code">class Handler:
+    _registry: dict[str, type] = {}
+
+    def __init_subclass__(cls, name: str, **kwargs):
+        super().__init_subclass__(**kwargs)
+        Handler._registry[name] = cls
+
+class JSONHandler(Handler, name="json"):
+    def handle(self, data): return json.dumps(data)
+
+class XMLHandler(Handler, name="xml"):
+    def handle(self, data): return f"<root>{data}</root>"
+
+Handler._registry["json"]().handle({"x": 1})  # '{"x": 1}'</code></pre>
+
+  <h3>Descriptors</h3>
+  <p>Descriptors control attribute access on a class. <code>property</code>, <code>classmethod</code>, and <code>staticmethod</code> are all descriptors.</p>
+  <pre><code>class Validated:
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None: return self
+        return obj.__dict__.get(self.name)
+
+    def __set__(self, obj, value):
+        if not isinstance(value, (int, float)):
+            raise TypeError(f"{self.name} must be numeric")
+        obj.__dict__[self.name] = value
+
+class Product:
+    price = Validated()     # descriptor instance assigned to class attr</code></pre>
+
+  <h3>exec / eval</h3>
+  <div class="callout callout-rose">
+    <strong>Security Warning</strong>
+    Never pass user-supplied strings to <code>exec</code> or <code>eval</code> — they execute arbitrary code. Use only with trusted, program-generated strings (e.g., code generators, ORMs).
+  </div>
+  <pre><code># eval — evaluate a single expression, returns a value
+result = eval("2 ** 10")                       # 1024
+
+# exec — execute statements, returns None
+code = "def greet(name): return f'Hello {name}'"
+namespace = {}
+exec(code, namespace)
+namespace["greet"]("World")                    # Hello World</code></pre>
+</div>
+
+<!-- ══ SECTION 13 ══ -->
+<div class="section page-break" id="s13">
+  <div class="section-num">Section 13</div>
+  <h2 class="section-title">Testing</h2>
+  <p class="lead">Robust Python testing combines pytest's ergonomic fixture system, unittest.mock for isolation, and coverage tools to enforce quality. The testing pyramid applies: many unit tests, fewer integration tests, minimal E2E tests.</p>
+
+  <h3>pytest Fundamentals</h3>
+  <pre><code># test_math.py
+def add(a, b): return a + b
+
+def test_add_integers():
+    assert add(2, 3) == 5
+
+def test_add_floats():
+    assert add(0.1, 0.2) == pytest.approx(0.3)  # float tolerance
+
+def test_add_raises():
+    with pytest.raises(TypeError):
+        add("a", 1)</code></pre>
+
+  <h3>Fixtures</h3>
+  <pre><code>import pytest
+
+@pytest.fixture
+def db_session():
+    session = create_test_session()
+    yield session             # setup above, teardown below
+    session.rollback()
+    session.close()
+
+@pytest.fixture(scope="module")   # shared across all tests in module
+def test_config():
+    return {"debug": True, "db": "sqlite:///:memory:"}
+
+def test_create_user(db_session, test_config):
+    user = User(name="Alice")
+    db_session.add(user)
+    db_session.flush()
+    assert user.id is not None</code></pre>
+
+  <h3>Parametrize</h3>
+  <pre><code">@pytest.mark.parametrize("input,expected", [
+    ("hello", "HELLO"),
+    ("world", "WORLD"),
+    ("",      ""),
+    ("MiXeD", "MIXED"),
+])
+def test_uppercase(input, expected):
+    assert input.upper() == expected</code></pre>
+
+  <h3>Mocking</h3>
+  <pre><code">from unittest.mock import patch, MagicMock, AsyncMock
+
+def test_api_call():
+    with patch("mymodule.requests.get") as mock_get:
+        mock_get.return_value.json.return_value = {"status": "ok"}
+        result = fetch_status()
+        assert result == "ok"
+        mock_get.assert_called_once_with("https://api.example.com/status")
+
+# Async mock
+async def test_async_fetch():
+    with patch("mymodule.fetch", new=AsyncMock(return_value="data")):
+        result = await process()
+        assert result == "DATA"</code></pre>
+
+  <h3>Testing Tools Overview</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tool</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>pytest</code></td><td>Test runner, fixtures, parametrize, plugins</td></tr>
+        <tr><td><code>unittest.mock</code></td><td>Mock, MagicMock, patch, AsyncMock, spy</td></tr>
+        <tr><td><code>pytest-cov</code></td><td>Code coverage reports (wraps coverage.py)</td></tr>
+        <tr><td><code>pytest-asyncio</code></td><td>Run async test functions with <code>@pytest.mark.asyncio</code></td></tr>
+        <tr><td><code>hypothesis</code></td><td>Property-based testing — generates edge-case inputs</td></tr>
+        <tr><td><code>factory_boy</code></td><td>Test fixtures with realistic fake data (ORM-aware)</td></tr>
+        <tr><td><code>freezegun</code></td><td>Freeze/mock datetime.now() in tests</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ SECTION 14 ══ -->
+<div class="section page-break" id="s14">
+  <div class="section-num">Section 14</div>
+  <h2 class="section-title">Async I/O Libraries</h2>
+  <p class="lead">The async Python ecosystem provides high-performance, non-blocking alternatives to the standard synchronous libraries — critical for services that handle many concurrent connections.</p>
+
+  <h3>HTTP — aiohttp vs httpx</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>aiohttp</th><th>httpx</th></tr></thead>
+      <tbody>
+        <tr><td>API style</td><td>Async-first, context managers</td><td>Sync + async, requests-compatible API</td></tr>
+        <tr><td>HTTP/2</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Sync support</td><td>No</td><td>Yes — <code>httpx.Client()</code></td></tr>
+        <tr><td>Server (ASGI)</td><td>Yes — aiohttp web server</td><td>No</td></tr>
+        <tr><td>Migration from requests</td><td>Significant changes</td><td>Near drop-in replacement</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><code">import httpx
+
+# Sync (familiar requests-style)
+with httpx.Client() as client:
+    r = client.get("https://api.example.com/data")
+    print(r.json())
+
+# Async
+async with httpx.AsyncClient() as client:
+    r = await client.get("https://api.example.com/data")
+    print(r.json())
+
+# Concurrent requests
+async with httpx.AsyncClient() as client:
+    responses = await asyncio.gather(
+        client.get("/users"),
+        client.get("/products"),
+        client.get("/orders"),
+    )</code></pre>
+
+  <h3>File I/O — aiofiles</h3>
+  <pre><code">import aiofiles
+
+async def read_config(path: str) -> str:
+    async with aiofiles.open(path, "r") as f:
+        return await f.read()
+
+async def write_results(path: str, data: str) -> None:
+    async with aiofiles.open(path, "w") as f:
+        await f.write(data)</code></pre>
+
+  <h3>Database — asyncpg / SQLAlchemy async</h3>
+  <pre><code">import asyncpg
+
+# asyncpg — raw async PostgreSQL driver (fastest)
+conn = await asyncpg.connect("postgresql://user:pass@host/db")
+rows = await conn.fetch("SELECT * FROM users WHERE active = $1", True)
+
+# SQLAlchemy 2.0 async (ORM + connection pooling)
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+
+engine = create_async_engine("postgresql+asyncpg://user:pass@host/db")
+async with AsyncSession(engine) as session:
+    result = await session.execute(select(User).where(User.active == True))
+    users = result.scalars().all()</code></pre>
+
+  <h3>Key Async Libraries</h3>
+  <div class="pills">
+    <span class="pill pill-blue">aiohttp</span>
+    <span class="pill pill-blue">httpx</span>
+    <span class="pill pill-blue">aiofiles</span>
+    <span class="pill pill-blue">asyncpg</span>
+    <span class="pill pill-blue">aiomysql</span>
+    <span class="pill pill-blue">motor (MongoDB)</span>
+    <span class="pill pill-blue">aioredis</span>
+    <span class="pill pill-blue">aiokafka</span>
+    <span class="pill pill-green">FastAPI (ASGI)</span>
+    <span class="pill pill-green">Starlette</span>
+    <span class="pill pill-teal">SQLAlchemy async</span>
+    <span class="pill pill-teal">Tortoise ORM</span>
+  </div>
+</div>
+
+<!-- ══ SECTION 15 ══ -->
+<div class="section page-break" id="s15">
+  <div class="section-num">Section 15</div>
+  <h2 class="section-title">The GIL (Global Interpreter Lock)</h2>
+  <p class="lead">The GIL is a mutex in CPython that allows only one thread to execute Python bytecode at a time. It simplifies CPython's memory management at the cost of true CPU parallelism for pure-Python multi-threaded programs.</p>
+
+  <h3>Why the GIL Exists</h3>
+  <p>CPython uses reference counting for memory management. Without a lock, concurrent threads could corrupt reference counts, causing memory leaks or premature object deallocation. The GIL is a single coarse-grained lock that prevents this without per-object locks.</p>
+
+  <h3>What the GIL Does and Doesn't Block</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Scenario</th><th>GIL Impact</th><th>Solution</th></tr></thead>
+      <tbody>
+        <tr><td>CPU-bound work (Python loops)</td><td>Threads don't parallelize — each thread must acquire GIL</td><td>multiprocessing, ProcessPoolExecutor</td></tr>
+        <tr><td>I/O-bound work (network, files)</td><td>GIL released while waiting for I/O — threads work fine</td><td>threading, asyncio both work</td></tr>
+        <tr><td>NumPy / C extensions</td><td>GIL released during C-level computation</td><td>threading is fine for NumPy-heavy code</td></tr>
+        <tr><td>Subprocess calls</td><td>GIL released — runs in separate process</td><td>subprocess works fine with threads</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Concurrency Models Compared</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Model</th><th>Best For</th><th>GIL impact</th><th>Memory</th></tr></thead>
+      <tbody>
+        <tr><td>threading</td><td>I/O-bound, simple concurrency</td><td>Limited for CPU-bound</td><td>Shared</td></tr>
+        <tr><td>multiprocessing</td><td>CPU-bound parallelism</td><td>None — separate processes</td><td>Separate (copy-on-write)</td></tr>
+        <tr><td>asyncio</td><td>High-concurrency I/O</td><td>None — single thread</td><td>Shared</td></tr>
+        <tr><td>concurrent.futures</td><td>Thread or process pool with Future API</td><td>Depends on executor</td><td>Depends</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Python 3.13 — GIL is Optional (PEP 703)</h3>
+  <div class="callout callout-green">
+    <strong>Free-threaded Python (3.13+)</strong>
+    Python 3.13 ships an experimental no-GIL build (<code>python3.13t</code>). The GIL can be disabled with <code>PYTHON_GIL=0</code>. True multi-core parallelism is now possible in pure Python. C extensions must opt-in via <code>Py_mod_gil = Py_MOD_GIL_NOT_USED</code>. Not yet production-recommended — ecosystem compatibility is still maturing.
+  </div>
+
+  <pre><code"># Check if running free-threaded Python
+import sys
+print(sys._is_gil_enabled())   # True (GIL on) / False (free-threaded)
+
+# multiprocessing — bypasses GIL entirely
+from multiprocessing import Pool
+
+def cpu_task(n):
+    return sum(range(n))
+
+with Pool(4) as pool:           # 4 separate Python processes
+    results = pool.map(cpu_task, [10**7] * 4)
+
+# concurrent.futures — clean Future-based API
+from concurrent.futures import ProcessPoolExecutor
+with ProcessPoolExecutor(max_workers=4) as ex:
+    futures = [ex.submit(cpu_task, 10**7) for _ in range(4)]
+    results = [f.result() for f in futures]</code></pre>
+</div>
+
+<!-- ══ SECTION 16 ══ -->
+<div class="section page-break" id="s16">
+  <div class="section-num">Section 16</div>
+  <h2 class="section-title">Quick Reference Cheatsheet</h2>
+  <p class="lead">High-density summary of the most interview-critical Python patterns, syntax, and gotchas.</p>
+
+  <h3>Decorator Patterns</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Pattern</th><th>Snippet</th></tr></thead>
+      <tbody>
+        <tr><td>Basic wrapper</td><td><code>@functools.wraps(fn)</code> inside wrapper function</td></tr>
+        <tr><td>Parameterised</td><td>3-level nesting: decorator_factory → decorator → wrapper</td></tr>
+        <tr><td>Class decorator</td><td>Implement <code>__call__</code> + <code>functools.update_wrapper</code></td></tr>
+        <tr><td>Stacking</td><td>Applied bottom-up: <code>@A @B def f</code> → <code>A(B(f))</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Async Cheatsheet</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Need</th><th>Use</th></tr></thead>
+      <tbody>
+        <tr><td>Run async code from sync</td><td><code>asyncio.run(main())</code></td></tr>
+        <tr><td>Run tasks concurrently</td><td><code>await asyncio.gather(t1, t2, t3)</code></td></tr>
+        <tr><td>Background task</td><td><code>asyncio.create_task(coro())</code></td></tr>
+        <tr><td>Timeout</td><td><code>async with asyncio.timeout(5.0):</code></td></tr>
+        <tr><td>Offload blocking call</td><td><code>await asyncio.to_thread(blocking_fn, arg)</code></td></tr>
+        <tr><td>Async iteration</td><td><code>async for item in async_gen():</code></td></tr>
+        <tr><td>Async resource</td><td><code>async with resource() as r:</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Common Gotchas</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Gotcha</th><th>Explanation &amp; Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Mutable default argument</td><td><code>def f(x=[]):</code> — list shared across calls. Use <code>x=None</code> then <code>x = x or []</code></td></tr>
+        <tr><td>Late binding in closures</td><td><code>lambda: i</code> in a loop captures variable reference, not value. Use <code>lambda i=i: i</code></td></tr>
+        <tr><td>Generator exhausted</td><td>Generators are single-pass. Wrap in <code>list()</code> or recreate if you need to iterate twice</td></tr>
+        <tr><td>Chained comparisons</td><td><code>a == b == c</code> is <code>a == b and b == c</code> in Python — usually what you want</td></tr>
+        <tr><td>is vs ==</td><td><code>is</code> checks identity (same object), <code>==</code> checks equality. Never <code>x is "hello"</code></td></tr>
+        <tr><td>except Exception</td><td>Does not catch <code>SystemExit</code>, <code>KeyboardInterrupt</code> (use <code>BaseException</code> for those)</td></tr>
+        <tr><td>dict ordering</td><td>Dicts maintain insertion order since Python 3.7 (CPython 3.6)</td></tr>
+        <tr><td>copy vs deepcopy</td><td><code>copy.copy</code> — shallow (references shared). <code>copy.deepcopy</code> — fully independent clone</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Essential Standard Library Modules</h3>
+  <div class="pills">
+    <span class="pill pill-blue">collections</span>
+    <span class="pill pill-blue">itertools</span>
+    <span class="pill pill-blue">functools</span>
+    <span class="pill pill-blue">contextlib</span>
+    <span class="pill pill-blue">pathlib</span>
+    <span class="pill pill-blue">dataclasses</span>
+    <span class="pill pill-blue">typing</span>
+    <span class="pill pill-blue">abc</span>
+    <span class="pill pill-green">asyncio</span>
+    <span class="pill pill-green">concurrent.futures</span>
+    <span class="pill pill-green">multiprocessing</span>
+    <span class="pill pill-purple">json</span>
+    <span class="pill pill-purple">re</span>
+    <span class="pill pill-purple">logging</span>
+    <span class="pill pill-purple">unittest.mock</span>
+    <span class="pill pill-teal">datetime</span>
+    <span class="pill pill-teal">enum</span>
+    <span class="pill pill-teal">struct</span>
+    <span class="pill pill-amber">os / sys</span>
+    <span class="pill pill-amber">subprocess</span>
+    <span class="pill pill-amber">shutil</span>
+  </div>
+
+  <h3>collections Module Highlights</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Type</th><th>Use case</th></tr></thead>
+      <tbody>
+        <tr><td><code>defaultdict(list)</code></td><td>Auto-initialises missing keys — no need to check <code>key in d</code> before appending</td></tr>
+        <tr><td><code>Counter(iterable)</code></td><td>Count occurrences; <code>.most_common(n)</code> returns top n items</td></tr>
+        <tr><td><code>deque(maxlen=N)</code></td><td>O(1) append/pop from both ends; fixed-size sliding window</td></tr>
+        <tr><td><code>OrderedDict</code></td><td>Maintains insertion order (legacy — regular dicts do this in 3.7+)</td></tr>
+        <tr><td><code>namedtuple</code></td><td>Lightweight immutable record with attribute access — tuple with named fields</td></tr>
+        <tr><td><code>ChainMap</code></td><td>Layer multiple dicts (reads first match); great for config/defaults override</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    Python Advanced Features — Complete Reference Guide &nbsp;•&nbsp; April 2026 &nbsp;•&nbsp; v1.0
+  </div>
+
+</div><!-- /.container -->
+</div><!-- /.main-scroll -->
+</div><!-- /.topic-page -->
+
+<!-- <footer class="guide-footer">Python Advanced Features — Complete Reference Guide</footer> -->
+
+</body>
+</html>

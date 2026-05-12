@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machine Learning — Synapse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e; --ink2: #3d3d5c; --ink3: #6b6b8a;
+  --bg: #ffffff; --bg2: #f4f3f0; --bg3: #eae8e4;
+  --accent: #2563eb; --accent2: #1d4ed8; --accent-bg: #eff6ff;
+  --green: #059669; --green-bg: #ecfdf5;
+  --amber: #d97706; --amber-bg: #fffbeb;
+  --rose: #e11d48; --rose-bg: #fff1f2;
+  --purple: #7c3aed; --purple-bg: #f5f3ff;
+  --teal: #0d9488; --teal-bg: #f0fdfa;
+  --coral: #ea580c; --coral-bg: #fff7ed;
+  --border: #e2e0dc; --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+@media print {
+  body { font-size: 10pt; } .no-print { display: none !important; }
+  .page-break { page-break-before: always; } .card { break-inside: avoid; }
+  pre { font-size: 8pt; } h1 { font-size: 22pt; } h2 { font-size: 14pt; }
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+.cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%); color: white; padding: 4rem 2rem; position: relative; overflow: hidden; }
+.cover::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 50%, rgba(37,99,235,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(124,58,237,0.1) 0%, transparent 50%); }
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+.diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; margin: 1rem 0; font-family: var(--mono); font-size: 0.75rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink2); }
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← Synapse</a>
+  <h1>Machine Learning</h1>
+</header>
+
+<div class="topic-page">
+  <aside class="sidebar">
+    <p class="sidebar-title">Machine Learning</p>
+    <nav><ul>
+      <li><a href="#s1"><span class="toc-num">01</span>ML Landscape</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>Linear &amp; Logistic Regression</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>Decision Trees &amp; Ensembles</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>Neural Networks &amp; Deep Learning</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>Model Evaluation</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>Feature Engineering</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>Unsupervised Learning</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>ML Pipelines with scikit-learn</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>ML → LLM Bridge</a></li>
+    </ul></nav>
+  </aside>
+
+  <div class="main-scroll">
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference — May 2026</div>
+  <h1>Machine <span>Learning</span></h1>
+  <p class="cover-sub">From regression and decision trees to neural networks and deep learning — the mathematical and practical foundations that underpin all modern AI systems.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">Supervised Learning</span>
+    <span class="cover-tag">scikit-learn</span>
+    <span class="cover-tag">XGBoost</span>
+    <span class="cover-tag">Neural Networks</span>
+    <span class="cover-tag">PyTorch</span>
+    <span class="cover-tag">Backpropagation</span>
+    <span class="cover-tag">Cross-Validation</span>
+    <span class="cover-tag">Feature Engineering</span>
+    <span class="cover-tag">Clustering</span>
+    <span class="cover-tag">Transformers</span>
+  </div>
+  <div class="cover-date">v1.0 — Last updated May 2026</div>
+</div>
+
+<div class="container">
+<div class="toc page-break">
+  <h2>Contents</h2>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">ML Landscape &amp; Taxonomy</span></a>
+    <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">Linear &amp; Logistic Regression</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">Decision Trees &amp; Ensembles</span></a>
+    <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">Neural Networks &amp; Deep Learning</span></a>
+    <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">Model Evaluation &amp; Validation</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Feature Engineering</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Unsupervised Learning</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">ML Pipelines with scikit-learn</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">ML → LLM Bridge</span></a>
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+<div class="section page-break" id="s1">
+  <div class="section-num">Section 01</div>
+  <h2 class="section-title">ML Landscape &amp; Taxonomy</h2>
+  <p class="lead">Machine Learning is the practice of building systems that learn patterns from data rather than executing hand-written rules. It is the foundation of all modern AI — from classical tabular models to the Transformer architectures that power LLMs.</p>
+
+  <div class="diagram">                   MACHINE LEARNING
+          ┌──────────────────┬──────────────────────┐
+   Supervised           Unsupervised         Reinforcement
+          │                   │                    │
+   ┌──────┴──────┐    ┌───────┴──────┐     ┌───────┴──────┐
+ Regression  Classification  Clustering  Dim. Reduction  Policy
+   │              │           │              │            Learning
+ Linear      Logistic       K-Means        PCA           PPO
+ Ridge/Lasso  Random Forest  DBSCAN        t-SNE/UMAP    DQN
+ XGBoost     XGBoost        Gaussian Mix.  Autoencoders  RLHF</div>
+
+  <h3>Learning Paradigm Comparison</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Paradigm</th><th>Input</th><th>Goal</th><th>Examples</th></tr></thead>
+    <tbody>
+      <tr><td>Supervised</td><td>Labelled (X, y) pairs</td><td>Learn mapping X → y</td><td>Spam detection, house price prediction, image classification</td></tr>
+      <tr><td>Unsupervised</td><td>Unlabelled X only</td><td>Discover hidden structure</td><td>Customer segmentation, anomaly detection, topic modelling</td></tr>
+      <tr><td>Semi-supervised</td><td>Small labelled + large unlabelled</td><td>Leverage unlabelled data</td><td>Document classification with few labels</td></tr>
+      <tr><td>Self-supervised</td><td>Data itself creates labels</td><td>Learn representations</td><td>GPT pre-training (next token), BERT (masked token)</td></tr>
+      <tr><td>Reinforcement</td><td>Environment + reward signal</td><td>Maximise cumulative reward</td><td>Game playing, robot control, RLHF for LLMs</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>The ML Workflow</h3>
+  <div class="diagram">Raw Data
+    │
+    ├─► EDA (Exploratory Data Analysis)
+    │       └─ distributions, correlations, missing values, outliers
+    │
+    ├─► Feature Engineering
+    │       └─ encode, scale, create, select features
+    │
+    ├─► Train / Validation / Test Split
+    │       └─ 70/15/15 or 80/10/10 (never touch test until final eval)
+    │
+    ├─► Model Selection + Hyperparameter Tuning
+    │       └─ cross-validation, grid/random/Bayesian search
+    │
+    ├─► Final Evaluation on Test Set
+    │
+    └─► Deployment + Monitoring</div>
+
+  <div class="callout callout-amber">
+    <strong>Data quality over algorithm choice</strong>
+    A simple linear model on clean, well-engineered features usually outperforms a complex model on raw data. In practice, 80% of ML project time goes to data preparation — and that investment pays off far more than model architecture choices.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+<div class="section page-break" id="s2">
+  <div class="section-num">Section 02</div>
+  <h2 class="section-title">Linear &amp; Logistic Regression</h2>
+  <p class="lead">Linear and logistic regression are the workhorses of interpretable ML. They are fast, require little data, and produce human-readable coefficients. Understanding them deeply — including their loss functions and regularisation — is essential for all ML engineers.</p>
+
+  <h3>Linear Regression</h3>
+  <div class="diagram">Model:    ŷ = w₀ + w₁x₁ + w₂x₂ + ... + wₙxₙ
+Loss:     MSE = (1/N) Σ(yᵢ - ŷᵢ)²
+Optimise: Gradient descent  →  wⱼ := wⱼ - α · ∂MSE/∂wⱼ
+          Normal equation   →  w = (XᵀX)⁻¹ Xᵀy  (exact, but O(n³))</div>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Variant</th><th>Regularisation</th><th>Penalty</th><th>Effect</th><th>When to Use</th></tr></thead>
+    <tbody>
+      <tr><td>OLS (Ordinary Least Squares)</td><td>None</td><td>—</td><td>No constraint on weights</td><td>Few features, low multicollinearity</td></tr>
+      <tr><td>Ridge (L2)</td><td>L2</td><td>λ Σwⱼ²</td><td>Shrinks all weights toward 0</td><td>Many correlated features</td></tr>
+      <tr><td>Lasso (L1)</td><td>L1</td><td>λ Σ|wⱼ|</td><td>Drives some weights to exactly 0 (feature selection)</td><td>Many irrelevant features</td></tr>
+      <tr><td>ElasticNet</td><td>L1 + L2</td><td>λ₁|w| + λ₂w²</td><td>Combines both effects</td><td>Many features, some correlated</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Logistic Regression</h3>
+<pre><code>import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import cross_val_score
+
+# Pipeline: scale → regularised logistic regression
+pipeline = Pipeline([
+    ("scaler", StandardScaler()),
+    ("clf",    LogisticRegression(C=1.0, penalty="l2", max_iter=1000)),
+])
+
+pipeline.fit(X_train, y_train)
+
+# Coefficients → interpretability
+coef = pipeline.named_steps["clf"].coef_[0]
+feature_importance = dict(zip(feature_names, np.abs(coef)))
+top_features = sorted(feature_importance.items(), key=lambda x: -x[1])[:5]
+
+# Cross-validated AUC
+cv_auc = cross_val_score(pipeline, X, y, cv=5, scoring="roc_auc")
+print(f"CV AUC: {cv_auc.mean():.3f} ± {cv_auc.std():.3f}")</code></pre>
+
+  <div class="callout callout-blue">
+    <strong>Logistic regression is a probability model, not just a classifier</strong>
+    The output sigmoid(wᵀx) is a calibrated probability. Use <code>predict_proba</code> rather than <code>predict</code> when you need confidence scores for ranking, thresholding, or downstream decisions.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+<div class="section page-break" id="s3">
+  <div class="section-num">Section 03</div>
+  <h2 class="section-title">Decision Trees &amp; Ensemble Methods</h2>
+  <p class="lead">Decision trees partition feature space into axis-aligned regions. Alone they overfit; combined into ensembles (bagging → Random Forest, boosting → XGBoost/LightGBM) they become the most powerful algorithms for tabular data.</p>
+
+  <div class="diagram">Decision Tree split:
+  ┌─────────────────────────────────────┐
+  │  age &lt; 35?                          │
+  │     YES ──► income &lt; 50K?           │
+  │               YES → class: 0        │
+  │               NO  → class: 1        │
+  │     NO  ──► employed?               │
+  │               YES → class: 1        │
+  │               NO  → class: 0        │
+  └─────────────────────────────────────┘
+  Split criterion: Gini impurity or Information Gain (entropy)</div>
+
+  <h3>Ensemble Strategy Comparison</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Method</th><th>Builds Trees</th><th>Combines Via</th><th>Reduces</th><th>Algorithm</th></tr></thead>
+    <tbody>
+      <tr><td>Bagging</td><td>Parallel (independent)</td><td>Average / vote</td><td>Variance</td><td>Random Forest</td></tr>
+      <tr><td>Boosting</td><td>Sequential (correct errors)</td><td>Weighted sum</td><td>Bias + Variance</td><td>XGBoost, LightGBM, CatBoost</td></tr>
+      <tr><td>Stacking</td><td>Parallel (diverse models)</td><td>Meta-learner</td><td>Both</td><td>sklearn StackingClassifier</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>XGBoost — Production-Grade Boosting</h3>
+<pre><code>import xgboost as xgb
+from sklearn.model_selection import RandomizedSearchCV
+import numpy as np
+
+model = xgb.XGBClassifier(
+    n_estimators=500,
+    learning_rate=0.05,
+    max_depth=6,
+    subsample=0.8,          # row sampling → reduces overfitting
+    colsample_bytree=0.8,   # column sampling per tree
+    reg_alpha=0.1,          # L1 regularisation
+    reg_lambda=1.0,         # L2 regularisation
+    eval_metric="auc",
+    early_stopping_rounds=20,
+    random_state=42,
+    n_jobs=-1,
+)
+
+model.fit(
+    X_train, y_train,
+    eval_set=[(X_val, y_val)],
+    verbose=50,
+)
+
+# Feature importance
+importance = model.feature_importances_
+top_idx = np.argsort(importance)[::-1][:10]
+for i in top_idx:
+    print(f"{feature_names[i]}: {importance[i]:.4f}")</code></pre>
+
+  <div class="card-grid">
+    <div class="card card-accent"><h4>Random Forest</h4><p>Best default for tabular data. Low hyperparameter sensitivity. Out-of-bag error estimation. <code>n_estimators=100</code>, <code>max_features="sqrt"</code>.</p></div>
+    <div class="card card-accent"><h4>XGBoost</h4><p>Top Kaggle performer. Column/row subsampling, regularisation, GPU support. Use <code>early_stopping_rounds</code> always.</p></div>
+    <div class="card card-accent"><h4>LightGBM</h4><p>10–100x faster than XGBoost on large datasets. Leaf-wise tree growth. Native categorical support. Best for &gt;100K rows.</p></div>
+    <div class="card card-accent"><h4>CatBoost</h4><p>Best for categorical-heavy data with no encoding needed. Symmetric trees, minimal tuning. Strong default performance.</p></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+<div class="section page-break" id="s4">
+  <div class="section-num">Section 04</div>
+  <h2 class="section-title">Neural Networks &amp; Deep Learning</h2>
+  <p class="lead">Neural networks are universal function approximators composed of layers of learnable linear transformations followed by non-linear activations. Deep learning extends this to many layers, enabling hierarchical feature learning from raw data.</p>
+
+  <div class="diagram">Forward Pass:
+  Input x
+    │
+    ├─► Layer 1: z₁ = W₁x + b₁,  a₁ = ReLU(z₁)
+    ├─► Layer 2: z₂ = W₂a₁ + b₂, a₂ = ReLU(z₂)
+    └─► Output:  ŷ  = softmax(W₃a₂ + b₃)
+
+Backward Pass (Backpropagation):
+  Loss L = CrossEntropy(y, ŷ)
+  ∂L/∂W₃ → ∂L/∂W₂ → ∂L/∂W₁   (chain rule)
+  Wᵢ := Wᵢ - α · ∂L/∂Wᵢ        (gradient descent update)</div>
+
+  <h3>Activation Functions</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Activation</th><th>Formula</th><th>Range</th><th>Use Case</th><th>Avoid When</th></tr></thead>
+    <tbody>
+      <tr><td>ReLU</td><td>max(0, x)</td><td>[0, ∞)</td><td>Hidden layers (default)</td><td>Many dead neurons (&gt;50% negative)</td></tr>
+      <tr><td>LeakyReLU</td><td>max(0.01x, x)</td><td>(−∞, ∞)</td><td>Fixes dying ReLU</td><td>—</td></tr>
+      <tr><td>GELU</td><td>x·Φ(x)</td><td>(−∞, ∞)</td><td>Transformers (BERT, GPT)</td><td>—</td></tr>
+      <tr><td>Sigmoid</td><td>1/(1+e⁻ˣ)</td><td>(0, 1)</td><td>Binary output layer</td><td>Hidden layers (vanishing gradient)</td></tr>
+      <tr><td>Softmax</td><td>eˣⁱ/Σeˣʲ</td><td>(0, 1) summing to 1</td><td>Multi-class output layer</td><td>Hidden layers</td></tr>
+      <tr><td>Tanh</td><td>(eˣ−e⁻ˣ)/(eˣ+e⁻ˣ)</td><td>(−1, 1)</td><td>RNN hidden states</td><td>Deep networks (vanishing gradient)</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Neural Network in PyTorch</h3>
+<pre><code>import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader, TensorDataset
+
+class MLP(nn.Module):
+    def __init__(self, input_dim: int, hidden_dim: int, output_dim: int):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.BatchNorm1d(hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(hidden_dim, hidden_dim // 2),
+            nn.ReLU(),
+            nn.Linear(hidden_dim // 2, output_dim),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.net(x)
+
+model = MLP(input_dim=128, hidden_dim=256, output_dim=10)
+optimiser = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=1e-4)
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimiser, T_max=50)
+criterion = nn.CrossEntropyLoss()
+
+# Training loop
+for epoch in range(50):
+    model.train()
+    for X_batch, y_batch in train_loader:
+        optimiser.zero_grad()
+        loss = criterion(model(X_batch), y_batch)
+        loss.backward()
+        nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+        optimiser.step()
+    scheduler.step()</code></pre>
+
+  <h3>Key Deep Learning Concepts</h3>
+  <div class="pills">
+    <span class="pill pill-blue">Batch Normalisation</span>
+    <span class="pill pill-blue">Dropout</span>
+    <span class="pill pill-blue">Residual Connections</span>
+    <span class="pill pill-blue">Weight Initialisation</span>
+    <span class="pill pill-blue">Learning Rate Scheduling</span>
+    <span class="pill pill-blue">Gradient Clipping</span>
+    <span class="pill pill-purple">Attention Mechanism</span>
+    <span class="pill pill-purple">Transformer Architecture</span>
+    <span class="pill pill-green">Transfer Learning</span>
+    <span class="pill pill-green">Data Augmentation</span>
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>The Transformer is a neural network too</strong>
+    Every LLM is a deep neural network — specifically a decoder-only Transformer. Understanding backpropagation, attention, residual connections, and layer normalisation directly explains how GPT and Claude work at a mathematical level.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+<div class="section page-break" id="s5">
+  <div class="section-num">Section 05</div>
+  <h2 class="section-title">Model Evaluation &amp; Validation</h2>
+  <p class="lead">A model is only as trustworthy as its evaluation methodology. Leaking test data into training — through improper splits, target encoding on the full set, or repeated test-set evaluation — produces optimistic estimates that don't hold in production.</p>
+
+  <h3>Classification Metrics</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Metric</th><th>Formula</th><th>When to Use</th><th>Pitfall</th></tr></thead>
+    <tbody>
+      <tr><td>Accuracy</td><td>correct / total</td><td>Balanced classes only</td><td>Misleading on imbalanced data (99% negative → trivial classifier)</td></tr>
+      <tr><td>Precision</td><td>TP / (TP + FP)</td><td>False positives are costly (spam filter)</td><td>Ignore recall — model predicts positive rarely</td></tr>
+      <tr><td>Recall (Sensitivity)</td><td>TP / (TP + FN)</td><td>False negatives are costly (cancer detection)</td><td>Ignore precision — model predicts positive always</td></tr>
+      <tr><td>F1 Score</td><td>2·P·R / (P+R)</td><td>Need balance of precision &amp; recall</td><td>Doesn't account for true negatives</td></tr>
+      <tr><td>ROC-AUC</td><td>Area under TPR vs FPR curve</td><td>Ranking quality, threshold-independent</td><td>Misleading on severe class imbalance</td></tr>
+      <tr><td>PR-AUC</td><td>Area under Precision vs Recall</td><td>Imbalanced classification</td><td>More informative than ROC-AUC when positives are rare</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Bias–Variance Trade-off</h3>
+  <div class="diagram">Total Error = Bias² + Variance + Irreducible Noise
+
+  High Bias (Underfitting)        High Variance (Overfitting)
+  ─────────────────────────       ──────────────────────────
+  Model too simple                Model too complex
+  Train error: HIGH               Train error: LOW
+  Val error:   HIGH               Val error: HIGH
+  Fix: more features,             Fix: regularisation, dropout,
+       more complex model              more data, pruning</div>
+
+  <h3>Cross-Validation &amp; Hyperparameter Search</h3>
+<pre><code>from sklearn.model_selection import StratifiedKFold, cross_validate
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+import optuna
+
+# Stratified K-Fold — preserves class ratios in each fold
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+def objective(trial):
+    C     = trial.suggest_float("C", 1e-3, 100, log=True)
+    gamma = trial.suggest_categorical("gamma", ["scale", "auto"])
+    kernel = trial.suggest_categorical("kernel", ["rbf", "poly"])
+
+    pipe = Pipeline([("sc", StandardScaler()),
+                     ("svm", SVC(C=C, gamma=gamma, kernel=kernel))])
+
+    scores = cross_validate(pipe, X_train, y_train, cv=cv,
+                            scoring="roc_auc", n_jobs=-1)
+    return scores["test_score"].mean()
+
+study = optuna.create_study(direction="maximize")
+study.optimize(objective, n_trials=50, timeout=120)
+print(f"Best ROC-AUC: {study.best_value:.4f}")
+print(f"Best params:  {study.best_params}")</code></pre>
+
+  <div class="callout callout-rose">
+    <strong>Never tune on the test set</strong>
+    Every time you peek at test-set performance and adjust your model, you are effectively training on it. Use a held-out test set exactly once — for the final reported number. Use validation or cross-validation for all tuning.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+<div class="section page-break" id="s6">
+  <div class="section-num">Section 06</div>
+  <h2 class="section-title">Feature Engineering</h2>
+  <p class="lead">Feature engineering — transforming raw input into representations that expose the signal the model needs — is the highest-leverage skill in applied ML. No algorithm automatically extracts domain knowledge from raw columns.</p>
+
+  <h3>Numeric Features</h3>
+<pre><code>import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler, PowerTransformer, KBinsDiscretizer
+
+df = pd.DataFrame({"age": [23, 45, 67, 12], "income": [30000, 75000, 150000, 5000]})
+
+# 1. Standardisation (mean=0, std=1) — required for linear/SVM/NN
+scaler = StandardScaler()
+df["age_scaled"] = scaler.fit_transform(df[["age"]])
+
+# 2. Log transform — handles right-skewed distributions
+df["log_income"] = np.log1p(df["income"])
+
+# 3. Power transform (Yeo-Johnson) — makes distribution more Gaussian
+pt = PowerTransformer(method="yeo-johnson")
+df["income_normal"] = pt.fit_transform(df[["income"]])
+
+# 4. Binning — captures non-linear age effects
+binner = KBinsDiscretizer(n_bins=5, encode="ordinal", strategy="quantile")
+df["age_bin"] = binner.fit_transform(df[["age"]])</code></pre>
+
+  <h3>Categorical Features</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Encoding</th><th>When to Use</th><th>Dims</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>One-Hot Encoding</td><td>Low-cardinality nominal (&lt;20 categories)</td><td>+N cols</td><td>Creates sparse matrix. Use <code>drop="first"</code> for linear models.</td></tr>
+      <tr><td>Label / Ordinal</td><td>Ordered categories (low/mid/high)</td><td>+1 col</td><td>Only valid when ordering is meaningful.</td></tr>
+      <tr><td>Target Encoding</td><td>High-cardinality (city, user_id)</td><td>+1 col</td><td>Compute on train only; use CV to prevent leakage.</td></tr>
+      <tr><td>Embeddings</td><td>Very high cardinality + NN model</td><td>+k dims</td><td>Learned representations. Best quality but needs NN.</td></tr>
+      <tr><td>Frequency Encoding</td><td>Tree models + high cardinality</td><td>+1 col</td><td>Replace category with its count/frequency in train set.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Feature Selection</h3>
+<pre><code>from sklearn.feature_selection import SelectFromModel, mutual_info_classif, RFE
+from sklearn.ensemble import RandomForestClassifier
+
+# Method 1: Tree-based feature importance
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+rf.fit(X_train, y_train)
+selector = SelectFromModel(rf, threshold="median", prefit=True)
+X_selected = selector.transform(X_train)
+
+# Method 2: Mutual information (non-linear correlation with target)
+mi_scores = mutual_info_classif(X_train, y_train)
+top_features = X_train.columns[mi_scores.argsort()[::-1][:20]]
+
+# Method 3: Recursive Feature Elimination
+rfe = RFE(RandomForestClassifier(n_estimators=50), n_features_to_select=20)
+rfe.fit(X_train, y_train)</code></pre>
+
+  <div class="callout callout-green">
+    <strong>Interaction features beat algorithm complexity</strong>
+    Adding age × income or log(debt/income) often improves a linear model more than switching to XGBoost. Manual interaction features encode domain knowledge no algorithm can discover from sparse tabular data.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+<div class="section page-break" id="s7">
+  <div class="section-num">Section 07</div>
+  <h2 class="section-title">Unsupervised Learning</h2>
+  <p class="lead">Unsupervised learning discovers structure in data without labels. Its outputs — clusters, embeddings, and compressed representations — are often used as features for supervised models or as the basis for exploration and anomaly detection.</p>
+
+  <h3>Clustering Algorithms</h3>
+  <div class="diagram">K-Means:
+  1. Randomly initialise K centroids
+  2. Assign each point to nearest centroid
+  3. Recompute centroids as cluster means
+  4. Repeat until convergence (O(n·k·i))
+
+DBSCAN:
+  Core point: has ≥ minPts neighbours within ε
+  Clusters: connected components of core points
+  Noise: points not reachable from any core point
+  Advantage: finds arbitrary shapes, auto-detects K</div>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Algorithm</th><th>K required?</th><th>Cluster Shape</th><th>Noise handling</th><th>Best For</th></tr></thead>
+    <tbody>
+      <tr><td>K-Means</td><td>Yes</td><td>Spherical</td><td>No</td><td>Large datasets, image segmentation, customer segments</td></tr>
+      <tr><td>DBSCAN</td><td>No</td><td>Arbitrary</td><td>Yes (noise class)</td><td>Spatial data, anomaly detection, unknown cluster count</td></tr>
+      <tr><td>Gaussian Mixture (GMM)</td><td>Yes</td><td>Elliptical</td><td>Soft assignment</td><td>Overlapping clusters, probabilistic membership</td></tr>
+      <tr><td>Hierarchical (Agglomerative)</td><td>No (cut dendrogram)</td><td>Arbitrary</td><td>No</td><td>Small datasets, when hierarchy matters</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Dimensionality Reduction</h3>
+<pre><code>from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+import umap
+
+# PCA — linear, preserves variance, interpretable components
+pca = PCA(n_components=0.95)  # keep 95% of variance
+X_pca = pca.fit_transform(X_scaled)
+print(f"Reduced from {X.shape[1]} to {X_pca.shape[1]} dimensions")
+print(f"Explained variance ratio: {pca.explained_variance_ratio_[:5]}")
+
+# t-SNE — non-linear, excellent 2D visualisation, not for ML features
+X_tsne = TSNE(n_components=2, perplexity=30, random_state=42).fit_transform(X_scaled)
+
+# UMAP — non-linear, preserves global structure better than t-SNE, usable as ML features
+reducer = umap.UMAP(n_components=16, random_state=42)
+X_umap = reducer.fit_transform(X_scaled)  # use as features for downstream model</code></pre>
+
+  <div class="callout callout-blue">
+    <strong>UMAP &gt; t-SNE for features; t-SNE for visualisation</strong>
+    t-SNE distorts global structure (only preserves local neighbourhoods). UMAP preserves both local and global structure and is fast enough to use as a feature transformation step before a classifier. Use t-SNE only for 2D plots.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+<div class="section page-break" id="s8">
+  <div class="section-num">Section 08</div>
+  <h2 class="section-title">ML Pipelines with scikit-learn</h2>
+  <p class="lead">scikit-learn's <code>Pipeline</code> and <code>ColumnTransformer</code> are the right way to build reproducible, leak-proof ML workflows. They chain preprocessing and modelling into a single object that can be cross-validated, serialised, and deployed atomically.</p>
+
+  <h3>Full Production Pipeline</h3>
+<pre><code>from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, PowerTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.model_selection import cross_val_score
+import joblib
+
+numeric_features  = ["age", "income", "credit_score"]
+categorical_features = ["employment_type", "region"]
+
+# Preprocessing sub-pipelines
+numeric_transformer = Pipeline([
+    ("imputer", SimpleImputer(strategy="median")),
+    ("power",   PowerTransformer(method="yeo-johnson")),
+    ("scaler",  StandardScaler()),
+])
+
+categorical_transformer = Pipeline([
+    ("imputer", SimpleImputer(strategy="most_frequent")),
+    ("onehot",  OneHotEncoder(handle_unknown="ignore", sparse_output=False)),
+])
+
+preprocessor = ColumnTransformer([
+    ("num", numeric_transformer,    numeric_features),
+    ("cat", categorical_transformer, categorical_features),
+])
+
+# Full pipeline
+full_pipeline = Pipeline([
+    ("preprocessor", preprocessor),
+    ("classifier",   GradientBoostingClassifier(
+        n_estimators=300, learning_rate=0.05, max_depth=4,
+        subsample=0.8, random_state=42
+    )),
+])
+
+# Cross-validated evaluation (no leakage — transform fitted per fold)
+scores = cross_val_score(full_pipeline, X, y, cv=5, scoring="roc_auc")
+print(f"ROC-AUC: {scores.mean():.4f} ± {scores.std():.4f}")
+
+# Train final model and save
+full_pipeline.fit(X_train, y_train)
+joblib.dump(full_pipeline, "model_v1.pkl")
+
+# Load and predict (preprocessing automatically applied)
+model = joblib.load("model_v1.pkl")
+probas = model.predict_proba(X_new)[:, 1]</code></pre>
+
+  <h3>Scikit-learn Ecosystem</h3>
+  <div class="card-grid">
+    <div class="card card-accent"><h4>Pipeline</h4><p>Chain transformers + estimator. Prevents leakage, enables cross-validation of entire workflow.</p></div>
+    <div class="card card-accent"><h4>ColumnTransformer</h4><p>Apply different preprocessing to numeric vs categorical columns in parallel.</p></div>
+    <div class="card card-accent"><h4>GridSearchCV / RandomizedSearchCV</h4><p>Hyperparameter search with built-in cross-validation. Use <code>RandomizedSearchCV</code> for &gt;4 params.</p></div>
+    <div class="card card-accent"><h4>joblib</h4><p>Serialise trained pipelines to disk. Models are ~1MB–100MB. Always version with a hash of training data.</p></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 9 ══════════════════════════ -->
+<div class="section page-break" id="s9">
+  <div class="section-num">Section 09</div>
+  <h2 class="section-title">ML → LLM Bridge</h2>
+  <p class="lead">Large Language Models are built on the same mathematical foundations as classical ML — gradient descent, backpropagation, regularisation — but at trillion-parameter scale with the Transformer architecture. Understanding classical ML makes LLM engineering intuitive.</p>
+
+  <div class="diagram">Classical ML Concept    →    LLM Equivalent
+  ─────────────────────────────────────────────────────
+  Gradient descent         →    Adam / AdamW optimiser
+  Regularisation (L2)      →    Weight decay
+  Dropout                  →    Attention dropout
+  Batch normalisation      →    Layer normalisation
+  Feature extraction       →    Tokenisation + embeddings
+  Transfer learning        →    Pre-trained base model
+  Fine-tuning              →    SFT / LoRA / QLoRA
+  Cross-validation         →    Eval set + RAGAS metrics
+  Hyperparameter tuning    →    LR, batch size, rank (LoRA)
+  Ensemble                 →    Mixture of Experts (MoE)
+  Logistic regression      →    Softmax output over vocabulary</div>
+
+  <h3>Attention Is Just Weighted Feature Aggregation</h3>
+  <div class="diagram">Self-Attention for token xᵢ:
+  1. Compute query Qᵢ = Wq · xᵢ
+  2. Compute keys  Kⱼ = Wk · xⱼ  (for all tokens j)
+  3. Scores = softmax(QᵢKᵀ / √d)     ← scaled dot product
+  4. Output = Σⱼ scores[j] · Vⱼ       ← weighted average of values
+
+  This is equivalent to: learn which features (other tokens) matter
+  for predicting token xᵢ, then aggregate them.
+  Same intuition as an attention-weighted feature mean in classical ML.</div>
+
+  <h3>Key Connections</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>ML Concept</th><th>Why It Matters for LLMs</th></tr></thead>
+    <tbody>
+      <tr><td>Bias-variance trade-off</td><td>LLMs overfit to fine-tuning data (high variance). LoRA rank controls capacity = bias-variance knob.</td></tr>
+      <tr><td>Class imbalance</td><td>LLM instruction datasets have imbalanced task types. Curating balanced datasets improves fine-tuning quality.</td></tr>
+      <tr><td>Feature importance</td><td>Attention weights ≈ feature importance. Attention visualisation helps debug why a model focuses on wrong context.</td></tr>
+      <tr><td>Data leakage</td><td>Test documents in pre-training = data leakage. Benchmark contamination inflates LLM eval scores.</td></tr>
+      <tr><td>Learning rate scheduling</td><td>Warmup + cosine decay is standard for LLM training. Too high LR → loss spikes. Too low → slow convergence.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-green">
+    <strong>Classical ML is not obsolete</strong>
+    For structured tabular data — fraud detection, pricing models, churn prediction — XGBoost and LightGBM still outperform LLMs by a significant margin. LLMs excel at unstructured text; gradient-boosted trees excel at tabular numerical data.
+  </div>
+
+  <h3>Further Reading</h3>
+  <ul class="clean">
+    <li><a href="https://scikit-learn.org/stable/user_guide.html" target="_blank">scikit-learn User Guide</a></li>
+    <li><a href="https://xgboost.readthedocs.io/" target="_blank">XGBoost Documentation</a></li>
+    <li><a href="https://lightgbm.readthedocs.io/" target="_blank">LightGBM Documentation</a></li>
+    <li><a href="https://pytorch.org/tutorials/" target="_blank">PyTorch Tutorials</a></li>
+    <li><a href="https://www.kaggle.com/learn/machine-learning" target="_blank">Kaggle ML Course (free)</a></li>
+    <li><a href="https://arxiv.org/abs/1706.03762" target="_blank">Attention Is All You Need (Transformer paper)</a></li>
+    <li><a href="https://d2l.ai/" target="_blank">Dive into Deep Learning (free textbook)</a></li>
+  </ul>
+</div>
+
+<div class="footer">Synapse · Machine Learning · May 2026</div>
+</div><!-- /container -->
+  </div><!-- /main-scroll -->
+</div><!-- /topic-page -->
+<footer class="guide-footer">Synapse &middot; AI &amp; LLM Engineering</footer>
+</body>
+</html>

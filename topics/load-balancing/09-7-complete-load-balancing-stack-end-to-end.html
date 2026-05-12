@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complete Load Balancing Stack — End-to-End – Load Balancing</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../load-balancing.html">Load Balancing</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Complete Load Balancing Stack — End-to-End</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Load Balancing</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-api-traffic-load-balancing-fundamentals.html">API &amp; Traffic Load Balancing Fundamentals</a></li>
+        <li><a href="04-2-load-balancing-inside-openshift.html">Load Balancing Inside OpenShift</a></li>
+        <li><a href="05-3-load-balancing-outside-openshift-external.html">Load Balancing Outside OpenShift (External)</a></li>
+        <li><a href="06-4-how-to-use-external-load-balancers-with-openshift.html">How to Use External Load Balancers WITH OpenShift</a></li>
+        <li><a href="07-5-canary-deployments-in-openshift.html">Canary Deployments in OpenShift</a></li>
+        <li><a href="08-6-load-balancing-between-production-and-cobdr-environments.html">Load Balancing Between Production and COB/DR Environments</a></li>
+        <li class="active"><a href="09-7-complete-load-balancing-stack-end-to-end.html" class="active">Complete Load Balancing Stack — End-to-End</a></li>
+        <li><a href="10-8-decision-guide-which-approach-to-use.html">Decision Guide — Which Approach to Use?</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>7. Complete Load Balancing Stack — End-to-End</h1>
+<p>The following table summarises every load balancing layer from the outermost (cross-site) to the innermost (pod-level), showing how they stack together in a production enterprise OpenShift deployment:</p>
+<div class="table-wrap"><table>
+  <tr><th>Layer</th><th>Scope</th><th>OSI</th><th>Where</th><th>Examples</th></tr>
+  <tr><td>GSLB</td><td>Cross-site</td><td>DNS</td><td>Between clusters</td><td>F5 GTM, Route 53, Azure Traffic Manager, Cloudflare LB</td></tr>
+  <tr><td>External LB</td><td>Cluster entry</td><td>L4 / L7</td><td>In front of OCP</td><td>F5 LTM, HAProxy, Cloud NLB/ALB, Keepalived VIPs</td></tr>
+  <tr><td>OCP Router</td><td>Ingress</td><td>L7</td><td>Inside cluster</td><td>HAProxy Ingress Controller (routes, weighted backends)</td></tr>
+  <tr><td>Service Mesh</td><td>Pod-to-pod</td><td>L7</td><td>Inside cluster</td><td>Istio/Envoy VirtualService (canary, A/B, mirroring)</td></tr>
+  <tr><td>K8s Service</td><td>Internal</td><td>L4</td><td>Inside cluster</td><td>kube-proxy (iptables/IPVS), OVN-Kubernetes</td></tr>
+  <tr><td>MetalLB</td><td>External svc</td><td>L4</td><td>Inside (on-prem)</td><td>Layer 2 ARP / BGP LoadBalancer type services</td></tr>
+</table></div>
+<h3>7.1 Full Traffic Flow Diagram</h3>
+<pre><code>COMPLETE END-TO-END TRAFFIC FLOW
+User types: api.mycompany.com
+|
+v
+[1] GSLB DNS Resolution
+F5 GTM / Route 53 / Azure TM
+-&gt; Returns IP of healthy site (Prod or COB)
+|
+v
+[2] External Load Balancer at chosen site
+F5 LTM / HAProxy / Cloud NLB
+-&gt; Health checks workers, distributes to healthy nodes
+|
+v
+[3] OpenShift Router (HAProxy Ingress Controller)
+-&gt; Matches hostname/path to Route
+-&gt; Applies weighted backends (if A/B configured)
+|
+v
+[4] Service Mesh (Istio VirtualService) [if deployed]
+-&gt; Fine-grained traffic split (canary %)
+-&gt; Header-based routing
+-&gt; Circuit breaking, retries
+|
+v
+[5] Kubernetes Service (ClusterIP)
+-&gt; kube-proxy / OVN rules
+-&gt; Random distribution across pod endpoints
+|
+v
+[6] Application Pod
+-&gt; Processes request and returns response</code></pre>
+      </article>
+
+      <nav class="page-nav">
+        <a href="08-6-load-balancing-between-production-and-cobdr-environments.html">&#8592; Load Balancing Between Production and COB/DR Environments</a>
+        <span class="spacer"></span>
+        <a href="10-8-decision-guide-which-approach-to-use.html">Decision Guide — Which Approach to Use? &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

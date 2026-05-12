@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horizontal Pod Autoscaler (HPA) – Autoscaling</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../autoscaling.html">Autoscaling</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Horizontal Pod Autoscaler (HPA)</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Autoscaling</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-scaling-fundamentals.html">Scaling Fundamentals</a></li>
+        <li class="active"><a href="04-2-horizontal-pod-autoscaler-hpa.html" class="active">Horizontal Pod Autoscaler (HPA)</a></li>
+        <li><a href="05-3-vertical-pod-autoscaler-vpa.html">Vertical Pod Autoscaler (VPA)</a></li>
+        <li><a href="06-4-custom-metrics-autoscaler-keda.html">Custom Metrics Autoscaler (KEDA)</a></li>
+        <li><a href="07-5-cluster-and-machine-autoscaler-node-scaling.html">Cluster and Machine Autoscaler (Node Scaling)</a></li>
+        <li><a href="08-6-openshift-serverless-knative-autoscaling.html">OpenShift Serverless (Knative) Autoscaling</a></li>
+        <li><a href="09-7-fastapi-publishing-metrics-for-autoscaling.html">FastAPI: Publishing Metrics for Autoscaling</a></li>
+        <li><a href="10-8-what-is-not-possible-limitations.html">What is NOT Possible — Limitations</a></li>
+        <li><a href="11-9-decision-guide-which-autoscaler-to-use.html">Decision Guide — Which Autoscaler to Use?</a></li>
+        <li><a href="12-10-end-to-end-autoscaling-architecture.html">End-to-End Autoscaling Architecture</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>2. Horizontal Pod Autoscaler (HPA)</h1>
+<p>The HPA is built into OpenShift and Kubernetes. It periodically queries the metrics API (every 15 seconds by default), computes the ratio of current metric value to the target value, and adjusts the replica count of a Deployment, StatefulSet, or DeploymentConfig accordingly.</p>
+<pre><code>HPA Control Loop
++-------------+        +------------------+        +----------------+
+|  Metrics    | -----&gt; |  HPA Controller  | -----&gt; | Deployment /   |
+|  Server     |  CPU,  |  (every 15s)     | scale  | ReplicaSet     |
+| (resource   |  Mem   |                  | up/down|                |
+|  metrics)   |        |  desiredReplicas |        | replicas: N    |
++-------------+        |  = ceil(current  |        +----------------+
+|  / target * cur) |
++------------------+</code></pre>
+<h4>2.1 Supported Metrics</h4>
+<ul>
+  <li>CPU Utilization: Percentage of requested CPU used. Most common. Works via oc autoscale command.</li>
+  <li>Memory Utilization: Percentage of requested memory used. Requires YAML definition (no CLI shortcut). Memory must decrease proportionally when replicas increase.</li>
+</ul>
+<h4>2.2 Prerequisites</h4>
+<p>Your pods MUST have resource requests defined. HPA computes utilisation as a percentage of the requested value. Without requests, HPA cannot calculate metrics and will not function.</p>
+<pre><code># Pod spec with resource requests (REQUIRED for HPA)
+containers:
+- name: my-api
+image: my-registry/my-api:latest
+resources:
+requests:
+cpu: 200m        # HPA calculates: actual_cpu / 200m
+memory: 256Mi    # HPA calculates: actual_mem / 256Mi
+limits:
+cpu: 1000m
+memory: 512Mi</code></pre>
+<h4>2.3 Example: CLI</h4>
+<pre><code># Scale between 2 and 10 pods, targeting 70% CPU utilisation
+oc autoscale deployment/my-api --min=2 --max=10 --cpu-percent=70
+# Check HPA status
+oc get hpa
+oc describe hpa my-api</code></pre>
+<h4>2.4 Example: YAML (CPU + Memory)</h4>
+<pre><code>apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+name: my-api-hpa
+spec:
+scaleTargetRef:
+apiVersion: apps/v1
+kind: Deployment
+name: my-api
+minReplicas: 2
+maxReplicas: 10
+metrics:
+- type: Resource
+resource:
+name: cpu
+target:
+type: Utilization
+averageUtilization: 70
+- type: Resource
+resource:
+name: memory
+target:
+type: Utilization
+averageUtilization: 80
+behavior:
+scaleDown:
+stabilizationWindowSeconds: 300    # Wait 5 min before scaling down
+policies:
+- type: Percent
+value: 10
+periodSeconds: 60              # Remove max 10% of pods per minute
+scaleUp:
+stabilizationWindowSeconds: 0
+policies:
+- type: Percent
+value: 100
+periodSeconds: 15              # Can double pods every 15s</code></pre>
+<p>Limitations: HPA only supports CPU and memory natively. It cannot scale to zero (minimum is 1 replica). It cannot scale on custom metrics like HTTP requests per second without an external adapter.</p>
+      </article>
+
+      <nav class="page-nav">
+        <a href="03-1-scaling-fundamentals.html">&#8592; Scaling Fundamentals</a>
+        <span class="spacer"></span>
+        <a href="05-3-vertical-pod-autoscaler-vpa.html">Vertical Pod Autoscaler (VPA) &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

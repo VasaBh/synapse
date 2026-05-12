@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Higher-Order Components (HOC) – React</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../react.html">React</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Higher-Order Components (HOC)</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">React</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-1-react-fundamentals.html">React Fundamentals</a></li>
+        <li><a href="03-2-react-hooks-deep-dive.html">React Hooks (Deep Dive)</a></li>
+        <li><a href="04-3-how-react-works-internally.html">How React Works Internally</a></li>
+        <li><a href="05-4-nodejs-vite-the-react-ecosystem.html">Node.js, Vite &amp; The React Ecosystem</a></li>
+        <li><a href="06-5-advanced-patterns-concepts.html">Advanced Patterns &amp; Concepts</a></li>
+        <li><a href="07-1-compound-components.html">Compound Components</a></li>
+        <li><a href="08-2-render-props.html">Render Props</a></li>
+        <li class="active"><a href="09-3-higher-order-components-hoc.html" class="active">Higher-Order Components (HOC)</a></li>
+        <li><a href="10-6-typescript-with-react.html">TypeScript with React</a></li>
+        <li><a href="11-7-top-interview-questions-rapid-fire.html">Top Interview Questions — Rapid Fire</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>3. Higher-Order Components (HOC)</h1>
+<p>A function that takes a component and returns a new component with additional behaviour.</p>
+<pre><code>function withAuth(WrappedComponent) {
+return function AuthComponent(props) {
+const user = useAuth();
+if (!user) return &lt;Redirect to=&quot;/login&quot; /&gt;;
+return &lt;WrappedComponent {...props} user={user} /&gt;;
+};
+}
+const ProtectedDashboard = withAuth(Dashboard);</code></pre>
+<div class="table-wrap"><table>
+  <tr><th>Modern Recommendation Prefer custom hooks over HOCs for new code. HOCs can cause prop collisions and are harder to trace in DevTools.</th></tr>
+</table></div>
+<h3>5.2 Error Boundaries</h3>
+<p>Error Boundaries catch JavaScript errors in the component tree and show a fallback UI. They ONLY work as class components.</p>
+<pre><code>class ErrorBoundary extends React.Component {
+state = { hasError: false };
+static getDerivedStateFromError(error) {
+return { hasError: true };
+}
+componentDidCatch(error, errorInfo) {
+logErrorToService(error, errorInfo);
+}
+render() {
+if (this.state.hasError) return &lt;h1&gt;Something went wrong.&lt;/h1&gt;;
+return this.props.children;
+}
+}</code></pre>
+<div class="table-wrap"><table>
+  <tr><th>Limitations Error boundaries do NOT catch: event handler errors (use try/catch), async code (promises, setTimeout), server-side rendering errors, or errors in the boundary itself.</th></tr>
+</table></div>
+<h3>5.3 Code Splitting with React.lazy &amp; Suspense</h3>
+<pre><code>const Dashboard = lazy(() =&gt; import(&quot;./Dashboard&quot;));
+function App() {
+return (
+&lt;Suspense fallback={&lt;div&gt;Loading...&lt;/div&gt;}&gt;
+&lt;Routes&gt;
+&lt;Route path=&quot;/dashboard&quot; element={&lt;Dashboard /&gt;} /&gt;
+&lt;/Routes&gt;
+&lt;/Suspense&gt;
+);
+}</code></pre>
+<p>Without splitting: one 500KB bundle loaded upfront. With splitting: a 100KB main bundle + lazy-loaded chunks only when the user navigates to that route.</p>
+<h3>5.4 Performance Optimization Checklist</h3>
+<p>Ordered by impact — fix architecture before reaching for memoization:</p>
+<ul>
+  <li>1. Fix Architecture: Colocate state near where it’s used. Split frequently-updating components from static ones.</li>
+  <li>2. Memoization (sparingly): React.memo for pure components, useMemo for expensive calculations, useCallback for stable callbacks.</li>
+  <li>3. Virtualisation: Use react-window or @tanstack/virtual for long lists (render only visible items).</li>
+  <li>4. Code Splitting: React.lazy + Suspense for route-level splitting. Dynamic import() for heavy libraries.</li>
+  <li>5. Avoid Anti-Patterns: Don’t create objects/arrays inline in JSX. Don’t store derived data in state (compute during render). Avoid unnecessary useEffect chains.</li>
+</ul>
+      </article>
+
+      <nav class="page-nav">
+        <a href="08-2-render-props.html">&#8592; Render Props</a>
+        <span class="spacer"></span>
+        <a href="10-6-typescript-with-react.html">TypeScript with React &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAG &amp; Vector Search — Synapse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e; --ink2: #3d3d5c; --ink3: #6b6b8a;
+  --bg: #ffffff; --bg2: #f4f3f0; --bg3: #eae8e4;
+  --accent: #2563eb; --accent2: #1d4ed8; --accent-bg: #eff6ff;
+  --green: #059669; --green-bg: #ecfdf5;
+  --amber: #d97706; --amber-bg: #fffbeb;
+  --rose: #e11d48; --rose-bg: #fff1f2;
+  --purple: #7c3aed; --purple-bg: #f5f3ff;
+  --teal: #0d9488; --teal-bg: #f0fdfa;
+  --coral: #ea580c; --coral-bg: #fff7ed;
+  --border: #e2e0dc; --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+@media print {
+  body { font-size: 10pt; } .no-print { display: none !important; }
+  .page-break { page-break-before: always; } .card { break-inside: avoid; }
+  pre { font-size: 8pt; } h1 { font-size: 22pt; } h2 { font-size: 14pt; }
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+.cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%); color: white; padding: 4rem 2rem; position: relative; overflow: hidden; }
+.cover::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 50%, rgba(37,99,235,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(124,58,237,0.1) 0%, transparent 50%); }
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+.diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; margin: 1rem 0; font-family: var(--mono); font-size: 0.75rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink2); }
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← Synapse</a>
+  <h1>RAG &amp; Vector Search</h1>
+</header>
+
+<div class="topic-page">
+  <aside class="sidebar">
+    <p class="sidebar-title">RAG &amp; Vector Search</p>
+    <nav><ul>
+      <li><a href="#s1"><span class="toc-num">01</span>RAG Architecture</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>Embedding Models</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>Vector Databases</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>Chunking Strategies</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>Hybrid Search</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>Reranking</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>Advanced RAG Patterns</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>RAGAS Evaluation</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>Production RAG</a></li>
+    </ul></nav>
+  </aside>
+
+  <div class="main-scroll">
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference — May 2026</div>
+  <h1>RAG &amp; <span>Vector Search</span></h1>
+  <p class="cover-sub">From embeddings and vector databases to advanced retrieval pipelines, hybrid search, reranking, and production-grade RAG systems.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">Embeddings</span>
+    <span class="cover-tag">Pinecone</span>
+    <span class="cover-tag">Weaviate</span>
+    <span class="cover-tag">Chroma</span>
+    <span class="cover-tag">Hybrid Search</span>
+    <span class="cover-tag">BM25</span>
+    <span class="cover-tag">Reranking</span>
+    <span class="cover-tag">HyDE</span>
+    <span class="cover-tag">RAGAS</span>
+    <span class="cover-tag">LangChain</span>
+    <span class="cover-tag">LlamaIndex</span>
+  </div>
+  <div class="cover-date">v1.0 — Last updated May 2026</div>
+</div>
+
+<div class="container">
+<div class="toc page-break">
+  <h2>Contents</h2>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">RAG Architecture Overview</span></a>
+    <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">Embedding Models</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">Vector Databases</span></a>
+    <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">Chunking Strategies</span></a>
+    <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">Hybrid Search</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Reranking</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Advanced RAG Patterns</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">RAGAS Evaluation</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">Production RAG</span></a>
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+<div class="section page-break" id="s1">
+  <div class="section-num">Section 01</div>
+  <h2 class="section-title">RAG Architecture Overview</h2>
+  <p class="lead">Retrieval-Augmented Generation (RAG) connects LLMs to private or up-to-date knowledge without retraining. It retrieves semantically relevant documents and injects them as context, dramatically reducing hallucinations and enabling citation-backed answers.</p>
+
+  <div class="diagram">┌─────────────────────────────────────────────────────────────────┐
+│                     RAG PIPELINE                                │
+│                                                                 │
+│  INGESTION (offline)                                            │
+│  Documents → Parse → Chunk → Embed → Vector DB                 │
+│                                                                 │
+│  RETRIEVAL (online)                                             │
+│  User Query → Embed Query → Vector Search (Top-K)              │
+│             → [Optional: Rerank] → Retrieved Chunks            │
+│             → Augment Prompt → LLM → Grounded Answer           │
+└─────────────────────────────────────────────────────────────────┘</div>
+
+  <h3>RAG vs Fine-tuning vs Prompting</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Approach</th><th>Knowledge Update</th><th>Cost</th><th>Latency</th><th>Best For</th></tr></thead>
+    <tbody>
+      <tr><td>Prompting</td><td>Static (model cutoff)</td><td>Lowest</td><td>Lowest</td><td>General tasks, public knowledge</td></tr>
+      <tr><td>RAG</td><td>Real-time (any doc)</td><td>Low–Medium</td><td>+100–300ms</td><td>Private data, dynamic knowledge, citations</td></tr>
+      <tr><td>Fine-tuning</td><td>Baked in at training</td><td>High</td><td>None</td><td>Style/tone, format enforcement, domain specialisation</td></tr>
+      <tr><td>RAG + Fine-tune</td><td>Best of both</td><td>Highest</td><td>+100ms</td><td>Enterprise: domain style + live knowledge</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="card-grid">
+    <div class="card card-accent"><h4>Naive RAG</h4><p>Simple embed → retrieve → generate. Good baseline, struggles with multi-hop questions.</p></div>
+    <div class="card card-accent"><h4>Advanced RAG</h4><p>Query rewriting, HyDE, reranking, parent-child chunking. Significantly higher recall.</p></div>
+    <div class="card card-accent"><h4>Modular RAG</h4><p>Plug-and-play retrieval, generation, and routing modules. Maximum flexibility.</p></div>
+    <div class="card card-accent"><h4>Agentic RAG</h4><p>LLM decides when and how to retrieve. Multi-hop, self-correcting, iterative.</p></div>
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>When RAG beats fine-tuning</strong>
+    Use RAG when: data changes frequently, you need source citations, you have &lt;1M tokens of domain content, or the task requires up-to-date facts. Fine-tune only when RAG is too slow or you need to change the model's output style/format fundamentally.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+<div class="section page-break" id="s2">
+  <div class="section-num">Section 02</div>
+  <h2 class="section-title">Embedding Models</h2>
+  <p class="lead">Embeddings convert text into dense numerical vectors that capture semantic meaning. The choice of embedding model directly impacts retrieval quality — a poor embedder can't be fixed by a better vector DB or reranker.</p>
+
+  <h3>Embedding Model Comparison</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Model</th><th>Dims</th><th>Max Tokens</th><th>Cost/1M tokens</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>text-embedding-3-small</td><td>1536</td><td>8191</td><td>$0.02</td><td>Best value OpenAI. Good for most RAG apps.</td></tr>
+      <tr><td>text-embedding-3-large</td><td>3072</td><td>8191</td><td>$0.13</td><td>Higher quality, supports Matryoshka (truncatable dims).</td></tr>
+      <tr><td>Cohere embed-v3</td><td>1024</td><td>512</td><td>$0.10</td><td>Excellent multilingual, supports search vs clustering input types.</td></tr>
+      <tr><td>BGE-M3</td><td>1024</td><td>8192</td><td>Free (self-host)</td><td>SOTA open-source. Dense + sparse + colbert. Best for hybrid.</td></tr>
+      <tr><td>all-MiniLM-L6-v2</td><td>384</td><td>256</td><td>Free (self-host)</td><td>Fast, lightweight. Good for high-volume low-latency needs.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Computing Embeddings &amp; Similarity</h3>
+<pre><code>from openai import OpenAI
+import numpy as np
+
+client = OpenAI()
+
+def embed(text: str) -> list[float]:
+    return client.embeddings.create(
+        model="text-embedding-3-small",
+        input=text
+    ).data[0].embedding
+
+def cosine_similarity(a: list, b: list) -> float:
+    a, b = np.array(a), np.array(b)
+    return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
+
+query_vec = embed("What is RAG?")
+doc_vec   = embed("RAG stands for Retrieval-Augmented Generation...")
+print(cosine_similarity(query_vec, doc_vec))  # e.g. 0.91</code></pre>
+
+  <h3>Distance Metrics</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Metric</th><th>Formula</th><th>Range</th><th>Use When</th></tr></thead>
+    <tbody>
+      <tr><td>Cosine similarity</td><td>dot(a,b) / (|a|·|b|)</td><td>-1 to 1</td><td>Default. Magnitude-invariant. Best for text.</td></tr>
+      <tr><td>Dot product</td><td>dot(a,b)</td><td>unbounded</td><td>Normalised embeddings only (faster than cosine).</td></tr>
+      <tr><td>Euclidean (L2)</td><td>√Σ(aᵢ-bᵢ)²</td><td>0 to ∞</td><td>When vector magnitude matters.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-amber">
+    <strong>Asymmetric embeddings</strong>
+    Cohere and some BGE models support separate query vs document encoding. Query text is short and keyword-like; documents are long passages. Using asymmetric embeddings improves retrieval quality by 10–20%.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+<div class="section page-break" id="s3">
+  <div class="section-num">Section 03</div>
+  <h2 class="section-title">Vector Databases</h2>
+  <p class="lead">Vector databases store, index, and search high-dimensional embedding vectors at scale. They power the retrieval half of RAG — the right choice depends on scale, latency requirements, existing stack, and whether you need metadata filtering.</p>
+
+  <h3>Database Comparison</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Database</th><th>Type</th><th>Index</th><th>Highlights</th><th>Pricing</th></tr></thead>
+    <tbody>
+      <tr><td>Pinecone</td><td>Managed cloud</td><td>Proprietary</td><td>Zero ops, auto-scale, namespaces, metadata filtering</td><td>Serverless from $0</td></tr>
+      <tr><td>Weaviate</td><td>Open-source + cloud</td><td>HNSW</td><td>GraphQL API, multi-modal, hybrid BM25+vector built-in</td><td>Free self-host</td></tr>
+      <tr><td>Chroma</td><td>Open-source</td><td>HNSW</td><td>Dev-friendly, LangChain native, in-memory or persistent</td><td>Free</td></tr>
+      <tr><td>Qdrant</td><td>Open-source + cloud</td><td>HNSW</td><td>Rust-native, fast, payload filtering, quantisation</td><td>Free self-host</td></tr>
+      <tr><td>Milvus</td><td>Open-source + cloud</td><td>HNSW/IVF/DiskANN</td><td>Enterprise-grade, 1B+ vectors, GPU support</td><td>Free self-host</td></tr>
+      <tr><td>pgvector</td><td>Postgres extension</td><td>HNSW/IVF</td><td>SQL joins + vector search, no new infra, RLS</td><td>Free</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>HNSW Index Structure</h3>
+  <div class="diagram">Hierarchical Navigable Small World (HNSW)
+
+  Layer 2 (sparse):   1 ──────────────── 5
+                      │                  │
+  Layer 1:            1 ── 2 ── 4 ────── 5
+                      │    │    │
+  Layer 0 (dense):    1─2─3─4─5─6─7─8─9─10   ← all nodes
+
+  Search: start at top layer, greedily navigate to nearest,
+  descend to next layer, repeat until Layer 0.
+  O(log N) search vs O(N) brute force.</div>
+
+  <h3>Getting Started: Chroma + LangChain</h3>
+<pre><code>from langchain_chroma import Chroma
+from langchain_openai import OpenAIEmbeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import TextLoader
+
+# Load and chunk
+loader = TextLoader("docs/architecture.md")
+docs = loader.load()
+splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=64)
+chunks = splitter.split_documents(docs)
+
+# Create vector store
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+vectordb = Chroma.from_documents(chunks, embeddings, persist_directory="./chroma_db")
+
+# Similarity search
+results = vectordb.similarity_search("How does HNSW work?", k=4)
+for r in results:
+    print(r.page_content[:200])</code></pre>
+
+  <div class="callout callout-blue">
+    <strong>pgvector is sufficient for most teams</strong>
+    If you already run Postgres and have fewer than 1M vectors, pgvector with an HNSW index handles ~10ms p99 retrieval. Add a dedicated vector DB only when you outgrow it.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+<div class="section page-break" id="s4">
+  <div class="section-num">Section 04</div>
+  <h2 class="section-title">Chunking Strategies</h2>
+  <p class="lead">Chunking — splitting documents into smaller pieces before embedding — is one of the highest-leverage decisions in RAG. Chunk size directly controls the precision/recall trade-off: too small loses context, too large dilutes signal.</p>
+
+  <div class="diagram">Document
+    │
+    ├─ Fixed-size splitting  → equal-length chunks (fast, simple)
+    ├─ Recursive splitting   → paragraph → sentence → word fallback
+    ├─ Semantic splitting    → split at topic boundaries (embedding similarity)
+    └─ Parent-child          → large parent chunks + small child chunks indexed</div>
+
+  <h3>Strategy Comparison</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Strategy</th><th>Overlap</th><th>Avg Size</th><th>Best For</th><th>Recall Impact</th></tr></thead>
+    <tbody>
+      <tr><td>Fixed-size</td><td>10–15%</td><td>256–512 tokens</td><td>Uniform text (articles, FAQs)</td><td>Baseline</td></tr>
+      <tr><td>Recursive</td><td>10%</td><td>200–800 tokens</td><td>General purpose — most common</td><td>+5–10%</td></tr>
+      <tr><td>Semantic</td><td>None</td><td>Variable</td><td>Mixed-topic docs, long reports</td><td>+10–15%</td></tr>
+      <tr><td>Parent-child</td><td>None</td><td>Child: 128t / Parent: 1024t</td><td>When you need context around the match</td><td>+15–20%</td></tr>
+      <tr><td>Sentence-window</td><td>±2 sentences</td><td>1 sentence core</td><td>Precise Q&amp;A, targeted retrieval</td><td>+10%</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>RecursiveCharacterTextSplitter</h3>
+<pre><code>from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=512,        # ~380 words
+    chunk_overlap=64,      # ~12.5% overlap
+    separators=["\n\n", "\n", ". ", " ", ""],  # priority order
+    length_function=len,
+)
+chunks = splitter.split_text(document_text)
+print(f"{len(chunks)} chunks, avg {sum(len(c) for c in chunks)//len(chunks)} chars")</code></pre>
+
+  <h3>Parent-Child Chunking (LlamaIndex)</h3>
+<pre><code>from llama_index.core.node_parser import HierarchicalNodeParser, get_leaf_nodes
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+
+# Parse into parent (1024t) and child (128t) nodes
+parser = HierarchicalNodeParser.from_defaults(chunk_sizes=[1024, 256, 128])
+docs   = SimpleDirectoryReader("./data").load_data()
+nodes  = parser.get_nodes_from_documents(docs)
+
+# Index only leaf (child) nodes — retrieve child, return parent context
+leaf_nodes = get_leaf_nodes(nodes)
+index = VectorStoreIndex(leaf_nodes)</code></pre>
+
+  <div class="callout callout-green">
+    <strong>Practical starting point</strong>
+    Start with RecursiveCharacterTextSplitter at 512 tokens / 10% overlap. Measure RAGAS context recall. Only invest in semantic or parent-child chunking if recall is below 0.7.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+<div class="section page-break" id="s5">
+  <div class="section-num">Section 05</div>
+  <h2 class="section-title">Hybrid Search</h2>
+  <p class="lead">Hybrid search combines dense vector similarity with sparse BM25 keyword search. Vector search excels at semantic matching; BM25 excels at exact keyword and rare-term matching. Combining them consistently outperforms either alone.</p>
+
+  <div class="diagram">User Query
+     │
+     ├──► Dense Search (embeddings)  → top-50 semantic results
+     │                                        │
+     ├──► Sparse BM25 Search         → top-50 keyword results
+     │                                        │
+     └──────────── RRF Fusion ◄───────────────┘
+                        │
+                   Re-ranked top-K results</div>
+
+  <h3>Reciprocal Rank Fusion (RRF)</h3>
+<pre><code>from collections import defaultdict
+
+def reciprocal_rank_fusion(result_lists: list[list[str]], k: int = 60) -> list[str]:
+    """
+    result_lists: list of ranked document-ID lists from multiple retrievers
+    k: RRF constant (60 recommended by original paper)
+    Returns: merged and re-ranked list of doc IDs
+    """
+    scores = defaultdict(float)
+    for results in result_lists:
+        for rank, doc_id in enumerate(results, start=1):
+            scores[doc_id] += 1.0 / (k + rank)
+    return sorted(scores, key=scores.get, reverse=True)
+
+dense_results = ["doc3", "doc1", "doc7", "doc2"]   # from vector DB
+sparse_results = ["doc1", "doc5", "doc3", "doc8"]   # from BM25
+merged = reciprocal_rank_fusion([dense_results, sparse_results])
+print(merged)  # ['doc3', 'doc1', 'doc7', 'doc5', ...]</code></pre>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Search Type</th><th>Strengths</th><th>Weaknesses</th><th>Tool</th></tr></thead>
+    <tbody>
+      <tr><td>Dense (vector)</td><td>Synonyms, paraphrases, multilingual, conceptual</td><td>Misses exact terms, rare words</td><td>Pinecone, pgvector, Qdrant</td></tr>
+      <tr><td>Sparse (BM25)</td><td>Exact match, product codes, names, acronyms</td><td>No semantic understanding</td><td>Elasticsearch, BM25s lib</td></tr>
+      <tr><td>Hybrid (RRF)</td><td>Best recall across both query types</td><td>Slight latency increase</td><td>Weaviate, Qdrant, LangChain</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-green">
+    <strong>Hybrid search improves recall by 15–30%</strong>
+    Measured on BEIR benchmark. Especially valuable in enterprise settings where users mix natural language with product codes, IDs, or acronyms that semantic search alone misses.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+<div class="section page-break" id="s6">
+  <div class="section-num">Section 06</div>
+  <h2 class="section-title">Reranking</h2>
+  <p class="lead">Reranking is a two-stage approach: retrieve a large candidate set cheaply (e.g., top-50), then score each candidate against the query with a more powerful cross-encoder to select the final top-K. It improves precision without increasing index scan costs.</p>
+
+  <div class="diagram">Stage 1 — Recall (fast):
+  Vector Search / BM25  →  Top-50 candidates  (~5ms)
+
+Stage 2 — Precision (accurate):
+  Cross-Encoder Reranker  →  Score each candidate  →  Top-5 final  (~80ms)
+
+Net result: precision of expensive cross-encoder at cost of cheap bi-encoder</div>
+
+  <h3>Reranker Comparison</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Reranker</th><th>Speed</th><th>Quality</th><th>Cost</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>BM25 (no rerank)</td><td>Fastest</td><td>Baseline</td><td>Free</td><td>Keyword recall only</td></tr>
+      <tr><td>Bi-encoder (retriever)</td><td>Fast</td><td>Good</td><td>Low</td><td>Same model as embedding — approximate</td></tr>
+      <tr><td>Cross-encoder (CE)</td><td>Slow (~80ms/50 docs)</td><td>Excellent</td><td>Medium</td><td>Jointly encodes query+doc — most accurate</td></tr>
+      <tr><td>Cohere Rerank</td><td>~200ms API</td><td>Excellent</td><td>$2/1K calls</td><td>Best managed option. Multilingual v3.</td></tr>
+      <tr><td>LLM reranker</td><td>Slowest</td><td>Best</td><td>High</td><td>GPT-4 listwise — only for offline/batch</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Cohere Rerank API</h3>
+<pre><code>import cohere
+
+co = cohere.Client("your-api-key")
+
+query = "How does gradient descent work?"
+documents = [
+    "Gradient descent minimises loss by iteratively adjusting weights...",
+    "Newton's method uses second-order derivatives...",
+    "Stochastic gradient descent samples mini-batches...",
+    "Adam optimizer combines momentum and adaptive learning rates...",
+]
+
+results = co.rerank(
+    query=query,
+    documents=documents,
+    model="rerank-v3.5",
+    top_n=2,
+)
+
+for r in results.results:
+    print(f"Rank {r.index}: score={r.relevance_score:.3f}")
+    print(f"  {documents[r.index][:80]}")</code></pre>
+
+  <div class="callout callout-amber">
+    <strong>Latency budget</strong>
+    Budget 100–250ms for retrieval. Dense search: ~5ms. Reranking 50 docs: ~80–200ms. If you're over budget, reduce candidate count to 20 or use a lighter CE model (BGE-reranker-base vs -large).
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+<div class="section page-break" id="s7">
+  <div class="section-num">Section 07</div>
+  <h2 class="section-title">Advanced RAG Patterns</h2>
+  <p class="lead">When naive RAG hits quality ceilings, these patterns address specific failure modes — poor query formulation, multi-hop reasoning, low-quality retrieval, and knowledge graph traversal.</p>
+
+  <h3>HyDE — Hypothetical Document Embeddings</h3>
+  <div class="diagram">User Query (short, keyword-like)
+    │
+    └─► LLM generates a "hypothetical answer" paragraph
+              │
+              └─► Embed the hypothetical answer (not the query!)
+                        │
+                        └─► Vector search — matches real documents better</div>
+<pre><code>from openai import OpenAI
+
+client = OpenAI()
+
+def hyde_retrieval(query: str, vectordb, k: int = 5):
+    # Step 1: generate hypothetical document
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{
+            "role": "user",
+            "content": f"Write a paragraph that would answer: {query}"
+        }],
+        max_tokens=200
+    )
+    hypothetical_doc = response.choices[0].message.content
+
+    # Step 2: embed the hypothetical doc and search
+    return vectordb.similarity_search(hypothetical_doc, k=k)</code></pre>
+
+  <h3>Advanced Pattern Comparison</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Pattern</th><th>Technique</th><th>Improves</th><th>Added Latency</th></tr></thead>
+    <tbody>
+      <tr><td>HyDE</td><td>Embed a generated answer instead of query</td><td>Recall +15%</td><td>+1 LLM call</td></tr>
+      <tr><td>Query Rewriting</td><td>LLM reformulates the query for better retrieval</td><td>Recall +10%</td><td>+1 LLM call</td></tr>
+      <tr><td>Multi-query</td><td>Generate 3–5 query variants, merge results</td><td>Recall +20%</td><td>+1 LLM call</td></tr>
+      <tr><td>Step-back Prompting</td><td>Ask a more abstract question first</td><td>Reasoning quality</td><td>+1 LLM call</td></tr>
+      <tr><td>Self-RAG</td><td>Model decides when to retrieve, critiques its answer</td><td>Faithfulness</td><td>+2–3 LLM calls</td></tr>
+      <tr><td>GraphRAG</td><td>Knowledge graph + vector search for entity-level facts</td><td>Complex reasoning</td><td>High</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-amber">
+    <strong>Self-RAG adds 20–40% latency</strong>
+    Self-RAG is powerful but expensive. Use it only when faithfulness is critical (medical, legal, financial). For most chatbots, HyDE + reranking gives 80% of the benefit at 20% of the cost.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+<div class="section page-break" id="s8">
+  <div class="section-num">Section 08</div>
+  <h2 class="section-title">RAGAS Evaluation</h2>
+  <p class="lead">RAGAS (Retrieval-Augmented Generation Assessment) provides a reference-free evaluation framework for RAG pipelines. It measures four independent dimensions that together give a complete quality picture.</p>
+
+  <div class="diagram">RAG System Output
+    │
+    ├─ Faithfulness        ← Is the answer grounded in the retrieved context?
+    ├─ Answer Relevancy    ← Does the answer address the question asked?
+    ├─ Context Precision   ← Are the retrieved chunks relevant (no noise)?
+    └─ Context Recall      ← Were all needed facts retrieved?</div>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Metric</th><th>What It Measures</th><th>Range</th><th>Target</th></tr></thead>
+    <tbody>
+      <tr><td>Faithfulness</td><td>Fraction of answer claims that are grounded in context</td><td>0–1</td><td>&gt; 0.80</td></tr>
+      <tr><td>Answer Relevancy</td><td>How well the answer addresses the actual question</td><td>0–1</td><td>&gt; 0.75</td></tr>
+      <tr><td>Context Precision</td><td>Fraction of retrieved chunks that are actually useful</td><td>0–1</td><td>&gt; 0.70</td></tr>
+      <tr><td>Context Recall</td><td>Fraction of ground-truth facts that appear in retrieved context</td><td>0–1</td><td>&gt; 0.75</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Running RAGAS Evaluation</h3>
+<pre><code>from ragas import evaluate
+from ragas.metrics import faithfulness, answer_relevancy, context_precision, context_recall
+from datasets import Dataset
+
+# Build evaluation dataset
+data = {
+    "question": ["What is RAG?", "How does HNSW work?"],
+    "answer": ["RAG is retrieval-augmented generation...", "HNSW builds a hierarchical graph..."],
+    "contexts": [["RAG stands for...", "It uses vector search..."], ["HNSW index..."]],
+    "ground_truth": ["RAG retrieves documents to augment LLM context.", "HNSW navigates hierarchy."]
+}
+dataset = Dataset.from_dict(data)
+
+result = evaluate(
+    dataset,
+    metrics=[faithfulness, answer_relevancy, context_precision, context_recall]
+)
+print(result)
+# {'faithfulness': 0.87, 'answer_relevancy': 0.81, ...}</code></pre>
+
+  <div class="callout callout-green">
+    <strong>RAGAS in CI/CD</strong>
+    Run RAGAS on a golden dataset of 50–100 Q&amp;A pairs on every PR that changes your chunking, embedding model, or retrieval parameters. Gate merges on: faithfulness ≥ 0.80 and context recall ≥ 0.75.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 9 ══════════════════════════ -->
+<div class="section page-break" id="s9">
+  <div class="section-num">Section 09</div>
+  <h2 class="section-title">Production RAG</h2>
+  <p class="lead">Taking RAG from prototype to production requires addressing ingestion pipelines, caching, multi-tenancy, latency budgets, and streaming. A production RAG system is not just retrieval — it's a data pipeline, a serving system, and an eval harness all in one.</p>
+
+  <div class="diagram">INGESTION PIPELINE
+  Documents → Docling/Unstructured → Chunks → Embed (batch) → Upsert to Vector DB
+  (run nightly or on change event)
+
+QUERY PIPELINE
+  Request → [Semantic Cache hit?] → YES → return cached response
+           → NO → Query Rewrite → Hybrid Search + Rerank
+                → Augment → LLM (streaming) → Stream to Client
+                → Cache result → Log trace to LangSmith</div>
+
+  <h3>FastAPI Streaming RAG Endpoint</h3>
+<pre><code>from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_chroma import Chroma
+from langchain_core.prompts import ChatPromptTemplate
+import asyncio
+
+app = FastAPI()
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+vectordb = Chroma(persist_directory="./chroma_db", embedding_function=embeddings)
+llm = ChatOpenAI(model="gpt-4o-mini", streaming=True)
+
+RAG_PROMPT = ChatPromptTemplate.from_template("""
+Use the context below to answer the question.
+Context: {context}
+Question: {question}
+""")
+
+@app.get("/ask")
+async def ask(question: str):
+    docs = vectordb.similarity_search(question, k=4)
+    context = "\n\n".join(d.page_content for d in docs)
+
+    async def generate():
+        async for chunk in llm.astream(
+            RAG_PROMPT.format_messages(context=context, question=question)
+        ):
+            yield chunk.content
+
+    return StreamingResponse(generate(), media_type="text/plain")</code></pre>
+
+  <div class="card-grid">
+    <div class="card card-accent"><h4>Semantic Caching</h4><p>Cache LLM responses keyed by embedding similarity. GPTCache or Redis. 30–60% cache hit rate on typical chatbots.</p></div>
+    <div class="card card-accent"><h4>Multi-tenancy</h4><p>Namespace per tenant in Pinecone. RLS in pgvector. Metadata filter in Qdrant. Never share a namespace across tenants.</p></div>
+    <div class="card card-accent"><h4>Async Ingestion</h4><p>Celery + Redis queue for document processing. Webhook triggers re-indexing on new uploads. Never block the query path.</p></div>
+    <div class="card card-accent"><h4>Observability</h4><p>Log every retrieval event: query, retrieved docs, scores, latency. LangSmith traces give full RAG pipeline visibility.</p></div>
+  </div>
+
+  <h3>Further Reading</h3>
+  <ul class="clean">
+    <li><a href="https://python.langchain.com/docs/tutorials/rag/" target="_blank">LangChain RAG Tutorial</a></li>
+    <li><a href="https://docs.llamaindex.ai/en/stable/understanding/rag/" target="_blank">LlamaIndex RAG Guide</a></li>
+    <li><a href="https://docs.ragas.io/" target="_blank">RAGAS Documentation</a></li>
+    <li><a href="https://docs.pinecone.io/guides/get-started/quickstart" target="_blank">Pinecone Quickstart</a></li>
+    <li><a href="https://weaviate.io/developers/weaviate/search/hybrid" target="_blank">Weaviate Hybrid Search</a></li>
+    <li><a href="https://arxiv.org/abs/2312.10997" target="_blank">RAG Survey Paper (arXiv)</a></li>
+  </ul>
+</div>
+
+<div class="footer">Synapse · RAG &amp; Vector Search · May 2026</div>
+</div><!-- /container -->
+  </div><!-- /main-scroll -->
+</div><!-- /topic-page -->
+<footer class="guide-footer">Synapse &middot; AI &amp; LLM Engineering</footer>
+</body>
+</html>

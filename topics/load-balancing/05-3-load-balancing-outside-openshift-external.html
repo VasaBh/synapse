@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Load Balancing Outside OpenShift (External) – Load Balancing</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../load-balancing.html">Load Balancing</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">Load Balancing Outside OpenShift (External)</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Load Balancing</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-api-traffic-load-balancing-fundamentals.html">API &amp; Traffic Load Balancing Fundamentals</a></li>
+        <li><a href="04-2-load-balancing-inside-openshift.html">Load Balancing Inside OpenShift</a></li>
+        <li class="active"><a href="05-3-load-balancing-outside-openshift-external.html" class="active">Load Balancing Outside OpenShift (External)</a></li>
+        <li><a href="06-4-how-to-use-external-load-balancers-with-openshift.html">How to Use External Load Balancers WITH OpenShift</a></li>
+        <li><a href="07-5-canary-deployments-in-openshift.html">Canary Deployments in OpenShift</a></li>
+        <li><a href="08-6-load-balancing-between-production-and-cobdr-environments.html">Load Balancing Between Production and COB/DR Environments</a></li>
+        <li><a href="09-7-complete-load-balancing-stack-end-to-end.html">Complete Load Balancing Stack — End-to-End</a></li>
+        <li><a href="10-8-decision-guide-which-approach-to-use.html">Decision Guide — Which Approach to Use?</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>3. Load Balancing Outside OpenShift (External)</h1>
+<p>External load balancers sit in front of the entire OpenShift cluster. They are the first point of contact for client traffic and distribute requests to the OpenShift worker nodes running router (ingress controller) pods, and to control plane nodes for API access.</p>
+<h3>3.1 External Hardware / Software Load Balancers</h3>
+<p>Enterprise environments commonly use dedicated load balancer appliances or software:</p>
+<div class="table-wrap"><table>
+  <tr><th>Product</th><th>Type</th><th>Key Features</th></tr>
+  <tr><td>F5 BIG-IP</td><td>Hardware/Virtual Appliance</td><td>LTM for local LB, GTM/DNS for GSLB. Native OpenShift integration via CIS (Container Ingress Services).</td></tr>
+  <tr><td>Citrix NetScaler</td><td>Hardware/Virtual Appliance</td><td>ADC with GSLB capability via MEP. Supports active-active and active-passive.</td></tr>
+  <tr><td>HAProxy</td><td>Open Source Software</td><td>High-performance L4/L7 LB. The same software OpenShift uses internally for its router.</td></tr>
+  <tr><td>NGINX</td><td>Open Source / Commercial</td><td>L7 reverse proxy and LB. NGINX Plus adds health checks, session persistence.</td></tr>
+  <tr><td>Keepalived + VIPs</td><td>Open Source (On-Prem IPI)</td><td>Built into on-prem OpenShift IPI. Provides HA via VIPs but not true load distribution.</td></tr>
+</table></div>
+<h3>3.2 Cloud Provider Load Balancers</h3>
+<p>When OpenShift is installed via IPI (Installer Provisioned Infrastructure) on a cloud provider, the installer automatically provisions cloud-native load balancers:</p>
+<ul>
+  <li>AWS: Network Load Balancer (NLB) for the API (port 6443) and an Application Load Balancer or NLB for ingress (ports 80/443).</li>
+  <li>Azure: Azure Load Balancer for both API and ingress endpoints.</li>
+  <li>GCP: Google Cloud Load Balancer with TCP proxy for API and HTTP(S) LB for ingress.</li>
+</ul>
+<p>These are automatically managed by the cloud provider and scaled dynamically. No manual configuration is required.</p>
+<h3>3.3 DNS-Based Load Balancing</h3>
+<p>The simplest external load balancing approach is DNS round-robin, where a hostname resolves to multiple IP addresses. The DNS server rotates the order of IPs in its response, and the client typically connects to the first IP.</p>
+<p>Limitations: No health checking (clients may be sent to dead servers), relies on client-side TTL behaviour, no awareness of server load or capacity. Primarily used as a cheap supplementary mechanism, not as a primary load balancer.</p>
+      </article>
+
+      <nav class="page-nav">
+        <a href="04-2-load-balancing-inside-openshift.html">&#8592; Load Balancing Inside OpenShift</a>
+        <span class="spacer"></span>
+        <a href="06-4-how-to-use-external-load-balancers-with-openshift.html">How to Use External Load Balancers WITH OpenShift &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

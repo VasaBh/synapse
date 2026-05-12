@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FastAPI: Publishing Metrics for Autoscaling – Autoscaling</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../autoscaling.html">Autoscaling</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">FastAPI: Publishing Metrics for Autoscaling</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Autoscaling</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-scaling-fundamentals.html">Scaling Fundamentals</a></li>
+        <li><a href="04-2-horizontal-pod-autoscaler-hpa.html">Horizontal Pod Autoscaler (HPA)</a></li>
+        <li><a href="05-3-vertical-pod-autoscaler-vpa.html">Vertical Pod Autoscaler (VPA)</a></li>
+        <li><a href="06-4-custom-metrics-autoscaler-keda.html">Custom Metrics Autoscaler (KEDA)</a></li>
+        <li><a href="07-5-cluster-and-machine-autoscaler-node-scaling.html">Cluster and Machine Autoscaler (Node Scaling)</a></li>
+        <li><a href="08-6-openshift-serverless-knative-autoscaling.html">OpenShift Serverless (Knative) Autoscaling</a></li>
+        <li class="active"><a href="09-7-fastapi-publishing-metrics-for-autoscaling.html" class="active">FastAPI: Publishing Metrics for Autoscaling</a></li>
+        <li><a href="10-8-what-is-not-possible-limitations.html">What is NOT Possible — Limitations</a></li>
+        <li><a href="11-9-decision-guide-which-autoscaler-to-use.html">Decision Guide — Which Autoscaler to Use?</a></li>
+        <li><a href="12-10-end-to-end-autoscaling-architecture.html">End-to-End Autoscaling Architecture</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>7. FastAPI: Publishing Metrics for Autoscaling</h1>
+<p>This section covers how to instrument a FastAPI application to expose Prometheus metrics, which can then drive KEDA-based autoscaling in OpenShift.</p>
+<h3>7.1 Option A: Instrument FastAPI with Prometheus</h3>
+<p>The prometheus-fastapi-instrumentator library automatically adds Prometheus metrics to your FastAPI application with minimal code changes.</p>
+<h4>Step 1: Install the Library</h4>
+<pre><code>pip install prometheus-fastapi-instrumentator</code></pre>
+<h4>Step 2: Instrument Your App</h4>
+<pre><code>from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
+app = FastAPI(title=&quot;My API&quot;)
+# Create and configure instrumentator
+instrumentator = Instrumentator(
+should_group_status_codes=True,
+should_ignore_untemplated=True,
+excluded_handlers=[&quot;/healthz&quot;, &quot;/readyz&quot;, &quot;/metrics&quot;],
+)
+instrumentator.instrument(app)
+# Expose /metrics endpoint on startup
+@app.on_event(&quot;startup&quot;)
+async def _startup():
+instrumentator.expose(app, endpoint=&quot;/metrics&quot;, include_in_schema=False)
+@app.get(&quot;/&quot;)
+async def root():
+return {&quot;message&quot;: &quot;Hello World&quot;}
+@app.get(&quot;/items/{item_id}&quot;)
+async def read_item(item_id: int):
+return {&quot;item_id&quot;: item_id}</code></pre>
+<p>This automatically exposes at /metrics:</p>
+<ul>
+  <li>http_requests_total: Counter with labels: handler, status, method.</li>
+  <li>http_request_duration_seconds: Histogram of request latencies.</li>
+  <li>http_request_size_bytes: Summary of incoming request sizes.</li>
+  <li>http_response_size_bytes: Summary of outgoing response sizes.</li>
+</ul>
+<h4>Step 3: Custom Business Metrics (Optional)</h4>
+<pre><code>from prometheus_client import Counter, Histogram, Gauge
+# Custom business metrics
+orders_processed = Counter(
+'orders_processed_total',
+'Total orders processed',
+['order_type']
+)
+active_connections = Gauge(
+'active_websocket_connections',
+'Number of active WebSocket connections'
+)
+# Use in your endpoints
+@app.post(&quot;/orders&quot;)
+async def create_order(order: OrderModel):
+orders_processed.labels(order_type=order.type).inc()
+return process_order(order)</code></pre>
+<h4>Step 4: ServiceMonitor (Tell Prometheus to Scrape)</h4>
+<pre><code># Enable user workload monitoring (one-time, cluster admin)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+name: cluster-monitoring-config
+namespace: openshift-monitoring
+data:
+config.yaml: |
+enableUserWorkload: true
+---
+# ServiceMonitor for your FastAPI app
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+name: my-api-monitor
+labels:
+app: my-api
+spec:
+selector:
+matchLabels:
+app: my-api
+endpoints:
+- port: http
+path: /metrics
+interval: 15s</code></pre>
+<h4>Step 5: KEDA ScaledObject</h4>
+<p>Now connect KEDA to the Prometheus metrics to autoscale:</p>
+<pre><code>apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+name: my-api-scaler
+spec:
+scaleTargetRef:
+name: my-api
+minReplicaCount: 1
+maxReplicaCount: 15
+triggers:
+- type: prometheus
+metadata:
+serverAddress: https://thanos-querier.openshift-monitoring.svc.cluster.local:9092
+query: |
+sum(rate(http_requests_total{namespace=&quot;my-ns&quot;,service=&quot;my-api&quot;}[2m]))
+threshold: &quot;50&quot;
+authModes: &quot;bearer&quot;
+authenticationRef:
+name: keda-trigger-auth-prometheus</code></pre>
+<h3>7.2 Option B: Autoscale WITHOUT Code Changes</h3>
+<p>If you cannot modify your FastAPI application code, you have three viable approaches:</p>
+<h4>Approach 1: HPA on CPU (Indirect Traffic Proxy)</h4>
+<p>More HTTP traffic naturally causes higher CPU usage. HPA scales on CPU utilisation as a proxy for traffic load. No code changes required — just set resource requests on your pods.</p>
+<pre><code># Just set resource requests and create HPA
+oc autoscale deployment/my-api --min=2 --max=10 --cpu-percent=60</code></pre>
+<p>Pros: Simplest setup. No operators needed beyond default. Cons: Indirect — CPU is not always proportional to traffic (e.g., I/O-bound APIs). Cannot scale to zero.</p>
+<h4>Approach 2: Knative Serverless (Concurrency-Based)</h4>
+<p>Deploy your FastAPI as a Knative Service. Knative counts concurrent requests externally — no /metrics endpoint needed. Supports scale to zero.</p>
+<pre><code>apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+name: my-api
+spec:
+template:
+metadata:
+annotations:
+autoscaling.knative.dev/target: &quot;30&quot;
+autoscaling.knative.dev/metric: &quot;concurrency&quot;
+spec:
+containers:
+- image: my-registry/my-api:latest
+ports:
+- containerPort: 8000</code></pre>
+<p>Pros: True traffic-based scaling. Scale to zero. No code changes. Cons: Requires OpenShift Serverless Operator. Cold-start latency when scaling from zero.</p>
+<h4>Approach 3: KEDA with Istio/Service Mesh Metrics</h4>
+<p>If Service Mesh is deployed, the Envoy sidecar already collects request metrics (istio_requests_total). KEDA can scale on these without any changes to your application.</p>
+<pre><code>apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+name: my-api-mesh-scaler
+spec:
+scaleTargetRef:
+name: my-api
+minReplicaCount: 1
+maxReplicaCount: 15
+triggers:
+- type: prometheus
+metadata:
+serverAddress: https://thanos-querier.openshift-monitoring.svc.cluster.local:9092
+query: |
+sum(rate(istio_requests_total{destination_service_name=&quot;my-api&quot;}[2m]))
+threshold: &quot;100&quot;
+authModes: &quot;bearer&quot;
+authenticationRef:
+name: keda-trigger-auth-prometheus</code></pre>
+      </article>
+
+      <nav class="page-nav">
+        <a href="08-6-openshift-serverless-knative-autoscaling.html">&#8592; OpenShift Serverless (Knative) Autoscaling</a>
+        <span class="spacer"></span>
+        <a href="10-8-what-is-not-possible-limitations.html">What is NOT Possible — Limitations &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

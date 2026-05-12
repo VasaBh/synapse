@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLMOps &amp; Production AI — Synapse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e; --ink2: #3d3d5c; --ink3: #6b6b8a;
+  --bg: #ffffff; --bg2: #f4f3f0; --bg3: #eae8e4;
+  --accent: #2563eb; --accent2: #1d4ed8; --accent-bg: #eff6ff;
+  --green: #059669; --green-bg: #ecfdf5;
+  --amber: #d97706; --amber-bg: #fffbeb;
+  --rose: #e11d48; --rose-bg: #fff1f2;
+  --purple: #7c3aed; --purple-bg: #f5f3ff;
+  --teal: #0d9488; --teal-bg: #f0fdfa;
+  --coral: #ea580c; --coral-bg: #fff7ed;
+  --border: #e2e0dc; --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+@media print {
+  body { font-size: 10pt; } .no-print { display: none !important; }
+  .page-break { page-break-before: always; } .card { break-inside: avoid; }
+  pre { font-size: 8pt; } h1 { font-size: 22pt; } h2 { font-size: 14pt; }
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+.cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%); color: white; padding: 4rem 2rem; position: relative; overflow: hidden; }
+.cover::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 50%, rgba(37,99,235,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(124,58,237,0.1) 0%, transparent 50%); }
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+.diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; margin: 1rem 0; font-family: var(--mono); font-size: 0.75rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink2); }
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← Synapse</a>
+  <h1>LLMOps &amp; Production AI</h1>
+</header>
+
+<div class="topic-page">
+  <aside class="sidebar">
+    <p class="sidebar-title">LLMOps &amp; Production AI</p>
+    <nav><ul>
+      <li><a href="#s1"><span class="toc-num">01</span>Model Serving</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>Observability &amp; Tracing</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>Cost Optimization</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>Caching Strategies</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>A/B Testing LLMs</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>Guardrails &amp; Safety</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>Model Versioning</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>Latency Optimization</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>CI/CD for LLM Apps</a></li>
+    </ul></nav>
+  </aside>
+
+  <div class="main-scroll">
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference — May 2026</div>
+  <h1>LLMOps &amp; <span>Production AI</span></h1>
+  <p class="cover-sub">Running LLM-powered applications reliably at scale — serving infrastructure, observability, cost control, safety guardrails, and continuous improvement pipelines.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">vLLM</span>
+    <span class="cover-tag">LangSmith</span>
+    <span class="cover-tag">OpenTelemetry</span>
+    <span class="cover-tag">Prompt Caching</span>
+    <span class="cover-tag">A/B Testing</span>
+    <span class="cover-tag">Guardrails AI</span>
+    <span class="cover-tag">MLflow</span>
+    <span class="cover-tag">LiteLLM</span>
+    <span class="cover-tag">Streaming</span>
+    <span class="cover-tag">CI/CD</span>
+  </div>
+  <div class="cover-date">v1.0 — Last updated May 2026</div>
+</div>
+
+<div class="container">
+<div class="toc page-break">
+  <h2>Contents</h2>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">Model Serving</span></a>
+    <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">Observability &amp; Tracing</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">Cost Optimization</span></a>
+    <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">Caching Strategies</span></a>
+    <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">A/B Testing LLMs</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Guardrails &amp; Safety</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Model Versioning &amp; Registry</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">Latency Optimization</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">CI/CD for LLM Apps</span></a>
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+<div class="section page-break" id="s1">
+  <div class="section-num">Section 01</div>
+  <h2 class="section-title">Model Serving</h2>
+  <p class="lead">Serving LLMs efficiently is an infrastructure challenge: GPU memory is expensive, requests are bursty, and a single large model can saturate a whole GPU. Modern serving frameworks like vLLM solve this with paged attention and continuous batching.</p>
+
+  <div class="diagram">Client Requests (concurrent)
+       │
+       ▼
+  Load Balancer (nginx / Kubernetes Service)
+       │
+       ▼
+  vLLM Server (paged attention + continuous batching)
+  ┌──────────────────────────────────────────────┐
+  │  KV Cache pages (non-contiguous memory)      │
+  │  Request queue → dynamic batching            │
+  │  GPU utilisation: 70-90% vs 30% naive        │
+  └──────────────────────────────────────────────┘
+       │
+       ▼
+  GPU Cluster (A100/H100)</div>
+
+  <h3>Serving Framework Comparison</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Framework</th><th>Throughput</th><th>Key Feature</th><th>Best For</th></tr></thead>
+    <tbody>
+      <tr><td>vLLM</td><td>Highest</td><td>Paged attention, continuous batching, OpenAI API</td><td>Production self-hosted LLMs</td></tr>
+      <tr><td>TGI (HuggingFace)</td><td>High</td><td>Tensor parallelism, quantisation, gRPC</td><td>HuggingFace ecosystem, enterprise</td></tr>
+      <tr><td>Triton Inference Server</td><td>Very High</td><td>Multi-model, GPU/CPU, ONNX/TensorRT</td><td>Multi-model serving, NVIDIA shop</td></tr>
+      <tr><td>Ollama</td><td>Medium</td><td>One-command local deploy, GGUF support</td><td>Local dev, edge, MacOS</td></tr>
+      <tr><td>llama.cpp</td><td>CPU-optimised</td><td>4-bit quant, no GPU required</td><td>CPU-only servers, edge devices</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>vLLM: Launch &amp; Query</h3>
+<pre><code># Launch vLLM server (OpenAI-compatible API)
+python -m vllm.entrypoints.openai.api_server \
+    --model meta-llama/Llama-3-8B-Instruct \
+    --tensor-parallel-size 2 \
+    --max-model-len 8192 \
+    --port 8000</code></pre>
+
+<pre><code># Query with standard OpenAI SDK (drop-in replacement)
+from openai import OpenAI
+
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="not-needed")
+
+response = client.chat.completions.create(
+    model="meta-llama/Llama-3-8B-Instruct",
+    messages=[{"role": "user", "content": "Explain gradient descent."}],
+    max_tokens=512,
+    stream=True,
+)
+for chunk in response:
+    print(chunk.choices[0].delta.content or "", end="", flush=True)</code></pre>
+
+  <div class="callout callout-blue">
+    <strong>vLLM's paged attention reduces GPU waste by ~60%</strong>
+    Traditional serving pre-allocates a contiguous KV cache per request, wasting memory on speculative lengths. vLLM's paged attention allocates cache in fixed-size pages on demand — 2–4x higher throughput on the same hardware.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+<div class="section page-break" id="s2">
+  <div class="section-num">Section 02</div>
+  <h2 class="section-title">Observability &amp; Tracing</h2>
+  <p class="lead">LLM applications fail in non-deterministic ways. Observability — tracing every request end-to-end with inputs, outputs, latency, token counts, and tool calls — is the only way to debug production issues and measure quality over time.</p>
+
+  <div class="diagram">LLM Request
+    │
+    ├─► OpenTelemetry Span
+    │     ├─ span.name: "llm.completion"
+    │     ├─ attributes: model, input_tokens, output_tokens, latency_ms
+    │     └─ events: prompt, completion, tool_calls
+    │
+    └─► Trace Collector (OTEL Collector)
+            │
+            ├──► LangSmith  (LangChain native)
+            ├──► Langfuse   (open-source)
+            ├──► Arize Phoenix (ML observability)
+            └──► Grafana/Tempo (generic traces)</div>
+
+  <h3>LangSmith Tracing</h3>
+<pre><code>import os
+from langsmith import traceable
+from openai import OpenAI
+
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_API_KEY"] = "your-langsmith-key"
+os.environ["LANGCHAIN_PROJECT"] = "production-chatbot"
+
+client = OpenAI()
+
+@traceable(name="chat_completion", run_type="llm")
+def chat(messages: list, model: str = "gpt-4o-mini") -> str:
+    response = client.chat.completions.create(
+        model=model, messages=messages, max_tokens=512
+    )
+    return response.choices[0].message.content
+
+# Every call to chat() is automatically traced in LangSmith
+result = chat([{"role": "user", "content": "What is RAG?"}])</code></pre>
+
+  <h3>Observability Tool Comparison</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tool</th><th>Open-source</th><th>Key Features</th><th>Best For</th></tr></thead>
+    <tbody>
+      <tr><td>LangSmith</td><td>No (paid SaaS)</td><td>LangChain native, evals, prompt hub, A/B</td><td>LangChain/LangGraph shops</td></tr>
+      <tr><td>Langfuse</td><td>Yes (self-host)</td><td>Tracing, evals, prompt versioning, dashboards</td><td>Privacy-sensitive, cost-conscious teams</td></tr>
+      <tr><td>Helicone</td><td>Yes (proxy-based)</td><td>Zero code change, cache, rate limits, analytics</td><td>Quick observability with OpenAI API</td></tr>
+      <tr><td>Arize Phoenix</td><td>Yes</td><td>ML + LLM observability, drift detection</td><td>Teams with existing ML infra</td></tr>
+      <tr><td>W&amp;B Weave</td><td>No (paid)</td><td>Experiment tracking + LLM traces in one</td><td>Teams already using W&amp;B</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-green">
+    <strong>Always log token counts</strong>
+    A sudden 10x spike in input tokens is the #1 signal for prompt injection or runaway context accumulation. Set alerts: input_tokens &gt; 10K or output_tokens &gt; 2K → page on-call.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+<div class="section page-break" id="s3">
+  <div class="section-num">Section 03</div>
+  <h2 class="section-title">Cost Optimization</h2>
+  <p class="lead">LLM API costs scale linearly with token volume. At 10K requests/day, even small per-call savings compound to thousands of dollars per month. The highest-leverage techniques are model routing, caching, and prompt compression.</p>
+
+  <div class="diagram">Incoming Request
+    │
+    ├─► Complexity Classifier (lightweight model)
+    │         │
+    │    ┌────┴──────────┐
+    │  Simple          Complex
+    │    │                │
+    │  Haiku/GPT-Nano  Sonnet/GPT-Mini
+    │  ($0.25/1M)      ($3/1M)
+    │
+    └─► Cached? ──► YES → return cached (free)
+                └── NO → LLM call → cache result</div>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Strategy</th><th>Savings Estimate</th><th>Complexity</th><th>Implementation</th></tr></thead>
+    <tbody>
+      <tr><td>Model routing (tiered)</td><td>60–80%</td><td>Medium</td><td>LiteLLM router, custom classifier</td></tr>
+      <tr><td>Semantic caching</td><td>30–60% on repeat queries</td><td>Medium</td><td>GPTCache, Redis + embeddings</td></tr>
+      <tr><td>Prompt compression</td><td>30–50% token reduction</td><td>Low</td><td>LLMLingua, PromptCompressor</td></tr>
+      <tr><td>Prefix/prompt caching</td><td>Up to 90% on cached tokens</td><td>Low</td><td>Anthropic cache_control, OpenAI Prompt Cache</td></tr>
+      <tr><td>Batch API</td><td>50% off</td><td>Low</td><td>OpenAI Batch API, Anthropic Batches</td></tr>
+      <tr><td>Quantised self-hosted</td><td>70–90% vs API</td><td>High</td><td>vLLM + AWQ/GPTQ model</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>LiteLLM Cost-Based Router</h3>
+<pre><code>from litellm import Router
+
+router = Router(
+    model_list=[
+        {"model_name": "fast",    "litellm_params": {"model": "claude-haiku-4-5-20251001"}},
+        {"model_name": "smart",   "litellm_params": {"model": "claude-sonnet-4-20250514"}},
+        {"model_name": "premium", "litellm_params": {"model": "claude-opus-4-20250514"}},
+    ],
+    routing_strategy="cost-based-routing",
+)
+
+def route_request(prompt: str, task_type: str) -> str:
+    model = {
+        "classification": "fast",
+        "summarisation":  "smart",
+        "complex_reasoning": "premium",
+    }.get(task_type, "smart")
+
+    response = router.completion(
+        model=model,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return response.choices[0].message.content</code></pre>
+
+  <div class="callout callout-blue">
+    <strong>70/25/5 routing rule</strong>
+    Route 70% of requests to the cheapest capable model, 25% to the mid-tier, and 5% to premium. This pattern cuts API spend by 60–80% with minimal quality impact for most applications.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+<div class="section page-break" id="s4">
+  <div class="section-num">Section 04</div>
+  <h2 class="section-title">Caching Strategies</h2>
+  <p class="lead">Caching is the highest-ROI optimisation in LLM applications. A cache hit returns the answer in under 1ms at zero cost. Two complementary levels: prefix caching (provider-level) and semantic caching (application-level).</p>
+
+  <div class="diagram">Request → [Exact match cache]  ──► HIT  → return (0ms, free)
+                        │
+                       MISS
+                        │
+                        ▼
+           [Semantic cache (embedding similarity)]
+                        │
+                ┌───────┴───────┐
+               HIT             MISS
+                │                │
+           return (~5ms)      LLM call
+           (free)              (~800ms, $$$)
+                                 │
+                             cache result
+                             (TTL: 1h–24h)</div>
+
+  <h3>Anthropic Prompt Caching</h3>
+<pre><code>import anthropic
+
+client = anthropic.Anthropic()
+
+# Mark static system prompt for caching (up to 90% savings on cached tokens)
+response = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    system=[{
+        "type": "text",
+        "text": "You are a helpful assistant with deep knowledge of...\n" + long_documentation,
+        "cache_control": {"type": "ephemeral"}  # Cache this block
+    }],
+    messages=[{"role": "user", "content": "Summarise section 3."}]
+)
+# First call: full input tokens charged
+# Subsequent calls: cache_read_input_tokens (10% of normal price)</code></pre>
+
+  <h3>Application-Level Semantic Cache</h3>
+<pre><code>from langchain.cache import RedisSemanticCache
+from langchain_openai import OpenAIEmbeddings
+import langchain
+
+# Set up semantic cache backed by Redis
+langchain.llm_cache = RedisSemanticCache(
+    redis_url="redis://localhost:6379",
+    embedding=OpenAIEmbeddings(model="text-embedding-3-small"),
+    score_threshold=0.95,  # cosine similarity threshold for cache hit
+)
+
+# All subsequent LLM calls check cache automatically
+from langchain_openai import ChatOpenAI
+llm = ChatOpenAI(model="gpt-4o-mini")
+result = llm.invoke("What is the capital of France?")  # cached after first call</code></pre>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Cache Type</th><th>Hit Rate</th><th>Staleness Risk</th><th>Latency</th><th>Tool</th></tr></thead>
+    <tbody>
+      <tr><td>Exact match</td><td>Low (5–15%)</td><td>None</td><td>&lt;1ms</td><td>Redis / in-memory dict</td></tr>
+      <tr><td>Semantic (embeddings)</td><td>Medium (20–50%)</td><td>Low</td><td>5–15ms</td><td>GPTCache, RedisSemanticCache</td></tr>
+      <tr><td>Prompt prefix cache</td><td>Very high for static prompts</td><td>None</td><td>Provider-managed</td><td>Anthropic / OpenAI native</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+<div class="section page-break" id="s5">
+  <div class="section-num">Section 05</div>
+  <h2 class="section-title">A/B Testing LLMs</h2>
+  <p class="lead">Changing a model, prompt, or RAG configuration is a hypothesis. A/B testing validates it with real traffic before full rollout, preventing quality regressions that offline evals miss due to distribution shift.</p>
+
+  <div class="diagram">Incoming Traffic
+    │
+    ├──── 90% ──►  Variant A (current production)  ──► Log trace
+    │
+    └──── 10% ──►  Variant B (new prompt/model)    ──► Log trace
+                                                          │
+                                          Statistical analysis (after N samples)
+                                                          │
+                                          ┌──────────────┴──────────────┐
+                                        B wins                        No sig. diff
+                                          │                              │
+                                    Ramp B to 100%                 Keep A / iterate</div>
+
+<pre><code>import random
+import hashlib
+from langsmith import Client
+
+ls_client = Client()
+
+def ab_test_completion(user_id: str, prompt: str) -> str:
+    # Deterministic assignment by user_id (same user always gets same variant)
+    variant = "B" if int(hashlib.md5(user_id.encode()).hexdigest(), 16) % 100 < 10 else "A"
+
+    if variant == "A":
+        model, system = "gpt-4o-mini", "You are a helpful assistant."
+    else:
+        model = "claude-haiku-4-5-20251001"
+        system = "You are a concise, expert assistant. Answer in bullet points."
+
+    # ... call LLM ...
+
+    # Log variant for analysis
+    ls_client.create_run(
+        name="ab_test",
+        inputs={"prompt": prompt, "variant": variant, "user_id": user_id},
+        outputs={"response": response},
+        extra={"variant": variant, "model": model},
+    )
+    return response</code></pre>
+
+  <div class="callout callout-amber">
+    <strong>Minimum sample size matters</strong>
+    For LLM quality A/B tests, aim for at least 200 samples per variant before drawing conclusions. LLM output variance is high — small samples produce misleading results. Use a power calculator with α=0.05 and desired effect size.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+<div class="section page-break" id="s6">
+  <div class="section-num">Section 06</div>
+  <h2 class="section-title">Guardrails &amp; Safety</h2>
+  <p class="lead">Production LLM applications require both input and output validation layers. Guardrails catch harmful inputs before they reach the model, and validate outputs before they reach users — without retraining the underlying model.</p>
+
+  <div class="diagram">User Input
+    │
+    ├─► [PII Detection]      → redact phone, email, SSN
+    ├─► [Toxicity Filter]    → block harmful inputs
+    ├─► [Prompt Injection]   → detect "ignore instructions"
+    │
+    ▼
+  LLM
+    │
+    ▼
+  LLM Output
+    │
+    ├─► [Hallucination Check] → grounded in retrieved context?
+    ├─► [Format Validation]   → valid JSON / required fields?
+    ├─► [PII Output Filter]   → strip leaked PII
+    └─► [Toxicity Output]     → block harmful completions
+    │
+    ▼
+  User</div>
+
+<pre><code>from guardrails import Guard
+from guardrails.hub import DetectPII, ToxicLanguage, ValidLength
+
+guard = Guard().use_many(
+    DetectPII(pii_entities=["EMAIL_ADDRESS", "PHONE_NUMBER", "CREDIT_CARD"]),
+    ToxicLanguage(threshold=0.5, on_fail="exception"),
+    ValidLength(min=1, max=2000, on_fail="fix"),
+)
+
+def safe_completion(user_input: str) -> str:
+    # Validate input
+    validated_input, *_ = guard.validate(user_input)
+
+    # Call LLM
+    raw_output = call_llm(validated_input)
+
+    # Validate output
+    validated_output, *_ = guard.validate(raw_output)
+    return validated_output</code></pre>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Guardrail Type</th><th>Tool</th><th>Latency Add</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>PII detection</td><td>Presidio, Guardrails AI</td><td>10–50ms</td><td>Run on both input and output</td></tr>
+      <tr><td>Toxicity</td><td>Perspective API, LlamaGuard</td><td>50–150ms</td><td>LlamaGuard is self-hostable</td></tr>
+      <tr><td>Hallucination</td><td>RAGAS faithfulness, SelfCheckGPT</td><td>200–500ms</td><td>Only feasible for non-realtime flows</td></tr>
+      <tr><td>JSON validation</td><td>Instructor, Pydantic</td><td>&lt;1ms</td><td>Always use for structured outputs</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-rose">
+    <strong>Guardrails add 50–200ms latency</strong>
+    Profile every guardrail before adding it to the hot path. For real-time chat, use lightweight classifiers (PII regex, embedding-based toxicity). Reserve heavy checks (LlamaGuard, hallucination detection) for async post-processing or batch flows.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+<div class="section page-break" id="s7">
+  <div class="section-num">Section 07</div>
+  <h2 class="section-title">Model Versioning &amp; Registry</h2>
+  <p class="lead">Treating prompts and models as versioned artefacts — not inline strings — is what separates prototypes from production systems. A registry enables rollbacks, A/B testing, and audit trails.</p>
+
+  <div class="diagram">Experiment
+    │  (develop prompt / fine-tune model)
+    ▼
+  Evaluate (evals pass ≥ threshold?)
+    │  YES
+    ▼
+  Register (MLflow / LangSmith Hub / HuggingFace Hub)
+    │
+    ├─► Staging environment
+    │       │  (smoke test, integration test)
+    │       ▼
+    └─► Production (blue-green deploy)
+            │
+         Monitor  ──► quality regression? → rollback to prev version</div>
+
+  <h3>MLflow LLM Run Logging</h3>
+<pre><code>import mlflow
+
+mlflow.set_experiment("rag-chatbot-v2")
+
+with mlflow.start_run(run_name="prompt-v3-gpt4o-mini"):
+    # Log parameters
+    mlflow.log_params({
+        "model": "gpt-4o-mini",
+        "temperature": 0.3,
+        "chunk_size": 512,
+        "top_k": 4,
+        "prompt_version": "v3",
+    })
+
+    # Run evaluation
+    results = run_eval_suite()  # returns dict of metrics
+
+    # Log metrics
+    mlflow.log_metrics({
+        "ragas_faithfulness": results["faithfulness"],
+        "ragas_relevancy": results["answer_relevancy"],
+        "avg_latency_ms": results["avg_latency"],
+        "cost_per_query_usd": results["cost_per_query"],
+    })
+
+    # Log prompt as artefact
+    mlflow.log_text(system_prompt, "system_prompt_v3.txt")
+
+    # Register model if metrics pass threshold
+    if results["faithfulness"] >= 0.80:
+        mlflow.register_model("runs:/{run_id}/model", "rag-chatbot")</code></pre>
+
+  <div class="callout callout-blue">
+    <strong>Treat prompts as code</strong>
+    Version your prompts in git AND push them to a prompt registry (LangSmith Hub or Langfuse). Git gives you diffs and blame; a registry gives you runtime pull without redeploy, A/B testing, and rollback in seconds.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+<div class="section page-break" id="s8">
+  <div class="section-num">Section 08</div>
+  <h2 class="section-title">Latency Optimization</h2>
+  <p class="lead">LLM latency has two components: Time to First Token (TTFT) and generation speed (tokens/sec). Users perceive streaming as faster even when total latency is the same — always stream for interactive applications.</p>
+
+  <div class="diagram">Request received
+    │
+    ├─► TTFT (time to first token): 200–800ms
+    │   Affected by: model size, batch pressure, prefill length
+    │
+    └─► Generation: ~30–100 tok/sec (streaming hides this)
+
+Key insight: start streaming immediately.
+User sees first token at TTFT, not at completion.</div>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Technique</th><th>Latency Reduction</th><th>Trade-off</th></tr></thead>
+    <tbody>
+      <tr><td>Streaming</td><td>Perceived: 50–70%</td><td>Complex client handling</td></tr>
+      <tr><td>Semantic caching</td><td>100% (cache hit = ~5ms)</td><td>Stale responses possible</td></tr>
+      <tr><td>Smaller model (routing)</td><td>30–60%</td><td>Lower quality on hard tasks</td></tr>
+      <tr><td>Quantisation (INT8/AWQ)</td><td>20–40%</td><td>Minor quality regression</td></tr>
+      <tr><td>Speculative decoding</td><td>20–40%</td><td>Requires draft model, memory</td></tr>
+      <tr><td>Prompt compression</td><td>10–30% (shorter prefill)</td><td>May lose context</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>FastAPI Streaming Endpoint (SSE)</h3>
+<pre><code>from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+from openai import AsyncOpenAI
+
+app = FastAPI()
+client = AsyncOpenAI()
+
+@app.post("/chat/stream")
+async def stream_chat(prompt: str):
+    async def generate():
+        stream = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            stream=True,
+            max_tokens=512,
+        )
+        async for chunk in stream:
+            delta = chunk.choices[0].delta.content
+            if delta:
+                yield f"data: {delta}\n\n"
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(generate(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache",
+                                      "X-Accel-Buffering": "no"})</code></pre>
+</div>
+
+<!-- ══════════════════════════ SECTION 9 ══════════════════════════ -->
+<div class="section page-break" id="s9">
+  <div class="section-num">Section 09</div>
+  <h2 class="section-title">CI/CD for LLM Apps</h2>
+  <p class="lead">LLM application CI/CD differs from traditional software: you're not just testing code correctness, you're testing output quality. A CI pipeline that only runs unit tests will miss prompt regressions that ship to production.</p>
+
+  <div class="diagram">Pull Request
+    │
+    ├─► [Lint] prompt YAML schema validation
+    ├─► [Unit tests] tool functions, parsers, routers
+    ├─► [Eval suite] run DeepEval on 50-item golden dataset
+    │       │
+    │       ├── faithfulness ≥ 0.80?  → pass
+    │       ├── answer_relevancy ≥ 0.75? → pass
+    │       └── latency_p95 ≤ 2s?    → pass
+    │
+    ▼  All pass? → merge &amp; deploy to staging
+    │
+    ├─► [Staging] smoke test with real traffic sample
+    ├─► [Canary] 5% real traffic → monitor metrics
+    └─► [Full rollout] 100% traffic → monitor dashboards</div>
+
+  <h3>GitHub Actions Eval Workflow</h3>
+<pre><code># .github/workflows/llm-eval.yml
+name: LLM Eval Suite
+on: [pull_request]
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+
+      - name: Install dependencies
+        run: pip install deepeval langchain openai
+
+      - name: Run evaluation suite
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LANGCHAIN_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+        run: python scripts/run_evals.py --golden-set data/golden_qa.json
+
+      - name: Check quality gates
+        run: python scripts/check_quality_gates.py \
+               --min-faithfulness 0.80 \
+               --min-relevancy 0.75 \
+               --max-latency-p95 2000</code></pre>
+
+  <h3>Quality Gate Script</h3>
+<pre><code>import json, sys
+
+def check_gates(results_path: str, **thresholds):
+    with open(results_path) as f:
+        results = json.load(f)
+
+    failures = []
+    for metric, min_val in thresholds.items():
+        score = results.get(metric, 0)
+        if score < min_val:
+            failures.append(f"{metric}: {score:.3f} < {min_val}")
+
+    if failures:
+        print("❌ Quality gates FAILED:")
+        for f in failures: print(f"   {f}")
+        sys.exit(1)
+    else:
+        print("✅ All quality gates passed")
+
+check_gates("eval_results.json",
+            faithfulness=0.80, answer_relevancy=0.75)</code></pre>
+
+  <div class="card-grid">
+    <div class="card card-accent"><h4>Golden Dataset</h4><p>50–100 representative Q&amp;A pairs with expected answers. Update it as your product evolves. Never delete passing test cases.</p></div>
+    <div class="card card-accent"><h4>Regression Gate</h4><p>Block merges if quality drops more than 5% from the baseline established on main. Alert on absolute thresholds too.</p></div>
+    <div class="card card-accent"><h4>Canary Deploy</h4><p>Route 5% of traffic to new version for 30 minutes. Monitor error rate, latency p99, and user feedback score before full rollout.</p></div>
+    <div class="card card-accent"><h4>Rollback Playbook</h4><p>Document the 3-step rollback procedure. Test it quarterly. When an LLM incident hits at 2am, you want a script, not a wiki page.</p></div>
+  </div>
+
+  <h3>Further Reading</h3>
+  <ul class="clean">
+    <li><a href="https://docs.smith.langchain.com/" target="_blank">LangSmith Documentation</a></li>
+    <li><a href="https://langfuse.com/docs" target="_blank">Langfuse Documentation (open-source)</a></li>
+    <li><a href="https://docs.vllm.ai/" target="_blank">vLLM Documentation</a></li>
+    <li><a href="https://mlflow.org/docs/latest/llms/index.html" target="_blank">MLflow LLM Tracking</a></li>
+    <li><a href="https://docs.guardrailsai.com/" target="_blank">Guardrails AI Documentation</a></li>
+    <li><a href="https://deepeval.com/docs" target="_blank">DeepEval Documentation</a></li>
+    <li><a href="https://docs.litellm.ai/docs/routing" target="_blank">LiteLLM Router Documentation</a></li>
+  </ul>
+</div>
+
+<div class="footer">Synapse · LLMOps &amp; Production AI · May 2026</div>
+</div><!-- /container -->
+  </div><!-- /main-scroll -->
+</div><!-- /topic-page -->
+<footer class="guide-footer">Synapse &middot; AI &amp; LLM Engineering</footer>
+</body>
+</html>

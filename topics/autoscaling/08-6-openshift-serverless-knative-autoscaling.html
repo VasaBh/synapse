@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenShift Serverless (Knative) Autoscaling – Autoscaling</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../autoscaling.html">Autoscaling</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">OpenShift Serverless (Knative) Autoscaling</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Autoscaling</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-table-of-contents.html">Table of Contents</a></li>
+        <li><a href="03-1-scaling-fundamentals.html">Scaling Fundamentals</a></li>
+        <li><a href="04-2-horizontal-pod-autoscaler-hpa.html">Horizontal Pod Autoscaler (HPA)</a></li>
+        <li><a href="05-3-vertical-pod-autoscaler-vpa.html">Vertical Pod Autoscaler (VPA)</a></li>
+        <li><a href="06-4-custom-metrics-autoscaler-keda.html">Custom Metrics Autoscaler (KEDA)</a></li>
+        <li><a href="07-5-cluster-and-machine-autoscaler-node-scaling.html">Cluster and Machine Autoscaler (Node Scaling)</a></li>
+        <li class="active"><a href="08-6-openshift-serverless-knative-autoscaling.html" class="active">OpenShift Serverless (Knative) Autoscaling</a></li>
+        <li><a href="09-7-fastapi-publishing-metrics-for-autoscaling.html">FastAPI: Publishing Metrics for Autoscaling</a></li>
+        <li><a href="10-8-what-is-not-possible-limitations.html">What is NOT Possible — Limitations</a></li>
+        <li><a href="11-9-decision-guide-which-autoscaler-to-use.html">Decision Guide — Which Autoscaler to Use?</a></li>
+        <li><a href="12-10-end-to-end-autoscaling-architecture.html">End-to-End Autoscaling Architecture</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>6. OpenShift Serverless (Knative) Autoscaling</h1>
+<p>Knative Serving, available via the OpenShift Serverless Operator, provides the most traffic-aware autoscaling. It uses an activator proxy that sits in the request path and directly counts concurrent requests or requests per second — no application-side metrics instrumentation is needed.</p>
+<pre><code>Knative Autoscaling Architecture
+Client Request
+|
+v
++------------------+
+| Knative Activator|   &lt;-- Counts concurrent requests
+| (queue-proxy)    |   &lt;-- Buffers if pods = 0
++--------+---------+
+|
++-------+--------+
+v       v        v
++---+   +---+   +---+
+|Pod|   |Pod|   |Pod|
+| 1 |   | 2 |   | 3 |
++---+   +---+   +---+
+Autoscaler targets: 50 concurrent requests per pod
+150 concurrent requests -&gt; 3 pods
+0   concurrent requests -&gt; 0 pods (scale to zero)</code></pre>
+<h3>6.1 Scaling Metrics</h3>
+<ul>
+  <li>Concurrency (default): Number of simultaneous in-flight requests per pod. Target is 100 by default. When actual concurrency exceeds target, new pods are added.</li>
+  <li>RPS (Requests Per Second): Alternative metric. Scales based on throughput rather than concurrent connections.</li>
+</ul>
+<h3>6.2 Concurrency Limits</h3>
+<ul>
+  <li>Soft limit (target): The desired number of concurrent requests per pod. Autoscaler tries to maintain this level but can briefly exceed it during bursts.</li>
+  <li>Hard limit (containerConcurrency): Absolute maximum concurrent requests per pod. Excess requests are queued/buffered.</li>
+</ul>
+<h3>6.3 Example: Knative Service with Autoscaling</h3>
+<pre><code>apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+name: my-api
+spec:
+template:
+metadata:
+annotations:
+autoscaling.knative.dev/target: &quot;50&quot;             # 50 concurrent requests/pod
+autoscaling.knative.dev/min-scale: &quot;0&quot;           # Scale to zero when idle
+autoscaling.knative.dev/max-scale: &quot;20&quot;          # Max 20 pods
+autoscaling.knative.dev/scale-down-delay: &quot;5m&quot;   # Wait 5 min before scale down
+autoscaling.knative.dev/target-utilization-percentage: &quot;70&quot;
+spec:
+containerConcurrency: 100     # Hard limit: buffer above 100
+containers:
+- image: my-registry/my-api:latest
+ports:
+- containerPort: 8000
+resources:
+requests:
+cpu: 200m
+memory: 256Mi</code></pre>
+<p>Key advantage: Your FastAPI application needs ZERO code changes. Knative handles all traffic counting externally via its queue-proxy sidecar.</p>
+      </article>
+
+      <nav class="page-nav">
+        <a href="07-5-cluster-and-machine-autoscaler-node-scaling.html">&#8592; Cluster and Machine Autoscaler (Node Scaling)</a>
+        <span class="spacer"></span>
+        <a href="09-7-fastapi-publishing-metrics-for-autoscaling.html">FastAPI: Publishing Metrics for Autoscaling &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

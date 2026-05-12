@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MICROSERVICES – DEEP DIVE – Senior Architect</title>
+  <link rel="stylesheet" href="../../assets/style.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <a href="../../index.html" class="brand">&#8592; Interview Prep</a>
+    <nav class="breadcrumb">
+      <a href="../senior-architect.html">Senior Architect</a>
+      <span class="sep">&#8250;</span>
+      <span class="current">MICROSERVICES – DEEP DIVE</span>
+    </nav>
+  </header>
+
+  <div class="page-layout">
+    <aside class="section-sidebar">
+      <div class="sidebar-header">Senior Architect</div>
+      <ul>
+        <li><a href="01-_intro.html">_intro</a></li>
+        <li><a href="02-1-core-architecture-fundamentals.html">CORE ARCHITECTURE FUNDAMENTALS</a></li>
+        <li class="active"><a href="03-2-microservices-deep-dive.html" class="active">MICROSERVICES – DEEP DIVE</a></li>
+        <li><a href="04-3-openshift-routing-load-balancing.html">OPENSHIFT – ROUTING &amp; LOAD BALANCING</a></li>
+        <li><a href="05-4-openshift-horizontal-vertical-scaling.html">OPENSHIFT – HORIZONTAL &amp; VERTICAL SCALING</a></li>
+        <li><a href="06-5-mcp-model-context-protocol.html">MCP – MODEL CONTEXT PROTOCOL</a></li>
+        <li><a href="07-6-agentic-ai-architecture.html">AGENTIC AI ARCHITECTURE</a></li>
+        <li><a href="08-7-interview-qa-cheat-sheet.html">INTERVIEW Q&amp;A CHEAT SHEET</a></li>
+      </ul>
+    </aside>
+
+    <main class="content-area">
+      <article class="content-body">
+        <h1>2. MICROSERVICES – DEEP DIVE</h1>
+<h3>2.1 Decomposition Strategies</h3>
+<ul>
+  <li>Domain-Driven Design (DDD) – identify Bounded Contexts; each becomes a service</li>
+  <li>Subdomain types: Core (competitive differentiator), Supporting, Generic</li>
+  <li>Aggregates – cluster of related entities with a single root; don't split aggregates across services</li>
+  <li>Service granularity: too fine = chatty network; too coarse = monolith-in-disguise</li>
+</ul>
+<h3>2.2 Communication Patterns</h3>
+<div class="table-wrap"><table>
+  <tr><th>Pattern</th><th>Protocol</th><th>Use When</th></tr>
+  <tr><td>Sync request/reply</td><td>REST / gRPC</td><td>Immediate response required (user-facing reads)</td></tr>
+  <tr><td>Async messaging</td><td>Kafka / RabbitMQ</td><td>Decoupled workflows, high throughput</td></tr>
+  <tr><td>GraphQL</td><td>HTTP</td><td>Flexible queries; multiple clients with diff needs</td></tr>
+  <tr><td>Service Mesh (Istio)</td><td>mTLS + sidecar</td><td>Cross-cutting: observability, auth, retries at infra level</td></tr>
+</table></div>
+<h3>2.3 Resilience Patterns</h3>
+<p>Circuit Breaker (Resilience4j / Hystrix)</p>
+<ul>
+  <li>CLOSED → OPEN (after N failures) → HALF-OPEN (test probe) → CLOSED</li>
+  <li>Prevents cascade failures; gives downstream time to recover</li>
+</ul>
+<p>Other Patterns</p>
+<ul>
+  <li>Retry with exponential backoff + jitter – avoid thundering herd</li>
+  <li>Timeout – never wait indefinitely; set per-call and overall deadlines</li>
+  <li>Rate Limiting – protect services from being overwhelmed</li>
+  <li>Bulkhead – separate thread pools per downstream; failure in one doesn't starve others</li>
+  <li>Fallback – return cached/default data when dependency is unavailable</li>
+</ul>
+<h3>2.4 Data Management</h3>
+<div class="callout warn">⚠️ Key Concept: Each microservice must own its data store. Sharing databases couples services and defeats the purpose.</div>
+<ul>
+  <li>Database-per-service: each service chooses the right storage (SQL, NoSQL, Graph, Time-series)</li>
+  <li>API Composition – aggregate data from multiple services in a BFF or API Gateway</li>
+  <li>CQRS – separate read (Query) and write (Command) models for complex domains</li>
+  <li>Event Sourcing – persist state as immutable event log; derive current state by replaying events</li>
+</ul>
+<p>Distributed Transactions – Saga Pattern</p>
+<div class="table-wrap"><table>
+  <tr><th>Saga Type</th><th>Mechanism</th><th>Best For</th></tr>
+  <tr><td>Choreography</td><td>Services emit and react to events (no central coordinator)</td><td>Simple flows; loosely coupled</td></tr>
+  <tr><td>Orchestration</td><td>Central orchestrator directs each step and handles rollback</td><td>Complex flows; easier to visualise</td></tr>
+</table></div>
+<h3>2.5 Observability (The Three Pillars)</h3>
+<ul>
+  <li>Logs – structured JSON logs; centralise with ELK Stack (Elasticsearch, Logstash, Kibana)</li>
+  <li>Metrics – Prometheus scrapes metrics; Grafana dashboards; alert on SLOs</li>
+  <li>Traces – OpenTelemetry instrumentation → Jaeger / Zipkin for distributed request tracing</li>
+  <li>Correlation IDs – inject at edge; propagate through every service for end-to-end tracing</li>
+</ul>
+<h3>2.6 Security</h3>
+<ul>
+  <li>mTLS between services (via Istio / service mesh) – mutual authentication</li>
+  <li>OAuth2 / OIDC at API Gateway; JWT propagation internally</li>
+  <li>Secrets management – Vault, Kubernetes Secrets (encrypted at rest), external secrets operator</li>
+  <li>Principle of least privilege – each service has minimal permissions</li>
+</ul>
+<div class="callout tip">💡 Interview Tip: Expect: 'How do you handle distributed transactions?' Answer: Saga (choreography for simple, orchestration for complex); eventual consistency with compensating transactions.</div>
+      </article>
+
+      <nav class="page-nav">
+        <a href="02-1-core-architecture-fundamentals.html">&#8592; CORE ARCHITECTURE FUNDAMENTALS</a>
+        <span class="spacer"></span>
+        <a href="04-3-openshift-routing-load-balancing.html">OPENSHIFT – ROUTING &amp; LOAD BALANCING &#8594;</a>
+      </nav>
+    </main>
+  </div>
+
+  <footer><p>Interview Preparation Guide</p></footer>
+</body>
+</html>

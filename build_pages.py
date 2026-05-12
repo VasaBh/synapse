@@ -277,7 +277,7 @@ PAGE_TPL = """\
     </main>
   </div>
 
-  <footer><p>Interview Preparation Guide</p></footer>
+  <footer><p>{topic_name}</p></footer>
 </body>
 </html>
 """
@@ -294,7 +294,7 @@ INDEX_TPL = """\
 <body>
   <header class="guide-header">
     <a href="../index.html" class="back-home">&#8592; All Topics</a>
-    <h1>Interview Preparation Guide</h1>
+    <h1>{topic_name}</h1>
   </header>
 
   <div class="topic-page">
@@ -312,7 +312,7 @@ INDEX_TPL = """\
     </main>
   </div>
 
-  <footer><p>Interview Preparation Guide</p></footer>
+  <footer><p>{topic_name}</p></footer>
 </body>
 </html>
 """

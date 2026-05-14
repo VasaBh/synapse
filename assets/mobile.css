@@ -1,0 +1,108 @@
+/* ── Mobile overrides for topic landing pages ──────────────────────────────
+   Linked from all topics/*.html files that use their own inline CSS.
+   These rules are scoped to mobile widths so they don't affect desktop.
+   ────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  /* Switch from internal-scroll to body-scroll model */
+  html, body {
+    height: auto;
+    min-height: 100vh;
+  }
+  .topic-page {
+    overflow: visible;
+  }
+  .main-scroll {
+    overflow-y: visible;
+    overflow-x: hidden;
+  }
+
+  /* Hide sidebar — critical for pages that only hide it at 1100px */
+  .sidebar {
+    display: none !important;
+  }
+
+  /* Guide header: allow wrapping so title doesn't overflow */
+  .guide-header {
+    flex-wrap: wrap;
+    gap: .6rem;
+    padding: .75rem 1rem;
+  }
+
+  /* Cover / hero section */
+  .cover {
+    padding: 3rem 1.25rem 2.5rem;
+    min-height: 55vh;
+  }
+  .cover h1 {
+    font-size: 2.25rem !important;
+    max-width: 100%;
+  }
+  .cover-sub {
+    font-size: .95rem;
+    max-width: 100%;
+  }
+
+  /* Commodities-style hero */
+  .hero {
+    padding: 3rem 1.25rem 2.5rem;
+  }
+  .hero h1 {
+    font-size: 2.25rem !important;
+  }
+
+  /* Container */
+  .container {
+    padding: 0 1rem;
+  }
+
+  /* TOC grid: single column */
+  .toc-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Card grids: 2-up */
+  .card-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Main content area (commodities) */
+  .main-content {
+    padding: 1.5rem 1rem;
+  }
+
+  /* Code blocks */
+  pre {
+    font-size: .76rem;
+    padding: .875rem;
+    overflow-x: auto;
+  }
+
+  /* Tables */
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 480px) {
+  .cover {
+    padding: 2.5rem 1rem 2rem;
+    min-height: 45vh;
+  }
+  .cover h1 {
+    font-size: 1.85rem !important;
+  }
+  .hero h1 {
+    font-size: 1.85rem !important;
+  }
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+  .container {
+    padding: 0 .875rem;
+  }
+  .guide-header h1 {
+    font-size: .95rem;
+  }
+}

@@ -131,6 +131,84 @@ body { display: flex; flex-direction: column; }
 .sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
 .main-scroll { flex: 1; overflow-y: auto; }
 .guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+
+/* ── Mobile responsive ────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Tables: set a minimum width so .table-wrap actually triggers horizontal
+     scroll instead of squashing multi-column tables into unreadable slivers */
+  table { min-width: 520px; font-size: 0.78rem; }
+  th    { padding: 0.5rem 0.7rem; font-size: 0.72rem; }
+  td    { padding: 0.45rem 0.7rem; }
+
+  /* Belt-and-braces: ensure scroll on iOS too */
+  .table-wrap { -webkit-overflow-scrolling: touch; }
+
+  /* Section spacing */
+  .section { padding: 1.75rem 0 1rem; }
+  h2.section-title { font-size: 1.4rem; }
+  h3 { font-size: 1rem; }
+
+  /* TOC block */
+  .toc   { padding: 2rem 0; }
+  .toc h2 { font-size: 1.5rem; }
+
+  /* Cover tags: tighten on medium mobile */
+  .cover-tags { gap: 0.35rem; }
+  .cover-tag  { font-size: 0.65rem; padding: 0.25rem 0.55rem; }
+
+  /* Flow diagrams: wrap nodes into multiple lines instead of overflowing.
+     Hide horizontal arrow connectors — they no longer make sense when wrapped. */
+  .fd-row   { flex-wrap: wrap; gap: 0.5rem; }
+  .fd-arr-r { display: none; }
+
+  /* Callout */
+  .callout { padding: 0.875rem 1rem; font-size: 0.85rem; }
+
+  /* Diagram blocks: guarantee horizontal scroll */
+  .diagram { overflow-x: auto; }
+
+  /* Pills */
+  .pills { gap: 0.3rem; }
+}
+
+@media (max-width: 480px) {
+  /* Guide header title: prevent overflow on narrow phones */
+  .guide-header h1 { font-size: 0.95rem; }
+
+  /* Headings */
+  h2.section-title { font-size: 1.2rem; }
+  h3  { font-size: 0.95rem; }
+  h4  { font-size: 0.875rem; }
+  .toc h2 { font-size: 1.3rem; }
+
+  /* Tables: further reduce on very narrow screens */
+  table { min-width: 420px; font-size: 0.72rem; }
+  th    { padding: 0.4rem 0.5rem; font-size: 0.66rem; }
+  td    { padding: 0.35rem 0.5rem; }
+
+  /* Code and diagrams */
+  pre      { font-size: 0.68rem; padding: 0.75rem; }
+  .diagram { font-size: 0.65rem; padding: 0.75rem; }
+
+  /* Callouts */
+  .callout { font-size: 0.8rem; padding: 0.75rem 0.875rem; }
+
+  /* Flow diagram nodes: smaller text so they stay readable when wrapped */
+  .fd-node { font-size: 0.68rem; padding: 0.35rem 0.6rem; }
+
+  /* Cards: single column on very small screens */
+  .card-grid { grid-template-columns: 1fr; }
+
+  /* Pills */
+  .pill { font-size: 0.62rem; padding: 0.2rem 0.5rem; }
+
+  /* TOC links */
+  .toc-item  { padding: 0.55rem 0.75rem; }
+  .toc-label { font-size: 0.85rem; }
+
+  /* Section padding */
+  .section { padding: 1.5rem 0 0.75rem; }
+}
 </style>
 <link rel="stylesheet" href="../assets/mobile.css">
 </head>

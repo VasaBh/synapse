@@ -93,6 +93,39 @@ ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; wid
 @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
 .sep { height: 1px; background: var(--border); margin: 2rem 0; }
 .footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+/* ── CSS Flow Diagrams ── */
+.fd { display: flex; flex-direction: column; align-items: center; margin: 1.25rem 0; }
+.fd-row { display: flex; align-items: center; justify-content: center; }
+.fd-col { display: flex; flex-direction: column; align-items: center; }
+.fd-node { border-radius: 8px; padding: 0.45rem 1rem; font-size: 0.78rem; font-family: var(--mono); font-weight: 500; border: 1.5px solid; text-align: center; line-height: 1.45; }
+.fd-node sub { font-size: 0.65rem; opacity: 0.75; display: block; font-weight: 400; }
+.fd-node-blue   { background: var(--accent-bg);  border-color: var(--accent);  color: var(--accent2); }
+.fd-node-green  { background: var(--green-bg);   border-color: var(--green);   color: var(--green); }
+.fd-node-purple { background: var(--purple-bg);  border-color: var(--purple);  color: var(--purple); }
+.fd-node-amber  { background: var(--amber-bg);   border-color: var(--amber);   color: var(--amber); }
+.fd-node-teal   { background: var(--teal-bg);    border-color: var(--teal);    color: var(--teal); }
+.fd-node-coral  { background: var(--coral-bg);   border-color: var(--coral);   color: var(--coral); }
+.fd-node-rose   { background: var(--rose-bg);    border-color: var(--rose);    color: var(--rose); }
+.fd-node-dark   { background: var(--ink);        border-color: var(--ink);     color: #fff; }
+.fd-node-gray   { background: var(--bg2);        border-color: var(--border);  color: var(--ink2); }
+.fd-arr-d { width: 2px; height: 28px; background: var(--ink3); margin: 0 auto; position: relative; }
+.fd-arr-d::after { content:''; position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); border-left:5px solid transparent; border-right:5px solid transparent; border-top:7px solid var(--ink3); }
+.fd-arr-u { width: 2px; height: 28px; background: var(--ink3); margin: 0 auto; position: relative; }
+.fd-arr-u::before { content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%); border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:7px solid var(--ink3); }
+.fd-arr-r { width: 32px; height: 2px; background: var(--ink3); position: relative; flex-shrink: 0; }
+.fd-arr-r::after { content:''; position:absolute; right:-6px; top:50%; transform:translateY(-50%); border-top:5px solid transparent; border-bottom:5px solid transparent; border-left:7px solid var(--ink3); }
+.fd-arr-l { width: 32px; height: 2px; background: var(--ink3); position: relative; flex-shrink: 0; }
+.fd-arr-l::before { content:''; position:absolute; left:-6px; top:50%; transform:translateY(-50%); border-top:5px solid transparent; border-bottom:5px solid transparent; border-right:7px solid var(--ink3); }
+.fd-group { border: 2px dashed var(--border); border-radius: 12px; padding: 1rem 1.2rem; background: var(--bg2); }
+.fd-group-title { font-size: 0.65rem; font-family: var(--mono); color: var(--ink3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.6rem; text-align: center; }
+.fd-note { font-size: 0.68rem; font-family: var(--sans); color: var(--ink3); text-align: center; max-width: 200px; line-height: 1.35; margin-top: 0.2rem; }
+.fd-gap { width: 1.5rem; flex-shrink: 0; }
+.fd-gap-v { height: 0.75rem; }
+.fd-diamond { min-width: 100px; padding: 0.5rem 0.75rem; background: var(--amber-bg); border: 1.5px solid var(--amber); color: var(--amber); font-size: 0.72rem; font-family: var(--mono); display: flex; align-items: center; justify-content: center; clip-path: polygon(50% 0%,100% 50%,50% 100%,0% 50%); text-align: center; font-weight: 600; }
+.fd-mini-label { font-size: 0.62rem; font-family: var(--mono); color: var(--ink3); text-align: center; margin-top: 0.15rem; }
+.fd-start-end { font-family: var(--mono); font-size: 0.72rem; background: var(--ink); color: #fff; border-radius: 20px; padding: 0.25rem 0.9rem; font-weight: 600; }
+@media (max-width: 600px) { .fd-row { flex-wrap: wrap; gap: 0.5rem; } .fd-arr-r, .fd-arr-l { display: none; } }
 html, body { height: 100%; }
 body { display: flex; flex-direction: column; }
 .guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
@@ -175,23 +208,25 @@ body { display: flex; flex-direction: column; }
   <h2 class="section-title">LLM Tool Use Fundamentals</h2>
   <p class="lead">Tool use allows LLMs to call external functions — APIs, databases, calculators, search engines — turning them from text generators into action-capable agents. Both OpenAI and Anthropic support tool use natively through their APIs.</p>
 
-  <div class="diagram">User: "What's Apple's stock price and today's weather in London?"
-       │
-       ▼
-  LLM decides to call tools:
-  ┌─────────────────────────────────┐
-  │  tool_call: get_stock("AAPL")   │
-  │  tool_call: get_weather("London")│
-  └─────────────────────────────────┘
-       │
-       ▼
-  Application executes tools (in parallel)
-       │
-       ▼
-  Results sent back to LLM as tool_result messages
-       │
-       ▼
-  LLM generates final grounded answer</div>
+  <div class="fd">
+    <div class="fd-node fd-node-dark" style="min-width:300px">"What's Apple's stock price and weather in London?"</div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-blue" style="min-width:220px">LLM<sub>decides which tools to call</sub></div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-group" style="min-width:300px">
+      <div class="fd-group-title">Parallel Tool Calls</div>
+      <div class="fd-row" style="gap:0.75rem;justify-content:center">
+        <div class="fd-node fd-node-green" style="font-size:0.73rem">get_stock("AAPL")</div>
+        <div class="fd-node fd-node-teal" style="font-size:0.73rem">get_weather("London")</div>
+      </div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-amber" style="min-width:220px">Application Executes Tools<sub>in parallel via asyncio.gather</sub></div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-purple" style="min-width:220px">Results → LLM<sub>as tool_result messages</sub></div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-green" style="min-width:220px">Final Grounded Answer</div>
+  </div>
 
   <h3>OpenAI vs Anthropic Tool Calling API</h3>
   <div class="table-wrap"><table>
@@ -320,23 +355,45 @@ print(final.choices[0].message.content)</code></pre>
   <h2 class="section-title">Model Context Protocol (MCP)</h2>
   <p class="lead">MCP is an open standard (created by Anthropic, Nov 2024) for connecting AI models to external tools and data sources. It standardises the interface between AI hosts (Claude, Cursor, VS Code) and MCP servers (tools, databases, APIs) using JSON-RPC 2.0.</p>
 
-  <div class="diagram">┌─────────────────────────────────────────────────────────────────┐
-│                    MCP ARCHITECTURE                             │
-│                                                                 │
-│   HOST (Claude Desktop / Claude Code / Cursor)                  │
-│     │                                                           │
-│     └──► MCP CLIENT (manages connections)                       │
-│               │                                                 │
-│               │  JSON-RPC 2.0                                   │
-│               │  (stdio or SSE transport)                       │
-│               │                                                 │
-│     ┌─────────┼──────────────────────────┐                      │
-│     │         │                          │                      │
-│  MCP Server   MCP Server          MCP Server                    │
-│  (filesystem) (GitHub API)        (Postgres)                    │
-│     │              │                    │                       │
-│  [Tools]       [Resources]         [Prompts]                    │
-└─────────────────────────────────────────────────────────────────┘</div>
+  <div class="fd">
+    <div class="fd-group" style="width:100%;max-width:580px">
+      <div class="fd-group-title">MCP Architecture</div>
+
+      <div class="fd-node fd-node-dark" style="width:100%;margin-bottom:0.5rem">HOST<sub>Claude Desktop · Claude Code · Cursor · VS Code</sub></div>
+      <div class="fd-arr-d"></div>
+      <div class="fd-node fd-node-blue" style="min-width:220px;align-self:center">MCP Client<sub>manages connections</sub></div>
+      <div style="display:flex;align-items:flex-start;justify-content:center;gap:0.25rem;margin-top:4px">
+        <div style="width:2px;height:32px;background:var(--ink3);margin:0 2.5rem;position:relative">
+          <div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--ink3)"></div>
+        </div>
+        <div style="width:2px;height:32px;background:var(--ink3);position:relative">
+          <div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--ink3)"></div>
+        </div>
+        <div style="width:2px;height:32px;background:var(--ink3);margin:0 2.5rem;position:relative">
+          <div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--ink3)"></div>
+        </div>
+      </div>
+      <div style="font-size:0.62rem;font-family:var(--mono);color:var(--ink3);text-align:center;margin-bottom:0.5rem">JSON-RPC 2.0 · stdio or SSE transport</div>
+
+      <div class="fd-row" style="gap:0.75rem;align-items:flex-start;justify-content:center;flex-wrap:wrap">
+        <div class="fd-col">
+          <div class="fd-node fd-node-green" style="min-width:120px">MCP Server<sub>filesystem</sub></div>
+          <div class="fd-gap-v"></div>
+          <div class="pill pill-green" style="align-self:center">Tools</div>
+        </div>
+        <div class="fd-col">
+          <div class="fd-node fd-node-teal" style="min-width:120px">MCP Server<sub>GitHub API</sub></div>
+          <div class="fd-gap-v"></div>
+          <div class="pill pill-teal" style="align-self:center">Resources</div>
+        </div>
+        <div class="fd-col">
+          <div class="fd-node fd-node-purple" style="min-width:120px">MCP Server<sub>Postgres</sub></div>
+          <div class="fd-gap-v"></div>
+          <div class="pill pill-purple" style="align-self:center">Prompts</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <h3>MCP Primitives</h3>
   <div class="table-wrap"><table>
@@ -485,15 +542,30 @@ await server.connect(transport);</code></pre>
   <h2 class="section-title">Structured Outputs</h2>
   <p class="lead">Structured outputs guarantee the LLM returns valid JSON matching a precise schema. This eliminates brittle regex parsing and makes LLM output a first-class typed object in your application.</p>
 
-  <div class="diagram">User Request → LLM → [JSON mode / Structured Output] → Validated Schema
-                                                    │
-                              ┌─────────────────────┤
-                              │                     │
-                        Valid JSON            Validation Error
-                              │                     │
-                         Pydantic model       Retry with error
-                              │               (Instructor)
-                         Application logic</div>
+  <div class="fd">
+    <div class="fd-row" style="gap:0">
+      <div class="fd-node fd-node-dark">User Request</div>
+      <div class="fd-arr-r"></div>
+      <div class="fd-node fd-node-blue">LLM</div>
+      <div class="fd-arr-r"></div>
+      <div class="fd-node fd-node-amber">JSON mode /<br>Structured Output</div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-row" style="gap:3rem;align-items:flex-start">
+      <div class="fd-col">
+        <div style="font-size:0.65rem;font-family:var(--mono);color:var(--green);margin-bottom:0.3rem">Valid JSON</div>
+        <div class="fd-node fd-node-green" style="min-width:140px">Pydantic Model<sub>typed, validated object</sub></div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-node fd-node-teal" style="min-width:140px">Application Logic</div>
+      </div>
+      <div class="fd-col">
+        <div style="font-size:0.65rem;font-family:var(--mono);color:var(--rose);margin-bottom:0.3rem">Validation Error</div>
+        <div class="fd-node fd-node-rose" style="min-width:140px">Retry with Error<sub>Instructor handles this</sub></div>
+        <div class="fd-arr-u" style="height:36px"></div>
+        <div class="fd-note">loops back to LLM with validation message</div>
+      </div>
+    </div>
+  </div>
 
   <h3>Instructor — Pydantic Extraction</h3>
 <pre><code>import instructor
@@ -557,18 +629,23 @@ invoice = client.chat.completions.create(
   <h2 class="section-title">Parallel Tool Calls</h2>
   <p class="lead">Modern LLMs can request multiple tool calls in a single response. Your application should execute them concurrently with <code>asyncio.gather</code>, then return all results in a single follow-up message.</p>
 
-  <div class="diagram">LLM Response:
-  tool_calls = [
-    {"id": "call_1", "function": "get_stock", "args": {"ticker": "AAPL"}},
-    {"id": "call_2", "function": "get_stock", "args": {"ticker": "MSFT"}},
-    {"id": "call_3", "function": "get_weather", "args": {"city": "London"}}
-  ]
-       │
-       ▼  asyncio.gather() — all 3 in parallel
-  [result_1, result_2, result_3]  (~100ms total vs ~300ms sequential)
-       │
-       ▼  Submit all results in one message
-  LLM generates final answer</div>
+  <div class="fd">
+    <div class="fd-node fd-node-blue" style="min-width:240px">LLM Response<sub>3 tool_calls in one turn</sub></div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-group" style="min-width:360px">
+      <div class="fd-group-title">asyncio.gather() — all 3 in parallel</div>
+      <div class="fd-row" style="gap:0.6rem;justify-content:center;flex-wrap:wrap">
+        <div class="fd-node fd-node-green" style="font-size:0.72rem;min-width:110px">get_stock<sub>"AAPL"</sub></div>
+        <div class="fd-node fd-node-green" style="font-size:0.72rem;min-width:110px">get_stock<sub>"MSFT"</sub></div>
+        <div class="fd-node fd-node-teal" style="font-size:0.72rem;min-width:110px">get_weather<sub>"London"</sub></div>
+      </div>
+    </div>
+    <div class="fd-note">~100ms total vs ~300ms sequential</div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-amber" style="min-width:240px">Submit All Results<sub>in one follow-up message</sub></div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-purple" style="min-width:240px">LLM Final Answer</div>
+  </div>
 
 <pre><code>import asyncio
 import json
@@ -622,22 +699,32 @@ async def handle_parallel_tools(messages: list) -> str:
   <h2 class="section-title">Tool Security</h2>
   <p class="lead">Tools that interact with external systems introduce attack surface. The three main threats are prompt injection (malicious content in tool results), tool abuse (LLM calling dangerous tools unexpectedly), and data exfiltration via tool outputs.</p>
 
-  <div class="diagram">User Input → [Input sanitisation] → LLM
-                                          │
-                                    tool_call decision
-                                          │
-                              [Authorisation check]
-                                          │
-                        ┌─────────────────┴──────────────────┐
-                    Allowed                              Denied
-                        │                                    │
-              [Sandboxed execution]               Return error to LLM
-                        │
-                    Tool result
-                        │
-                [Output filtering]  ← strip secrets / PII
-                        │
-                    Return to LLM</div>
+  <div class="fd">
+    <div class="fd-row" style="gap:0">
+      <div class="fd-node fd-node-dark">User Input</div>
+      <div class="fd-arr-r"></div>
+      <div class="fd-node fd-node-amber">Input Sanitisation</div>
+      <div class="fd-arr-r"></div>
+      <div class="fd-node fd-node-blue">LLM<sub>tool_call decision</sub></div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-amber" style="min-width:200px">Authorisation Check<sub>whitelist · session scope</sub></div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-row" style="gap:3rem;align-items:flex-start">
+      <div class="fd-col">
+        <div style="font-size:0.65rem;font-family:var(--mono);color:var(--green);margin-bottom:0.3rem">Allowed</div>
+        <div class="fd-node fd-node-green" style="min-width:150px">Sandboxed Execution<sub>Docker · RestrictedPython</sub></div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-node fd-node-teal" style="min-width:150px">Output Filtering<sub>strip secrets · PII</sub></div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-node fd-node-blue" style="min-width:150px">Return to LLM</div>
+      </div>
+      <div class="fd-col">
+        <div style="font-size:0.65rem;font-family:var(--mono);color:var(--rose);margin-bottom:0.3rem">Denied</div>
+        <div class="fd-node fd-node-rose" style="min-width:150px">Error to LLM<sub>structured refusal message</sub></div>
+      </div>
+    </div>
+  </div>
 
   <div class="table-wrap"><table>
     <thead><tr><th>Attack</th><th>Description</th><th>Mitigation</th></tr></thead>
@@ -688,20 +775,37 @@ def sanitise_tool_result(result: str) -> str:
   <h2 class="section-title">Agent Integration</h2>
   <p class="lead">MCP tools integrate cleanly into LangChain, LangGraph, CrewAI, and Pydantic AI. The key pattern is wrapping MCP tool calls as framework-native tool objects so the orchestrator can invoke them transparently.</p>
 
-  <div class="diagram">Agent (LangGraph)
-    │
-    ├─ State: messages, tool_results
-    │
-    ├─ llm_node: call LLM with tools registered
-    │       │
-    │       └─► LLM returns tool_call(s)
-    │
-    └─ tool_node: execute tool calls
-            │
-            ├─ MCP Client → stdio/SSE → MCP Server
-            │       └─► execute tool → return result
-            │
-            └─► Add tool_results to state → back to llm_node</div>
+  <div class="fd">
+    <div class="fd-group" style="width:100%;max-width:560px">
+      <div class="fd-group-title">Agent (LangGraph) — State: messages · tool_results</div>
+
+      <div class="fd-row" style="gap:1rem;justify-content:center;align-items:flex-start">
+        <div class="fd-col" style="flex:1;align-items:center">
+          <div class="fd-node fd-node-blue" style="width:100%">llm_node<sub>call LLM with registered tools</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-note">LLM returns tool_call(s)</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:1rem">
+          <div class="fd-arr-r"></div>
+          <div style="font-size:0.6rem;font-family:var(--mono);color:var(--ink3);white-space:nowrap;margin-top:0.2rem">tool calls</div>
+          <div class="fd-gap-v"></div>
+          <div class="fd-arr-l"></div>
+          <div style="font-size:0.6rem;font-family:var(--mono);color:var(--ink3);white-space:nowrap;margin-top:0.2rem">tool results → state</div>
+        </div>
+        <div class="fd-col" style="flex:1;align-items:center">
+          <div class="fd-node fd-node-green" style="width:100%">tool_node<sub>execute tool calls</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-group" style="width:100%;background:var(--bg)">
+            <div class="fd-group-title">MCP Client</div>
+            <div class="fd-node fd-node-teal" style="font-size:0.72rem;width:100%">stdio / SSE</div>
+            <div class="fd-arr-d" style="height:18px"></div>
+            <div class="fd-node fd-node-purple" style="font-size:0.72rem;width:100%">MCP Server<sub>executes tool → result</sub></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <h3>Wrapping MCP Tools in LangChain</h3>
 <pre><code>from langchain_core.tools import StructuredTool

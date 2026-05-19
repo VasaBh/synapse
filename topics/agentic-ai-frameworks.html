@@ -156,6 +156,38 @@ ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; wid
 /* Flow arrow */
 .flow-arrow { text-align: center; color: var(--ink3); font-size: 1.2rem; margin: 0.3rem 0; }
 
+/* ── CSS Flow Diagrams ── */
+.fd { display: flex; flex-direction: column; align-items: center; margin: 1.25rem 0; }
+.fd-row { display: flex; align-items: center; justify-content: center; }
+.fd-col { display: flex; flex-direction: column; align-items: center; }
+.fd-node { border-radius: 8px; padding: 0.45rem 1rem; font-size: 0.78rem; font-family: var(--mono); font-weight: 500; border: 1.5px solid; text-align: center; line-height: 1.45; }
+.fd-node sub { font-size: 0.65rem; opacity: 0.75; display: block; font-weight: 400; }
+.fd-node-blue   { background: var(--accent-bg);  border-color: var(--accent);  color: var(--accent2); }
+.fd-node-green  { background: var(--green-bg);   border-color: var(--green);   color: var(--green); }
+.fd-node-purple { background: var(--purple-bg);  border-color: var(--purple);  color: var(--purple); }
+.fd-node-amber  { background: var(--amber-bg);   border-color: var(--amber);   color: var(--amber); }
+.fd-node-teal   { background: var(--teal-bg);    border-color: var(--teal);    color: var(--teal); }
+.fd-node-coral  { background: var(--coral-bg);   border-color: var(--coral);   color: var(--coral); }
+.fd-node-dark   { background: var(--ink);        border-color: var(--ink);     color: #fff; }
+.fd-node-gray   { background: var(--bg2);        border-color: var(--border);  color: var(--ink2); }
+.fd-arr-d { width: 2px; height: 28px; background: var(--ink3); margin: 0 auto; position: relative; }
+.fd-arr-d::after { content:''; position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); border-left:5px solid transparent; border-right:5px solid transparent; border-top:7px solid var(--ink3); }
+.fd-arr-u { width: 2px; height: 28px; background: var(--ink3); margin: 0 auto; position: relative; }
+.fd-arr-u::before { content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%); border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:7px solid var(--ink3); }
+.fd-arr-r { width: 32px; height: 2px; background: var(--ink3); position: relative; flex-shrink: 0; }
+.fd-arr-r::after { content:''; position:absolute; right:-6px; top:50%; transform:translateY(-50%); border-top:5px solid transparent; border-bottom:5px solid transparent; border-left:7px solid var(--ink3); }
+.fd-arr-l { width: 32px; height: 2px; background: var(--ink3); position: relative; flex-shrink: 0; }
+.fd-arr-l::before { content:''; position:absolute; left:-6px; top:50%; transform:translateY(-50%); border-top:5px solid transparent; border-bottom:5px solid transparent; border-right:7px solid var(--ink3); }
+.fd-group { border: 2px dashed var(--border); border-radius: 12px; padding: 1rem 1.2rem; background: var(--bg2); }
+.fd-group-title { font-size: 0.65rem; font-family: var(--mono); color: var(--ink3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.6rem; text-align: center; }
+.fd-note { font-size: 0.68rem; font-family: var(--sans); color: var(--ink3); text-align: center; max-width: 180px; line-height: 1.35; margin-top: 0.2rem; }
+.fd-gap { width: 1.5rem; flex-shrink: 0; }
+.fd-gap-v { height: 0.75rem; }
+.fd-diamond { width: 90px; height: 44px; background: var(--amber-bg); border: 1.5px solid var(--amber); color: var(--amber); font-size: 0.72rem; font-family: var(--mono); display: flex; align-items: center; justify-content: center; clip-path: polygon(50% 0%,100% 50%,50% 100%,0% 50%); text-align: center; font-weight: 600; }
+.fd-mini-label { font-size: 0.62rem; font-family: var(--mono); color: var(--ink3); text-align: center; margin-top: 0.15rem; }
+.fd-start-end { font-family: var(--mono); font-size: 0.72rem; background: var(--ink); color: #fff; border-radius: 20px; padding: 0.25rem 0.9rem; font-weight: 600; }
+@media (max-width: 600px) { .fd-row { flex-wrap: wrap; gap: 0.5rem; } .fd-arr-r, .fd-arr-l { display: none; } }
+
 /* Two col */
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
 @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
@@ -203,10 +235,11 @@ body { display: flex; flex-direction: column; }
         <li><a href="#s3"><span class="toc-num">03</span>LangGraph</a></li>
         <li><a href="#s4"><span class="toc-num">04</span>CrewAI</a></li>
         <li><a href="#s5"><span class="toc-num">05</span>AutoGen</a></li>
-        <li><a href="#s6"><span class="toc-num">06</span>Pydantic AI</a></li>
-        <li><a href="#s7"><span class="toc-num">07</span>Agent Memory</a></li>
-        <li><a href="#s8"><span class="toc-num">08</span>Multi-Agent Patterns</a></li>
-        <li><a href="#s9"><span class="toc-num">09</span>Production Agents</a></li>
+        <li><a href="#s6"><span class="toc-num">06</span>OpenAI Agents SDK</a></li>
+        <li><a href="#s7"><span class="toc-num">07</span>Pydantic AI</a></li>
+        <li><a href="#s8"><span class="toc-num">08</span>Agent Memory</a></li>
+        <li><a href="#s9"><span class="toc-num">09</span>Multi-Agent Patterns</a></li>
+        <li><a href="#s10"><span class="toc-num">10</span>Production Agents</a></li>
       </ul>
     </nav>
   </aside>
@@ -216,12 +249,13 @@ body { display: flex; flex-direction: column; }
 <div class="cover">
   <div class="cover-label">Complete Technical Reference &#8212; May 2026</div>
   <h1>Agentic AI &amp; <span>Frameworks</span></h1>
-  <p class="cover-sub">LangChain, LangGraph, CrewAI, AutoGen, Pydantic AI, ReAct loops, multi-agent orchestration, memory architectures, and production patterns &#8212; the complete agentic AI playbook.</p>
+  <p class="cover-sub">LangChain, LangGraph, CrewAI, AutoGen, OpenAI Agents SDK, Pydantic AI, ReAct loops, multi-agent orchestration, memory architectures, and production patterns &#8212; the complete agentic AI playbook.</p>
   <div class="cover-tags">
     <span class="cover-tag">LangChain</span>
     <span class="cover-tag">LangGraph</span>
     <span class="cover-tag">CrewAI</span>
     <span class="cover-tag">AutoGen</span>
+    <span class="cover-tag">OpenAI Agents SDK</span>
     <span class="cover-tag">Pydantic AI</span>
     <span class="cover-tag">ReAct</span>
     <span class="cover-tag">Multi-Agent</span>
@@ -241,10 +275,11 @@ body { display: flex; flex-direction: column; }
     <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">LangGraph</span></a>
     <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">CrewAI</span></a>
     <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">AutoGen</span></a>
-    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Pydantic AI</span></a>
-    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Agent Memory</span></a>
-    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">Multi-Agent Patterns</span></a>
-    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">Production Agents</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">OpenAI Agents SDK</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Pydantic AI</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">Agent Memory</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">Multi-Agent Patterns</span></a>
+    <a class="toc-item" href="#s10"><span class="toc-num">10</span><span class="toc-label">Production Agents</span></a>
   </div>
 </div>
 
@@ -255,27 +290,49 @@ body { display: flex; flex-direction: column; }
   <p class="lead">An AI agent is a system that perceives its environment, maintains memory, reasons using an LLM, and takes actions via tools &#8212; looping until the task is complete. Unlike a simple pipeline, an agent can decide its own control flow at runtime.</p>
 
   <h3>The Agent Loop</h3>
-  <div class="diagram">+------------------+     +--------------------+     +------------------+
-|   Perception     |---->|  Memory (context)  |---->| Reasoning (LLM)  |
-|   (user input,   |     |  short-term +      |     |  ReAct / CoT /   |
-|    tool results) |     |  long-term store   |     |  function calls  |
-+------------------+     +--------------------+     +--------+---------+
-         ^                                                    |
-         |                          +-------------------------+
-         |                          v
-+--------+---------+     +----------+--------+
-|   Observe        |&lt;----|    Action          |
-|   (parse result) |     |  (tool call /      |
-|   loop or finish |     |   code exec / API) |
-+------------------+     +----------+---------+
-                                     |
-                          +----------v---------+
-                          |      Tools         |
-                          |  web_search()      |
-                          |  run_python()      |
-                          |  query_db()        |
-                          |  send_email()      |
-                          +--------------------+</div>
+  <div class="fd">
+    <div class="fd-row">
+      <div class="fd-col">
+        <div class="fd-node fd-node-teal">Perception<sub>user input · tool results</sub></div>
+        <div class="fd-mini-label"></div>
+      </div>
+      <div class="fd-arr-r"></div>
+      <div class="fd-col">
+        <div class="fd-node fd-node-purple">Memory<sub>short-term + long-term store</sub></div>
+      </div>
+      <div class="fd-arr-r"></div>
+      <div class="fd-col">
+        <div class="fd-node fd-node-blue">Reasoning (LLM)<sub>ReAct · CoT · function calls</sub></div>
+      </div>
+    </div>
+    <div style="display:flex;width:100%;justify-content:space-between;padding:0 3rem">
+      <div class="fd-arr-u" style="height:36px"></div>
+      <div class="fd-arr-d" style="height:36px"></div>
+    </div>
+    <div class="fd-row">
+      <div class="fd-col">
+        <div class="fd-node fd-node-green">Observe<sub>parse result · loop or finish</sub></div>
+      </div>
+      <div class="fd-arr-l"></div>
+      <div class="fd-col">
+        <div class="fd-node fd-node-coral">Action<sub>tool call · code exec · API</sub></div>
+      </div>
+      <div class="fd-arr-l" style="visibility:hidden"></div>
+      <div class="fd-col" style="visibility:hidden">
+        <div class="fd-node fd-node-blue">placeholder</div>
+      </div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-group" style="min-width:260px">
+      <div class="fd-group-title">Tools</div>
+      <div class="fd-row" style="gap:0.5rem;flex-wrap:wrap;justify-content:center">
+        <span class="pill pill-teal">web_search()</span>
+        <span class="pill pill-teal">run_python()</span>
+        <span class="pill pill-teal">query_db()</span>
+        <span class="pill pill-teal">send_email()</span>
+      </div>
+    </div>
+  </div>
 
   <h3>Core Agent Capabilities</h3>
   <div class="card-grid">
@@ -333,22 +390,39 @@ body { display: flex; flex-direction: column; }
   <p class="lead">LangChain provides composable abstractions for LLM applications. The modern API &#8212; LangChain Expression Language (LCEL) &#8212; uses a pipe operator to chain Runnables, enabling streaming, batching, and async execution out of the box with a single consistent interface.</p>
 
   <h3>LCEL Chain Anatomy</h3>
-  <div class="diagram">Input (string or dict)
-  |
-  v
-RunnablePassthrough  ---&gt;  passes input through, optionally renamed or merged
-  |
-  v
-PromptTemplate       ---&gt;  formats variables into a prompt string / message list
-  |
-  v
-ChatOpenAI           ---&gt;  calls the LLM, returns an AIMessage object
-  |
-  v
-StrOutputParser      ---&gt;  extracts .content string from the AIMessage
-  |
-  v
-Output (string)</div>
+  <div class="fd">
+    <div class="fd-node fd-node-dark" style="min-width:200px">Input <sub>string or dict</sub></div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-row" style="align-items:flex-start;gap:0.75rem">
+      <div class="fd-col">
+        <div class="fd-node fd-node-gray" style="min-width:200px">RunnablePassthrough</div>
+      </div>
+      <div class="fd-note">passes input through, optionally renamed or merged</div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-row" style="align-items:flex-start;gap:0.75rem">
+      <div class="fd-col">
+        <div class="fd-node fd-node-blue" style="min-width:200px">PromptTemplate</div>
+      </div>
+      <div class="fd-note">formats variables into a prompt string / message list</div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-row" style="align-items:flex-start;gap:0.75rem">
+      <div class="fd-col">
+        <div class="fd-node fd-node-purple" style="min-width:200px">ChatOpenAI</div>
+      </div>
+      <div class="fd-note">calls the LLM, returns an AIMessage object</div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-row" style="align-items:flex-start;gap:0.75rem">
+      <div class="fd-col">
+        <div class="fd-node fd-node-green" style="min-width:200px">StrOutputParser</div>
+      </div>
+      <div class="fd-note">extracts .content string from the AIMessage</div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-dark" style="min-width:200px">Output <sub>string</sub></div>
+  </div>
 
   <h3>Example: LCEL RAG Chain</h3>
 <pre><code>from langchain_openai import ChatOpenAI, OpenAIEmbeddings
@@ -464,32 +538,35 @@ print(result["output"])</code></pre>
   <p class="lead">LangGraph extends LangChain with a graph-based stateful agent framework. Nodes are Python functions; edges define control flow including cycles; a shared TypedDict state threads through every node. This enables complex, long-running, resumable, and multi-agent workflows with full persistence.</p>
 
   <h3>StateGraph Control Flow</h3>
-  <div class="diagram">          START
-            |
-            v
-       +----+-------+
-       |  plan_node  |   decides what tools to call next
-       +-----+-------+
-             |
-             v
-       +-----+------+
-       | tool_node   |   executes all tool calls in the message
-       +-----+-------+
-             |
-     +-------+--------+
-     |  conditional   |   should_continue() inspects last message
-     |     edge       |
-     +--+----------+--+
-   yes  |          | no
-        |          v
-        |    +-----+---------+
-        |    |  respond_node  |   LLM writes final answer
-        |    +-----+---------+
-        |          |
-        |          v
-        |         END
-        |
-        +--------&gt; tool_node   (loop back for more tool calls)</div>
+  <div class="fd">
+    <div class="fd-start-end">START</div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-row" style="align-items:flex-start;gap:0.75rem">
+      <div class="fd-col">
+        <div class="fd-node fd-node-blue" style="min-width:160px">agent_node</div>
+      </div>
+      <div class="fd-note">calls LLM with bound tools; decides next action</div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-col" style="align-items:center">
+      <div class="fd-diamond">should_<br>continue?</div>
+      <div class="fd-gap-v"></div>
+      <div class="fd-row" style="gap:3rem;align-items:flex-start">
+        <div class="fd-col">
+          <div style="font-size:0.65rem;font-family:var(--mono);color:var(--green);margin-bottom:0.3rem">yes — tool_calls</div>
+          <div class="fd-node fd-node-green" style="min-width:130px">tool_node<sub>executes tool calls</sub></div>
+          <div class="fd-arr-u" style="height:50px"></div>
+          <div style="font-size:0.62rem;color:var(--ink3);font-style:italic">loops back to agent</div>
+        </div>
+        <div class="fd-col">
+          <div style="font-size:0.65rem;font-family:var(--mono);color:var(--coral);margin-bottom:0.3rem">no — done</div>
+          <div class="fd-node fd-node-purple" style="min-width:130px">respond_node<sub>writes final answer</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-start-end">END</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <h3>Example: LangGraph StateGraph Agent</h3>
 <pre><code>from typing import TypedDict, Annotated, Sequence
@@ -604,28 +681,35 @@ for event in app.stream(None, config=config, stream_mode="values"):
   <p class="lead">CrewAI models agent collaboration as a "crew" of specialists. Each agent has a role, goal, and backstory. Tasks are assigned and flow through sequential or hierarchical processes. The intuitive, role-based API makes it the fastest framework to prototype multi-agent content pipelines.</p>
 
   <h3>CrewAI Architecture</h3>
-  <div class="diagram">                   +------------------------------------------+
-                   |                  CREW                    |
-                   |                                          |
-                   |  +---------------+  +---------------+   |
-                   |  |     Agent     |  |     Agent     |   |
-                   |  | (Researcher)  |  |   (Writer)    |   |
-                   |  |  role + goal  |  |  role + goal  |   |
-                   |  |  backstory    |  |  backstory    |   |
-                   |  +-------+-------+  +-------+-------+   |
-                   |          |                  |            |
-                   |  +-------+------------------+--------+  |
-                   |  |              Tasks                 |  |
-                   |  |  task_1(researcher) --&gt; task_2(writer) |
-                   |  +------------------+-----------------+  |
-                   |                     |                     |
-                   |  +------------------+------------------+  |
-                   |  |  Process: sequential / hierarchical  | |
-                   |  +------------------+------------------+  |
-                   +---------------------+--------------------+
-                                         |
-                                         v
-                                      Output</div>
+  <div class="fd">
+    <div class="fd-group" style="width:100%;max-width:560px">
+      <div class="fd-group-title">Crew</div>
+      <div class="fd-row" style="gap:1rem;justify-content:center;margin-bottom:0.75rem">
+        <div class="fd-col">
+          <div class="fd-node fd-node-blue" style="min-width:140px">Agent: Researcher<sub>role · goal · backstory</sub></div>
+        </div>
+        <div class="fd-col">
+          <div class="fd-node fd-node-purple" style="min-width:140px">Agent: Writer<sub>role · goal · backstory</sub></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:1rem;margin-bottom:0.5rem">
+        <div class="fd-arr-d" style="margin:0;height:20px"></div>
+        <div class="fd-arr-d" style="margin:0;height:20px"></div>
+      </div>
+      <div class="fd-group" style="background:var(--bg)">
+        <div class="fd-group-title">Tasks</div>
+        <div class="fd-row" style="gap:0;justify-content:center">
+          <div class="fd-node fd-node-teal" style="font-size:0.73rem">task_1 (researcher)</div>
+          <div class="fd-arr-r"></div>
+          <div class="fd-node fd-node-coral" style="font-size:0.73rem">task_2 (writer)</div>
+        </div>
+      </div>
+      <div class="fd-arr-d"></div>
+      <div class="fd-node fd-node-amber" style="align-self:center;width:fit-content;margin:0 auto">Process<sub>sequential · hierarchical</sub></div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-dark" style="min-width:160px">Output</div>
+  </div>
 
   <h3>Example: Sequential Pipeline with Two Agents</h3>
 <pre><code>from crewai import Agent, Task, Crew, Process
@@ -744,28 +828,38 @@ print(flow.state.final_article)</code></pre>
   <p class="lead">AutoGen (Microsoft) frames agents as conversable actors that exchange messages. An AssistantAgent writes and plans; a UserProxyAgent executes code and returns output. GroupChat orchestrates structured multi-agent conversations with a manager that selects the next speaker.</p>
 
   <h3>AutoGen Architecture</h3>
-  <div class="diagram">User Message
-      |
-      v
-+------------------+       writes code, forms plan
-|  AssistantAgent  | &lt;------------------------------------+
-+--------+---------+                                      |
-         |  sends generated code                          |
-         v                                                |
-+------------------+       executes in Docker sandbox     |
-|  UserProxyAgent  | ----------------------------------- &gt;+
-+--------+---------+       returns stdout / stderr
-         | (result fed back as message)
-         |
-         |   For multi-agent GroupChat:
-         v
-+-------------------------+
-|   GroupChatManager      |   selects next speaker via LLM
-+--+------+----------+----+
-   |      |          |
-   v      v          v
-Agent1  Agent2    Agent3
-(Coder) (Reviewer) (Planner)</div>
+  <div class="two-col" style="gap:1.5rem;align-items:start">
+    <div class="fd">
+      <div class="fd-group-title" style="text-align:left;font-size:0.72rem;color:var(--ink2);margin-bottom:0.5rem">Two-Agent Loop</div>
+      <div class="fd-node fd-node-dark" style="min-width:160px">User Message</div>
+      <div class="fd-arr-d"></div>
+      <div class="fd-node fd-node-blue" style="min-width:160px">AssistantAgent<sub>writes code · forms plan</sub></div>
+      <div class="fd-arr-d"></div>
+      <div class="fd-node fd-node-green" style="min-width:160px">UserProxyAgent<sub>executes in Docker sandbox</sub></div>
+      <div style="display:flex;margin-top:4px">
+        <div style="width:2px;height:36px;background:var(--ink3);margin-left:auto;margin-right:20px;position:relative">
+          <div style="position:absolute;top:-6px;left:50%;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:7px solid var(--ink3)"></div>
+        </div>
+      </div>
+      <div class="fd-note" style="color:var(--ink3)">stdout/stderr loops back<br>until TERMINATE</div>
+    </div>
+    <div class="fd">
+      <div class="fd-group-title" style="text-align:left;font-size:0.72rem;color:var(--ink2);margin-bottom:0.5rem">GroupChat (multi-agent)</div>
+      <div class="fd-node fd-node-amber" style="min-width:200px">GroupChatManager<sub>selects next speaker via LLM</sub></div>
+      <div class="fd-arr-d"></div>
+      <div class="fd-row" style="gap:0.75rem">
+        <div class="fd-col">
+          <div class="fd-node fd-node-blue" style="font-size:0.73rem;min-width:80px">Coder</div>
+        </div>
+        <div class="fd-col">
+          <div class="fd-node fd-node-purple" style="font-size:0.73rem;min-width:80px">Reviewer</div>
+        </div>
+        <div class="fd-col">
+          <div class="fd-node fd-node-teal" style="font-size:0.73rem;min-width:80px">Planner</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <h3>Example: ConversableAgent with Code Execution</h3>
 <pre><code>from autogen import AssistantAgent, UserProxyAgent
@@ -862,34 +956,232 @@ user.initiate_chat(
 <!-- ════ SECTION 6 ════ -->
 <div class="section page-break" id="s6">
   <div class="section-num">Section 06</div>
+  <h2 class="section-title">OpenAI Agents SDK</h2>
+  <p class="lead">The OpenAI Agents SDK (open-source, Python-first) is OpenAI's official framework for building production-grade agentic systems. It introduces four primitives &#8212; <strong>Agent</strong>, <strong>Runner</strong>, <strong>Tool</strong>, and <strong>Handoff</strong> &#8212; plus built-in tracing and guardrails, making it the simplest path to deploying agents backed by GPT-4o or o3.</p>
+
+  <h3>Architecture</h3>
+  <div class="fd">
+    <div class="fd-node fd-node-dark" style="min-width:200px">User Input</div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-amber" style="min-width:200px">Runner.run(agent, input)<sub>executes the agent loop</sub></div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-group" style="width:100%;max-width:520px">
+      <div class="fd-group-title">Agent (instructions + tools + handoffs)</div>
+      <div class="fd-row" style="gap:1rem;justify-content:center;flex-wrap:wrap">
+        <div class="fd-col">
+          <div class="fd-node fd-node-green" style="min-width:130px">@function_tool<sub>typed Python functions</sub></div>
+          <div class="fd-mini-label">tool calls</div>
+        </div>
+        <div class="fd-col">
+          <div class="fd-node fd-node-blue" style="min-width:130px">Handoff<sub>transfer to specialist</sub></div>
+          <div class="fd-mini-label">agent routing</div>
+        </div>
+        <div class="fd-col">
+          <div class="fd-node fd-node-purple" style="min-width:130px">Guardrails<sub>input/output validation</sub></div>
+          <div class="fd-mini-label">safety checks</div>
+        </div>
+      </div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-row" style="gap:2rem">
+      <div class="fd-col">
+        <div class="fd-node fd-node-teal" style="min-width:140px">RunResult<sub>final_output · messages</sub></div>
+      </div>
+      <div class="fd-col">
+        <div class="fd-node fd-node-gray" style="min-width:140px">Built-in Tracing<sub>full span tree per run</sub></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Example: Agent with Tools</h3>
+<pre><code>from agents import Agent, Runner, function_tool
+import asyncio
+
+@function_tool
+def web_search(query: str) -> str:
+    """Search the web for up-to-date information on a topic."""
+    # In production: integrate Tavily or Brave Search
+    return f"Top results for '{query}': [results here]"
+
+@function_tool
+def get_stock_price(ticker: str) -> dict:
+    """Get the current stock price for a given ticker symbol."""
+    # In production: call a financial data API
+    return {"ticker": ticker.upper(), "price": 185.42, "currency": "USD"}
+
+agent = Agent(
+    name="ResearchAssistant",
+    instructions=(
+        "You are a financial research assistant. Use web_search to find "
+        "context and get_stock_price for live prices. Always cite sources."
+    ),
+    tools=[web_search, get_stock_price],
+    model="gpt-4o",
+)
+
+async def main():
+    result = await Runner.run(agent, "What is the current AAPL price and recent news?")
+    print(result.final_output)
+
+asyncio.run(main())</code></pre>
+
+  <h3>Example: Multi-Agent Handoffs</h3>
+<pre><code>from agents import Agent, Runner, handoff
+import asyncio
+
+# Specialist agents
+researcher = Agent(
+    name="Researcher",
+    instructions="Research topics thoroughly and return structured findings.",
+    tools=[web_search],
+    model="gpt-4o",
+)
+
+writer = Agent(
+    name="Writer",
+    instructions="Write clear, concise technical articles from research findings.",
+    model="gpt-4o",
+)
+
+code_reviewer = Agent(
+    name="CodeReviewer",
+    instructions="Review code for bugs, security issues, and best practices.",
+    model="gpt-4o",
+)
+
+# Triage agent routes to the right specialist
+triage = Agent(
+    name="Triage",
+    instructions=(
+        "You route user requests to the right specialist. "
+        "For research questions use Researcher, for writing use Writer, "
+        "for code review use CodeReviewer."
+    ),
+    handoffs=[
+        handoff(researcher),
+        handoff(writer),
+        handoff(code_reviewer),
+    ],
+    model="gpt-4o",
+)
+
+async def main():
+    result = await Runner.run(
+        triage,
+        "Review this Python function for security vulnerabilities: def get_user(id): ..."
+    )
+    print(result.final_output)
+
+asyncio.run(main())</code></pre>
+
+  <h3>Example: Guardrails for Input Validation</h3>
+<pre><code>from agents import Agent, Runner, GuardrailFunctionOutput, input_guardrail
+from pydantic import BaseModel
+import asyncio
+
+class SafetyCheck(BaseModel):
+    is_safe: bool
+    reason: str
+
+safety_agent = Agent(
+    name="SafetyChecker",
+    instructions="Determine if the user request is safe and appropriate.",
+    result_type=SafetyCheck,
+    model="gpt-4o-mini",   # cheap model for guardrail pass
+)
+
+@input_guardrail
+async def content_safety_guardrail(ctx, agent, input):
+    result = await Runner.run(safety_agent, input, context=ctx.context)
+    check: SafetyCheck = result.final_output
+    return GuardrailFunctionOutput(
+        output_info=check,
+        tripwire_triggered=not check.is_safe,
+    )
+
+main_agent = Agent(
+    name="MainAgent",
+    instructions="You are a helpful assistant.",
+    input_guardrails=[content_safety_guardrail],
+    model="gpt-4o",
+)
+
+async def main():
+    try:
+        result = await Runner.run(main_agent, "How do I build a website?")
+        print(result.final_output)
+    except Exception as e:
+        print(f"Guardrail triggered: {e}")
+
+asyncio.run(main())</code></pre>
+
+  <h3>OpenAI Agents SDK vs Other Frameworks</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Feature</th><th>OpenAI Agents SDK</th><th>LangGraph</th><th>CrewAI</th><th>AutoGen</th></tr></thead>
+      <tbody>
+        <tr><td>Mental model</td><td>Agent + Runner + Handoffs &#8212; minimal primitives</td><td>Explicit state machine graph</td><td>Role-based crew with tasks</td><td>Conversational actors</td></tr>
+        <tr><td>Multi-agent</td><td>First-class handoffs &#8212; agents call agents natively</td><td>Subgraph nodes + Send() API</td><td>Sequential / hierarchical processes</td><td>GroupChat manager</td></tr>
+        <tr><td>Guardrails</td><td>Native input/output guardrails decorator</td><td>Custom validation node</td><td>Not built-in</td><td>Not built-in</td></tr>
+        <tr><td>Tracing</td><td>Built-in per-run span tree &#8212; zero config</td><td>Via LangSmith (external)</td><td>CrewAI+ dashboard (paid)</td><td>Manual logging</td></tr>
+        <tr><td>Model support</td><td>OpenAI models + any OpenAI-compatible endpoint</td><td>Any LangChain-supported model</td><td>Any via LiteLLM</td><td>Any via config</td></tr>
+        <tr><td>Best for</td><td>GPT-4o / o3 backends, fast prototyping, clean handoffs</td><td>Complex stateful production workflows</td><td>Content pipelines, team-oriented tasks</td><td>Code gen, iterative multi-agent debate</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>Handoffs vs Subgraphs &#8212; Choose Based on Control Requirements</strong>
+    OpenAI Agents SDK handoffs let the LLM dynamically route to any registered agent &#8212; simple and flexible but less auditable. LangGraph subgraphs route via explicit conditional edges &#8212; deterministic and fully inspectable. Use the SDK for rapid development and when you trust the model's routing; use LangGraph when routing logic must be explicitly controlled and every state transition must be observable.
+  </div>
+
+  <div class="pills">
+    <span class="pill pill-blue">openai-agents</span>
+    <span class="pill pill-green">@function_tool</span>
+    <span class="pill pill-purple">handoff()</span>
+    <span class="pill pill-amber">input_guardrail</span>
+    <span class="pill pill-teal">Runner.run()</span>
+    <span class="pill pill-coral">built-in tracing</span>
+  </div>
+</div>
+
+<!-- ════ SECTION 7 ════ -->
+<div class="section page-break" id="s7">
+  <div class="section-num">Section 07</div>
   <h2 class="section-title">Pydantic AI</h2>
   <p class="lead">Pydantic AI brings the ergonomics of FastAPI to LLM agents. It enforces type safety from tool inputs through to the final structured output, uses dependency injection for clean testability, and integrates natively with the Pydantic V2 ecosystem used throughout modern Python stacks.</p>
 
   <h3>Pydantic AI Architecture</h3>
-  <div class="diagram">+---------------------------------------------------------+
-|       Agent(model="openai:gpt-4o",                      |
-|             result_type=CompanyProfile,                  |
-|             deps_type=Deps)                              |
-|                                                          |
-|  system_prompt                                           |
-|  +--------------------------------------------------+   |
-|  |  "You are a company analyst. Use tools to        |   |
-|  |   look up data and return a CompanyProfile."     |   |
-|  +--------------------------------------------------+   |
-|                                                          |
-|  @agent.tool                                             |
-|  lookup_company(ctx: RunContext[Deps], name: str)        |
-|       --&gt;  returns dict from ctx.deps.company_db        |
-|                                                          |
-|  validated output                                        |
-|  +--------------------------------------------------+   |
-|  |  CompanyProfile (Pydantic BaseModel)             |   |
-|  |    name: str                                     |   |
-|  |    industry: str                                 |   |
-|  |    employee_count: int                           |   |
-|  |    founded_year: int                             |   |
-|  +--------------------------------------------------+   |
-+---------------------------------------------------------+</div>
+  <div class="fd">
+    <div class="fd-group" style="width:100%;max-width:540px">
+      <div class="fd-group-title">Agent(model="openai:gpt-4o", result_type=CompanyProfile, deps_type=Deps)</div>
+      <div class="fd-row" style="gap:1rem;justify-content:center;flex-wrap:wrap">
+        <div class="fd-col" style="flex:1;min-width:140px">
+          <div class="fd-node fd-node-blue" style="width:100%">system_prompt<sub>"You are a company analyst..."</sub></div>
+        </div>
+        <div class="fd-col" style="flex:1;min-width:140px">
+          <div class="fd-node fd-node-green" style="width:100%">@agent.tool<sub>lookup_company(ctx, name) → dict</sub></div>
+        </div>
+        <div class="fd-col" style="flex:1;min-width:140px">
+          <div class="fd-node fd-node-purple" style="width:100%">deps_type=Deps<sub>injected at runtime</sub></div>
+        </div>
+      </div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-amber" style="min-width:200px">LLM Call + Tool Execution<sub>validated inputs via Pydantic</sub></div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-group" style="max-width:320px">
+      <div class="fd-group-title">result_type: CompanyProfile (BaseModel)</div>
+      <div style="font-family:var(--mono);font-size:0.73rem;color:var(--ink2);line-height:1.7">
+        name: <span style="color:var(--purple)">str</span><br>
+        industry: <span style="color:var(--purple)">str</span><br>
+        employee_count: <span style="color:var(--green)">int</span><br>
+        founded_year: <span style="color:var(--green)">int</span><br>
+        summary: <span style="color:var(--purple)">str</span>
+      </div>
+    </div>
+    <div class="fd-note" style="margin-top:0.5rem">Auto-retries if model returns wrong shape</div>
+  </div>
 
   <h3>Example: Structured Output, Dependency Injection, and Tool</h3>
 <pre><code>from pydantic import BaseModel
@@ -980,35 +1272,32 @@ async def test_company_agent_returns_profile():
   </div>
 </div>
 
-<!-- ════ SECTION 7 ════ -->
-<div class="section page-break" id="s7">
-  <div class="section-num">Section 07</div>
+<!-- ════ SECTION 8 ════ -->
+<div class="section page-break" id="s8">
+  <div class="section-num">Section 08</div>
   <h2 class="section-title">Agent Memory</h2>
   <p class="lead">Memory is the mechanism by which an agent accumulates, stores, and retrieves information across turns, sessions, and time. Getting memory right is often the difference between a demo that works once and a production system users trust.</p>
 
   <h3>Memory Architecture</h3>
-  <div class="diagram">+-------------------+  +--------------------+  +-------------------+
-|   Short-term      |  |    Long-term       |  |     Episodic       |
-|   (in-context)    |  |   (vector store)   |  |    (event log)     |
-|                   |  |                    |  |                    |
-|  Current messages |  |  Past summaries    |  |  Action history    |
-|  Recent turns     |  |  User preferences  |  |  Error traces      |
-|  Scratchpad       |  |  Semantic facts     |  |  Milestones reached|
-+--------+----------+  +----------+---------+  +---------+---------+
-         |                        |                       |
-         +------------------------+-----------------------+
-                                  |
-                          +-------+-------+
-                          | Memory Manager|
-                          | retrieval +   |
-                          | summarisation |
-                          +-------+-------+
-                                  |
-                                  v
-                         Retrieved context
-                                  |
-                                  v
-                              LLM call</div>
+  <div class="fd">
+    <div class="fd-row" style="gap:1rem;align-items:stretch;flex-wrap:wrap;justify-content:center">
+      <div class="fd-node fd-node-blue" style="min-width:150px;flex:1;max-width:170px">Short-term<sub>in-context messages · scratchpad · recent turns</sub></div>
+      <div class="fd-node fd-node-purple" style="min-width:150px;flex:1;max-width:170px">Long-term<sub>vector store · summaries · user preferences</sub></div>
+      <div class="fd-node fd-node-teal" style="min-width:150px;flex:1;max-width:170px">Episodic<sub>event log · action history · error traces</sub></div>
+    </div>
+    <div style="display:flex;width:60%;max-width:400px;justify-content:center">
+      <div style="width:2px;flex:1;background:var(--ink3);height:28px"></div>
+      <div style="width:2px;flex:1;background:var(--ink3);height:28px;position:relative">
+        <div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid var(--ink3)"></div>
+      </div>
+      <div style="width:2px;flex:1;background:var(--ink3);height:28px"></div>
+    </div>
+    <div class="fd-node fd-node-amber" style="min-width:220px">Memory Manager<sub>retrieval · summarisation · eviction</sub></div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-green" style="min-width:200px">Retrieved Context<sub>injected into prompt</sub></div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-dark" style="min-width:160px">LLM Call</div>
+  </div>
 
   <h3>Memory Types</h3>
   <div class="table-wrap">
@@ -1093,39 +1382,70 @@ app = graph.compile(checkpointer=checkpointer)</code></pre>
   </div>
 </div>
 
-<!-- ════ SECTION 8 ════ -->
-<div class="section page-break" id="s8">
-  <div class="section-num">Section 08</div>
+<!-- ════ SECTION 9 ════ -->
+<div class="section page-break" id="s9">
+  <div class="section-num">Section 09</div>
   <h2 class="section-title">Multi-Agent Patterns</h2>
   <p class="lead">Multi-agent systems decompose complex problems across specialised agents. Choosing the right topology before building determines whether your system is maintainable, debuggable, and cost-efficient in production.</p>
 
   <h3>Four Core Topologies</h3>
-  <div class="diagram">-- SUPERVISOR / WORKER -------------------------------------------------
-  Supervisor (router LLM)
-  +-- Worker A: Researcher  (handles research subtasks)
-  +-- Worker B: Coder       (handles code generation subtasks)
-  +-- Worker C: Writer      (handles documentation subtasks)
-  Supervisor routes incoming tasks, collects results, synthesises final output.
+  <div class="two-col" style="gap:1.25rem">
 
--- PARALLEL FAN-OUT -----------------------------------------------------
-  Orchestrator
-  +--&gt; Agent A (subtask 1) --+
-  +--&gt; Agent B (subtask 2) --+--&gt; Aggregator --&gt; Final result
-  +--&gt; Agent C (subtask 3) --+
-  All agents run concurrently via asyncio.gather; aggregator merges results.
+    <div class="fd-group">
+      <div class="fd-group-title">Supervisor / Worker</div>
+      <div class="fd">
+        <div class="fd-node fd-node-amber" style="width:100%">Supervisor<sub>router LLM</sub></div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-row" style="gap:0.5rem">
+          <div class="fd-node fd-node-blue" style="flex:1;font-size:0.72rem">Researcher</div>
+          <div class="fd-node fd-node-green" style="flex:1;font-size:0.72rem">Coder</div>
+          <div class="fd-node fd-node-purple" style="flex:1;font-size:0.72rem">Writer</div>
+        </div>
+      </div>
+    </div>
 
--- DEBATE / CRITIC -------------------------------------------------------
-  Proposer  --&gt;  initial draft
-  Critic    --&gt;  critique of draft
-  Proposer  --&gt;  revised draft        (repeat N rounds)
-  Judge     --&gt;  final verdict / selection
-  Improves output quality through structured adversarial iteration.
+    <div class="fd-group">
+      <div class="fd-group-title">Parallel Fan-out</div>
+      <div class="fd">
+        <div class="fd-node fd-node-dark" style="width:100%">Orchestrator</div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-row" style="gap:0.5rem">
+          <div class="fd-node fd-node-teal" style="flex:1;font-size:0.72rem">Agent A<sub>subtask 1</sub></div>
+          <div class="fd-node fd-node-teal" style="flex:1;font-size:0.72rem">Agent B<sub>subtask 2</sub></div>
+          <div class="fd-node fd-node-teal" style="flex:1;font-size:0.72rem">Agent C<sub>subtask 3</sub></div>
+        </div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-node fd-node-green" style="width:100%">Aggregator → Output</div>
+      </div>
+    </div>
 
--- HANDOFF CHAIN ----------------------------------------------------------
-  Agent A (intake + classify)
-  --&gt; Agent B (process + enrich)
-  --&gt; Agent C (format + deliver output)
-  Linear pipeline; each agent has one bounded responsibility.</div>
+    <div class="fd-group">
+      <div class="fd-group-title">Debate / Critic</div>
+      <div class="fd">
+        <div class="fd-node fd-node-blue" style="width:100%">Proposer<sub>initial draft</sub></div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-node fd-node-coral" style="width:100%">Critic<sub>critique + suggestions</sub></div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-node fd-node-blue" style="width:100%">Proposer<sub>revised draft (N rounds)</sub></div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-node fd-node-amber" style="width:100%">Judge → Final verdict</div>
+      </div>
+    </div>
+
+    <div class="fd-group">
+      <div class="fd-group-title">Handoff Chain</div>
+      <div class="fd">
+        <div class="fd-node fd-node-green" style="width:100%">Agent A<sub>intake + classify</sub></div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-node fd-node-blue" style="width:100%">Agent B<sub>process + enrich</sub></div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-node fd-node-purple" style="width:100%">Agent C<sub>format + deliver</sub></div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-node fd-node-dark" style="width:100%">Output</div>
+      </div>
+    </div>
+
+  </div>
 
   <h3>Pattern Comparison</h3>
   <div class="table-wrap">
@@ -1207,38 +1527,45 @@ result = app.invoke({"messages": [HumanMessage(content="Build a web scraper and 
   </div>
 </div>
 
-<!-- ════ SECTION 9 ════ -->
-<div class="section page-break" id="s9">
-  <div class="section-num">Section 09</div>
+<!-- ════ SECTION 10 ════ -->
+<div class="section page-break" id="s10">
+  <div class="section-num">Section 10</div>
   <h2 class="section-title">Production Agents</h2>
   <p class="lead">Running agents in production requires infrastructure that goes far beyond the happy path. Observability, cost controls, retry logic, and graceful degradation are not optional extras &#8212; they are the core of the product.</p>
 
   <h3>Production Architecture</h3>
-  <div class="diagram">Agent Request
-      |
-      v
-+------------------+
-|   Rate Limiter   |   per-user token budgets + global QPM limits
-+--------+---------+
-         |
-         v
-+------------------+
-|  Orchestrator    |   LangGraph state machine / LiteLLM gateway
-+---+----------+---+
-    |          |
-    v          v
-+--------+  +--------+
-| Tool A |  | Tool B |   MCP servers, REST APIs, code executor
-+---+----+  +----+---+
-    +----------+
-         |
-         v
-+------------------+
-|  Result Cache    |   Redis semantic cache (avoid repeat LLM calls)
-+--------+---------+
-         |
-         v
- Response + Trace -----&gt;  LangSmith / Datadog LLM monitoring</div>
+  <div class="fd">
+    <div class="fd-node fd-node-dark" style="min-width:220px">Agent Request</div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-row" style="align-items:flex-start;gap:0.75rem">
+      <div class="fd-node fd-node-coral" style="min-width:220px">Rate Limiter</div>
+      <div class="fd-note">per-user token budgets · global QPM limits</div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-row" style="align-items:flex-start;gap:0.75rem">
+      <div class="fd-node fd-node-blue" style="min-width:220px">Orchestrator<sub>LangGraph · LiteLLM gateway</sub></div>
+      <div class="fd-note">state machine with full tool routing</div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-row" style="gap:1rem;justify-content:center">
+      <div class="fd-col">
+        <div class="fd-node fd-node-green" style="min-width:130px">Tool A<sub>MCP server / API</sub></div>
+      </div>
+      <div class="fd-col">
+        <div class="fd-node fd-node-green" style="min-width:130px">Tool B<sub>code executor</sub></div>
+      </div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-row" style="align-items:flex-start;gap:0.75rem">
+      <div class="fd-node fd-node-purple" style="min-width:220px">Result Cache<sub>Redis semantic cache</sub></div>
+      <div class="fd-note">avoid repeat LLM calls on identical queries</div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-row" style="gap:1rem;justify-content:center">
+      <div class="fd-node fd-node-teal" style="min-width:130px">Response</div>
+      <div class="fd-node fd-node-amber" style="min-width:130px">Trace<sub>LangSmith · Datadog</sub></div>
+    </div>
+  </div>
 
   <h3>Production Checklist</h3>
   <div class="card-grid">
@@ -1320,6 +1647,7 @@ with trace("tool_execution", inputs={"tool": "web_search", "query": "AI agents 2
     <li><a href="https://langchain-ai.github.io/langgraph/" target="_blank" rel="noopener">LangGraph Documentation &#8212; langchain-ai.github.io/langgraph</a></li>
     <li><a href="https://docs.crewai.com/" target="_blank" rel="noopener">CrewAI Documentation &#8212; docs.crewai.com</a></li>
     <li><a href="https://microsoft.github.io/autogen/" target="_blank" rel="noopener">AutoGen Documentation &#8212; microsoft.github.io/autogen</a></li>
+    <li><a href="https://openai.github.io/openai-agents-python/" target="_blank" rel="noopener">OpenAI Agents SDK Documentation &#8212; openai.github.io/openai-agents-python</a></li>
     <li><a href="https://ai.pydantic.dev/" target="_blank" rel="noopener">Pydantic AI Documentation &#8212; ai.pydantic.dev</a></li>
     <li><a href="https://smith.langchain.com/" target="_blank" rel="noopener">LangSmith &#8212; smith.langchain.com</a></li>
   </ul>

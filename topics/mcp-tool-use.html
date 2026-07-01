@@ -138,6 +138,9 @@ body { display: flex; flex-direction: column; }
 .sidebar nav ul { list-style: none; }
 .sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
 .sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar nav ul ul { margin: 0; padding: 0; }
+.sidebar nav ul ul li a { padding: 0.3rem 1.25rem 0.3rem 2.2rem; font-size: 0.74rem; color: #a0aec0; }
+.sidebar nav ul ul li a:hover { background: #3d4d63; color: #e2e8f0; }
 .sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
 .main-scroll { flex: 1; overflow-y: auto; }
 .guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
@@ -163,7 +166,12 @@ body { display: flex; flex-direction: column; }
       <li><a href="#s6"><span class="toc-num">06</span>Structured Outputs</a></li>
       <li><a href="#s7"><span class="toc-num">07</span>Parallel Tool Calls</a></li>
       <li><a href="#s8"><span class="toc-num">08</span>Tool Security</a></li>
-      <li><a href="#s9"><span class="toc-num">09</span>Agent Integration</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>Agent Integration</a>
+        <ul>
+          <li><a href="#s9-mcpstdio">&#8627; MCPServerStdio</a></li>
+        </ul>
+      </li>
+      <li><a href="#s10"><span class="toc-num">10</span>MCP Marketplaces</a></li>
     </ul></nav>
   </aside>
 
@@ -182,6 +190,7 @@ body { display: flex; flex-direction: column; }
     <span class="cover-tag">Parallel Tools</span>
     <span class="cover-tag">MCP Servers</span>
     <span class="cover-tag">Security</span>
+    <span class="cover-tag">MCP Marketplaces</span>
   </div>
   <div class="cover-date">v1.0 — Last updated May 2026</div>
 </div>
@@ -199,6 +208,7 @@ body { display: flex; flex-direction: column; }
     <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Parallel Tool Calls</span></a>
     <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">Tool Security</span></a>
     <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">Agent Integration</span></a>
+    <a class="toc-item" href="#s10"><span class="toc-num">10</span><span class="toc-label">MCP Server Marketplaces</span></a>
   </div>
 </div>
 
@@ -845,6 +855,156 @@ async def create_langchain_mcp_tools(server_script: str) -> list:
     <div class="card card-accent"><h4>Audit Logging</h4><p>Log every tool call: timestamp, tool name, arguments, result, latency. Essential for debugging multi-step agent traces.</p></div>
   </div>
 
+  <h3 id="s9-mcpstdio">MCPServerStdio — Connecting to Local MCP Servers</h3>
+
+  <h4>Required packages</h4>
+<pre><code># Core — OpenAI Agents SDK (provides MCPServerStdio, Agent, Runner)
+pip install openai-agents
+
+# MCP Python SDK — needed for the lower-level stdio_client / ClientSession approach
+pip install mcp
+
+# If your MCP server uses FastMCP (Section 4 examples)
+pip install "mcp[cli]"          # includes FastMCP + CLI tools
+
+# Optional — if wrapping MCP tools into LangChain / LangGraph
+pip install langchain-core langgraph
+
+# Common server-side dependencies (add as needed per server)
+pip install httpx               # async HTTP (used in the weather server example)
+pip install pydantic            # structured tool inputs</code></pre>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Package</th><th>Provides</th><th>When you need it</th></tr></thead>
+    <tbody>
+      <tr><td><code>openai-agents</code></td><td><code>MCPServerStdio</code>, <code>MCPServerSse</code>, <code>Agent</code>, <code>Runner</code></td><td>Building agents with the OpenAI Agents SDK</td></tr>
+      <tr><td><code>mcp</code></td><td><code>ClientSession</code>, <code>StdioServerParameters</code>, <code>stdio_client</code>, <code>FastMCP</code></td><td>Building or talking to MCP servers directly</td></tr>
+      <tr><td><code>mcp[cli]</code></td><td>Everything in <code>mcp</code> + <code>fastmcp</code> CLI + dev tools</td><td>Building FastMCP servers (recommended for development)</td></tr>
+    </tbody>
+  </table></div>
+
+  <p><code>MCPServerStdio</code> is the client-side class from the <strong>OpenAI Agents Python SDK</strong> (<code>openai-agents</code>) for launching a local MCP server as a subprocess and connecting to it over stdin/stdout. It handles the full lifecycle: spawning the process, performing the MCP handshake, listing available tools, and tearing down cleanly. Agents receive the server's tools automatically — no manual tool registration needed.</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Property</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>params.command</code></td><td>The executable to run — e.g. <code>"python"</code>, <code>"node"</code>, <code>"npx"</code></td></tr>
+      <tr><td><code>params.args</code></td><td>List of arguments passed to the command — e.g. <code>["server.py"]</code></td></tr>
+      <tr><td><code>params.env</code></td><td>Optional dict of environment variables injected into the server process</td></tr>
+      <tr><td><code>name</code></td><td>Optional human-readable label for the server (appears in traces)</td></tr>
+      <tr><td><code>cache_tools_list</code></td><td>Cache the tool list after first fetch — avoids a round-trip on every agent run (default <code>False</code>)</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Example: Basic Usage with OpenAI Agents SDK</h3>
+<pre><code>import asyncio
+from agents import Agent, Runner
+from agents.mcp import MCPServerStdio
+
+async def main():
+    # 1. Define the MCP server — points to a local Python MCP server script
+    mcp_server = MCPServerStdio(
+        name="weather-service",
+        params={
+            "command": "python",
+            "args": ["weather_server.py"],      # the FastMCP server from Section 4
+            "env": {"WEATHER_API_KEY": "sk-..."},
+        },
+        cache_tools_list=True,   # avoid re-fetching tool list on every run
+    )
+
+    # 2. Create an agent — mcp_servers wires tools in automatically
+    agent = Agent(
+        name="Weather Agent",
+        instructions="You help users with weather queries. Use available tools.",
+        mcp_servers=[mcp_server],
+    )
+
+    # 3. Run inside the server's async context manager (handles process lifecycle)
+    async with mcp_server:
+        result = await Runner.run(agent, "What's the weather in Paris right now?")
+        print(result.final_output)
+
+asyncio.run(main())</code></pre>
+
+  <h3>Example: Connecting to Multiple MCP Servers</h3>
+<pre><code>from agents import Agent, Runner
+from agents.mcp import MCPServerStdio
+
+weather_server = MCPServerStdio(
+    name="weather",
+    params={"command": "python", "args": ["weather_server.py"]},
+)
+database_server = MCPServerStdio(
+    name="database",
+    params={"command": "python", "args": ["db_server.py"],
+            "env": {"DB_URL": "postgresql://localhost/mydb"}},
+)
+search_server = MCPServerStdio(
+    name="search",
+    params={"command": "npx", "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+            "env": {"BRAVE_API_KEY": "your-key"}},
+)
+
+agent = Agent(
+    name="Research Agent",
+    instructions="Research topics using weather, database, and web search tools.",
+    mcp_servers=[weather_server, database_server, search_server],
+)
+
+# Use asynccontextmanager to open all servers together
+from contextlib import AsyncExitStack
+
+async def run():
+    async with AsyncExitStack() as stack:
+        for server in [weather_server, database_server, search_server]:
+            await stack.enter_async_context(server)
+        result = await Runner.run(agent, "Find data on climate trends in Paris")
+        print(result.final_output)</code></pre>
+
+  <h3>Example: Listing Available Tools from an MCP Server</h3>
+<pre><code>from agents.mcp import MCPServerStdio
+
+async def inspect_server_tools(script_path: str):
+    """Print all tools exposed by an MCP server."""
+    server = MCPServerStdio(
+        params={"command": "python", "args": [script_path]}
+    )
+    async with server:
+        tools = await server.list_tools()
+        for tool in tools:
+            print(f"  {tool.name}: {tool.description}")
+            if tool.inputSchema.get("properties"):
+                for param, schema in tool.inputSchema["properties"].items():
+                    required = param in tool.inputSchema.get("required", [])
+                    print(f"    - {param} ({schema.get('type','any')}){'*' if required else ''}")
+
+# Run it
+import asyncio
+asyncio.run(inspect_server_tools("weather_server.py"))
+
+# Output:
+#   get_weather: Get current weather for a city. Units: celsius or fahrenheit.
+#     - city (string)*
+#     - units (string)</code></pre>
+
+  <div class="callout callout-blue">
+    <strong>MCPServerStdio vs <code>stdio_client</code> directly</strong>
+    <div class="table-wrap" style="margin-top:0.6rem;"><table style="font-size:0.83rem;">
+      <thead><tr><th>Approach</th><th>When to use</th><th>Complexity</th></tr></thead>
+      <tbody>
+        <tr><td><code>MCPServerStdio</code> (Agents SDK)</td><td>Building agents with OpenAI Agents SDK — tools auto-registered, lifecycle managed</td><td>Low — just pass to <code>Agent(mcp_servers=[...])</code></td></tr>
+        <tr><td><code>stdio_client</code> + <code>ClientSession</code> (MCP SDK)</td><td>Manual control — wrapping into LangChain, LangGraph, or custom code</td><td>Medium — manage context managers and session init yourself</td></tr>
+        <tr><td><code>StdioServerParameters</code> (MCP SDK)</td><td>Same as above — older API, same capability</td><td>Medium</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="callout callout-amber">
+    <strong>Always use MCPServerStdio as an async context manager</strong>
+    The <code>async with mcp_server:</code> block starts the subprocess, runs the MCP handshake, and ensures the process is killed cleanly when done. Forgetting the context manager leaves orphaned server processes running in the background.
+  </div>
+
   <h3>Further Reading</h3>
   <ul class="clean">
     <li><a href="https://modelcontextprotocol.io/introduction" target="_blank">MCP Official Specification</a></li>
@@ -854,6 +1014,701 @@ async def create_langchain_mcp_tools(server_script: str) -> list:
     <li><a href="https://github.com/punkpeye/awesome-mcp-servers" target="_blank">Awesome MCP Servers (community list)</a></li>
     <li><a href="https://python.useinstructor.com/" target="_blank">Instructor Library Documentation</a></li>
   </ul>
+</div>
+
+<!-- ══════════════════════════ SECTION 10 ══════════════════════════ -->
+<div class="section page-break" id="s10">
+  <div class="section-num">Section 10</div>
+  <h2 class="section-title">MCP Server Marketplaces</h2>
+  <p class="lead">The MCP ecosystem has grown rapidly since the protocol's release. These directories, registries, and marketplaces let you discover pre-built servers — covering everything from databases and browser automation to enterprise SaaS integrations — rather than building from scratch.</p>
+
+  <h3>Official &amp; Reference Servers</h3>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Anthropic Reference Servers</h4>
+      <p>The official collection maintained by Anthropic. Covers filesystem, Git, databases (SQLite, PostgreSQL), browser automation (Playwright), Slack, Google Maps, and more. The best-maintained set and the first place to check.</p>
+      <p style="margin-top:0.5rem;"><a href="https://github.com/modelcontextprotocol/servers" target="_blank" rel="noopener" style="font-size:0.8rem;">github.com/modelcontextprotocol/servers</a></p>
+    </div>
+    <div class="card card-accent">
+      <h4>Claude Desktop Built-ins</h4>
+      <p>Claude Desktop ships with built-in MCP server support and a first-party server for local filesystem access. No installation needed — just configure <code>claude_desktop_config.json</code>.</p>
+      <p style="margin-top:0.5rem;"><a href="https://docs.anthropic.com/en/docs/agents-and-tools/mcp" target="_blank" rel="noopener" style="font-size:0.8rem;">docs.anthropic.com — MCP Docs</a></p>
+    </div>
+  </div>
+
+  <h3>Community Directories &amp; Marketplaces</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Marketplace</th><th>URL</th><th>Highlights</th><th>Best For</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Smithery</strong></td>
+        <td><a href="https://smithery.ai" target="_blank" rel="noopener">smithery.ai</a></td>
+        <td>Searchable registry, one-click install commands, usage stats, hosted server support (SSE)</td>
+        <td>Discovering and installing servers fast; largest curated index</td>
+      </tr>
+      <tr>
+        <td><strong>mcp.so</strong></td>
+        <td><a href="https://mcp.so" target="_blank" rel="noopener">mcp.so</a></td>
+        <td>Community-submitted directory with categories, tags, and ratings</td>
+        <td>Browsing by category (productivity, data, dev tools, etc.)</td>
+      </tr>
+      <tr>
+        <td><strong>Glama MCP</strong></td>
+        <td><a href="https://glama.ai/mcp/servers" target="_blank" rel="noopener">glama.ai/mcp/servers</a></td>
+        <td>Verified servers with security scanning, install guides per server</td>
+        <td>Security-conscious teams who want vetted servers</td>
+      </tr>
+      <tr>
+        <td><strong>PulseMCP</strong></td>
+        <td><a href="https://pulsemcp.com" target="_blank" rel="noopener">pulsemcp.com</a></td>
+        <td>Real-time tracking of new and trending MCP servers; weekly digest</td>
+        <td>Staying up-to-date with the fast-moving MCP ecosystem</td>
+      </tr>
+      <tr>
+        <td><strong>Awesome MCP Servers</strong></td>
+        <td><a href="https://github.com/punkpeye/awesome-mcp-servers" target="_blank" rel="noopener">github.com/punkpeye/awesome-mcp-servers</a></td>
+        <td>Community-maintained GitHub list; 1000+ servers; organised by category</td>
+        <td>Comprehensive reference; easy to contribute or find niche servers</td>
+      </tr>
+      <tr>
+        <td><strong>MCP Hub</strong></td>
+        <td><a href="https://mcphub.io" target="_blank" rel="noopener">mcphub.io</a></td>
+        <td>Directory with install instructions and API key requirements listed per server</td>
+        <td>Quick lookup when you know the integration you need</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <h3>Notable Pre-Built Servers by Category</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Category</th><th>Server</th><th>Install</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Filesystem</strong></td><td>filesystem (official)</td><td><code>npx @modelcontextprotocol/server-filesystem</code></td><td>Read, write, and search local files within allowed paths</td></tr>
+      <tr><td><strong>Web search</strong></td><td>Brave Search</td><td><code>npx @modelcontextprotocol/server-brave-search</code></td><td>Web and local search via Brave Search API</td></tr>
+      <tr><td><strong>Browser</strong></td><td>Playwright</td><td><code>npx @modelcontextprotocol/server-playwright</code></td><td>Browser automation — navigate, click, screenshot, scrape</td></tr>
+      <tr><td><strong>Browser</strong></td><td>Puppeteer</td><td><code>npx @modelcontextprotocol/server-puppeteer</code></td><td>Headless Chrome control via Puppeteer</td></tr>
+      <tr><td><strong>Git</strong></td><td>Git (official)</td><td><code>pip install mcp-server-git</code></td><td>Read commits, diffs, branches, file history</td></tr>
+      <tr><td><strong>Database</strong></td><td>SQLite (official)</td><td><code>pip install mcp-server-sqlite</code></td><td>Query and inspect local SQLite databases</td></tr>
+      <tr><td><strong>Database</strong></td><td>PostgreSQL (official)</td><td><code>npx @modelcontextprotocol/server-postgres</code></td><td>Read-only queries against a PostgreSQL database</td></tr>
+      <tr><td><strong>Memory</strong></td><td>Memory (official)</td><td><code>npx @modelcontextprotocol/server-memory</code></td><td>Persistent knowledge graph — store &amp; recall facts across sessions</td></tr>
+      <tr><td><strong>Slack</strong></td><td>Slack (official)</td><td><code>npx @modelcontextprotocol/server-slack</code></td><td>Post messages, read channels, search Slack workspace</td></tr>
+      <tr><td><strong>GitHub</strong></td><td>GitHub (official)</td><td><code>npx @modelcontextprotocol/server-github</code></td><td>Search repos, read files, create issues and PRs</td></tr>
+      <tr><td><strong>Google Maps</strong></td><td>Google Maps (official)</td><td><code>npx @modelcontextprotocol/server-google-maps</code></td><td>Geocoding, directions, place search</td></tr>
+      <tr><td><strong>Enterprise SaaS</strong></td><td>Zapier MCP</td><td>Hosted — configure via Zapier dashboard</td><td>7,000+ app integrations (Gmail, Sheets, Notion, Salesforce…)</td></tr>
+      <tr><td><strong>Everything</strong></td><td>Everything (test)</td><td><code>npx @modelcontextprotocol/server-everything</code></td><td>Reference server exposing every MCP primitive — useful for testing clients</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>How to Install a Server from a Marketplace</h3>
+<pre><code># ── Option A: npm/npx (TypeScript servers — most official ones) ──────────────
+# One-off run (no install needed):
+npx -y @modelcontextprotocol/server-brave-search
+
+# Or install globally:
+npm install -g @modelcontextprotocol/server-brave-search
+
+# ── Option B: pip (Python servers) ───────────────────────────────────────────
+pip install mcp-server-git
+pip install mcp-server-sqlite
+
+# ── Option C: Smithery CLI (any server in the Smithery registry) ─────────────
+npx -y @smithery/cli install @modelcontextprotocol/server-brave-search --client claude
+
+# ── Configure in claude_desktop_config.json ───────────────────────────────────
+{
+  "mcpServers": {
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": { "BRAVE_API_KEY": "your-key-here" }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/you/Documents"]
+    },
+    "git": {
+      "command": "python",
+      "args": ["-m", "mcp_server_git"],
+      "env": {}
+    }
+  }
+}</code></pre>
+
+  <h3>How to Use a Marketplace Server with MCPServerStdio</h3>
+<pre><code>from agents import Agent, Runner
+from agents.mcp import MCPServerStdio
+
+# Any server from the marketplace — just swap command/args
+brave_search = MCPServerStdio(
+    name="brave-search",
+    params={
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+        "env": {"BRAVE_API_KEY": "your-key"},
+    },
+    cache_tools_list=True,
+)
+
+github = MCPServerStdio(
+    name="github",
+    params={
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-github"],
+        "env": {"GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_..."},
+    },
+    cache_tools_list=True,
+)
+
+agent = Agent(
+    name="Research Agent",
+    instructions="Search the web and GitHub to answer technical questions.",
+    mcp_servers=[brave_search, github],
+)
+
+async def run():
+    from contextlib import AsyncExitStack
+    async with AsyncExitStack() as stack:
+        await stack.enter_async_context(brave_search)
+        await stack.enter_async_context(github)
+        result = await Runner.run(agent, "Find popular Python MCP server projects on GitHub")
+        print(result.final_output)</code></pre>
+
+  <div class="callout callout-amber">
+    <strong>Security tip: vet marketplace servers before use</strong>
+    MCP servers run as local processes with the permissions of your user account. Before installing any community server: check the GitHub repo, review the source code, and prefer servers from the official <code>@modelcontextprotocol</code> namespace or well-known publishers. Glama.ai performs automated security scanning on listed servers.
+  </div>
+
+  <h3>Enterprise Financial Data — Refinitiv (LSEG) &amp; Bloomberg</h3>
+
+  <h4>Are official MCP servers available?</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Vendor</th><th>Official MCP Server?</th><th>Type</th><th>Access</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>LSEG (Refinitiv)</strong></td>
+        <td><span style="color:var(--green);font-weight:700;">✅ Yes — launched Oct 2025</span></td>
+        <td>Managed remote server (SSE/HTTP)</td>
+        <td>Requires LSEG Workspace or Financial Analytics licence; available via Microsoft Copilot Studio, OpenAI ChatGPT Enterprise, and Databricks Marketplace</td>
+      </tr>
+      <tr>
+        <td><strong>Bloomberg</strong></td>
+        <td><span style="color:var(--amber);font-weight:700;">⚠ Community only</span></td>
+        <td>Local server (SSE, wraps BLPAPI)</td>
+        <td>Bloomberg is an official MCP supporting member but has not published a first-party open package; use the community <code>blpapi-mcp</code> server</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <h4>LSEG Official MCP Server</h4>
+  <p>LSEG launched its managed MCP server in October 2025 in partnership with Microsoft, and extended it to OpenAI in December 2025 and Databricks in 2026. It is a <strong>hosted remote server</strong> (SSE transport) — LSEG runs the infrastructure and you connect with your existing Workspace/Financial Analytics credentials. There is no self-hosted package to install.</p>
+
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>Microsoft Copilot Studio / M365</h4>
+      <p>Connect directly in Copilot Studio — LSEG's MCP server appears as a connectable data source. Requires an active LSEG Financial Analytics subscription linked to your Microsoft tenant.</p>
+      <p style="margin-top:0.4rem;font-size:0.8rem;"><a href="https://www.lseg.com/en/media-centre/press-releases/2025/lseg-and-microsoft-transform-access-to-ai-ready-financial-data-in-customer-workflows" target="_blank" rel="noopener">lseg.com — Microsoft announcement</a></p>
+    </div>
+    <div class="card card-accent">
+      <h4>OpenAI ChatGPT Enterprise</h4>
+      <p>LSEG's MCP connector went live in ChatGPT from December 2025 for OpenAI enterprise customers — financial data accessible directly inside ChatGPT agents.</p>
+      <p style="margin-top:0.4rem;font-size:0.8rem;"><a href="https://www.lseg.com/en/media-centre/press-releases/2025/lseg-announces-new-collaboration-with-openai" target="_blank" rel="noopener">lseg.com — OpenAI announcement</a></p>
+    </div>
+    <div class="card card-accent">
+      <h4>Databricks Marketplace</h4>
+      <p>Available in the Databricks Marketplace for use with Agent Bricks (Databricks' agentic AI product). Provides real-time connectivity to LSEG financial intelligence inside Databricks workflows.</p>
+      <p style="margin-top:0.4rem;font-size:0.8rem;"><a href="https://www.lseg.com/en/solutions/ai-finance-solutions/updates/lseg-launches-mcp-server-databricks-marketplace-ai-ready-access" target="_blank" rel="noopener">lseg.com — Databricks announcement</a></p>
+    </div>
+    <div class="card card-accent">
+      <h4>Claude / Custom agents (SSE)</h4>
+      <p>For custom agent code, LSEG exposes an SSE endpoint. Connect using <code>MCPServerSse</code> from the OpenAI Agents SDK with your LSEG API key. Also see the LSEG Claude Plugin sample on GitHub.</p>
+      <p style="margin-top:0.4rem;font-size:0.8rem;"><a href="https://github.com/LSEG-API-Samples/lseg-claude-plugin" target="_blank" rel="noopener">github.com/LSEG-API-Samples/lseg-claude-plugin</a></p>
+    </div>
+  </div>
+
+<pre><code># Connecting to LSEG's hosted MCP server via SSE (MCPServerSse)
+# pip install openai-agents
+
+from agents import Agent, Runner
+from agents.mcp import MCPServerSse
+
+# LSEG MCP is a remote hosted server — connect via SSE, not stdio
+lseg_server = MCPServerSse(
+    name="lseg",
+    params={
+        "url": "https://mcp.lseg.com/sse",   # LSEG hosted endpoint (confirm in LSEG docs)
+        "headers": {
+            "Authorization": "Bearer YOUR_LSEG_API_KEY",
+            "X-App-Key": "YOUR_APP_KEY",
+        },
+    },
+    cache_tools_list=True,
+)
+
+agent = Agent(
+    name="LSEG Financial Analyst",
+    instructions="You have access to LSEG financial data. Use it to answer market questions.",
+    mcp_servers=[lseg_server],
+)
+
+async def run():
+    async with lseg_server:
+        result = await Runner.run(agent, "Get the latest price and P/E for AAPL.O")
+        print(result.final_output)
+
+import asyncio
+asyncio.run(run())</code></pre>
+
+  <div class="callout callout-blue">
+    <strong>LSEG API Key vs Workspace session</strong>
+    The hosted MCP server authenticates with an LSEG API key (obtained from the LSEG Developer Portal), not the desktop Workspace application. This is different from the custom FastMCP server below which wraps the local <code>refinitiv-data</code> Python library that connects to a running Workspace session.
+  </div>
+
+  <h4>Bloomberg — Community <code>blpapi-mcp</code> Server</h4>
+  <p>Bloomberg has no official published MCP package, but is an official MCP supporting member and has publicly committed to the standard. The most widely used community server is <strong><code>blpapi-mcp</code></strong> by djsamseng — it wraps Bloomberg's BLPAPI and exposes financial data tools over SSE.</p>
+
+<pre><code># Install blpapi-mcp (community server — requires Bloomberg Terminal running)
+# Requires: uv (pip install uv), Bloomberg Terminal + BBComm on same machine
+
+uv add git+https://github.com/djsamseng/blpapi-mcp
+
+# Start the server (SSE mode on localhost)
+uv run blpapi-mcp --sse --host 127.0.0.1 --port 8000</code></pre>
+
+<pre><code># Connecting to blpapi-mcp via MCPServerSse
+from agents import Agent, Runner
+from agents.mcp import MCPServerSse
+import subprocess, asyncio, time
+
+async def run():
+    # Start the blpapi-mcp process (or run it separately in a terminal)
+    proc = subprocess.Popen(
+        ["uv", "run", "blpapi-mcp", "--sse", "--host", "127.0.0.1", "--port", "8000"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+    time.sleep(2)  # wait for server to start
+
+    bloomberg_server = MCPServerSse(
+        name="bloomberg",
+        params={"url": "http://127.0.0.1:8000/sse"},
+        cache_tools_list=True,
+    )
+
+    agent = Agent(
+        name="Bloomberg Analyst",
+        instructions=(
+            "You have access to Bloomberg Terminal data via BLPAPI. "
+            "Use Bloomberg tickers (e.g. 'AAPL US Equity') and field mnemonics "
+            "(PX_LAST, VOLUME, PE_RATIO). Always cite the data source."
+        ),
+        mcp_servers=[bloomberg_server],
+    )
+
+    async with bloomberg_server:
+        result = await Runner.run(
+            agent,
+            "Get the current price and P/E ratio for AAPL US Equity and MSFT US Equity."
+        )
+        print(result.final_output)
+
+    proc.terminate()
+
+asyncio.run(run())</code></pre>
+
+  <div class="callout callout-blue">
+    <strong>Configure <code>blpapi-mcp</code> in claude_desktop_config.json</strong>
+<pre style="margin:0.5rem 0 0;background:var(--code-bg);border:none;padding:0.75rem;font-size:0.77rem">{
+  "mcpServers": {
+    "bloomberg": {
+      "command": "uv",
+      "args": ["run", "blpapi-mcp"],
+      "env": {}
+    }
+  }
+}</pre>
+  </div>
+
+  <p>Refinitiv (LSEG Data Library) and Bloomberg (BLPAPI) are enterprise financial data platforms. The custom FastMCP servers below are for teams who need finer control over tool definitions, or who cannot use the hosted/community options above. Neither has a public MCP server on the marketplaces — both require proprietary credentials, internal network access, and licensed client software. The pattern is to wrap their Python SDKs as a custom FastMCP server and connect via <code>MCPServerStdio</code>.</p>
+
+  <div class="callout callout-rose">
+    <strong>Prerequisites</strong>
+    Refinitiv requires a valid LSEG Workspace / Eikon session running on the same machine (<code>pip install refinitiv-data</code>). Bloomberg requires Bloomberg Terminal + BLPAPI running locally (<code>pip install blpapi</code> from the Bloomberg SDK). Neither is available without an enterprise licence.
+  </div>
+
+  <h4>Refinitiv (LSEG) MCP Server</h4>
+<pre><code># pip install "mcp[cli]" refinitiv-data pandas
+# refinitiv_mcp_server.py
+
+from mcp.server.fastmcp import FastMCP
+import refinitiv.data as rd
+import pandas as pd
+
+mcp = FastMCP("Refinitiv Data Service")
+
+@mcp.tool()
+async def get_price_history(
+    ric: str,
+    start: str,
+    end: str,
+    fields: list[str] = ["TR.PriceClose", "TR.Volume"],
+) -> dict:
+    """
+    Fetch historical price data for a RIC (Reuters Instrument Code).
+    Args:
+        ric:    e.g. "AAPL.O", "VOD.L", ".SPX"
+        start:  ISO date string, e.g. "2024-01-01"
+        end:    ISO date string, e.g. "2024-12-31"
+        fields: Refinitiv field names (TR.* or standard)
+    """
+    rd.open_session()
+    df = rd.get_data(ric, fields=fields, parameters={"SDate": start, "EDate": end})
+    rd.close_session()
+    return df.to_dict(orient="records")
+
+@mcp.tool()
+async def get_realtime_quote(ric: str) -> dict:
+    """Get live bid/ask/last price for a RIC from Refinitiv Workspace."""
+    rd.open_session()
+    df = rd.get_data(
+        ric,
+        fields=["TR.PriceBid", "TR.PriceAsk", "TR.PriceLast",
+                "TR.Volume", "TR.PriceChangePercent"]
+    )
+    rd.close_session()
+    return df.to_dict(orient="records")[0]
+
+@mcp.tool()
+async def search_instruments(query: str, asset_class: str = "Equity") -> list[dict]:
+    """Search for instruments by name or keyword. asset_class: Equity, Bond, FX, Commodity."""
+    rd.open_session()
+    results = rd.discovery.search(
+        query=query,
+        filter=f"AssetClass eq '{asset_class}'",
+        top=10,
+        select="DocumentTitle,RIC,AssetClass,ExchangeName",
+    )
+    rd.close_session()
+    return results.to_dict(orient="records")
+
+@mcp.tool()
+async def get_fundamentals(ric: str) -> dict:
+    """Retrieve key fundamental data: P/E, market cap, revenue, EPS for a stock."""
+    rd.open_session()
+    df = rd.get_data(ric, fields=[
+        "TR.CompanyMarketCap", "TR.PERatio", "TR.Revenue",
+        "TR.EPSActual", "TR.DividendYield", "TR.CompanyName",
+    ])
+    rd.close_session()
+    return df.to_dict(orient="records")[0]
+
+if __name__ == "__main__":
+    mcp.run()  # stdio transport</code></pre>
+
+  <h4>Connecting to the Refinitiv Server with MCPServerStdio</h4>
+<pre><code>from agents import Agent, Runner
+from agents.mcp import MCPServerStdio
+
+refinitiv_server = MCPServerStdio(
+    name="refinitiv",
+    params={
+        "command": "python",
+        "args": ["refinitiv_mcp_server.py"],
+        # Refinitiv uses the locally running Eikon/Workspace session
+        # No API key needed here — it connects to the desktop application
+    },
+    cache_tools_list=True,
+)
+
+agent = Agent(
+    name="Financial Research Agent",
+    instructions=(
+        "You are a financial analyst assistant with access to Refinitiv market data. "
+        "Retrieve accurate, up-to-date prices, fundamentals, and history. "
+        "Always state the RIC and data date in your answers."
+    ),
+    mcp_servers=[refinitiv_server],
+)
+
+async def run():
+    async with refinitiv_server:
+        result = await Runner.run(
+            agent,
+            "Get the last 6 months of closing prices for Apple (AAPL.O) "
+            "and summarise the trend."
+        )
+        print(result.final_output)
+
+import asyncio
+asyncio.run(run())</code></pre>
+
+  <h4>Bloomberg BLPAPI MCP Server</h4>
+<pre><code># pip install "mcp[cli]" blpapi pandas
+# bloomberg_mcp_server.py
+# Requires Bloomberg Terminal running + BLPAPI session on localhost:8194
+
+from mcp.server.fastmcp import FastMCP
+import blpapi
+import pandas as pd
+from datetime import datetime
+
+mcp = FastMCP("Bloomberg Data Service")
+
+BLPAPI_HOST = "localhost"
+BLPAPI_PORT = 8194
+
+def _open_session() -> blpapi.Session:
+    opts = blpapi.SessionOptions()
+    opts.setServerHost(BLPAPI_HOST)
+    opts.setServerPort(BLPAPI_PORT)
+    session = blpapi.Session(opts)
+    if not session.start():
+        raise RuntimeError("Bloomberg session failed to start — is Terminal running?")
+    if not session.openService("//blp/refdata"):
+        raise RuntimeError("Failed to open Bloomberg //blp/refdata service")
+    return session
+
+@mcp.tool()
+async def get_reference_data(
+    securities: list[str],
+    fields: list[str],
+) -> list[dict]:
+    """
+    Fetch Bloomberg reference (snap) data for one or more securities.
+    Args:
+        securities: Bloomberg tickers, e.g. ["AAPL US Equity", "MSFT US Equity"]
+        fields:     Bloomberg field mnemonics, e.g. ["PX_LAST", "VOLUME", "PE_RATIO"]
+    """
+    session = _open_session()
+    refdata = session.getService("//blp/refdata")
+    request = refdata.createRequest("ReferenceDataRequest")
+    for s in securities:
+        request.getElement("securities").appendValue(s)
+    for f in fields:
+        request.getElement("fields").appendValue(f)
+
+    session.sendRequest(request)
+    rows = []
+    while True:
+        event = session.nextEvent(500)
+        for msg in event:
+            if msg.messageType() == blpapi.Name("ReferenceDataResponse"):
+                for sec in msg.getElement("securityData"):
+                    row = {"security": sec.getElementAsString("security")}
+                    fld_data = sec.getElement("fieldData")
+                    for f in fields:
+                        try:
+                            row[f] = fld_data.getElementAsFloat(f)
+                        except Exception:
+                            row[f] = None
+                    rows.append(row)
+        if event.eventType() == blpapi.Event.RESPONSE:
+            break
+    session.stop()
+    return rows
+
+@mcp.tool()
+async def get_historical_data(
+    security: str,
+    fields: list[str],
+    start_date: str,
+    end_date: str,
+    periodicity: str = "DAILY",
+) -> list[dict]:
+    """
+    Fetch Bloomberg historical data for a single security.
+    Args:
+        security:    e.g. "SPX Index", "AAPL US Equity"
+        fields:      e.g. ["PX_LAST", "VOLUME"]
+        start_date:  "YYYYMMDD"
+        end_date:    "YYYYMMDD"
+        periodicity: DAILY | WEEKLY | MONTHLY | QUARTERLY | YEARLY
+    """
+    session = _open_session()
+    refdata = session.getService("//blp/refdata")
+    request = refdata.createRequest("HistoricalDataRequest")
+    request.getElement("securities").appendValue(security)
+    for f in fields:
+        request.getElement("fields").appendValue(f)
+    request.set("startDate", start_date)
+    request.set("endDate", end_date)
+    request.set("periodicitySelection", periodicity)
+
+    session.sendRequest(request)
+    rows = []
+    while True:
+        event = session.nextEvent(500)
+        for msg in event:
+            if msg.messageType() == blpapi.Name("HistoricalDataResponse"):
+                field_data_array = (msg.getElement("securityData")
+                                       .getElement("fieldData"))
+                for i in range(field_data_array.numValues()):
+                    item = field_data_array.getValue(i)
+                    row = {"date": str(item.getElementAsDatetime("date").date())}
+                    for f in fields:
+                        try:
+                            row[f] = item.getElementAsFloat(f)
+                        except Exception:
+                            row[f] = None
+                    rows.append(row)
+        if event.eventType() == blpapi.Event.RESPONSE:
+            break
+    session.stop()
+    return rows
+
+@mcp.tool()
+async def get_intraday_bar(
+    security: str,
+    event_type: str = "TRADE",
+    interval_minutes: int = 5,
+    start_datetime: str = "",
+    end_datetime: str = "",
+) -> list[dict]:
+    """
+    Fetch intraday bar data from Bloomberg.
+    Args:
+        security:         e.g. "AAPL US Equity"
+        event_type:       TRADE | BID | ASK | BID_BEST | ASK_BEST
+        interval_minutes: bar interval in minutes (1–1440)
+        start_datetime:   "YYYY-MM-DDTHH:MM:SS" UTC
+        end_datetime:     "YYYY-MM-DDTHH:MM:SS" UTC
+    """
+    session = _open_session()
+    refdata = session.getService("//blp/refdata")
+    request = refdata.createRequest("IntradayBarRequest")
+    request.set("security", security)
+    request.set("eventType", event_type)
+    request.set("interval", interval_minutes)
+    if start_datetime:
+        request.set("startDateTime", start_datetime)
+    if end_datetime:
+        request.set("endDateTime", end_datetime)
+
+    session.sendRequest(request)
+    rows = []
+    while True:
+        event = session.nextEvent(500)
+        for msg in event:
+            if msg.messageType() == blpapi.Name("IntradayBarResponse"):
+                bar_data = msg.getElement("barData").getElement("barTickData")
+                for i in range(bar_data.numValues()):
+                    bar = bar_data.getValue(i)
+                    rows.append({
+                        "time":   str(bar.getElementAsDatetime("time")),
+                        "open":   bar.getElementAsFloat("open"),
+                        "high":   bar.getElementAsFloat("high"),
+                        "low":    bar.getElementAsFloat("low"),
+                        "close":  bar.getElementAsFloat("close"),
+                        "volume": bar.getElementAsInteger("volume"),
+                    })
+        if event.eventType() == blpapi.Event.RESPONSE:
+            break
+    session.stop()
+    return rows
+
+if __name__ == "__main__":
+    mcp.run()</code></pre>
+
+  <h4>Connecting to the Bloomberg Server with MCPServerStdio</h4>
+<pre><code>from agents import Agent, Runner
+from agents.mcp import MCPServerStdio
+
+bloomberg_server = MCPServerStdio(
+    name="bloomberg",
+    params={
+        "command": "python",
+        "args": ["bloomberg_mcp_server.py"],
+        # Bloomberg authenticates through the running Terminal session —
+        # no API key env var needed; BLPAPI connects to localhost:8194
+    },
+    cache_tools_list=True,
+)
+
+agent = Agent(
+    name="Bloomberg Analyst",
+    instructions=(
+        "You are a quantitative analyst with access to Bloomberg data. "
+        "Use Bloomberg field mnemonics (PX_LAST, VOLUME, PE_RATIO, etc.). "
+        "Always cite the Bloomberg ticker and data date in responses."
+    ),
+    mcp_servers=[bloomberg_server],
+)
+
+async def run():
+    async with bloomberg_server:
+        # Single security snapshot
+        result = await Runner.run(
+            agent,
+            "Get the current price, volume, P/E ratio, and 52-week high/low "
+            "for Apple (AAPL US Equity) and Microsoft (MSFT US Equity)."
+        )
+        print(result.final_output)
+
+        # Historical analysis
+        result2 = await Runner.run(
+            agent,
+            "Fetch daily closing prices for SPX Index from 20240101 to 20241231 "
+            "and describe the year's performance."
+        )
+        print(result2.final_output)
+
+import asyncio
+asyncio.run(run())</code></pre>
+
+  <h4>Using Both Together</h4>
+<pre><code>from agents import Agent, Runner
+from agents.mcp import MCPServerStdio
+from contextlib import AsyncExitStack
+
+refinitiv_server = MCPServerStdio(
+    name="refinitiv", params={"command": "python", "args": ["refinitiv_mcp_server.py"]},
+    cache_tools_list=True,
+)
+bloomberg_server = MCPServerStdio(
+    name="bloomberg", params={"command": "python", "args": ["bloomberg_mcp_server.py"]},
+    cache_tools_list=True,
+)
+
+agent = Agent(
+    name="Cross-Platform Financial Analyst",
+    instructions=(
+        "You have access to both Refinitiv (use RICs like AAPL.O) and Bloomberg "
+        "(use tickers like 'AAPL US Equity'). Cross-reference data across both "
+        "platforms for validation. Flag any significant discrepancies."
+    ),
+    mcp_servers=[refinitiv_server, bloomberg_server],
+)
+
+async def run():
+    async with AsyncExitStack() as stack:
+        await stack.enter_async_context(refinitiv_server)
+        await stack.enter_async_context(bloomberg_server)
+        result = await Runner.run(
+            agent,
+            "Compare Apple's current P/E ratio and market cap from both "
+            "Refinitiv and Bloomberg. Are the values consistent?"
+        )
+        print(result.final_output)
+
+import asyncio
+asyncio.run(run())</code></pre>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Feature</th><th>Refinitiv (LSEG)</th><th>Bloomberg BLPAPI</th></tr></thead>
+    <tbody>
+      <tr><td>Python package</td><td><code>pip install refinitiv-data</code></td><td><code>pip install blpapi</code> (from BBG SDK)</td></tr>
+      <tr><td>Requires</td><td>LSEG Workspace / Eikon desktop running</td><td>Bloomberg Terminal running + port 8194</td></tr>
+      <tr><td>Instrument ID</td><td>RIC (e.g. <code>AAPL.O</code>, <code>VOD.L</code>)</td><td>Ticker + yellow key (e.g. <code>AAPL US Equity</code>)</td></tr>
+      <tr><td>Field naming</td><td><code>TR.*</code> fields or Refinitiv field codes</td><td>Bloomberg mnemonics (<code>PX_LAST</code>, <code>VOLUME</code>…)</td></tr>
+      <tr><td>Real-time data</td><td>Via <code>rd.streaming</code></td><td>Via <code>//blp/mktdata</code> subscription service</td></tr>
+      <tr><td>Historical data</td><td><code>rd.get_history()</code></td><td><code>HistoricalDataRequest</code></td></tr>
+      <tr><td>Intraday bars</td><td><code>rd.get_history(interval=...)</code></td><td><code>IntradayBarRequest</code></td></tr>
+      <tr><td>Search/discovery</td><td><code>rd.discovery.search()</code></td><td>Not supported in BLPAPI directly</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-amber">
+    <strong>Security tip: vet marketplace servers before use</strong>
+    MCP servers run as local processes with the permissions of your user account. Before installing any community server: check the GitHub repo, review the source code, and prefer servers from the official <code>@modelcontextprotocol</code> namespace or well-known publishers. Glama.ai performs automated security scanning on listed servers.
+  </div>
 </div>
 
 <div class="footer">Synapse · MCP &amp; Tool Use · May 2026</div>

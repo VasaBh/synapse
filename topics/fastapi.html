@@ -1,0 +1,2312 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FastAPI — Synapse</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1a1a2e;
+        --ink2: #3d3d5c;
+        --ink3: #6b6b8a;
+        --bg: #ffffff;
+        --bg2: #f4f3f0;
+        --bg3: #eae8e4;
+        --accent: #2563eb;
+        --accent2: #1d4ed8;
+        --accent-bg: #eff6ff;
+        --green: #059669;
+        --green-bg: #ecfdf5;
+        --amber: #d97706;
+        --amber-bg: #fffbeb;
+        --rose: #e11d48;
+        --rose-bg: #fff1f2;
+        --purple: #7c3aed;
+        --purple-bg: #f5f3ff;
+        --teal: #0d9488;
+        --teal-bg: #f0fdfa;
+        --coral: #ea580c;
+        --coral-bg: #fff7ed;
+        --border: #e2e0dc;
+        --code-bg: #f8f7f5;
+        --serif: "Fraunces", Georgia, serif;
+        --sans: "DM Sans", system-ui, sans-serif;
+        --mono: "JetBrains Mono", "Fira Code", monospace;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        font-size: 15px;
+      }
+      body {
+        font-family: var(--sans);
+        color: var(--ink);
+        background: var(--bg);
+        line-height: 1.65;
+      }
+      @media print {
+        body {
+          font-size: 10pt;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .page-break {
+          page-break-before: always;
+        }
+        .card {
+          break-inside: avoid;
+        }
+        pre {
+          font-size: 8pt;
+        }
+        h1 {
+          font-size: 22pt;
+        }
+        h2 {
+          font-size: 14pt;
+        }
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+      .cover {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background: linear-gradient(
+          160deg,
+          #0f172a 0%,
+          #1e293b 40%,
+          #1a1a2e 100%
+        );
+        color: white;
+        padding: 4rem 2rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .cover::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background:
+          radial-gradient(
+            ellipse at 30% 50%,
+            rgba(5, 150, 105, 0.15) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse at 70% 30%,
+            rgba(37, 99, 235, 0.1) 0%,
+            transparent 50%
+          );
+      }
+      .cover * {
+        position: relative;
+      }
+      .cover-label {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 2rem;
+      }
+      .cover h1 {
+        font-family: var(--serif);
+        font-size: 3.5rem;
+        font-weight: 700;
+        line-height: 1.15;
+        margin-bottom: 1rem;
+        max-width: 700px;
+      }
+      .cover h1 span {
+        background: linear-gradient(135deg, #34d399, #60a5fa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .cover-sub {
+        font-size: 1.15rem;
+        color: rgba(255, 255, 255, 0.65);
+        max-width: 600px;
+        line-height: 1.7;
+        margin-bottom: 3rem;
+      }
+      .cover-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+        max-width: 650px;
+      }
+      .cover-tag {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        padding: 0.35rem 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        color: rgba(255, 255, 255, 0.6);
+      }
+      .cover-date {
+        margin-top: 3rem;
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.35);
+      }
+      .toc {
+        padding: 3rem 0;
+      }
+      .toc h2 {
+        font-family: var(--serif);
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        color: var(--ink);
+      }
+      .toc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 0.5rem;
+      }
+      .toc-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.65rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--ink);
+        transition: background 0.15s;
+      }
+      .toc-item:hover {
+        background: var(--bg2);
+      }
+      .toc-num {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--accent);
+        font-weight: 600;
+        min-width: 28px;
+      }
+      .toc-label {
+        font-size: 0.9rem;
+      }
+      .section {
+        padding: 2.5rem 0 1.5rem;
+        border-top: 1px solid var(--border);
+      }
+      .section-num {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--accent);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+      }
+      h2.section-title {
+        font-family: var(--serif);
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 0.75rem;
+        line-height: 1.3;
+      }
+      h3 {
+        font-family: var(--sans);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 1.5rem 0 0.5rem;
+      }
+      h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--ink2);
+        margin: 1.2rem 0 0.4rem;
+      }
+      p {
+        margin-bottom: 0.75rem;
+        color: var(--ink2);
+      }
+      p.lead {
+        font-size: 1.05rem;
+        color: var(--ink);
+        line-height: 1.7;
+      }
+      strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+      .card {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.1rem 1.2rem;
+      }
+      .card-accent {
+        border-left: 3px solid var(--accent);
+      }
+      .card h4 {
+        margin: 0 0 0.4rem;
+        font-size: 0.9rem;
+        color: var(--ink);
+      }
+      .card p {
+        font-size: 0.82rem;
+        margin: 0;
+        color: var(--ink3);
+        line-height: 1.5;
+      }
+      .table-wrap {
+        overflow-x: auto;
+        margin: 1rem 0;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+      }
+      thead {
+        background: var(--ink);
+        color: white;
+      }
+      th {
+        padding: 0.65rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.78rem;
+        letter-spacing: 0.3px;
+      }
+      td {
+        padding: 0.6rem 1rem;
+        border-top: 1px solid var(--border);
+        color: var(--ink2);
+      }
+      tr:nth-child(even) {
+        background: var(--bg2);
+      }
+      td:first-child {
+        font-weight: 500;
+        color: var(--ink);
+      }
+      pre {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem 1.2rem;
+        overflow-x: auto;
+        margin: 0.75rem 0;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        line-height: 1.6;
+        color: var(--ink2);
+      }
+      code {
+        font-family: var(--mono);
+        font-size: 0.82em;
+        background: var(--bg2);
+        padding: 0.15em 0.4em;
+        border-radius: 4px;
+        color: var(--ink);
+      }
+      pre code {
+        background: none;
+        padding: 0;
+      }
+      .callout {
+        border-radius: 10px;
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-size: 0.88rem;
+      }
+      .callout-blue {
+        background: var(--accent-bg);
+        border-left: 3px solid var(--accent);
+      }
+      .callout-green {
+        background: var(--green-bg);
+        border-left: 3px solid var(--green);
+      }
+      .callout-amber {
+        background: var(--amber-bg);
+        border-left: 3px solid var(--amber);
+      }
+      .callout-rose {
+        background: var(--rose-bg);
+        border-left: 3px solid var(--rose);
+      }
+      .callout-purple {
+        background: var(--purple-bg);
+        border-left: 3px solid var(--purple);
+      }
+      .callout strong {
+        display: block;
+        margin-bottom: 0.3rem;
+      }
+      .pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin: 0.5rem 0;
+      }
+      .pill {
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+        font-weight: 500;
+      }
+      .pill-blue {
+        background: var(--accent-bg);
+        color: var(--accent2);
+      }
+      .pill-green {
+        background: var(--green-bg);
+        color: var(--green);
+      }
+      .pill-purple {
+        background: var(--purple-bg);
+        color: var(--purple);
+      }
+      .pill-amber {
+        background: var(--amber-bg);
+        color: var(--amber);
+      }
+      .pill-teal {
+        background: var(--teal-bg);
+        color: var(--teal);
+      }
+      .pill-coral {
+        background: var(--coral-bg);
+        color: var(--coral);
+      }
+      ul.clean {
+        list-style: none;
+        padding: 0;
+      }
+      ul.clean li {
+        padding: 0.3rem 0 0.3rem 1.5rem;
+        position: relative;
+        font-size: 0.9rem;
+        color: var(--ink2);
+      }
+      ul.clean li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.7rem;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin: 1rem 0;
+      }
+      @media (max-width: 700px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+      .sep {
+        height: 1px;
+        background: var(--border);
+        margin: 2rem 0;
+      }
+      .footer {
+        text-align: center;
+        padding: 2rem;
+        color: var(--ink3);
+        font-size: 0.8rem;
+        border-top: 1px solid var(--border);
+        margin-top: 2rem;
+      }
+      /* ── CSS Flow Diagrams ── */
+      .fd {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 1.25rem 0;
+      }
+      .fd-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .fd-col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .fd-node {
+        border-radius: 8px;
+        padding: 0.45rem 1rem;
+        font-size: 0.78rem;
+        font-family: var(--mono);
+        font-weight: 500;
+        border: 1.5px solid;
+        text-align: center;
+        line-height: 1.45;
+      }
+      .fd-node sub {
+        font-size: 0.65rem;
+        opacity: 0.75;
+        display: block;
+        font-weight: 400;
+      }
+      .fd-node-blue {
+        background: var(--accent-bg);
+        border-color: var(--accent);
+        color: var(--accent2);
+      }
+      .fd-node-green {
+        background: var(--green-bg);
+        border-color: var(--green);
+        color: var(--green);
+      }
+      .fd-node-purple {
+        background: var(--purple-bg);
+        border-color: var(--purple);
+        color: var(--purple);
+      }
+      .fd-node-amber {
+        background: var(--amber-bg);
+        border-color: var(--amber);
+        color: var(--amber);
+      }
+      .fd-node-teal {
+        background: var(--teal-bg);
+        border-color: var(--teal);
+        color: var(--teal);
+      }
+      .fd-node-dark {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: #fff;
+      }
+      .fd-arr-d {
+        width: 2px;
+        height: 28px;
+        background: var(--ink3);
+        margin: 0 auto;
+        position: relative;
+      }
+      .fd-arr-d::after {
+        content: "";
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 7px solid var(--ink3);
+      }
+      .fd-arr-r {
+        width: 32px;
+        height: 2px;
+        background: var(--ink3);
+        position: relative;
+        flex-shrink: 0;
+      }
+      .fd-arr-r::after {
+        content: "";
+        position: absolute;
+        right: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 7px solid var(--ink3);
+      }
+      .fd-group {
+        border: 2px dashed var(--border);
+        border-radius: 12px;
+        padding: 1rem 1.2rem;
+        background: var(--bg2);
+      }
+      .fd-group-title {
+        font-size: 0.65rem;
+        font-family: var(--mono);
+        color: var(--ink3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.6rem;
+        text-align: center;
+      }
+      .fd-note {
+        font-size: 0.68rem;
+        font-family: var(--sans);
+        color: var(--ink3);
+        text-align: center;
+        max-width: 200px;
+        line-height: 1.35;
+        margin-top: 0.2rem;
+      }
+      .fd-gap {
+        width: 1.5rem;
+        flex-shrink: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      .guide-header {
+        background: #1a202c;
+        color: #fff;
+        padding: 0.9rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        flex-shrink: 0;
+      }
+      .guide-header .back-home {
+        color: #a0aec0;
+        text-decoration: none;
+        font-size: 0.82rem;
+        white-space: nowrap;
+        transition: color 0.15s;
+      }
+      .guide-header .back-home:hover {
+        color: #fff;
+      }
+      .guide-header h1 {
+        font-family: var(--sans);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #fff;
+      }
+      .topic-page {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+      .sidebar {
+        width: 260px;
+        background: #2d3748;
+        color: #e2e8f0;
+        padding: 1.25rem 0 2rem;
+        flex-shrink: 0;
+        overflow-y: auto;
+      }
+      .sidebar-title {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #a0aec0;
+        padding: 0 1.25rem 0.6rem;
+        font-family: var(--sans);
+      }
+      .sidebar nav ul {
+        list-style: none;
+      }
+      .sidebar nav ul li a {
+        display: block;
+        padding: 0.45rem 1.25rem;
+        color: #cbd5e0;
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-family: var(--sans);
+        line-height: 1.45;
+        transition:
+          background 0.1s,
+          color 0.1s;
+      }
+      .sidebar nav ul li a:hover,
+      .sidebar nav ul li a.active {
+        background: #4a5568;
+        color: #fff;
+      }
+      .sidebar nav ul ul {
+        margin: 0;
+        padding: 0;
+      }
+      .sidebar nav ul ul li a {
+        padding: 0.3rem 1.25rem 0.3rem 2.2rem;
+        font-size: 0.74rem;
+        color: #a0aec0;
+      }
+      .sidebar nav ul ul li a:hover {
+        background: #3d4d63;
+        color: #e2e8f0;
+      }
+      .sidebar .toc-num {
+        font-size: 0.65rem;
+        color: #90cdf4;
+        margin-right: 0.35rem;
+        font-family: var(--mono);
+      }
+      .main-scroll {
+        flex: 1;
+        overflow-y: auto;
+      }
+      .guide-footer {
+        text-align: center;
+        padding: 0.75rem;
+        color: #718096;
+        font-size: 0.78rem;
+        background: #1a202c;
+        flex-shrink: 0;
+      }
+    </style>
+    <link rel="stylesheet" href="../assets/mobile.css" />
+  </head>
+  <body>
+    <header class="guide-header">
+      <a href="../index.html" class="back-home">← Synapse</a>
+      <h1>FastAPI</h1>
+    </header>
+
+    <div class="topic-page">
+      <aside class="sidebar">
+        <p class="sidebar-title">FastAPI</p>
+        <nav>
+          <ul>
+            <li>
+              <a href="#s1"><span class="toc-num">01</span>First Steps</a>
+            </li>
+            <li>
+              <a href="#s2"
+                ><span class="toc-num">02</span>Path &amp; Query Parameters</a
+              >
+            </li>
+            <li>
+              <a href="#s3"
+                ><span class="toc-num">03</span>Request Body &amp; Pydantic</a
+              >
+            </li>
+            <li>
+              <a href="#s4"
+                ><span class="toc-num">04</span>Validation &amp; Extra Types</a
+              >
+            </li>
+            <li>
+              <a href="#s5"
+                ><span class="toc-num">05</span>Dependency Injection</a
+              >
+            </li>
+            <li>
+              <a href="#s6"><span class="toc-num">06</span>Response Models</a>
+            </li>
+            <li>
+              <a href="#s7"
+                ><span class="toc-num">07</span>Error Handling &amp;
+                Middleware</a
+              >
+            </li>
+            <li>
+              <a href="#s8"
+                ><span class="toc-num">08</span>Authentication &amp; Security</a
+              >
+            </li>
+            <li>
+              <a href="#s9"
+                ><span class="toc-num">09</span>Background Tasks &amp; SSE</a
+              >
+            </li>
+            <li>
+              <a href="#s10"><span class="toc-num">10</span>WebSockets</a>
+            </li>
+            <li>
+              <a href="#s11"
+                ><span class="toc-num">11</span>Project Structure</a
+              >
+            </li>
+            <li>
+              <a href="#s12"
+                ><span class="toc-num">12</span>Settings &amp; Config</a
+              >
+            </li>
+            <li>
+              <a href="#s13"><span class="toc-num">13</span>Testing</a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <div class="main-scroll">
+        <div class="cover">
+          <div class="cover-label">Complete Technical Reference — May 2026</div>
+          <h1>Fast<span>API</span></h1>
+          <p class="cover-sub">
+            Building high-performance Python APIs with automatic docs, type
+            safety, and async-first design — from first steps through production
+            patterns.
+          </p>
+          <div class="cover-tags">
+            <span class="cover-tag">Pydantic</span>
+            <span class="cover-tag">Path Parameters</span>
+            <span class="cover-tag">Request Body</span>
+            <span class="cover-tag">Dependency Injection</span>
+            <span class="cover-tag">OAuth2 / JWT</span>
+            <span class="cover-tag">Middleware</span>
+            <span class="cover-tag">WebSockets</span>
+            <span class="cover-tag">SSE</span>
+            <span class="cover-tag">APIRouter</span>
+            <span class="cover-tag">Async</span>
+            <span class="cover-tag">OpenAPI</span>
+            <span class="cover-tag">Testing</span>
+          </div>
+          <div class="cover-date">v1.0 — May 2026</div>
+        </div>
+
+        <div class="container">
+          <div class="toc page-break">
+            <h2>Contents</h2>
+            <div class="toc-grid">
+              <a class="toc-item" href="#s1"
+                ><span class="toc-num">01</span
+                ><span class="toc-label">First Steps</span></a
+              >
+              <a class="toc-item" href="#s2"
+                ><span class="toc-num">02</span
+                ><span class="toc-label">Path &amp; Query Parameters</span></a
+              >
+              <a class="toc-item" href="#s3"
+                ><span class="toc-num">03</span
+                ><span class="toc-label">Request Body &amp; Pydantic</span></a
+              >
+              <a class="toc-item" href="#s4"
+                ><span class="toc-num">04</span
+                ><span class="toc-label">Validation &amp; Extra Types</span></a
+              >
+              <a class="toc-item" href="#s5"
+                ><span class="toc-num">05</span
+                ><span class="toc-label">Dependency Injection</span></a
+              >
+              <a class="toc-item" href="#s6"
+                ><span class="toc-num">06</span
+                ><span class="toc-label">Response Models</span></a
+              >
+              <a class="toc-item" href="#s7"
+                ><span class="toc-num">07</span
+                ><span class="toc-label"
+                  >Error Handling &amp; Middleware</span
+                ></a
+              >
+              <a class="toc-item" href="#s8"
+                ><span class="toc-num">08</span
+                ><span class="toc-label">Authentication &amp; Security</span></a
+              >
+              <a class="toc-item" href="#s9"
+                ><span class="toc-num">09</span
+                ><span class="toc-label">Background Tasks &amp; SSE</span></a
+              >
+              <a class="toc-item" href="#s10"
+                ><span class="toc-num">10</span
+                ><span class="toc-label">WebSockets</span></a
+              >
+              <a class="toc-item" href="#s11"
+                ><span class="toc-num">11</span
+                ><span class="toc-label">Project Structure (APIRouter)</span></a
+              >
+              <a class="toc-item" href="#s12"
+                ><span class="toc-num">12</span
+                ><span class="toc-label">Settings &amp; Configuration</span></a
+              >
+              <a class="toc-item" href="#s13"
+                ><span class="toc-num">13</span
+                ><span class="toc-label">Testing</span></a
+              >
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+          <div class="section page-break" id="s1">
+            <div class="section-num">Section 01</div>
+            <h2 class="section-title">First Steps</h2>
+            <p class="lead">
+              FastAPI is a modern, high-performance Python web framework built
+              on top of Starlette (async) and Pydantic (validation). It
+              generates OpenAPI docs automatically and is one of the fastest
+              Python frameworks available.
+            </p>
+
+            <h3>Install &amp; run</h3>
+            <pre><code>pip install fastapi
+pip install "uvicorn[standard]"   # ASGI server
+# or install everything:
+pip install "fastapi[all]"
+
+# Run dev server (auto-reload):
+fastapi dev main.py
+# or:
+uvicorn main:app --reload</code></pre>
+
+            <h3>Minimal application</h3>
+            <pre><code>from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}</code></pre>
+
+            <div class="callout callout-green">
+              <strong>Automatic interactive docs — zero config</strong>
+              <ul class="clean" style="margin-top: 0.4rem">
+                <li>
+                  <strong>Swagger UI</strong> —
+                  <code>http://127.0.0.1:8000/docs</code>
+                </li>
+                <li>
+                  <strong>ReDoc</strong> —
+                  <code>http://127.0.0.1:8000/redoc</code>
+                </li>
+                <li>
+                  <strong>OpenAPI JSON</strong> —
+                  <code>http://127.0.0.1:8000/openapi.json</code>
+                </li>
+              </ul>
+            </div>
+
+            <h3>HTTP method decorators</h3>
+            <pre><code>@app.get("/items")        # read
+@app.post("/items")       # create
+@app.put("/items/{id}")   # full update
+@app.patch("/items/{id}") # partial update
+@app.delete("/items/{id}")# delete</code></pre>
+
+            <h3>Key features at a glance</h3>
+            <div class="card-grid">
+              <div class="card card-accent">
+                <h4>Async-first</h4>
+                <p>
+                  Built on Starlette/ASGI. Use <code>async def</code> for
+                  non-blocking I/O. Mix <code>def</code> and
+                  <code>async def</code> freely — FastAPI runs sync functions in
+                  a thread pool automatically.
+                </p>
+              </div>
+              <div class="card card-accent">
+                <h4>Type-driven validation</h4>
+                <p>
+                  Python type annotations are the source of truth. FastAPI +
+                  Pydantic validate, parse, and document everything from them —
+                  no separate schema files needed.
+                </p>
+              </div>
+              <div class="card card-accent">
+                <h4>OpenAPI compliant</h4>
+                <p>
+                  Every route is automatically included in the OpenAPI schema.
+                  Swagger UI, ReDoc, and client SDK generation work out of the
+                  box.
+                </p>
+              </div>
+              <div class="card card-accent">
+                <h4>Performance</h4>
+                <p>
+                  On par with Node.js and Go for async I/O workloads. One of the
+                  fastest Python frameworks, powered by async Python and
+                  Pydantic v2 (Rust-compiled core).
+                </p>
+              </div>
+            </div>
+
+            <h3>Request lifecycle</h3>
+            <div class="fd">
+              <div class="fd-node fd-node-dark" style="min-width: 220px">
+                HTTP Request
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-teal" style="min-width: 220px">
+                Middleware (CORS, logging, etc.)
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-blue" style="min-width: 220px">
+                Route matching + path param parsing
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-purple" style="min-width: 220px">
+                Dependency injection (resolved)
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-blue" style="min-width: 220px">
+                Request body + query param validation
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-green" style="min-width: 220px">
+                Path operation function executes
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-amber" style="min-width: 220px">
+                Response model filtering + serialisation
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-dark" style="min-width: 220px">
+                HTTP Response
+              </div>
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+          <div class="section page-break" id="s2">
+            <div class="section-num">Section 02</div>
+            <h2 class="section-title">Path &amp; Query Parameters</h2>
+            <p class="lead">
+              FastAPI reads parameter declarations directly from function
+              signatures. Path parameters come from the URL template; everything
+              else without a body type is treated as a query parameter.
+            </p>
+
+            <h3>Path parameters</h3>
+            <pre><code>from fastapi import FastAPI
+
+app = FastAPI()
+
+# Basic — string by default
+@app.get("/items/{item_id}")
+async def read_item(item_id: str):
+    return {"item_id": item_id}
+
+# Typed — auto-parsed and validated
+@app.get("/items/{item_id}")
+async def read_item(item_id: int):      # GET /items/foo → 422 Validation Error
+    return {"item_id": item_id}         # GET /items/3   → {"item_id": 3}
+
+# Path containing slashes — use :path converter
+@app.get("/files/{file_path:path}")
+async def read_file(file_path: str):
+    return {"file_path": file_path}     # /files/home/user/doc.txt ✓</code></pre>
+
+            <div class="callout callout-amber">
+              <strong
+                >Order matters — fixed paths before parameterised ones</strong
+              >
+              <code>/users/me</code> must be declared <em>before</em>
+              <code>/users/{user_id}</code>, otherwise <code>me</code> is
+              matched as the user ID.
+            </div>
+
+            <h3>Enum path parameters</h3>
+            <pre><code>from enum import Enum
+from fastapi import FastAPI
+
+class ModelName(str, Enum):
+    alexnet = "alexnet"
+    resnet  = "resnet"
+    lenet   = "lenet"
+
+app = FastAPI()
+
+@app.get("/models/{model_name}")
+async def get_model(model_name: ModelName):
+    if model_name is ModelName.alexnet:
+        return {"model_name": model_name, "message": "Deep Learning FTW!"}
+    if model_name.value == "lenet":
+        return {"model_name": model_name, "message": "LeCNN all the images"}
+    return {"model_name": model_name, "message": "Have some residuals"}</code></pre>
+
+            <h3>Query parameters</h3>
+            <pre><code># Any function parameter that is NOT in the path is a query parameter
+@app.get("/items/")
+async def read_items(skip: int = 0, limit: int = 10):
+    return fake_db[skip : skip + limit]   # GET /items/?skip=20&limit=5
+
+# Optional query parameter (None = not required)
+from typing import Optional
+
+@app.get("/items/{item_id}")
+async def read_item(item_id: str, q: Optional[str] = None):
+    if q:
+        return {"item_id": item_id, "q": q}
+    return {"item_id": item_id}
+
+# Boolean query params — FastAPI converts: 1/True/true/on/yes → True
+@app.get("/items/{item_id}")
+async def read_item(item_id: str, short: bool = False):
+    item = {"item_id": item_id}
+    if not short:
+        item["description"] = "This is a long description..."
+    return item</code></pre>
+
+            <h3>Combining path, query, and body</h3>
+            <pre><code>from pydantic import BaseModel
+
+class Item(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+
+# FastAPI distinguishes them automatically:
+# item_id → path param (in URL template)
+# q       → query param (simple type, has default)
+# item    → request body (Pydantic model)
+@app.put("/items/{item_id}")
+async def update_item(item_id: int, item: Item, q: str | None = None):
+    result = {"item_id": item_id, **item.model_dump()}
+    if q:
+        result.update({"q": q})
+    return result</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+          <div class="section page-break" id="s3">
+            <div class="section-num">Section 03</div>
+            <h2 class="section-title">Request Body &amp; Pydantic Models</h2>
+            <p class="lead">
+              Define your data shapes as Pydantic models. FastAPI uses them to
+              parse the JSON body, validate types, return clear error messages,
+              and generate OpenAPI schemas — all from a single class definition.
+            </p>
+
+            <h3>Basic model</h3>
+            <pre><code>from fastapi import FastAPI
+from pydantic import BaseModel
+
+class Item(BaseModel):
+    name: str                       # required
+    description: str | None = None  # optional
+    price: float                    # required
+    tax: float | None = None        # optional
+
+app = FastAPI()
+
+@app.post("/items/")
+async def create_item(item: Item):
+    item_dict = item.model_dump()
+    if item.tax is not None:
+        item_dict["price_with_tax"] = item.price + item.tax
+    return item_dict</code></pre>
+
+            <h3>Nested models</h3>
+            <pre><code>from pydantic import BaseModel, HttpUrl
+
+class Image(BaseModel):
+    url: HttpUrl          # validated URL
+    name: str
+
+class Item(BaseModel):
+    name: str
+    price: float
+    tags: list[str] = []           # list of strings
+    image: Image | None = None     # nested model
+
+class Offer(BaseModel):
+    name: str
+    items: list[Item]              # list of nested models
+
+@app.post("/offers/")
+async def create_offer(offer: Offer):
+    return offer</code></pre>
+
+            <h3>Multiple body parameters</h3>
+            <pre><code>from fastapi import Body
+from typing import Annotated
+
+class Item(BaseModel):
+    name: str
+    price: float
+
+class User(BaseModel):
+    username: str
+    full_name: str | None = None
+
+# FastAPI expects: {"item": {...}, "user": {...}, "importance": 5}
+@app.put("/items/{item_id}")
+async def update_item(
+    item_id: int,
+    item: Item,
+    user: User,
+    importance: Annotated[int, Body()],  # scalar body param needs Body()
+):
+    return {"item_id": item_id, "item": item, "user": user, "importance": importance}</code></pre>
+
+            <h3>Pydantic Field — per-field validation &amp; metadata</h3>
+            <pre><code>from pydantic import BaseModel, Field
+
+class Item(BaseModel):
+    name: str
+    description: str | None = Field(default=None, max_length=300)
+    price: float = Field(gt=0, description="Price must be greater than zero")
+    tax: float | None = None</code></pre>
+
+            <h3>Model methods</h3>
+            <pre><code>item = Item(name="Foo", price=10.5)
+
+item.model_dump()              # → dict
+item.model_dump_json()         # → JSON string
+item.model_copy(update={"price": 12.0})  # shallow copy with overrides
+Item.model_validate({"name": "Bar", "price": 5.0})  # from dict</code></pre>
+
+            <div class="callout callout-blue">
+              <strong
+                >What FastAPI does automatically with Pydantic models</strong
+              >
+              Reads the JSON body, converts types, validates constraints, raises
+              422 Unprocessable Entity with detailed errors if invalid, provides
+              the data as a typed Python object, generates JSON Schema, and adds
+              request/response examples to the OpenAPI docs.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+          <div class="section page-break" id="s4">
+            <div class="section-num">Section 04</div>
+            <h2 class="section-title">Validation &amp; Extra Types</h2>
+            <p class="lead">
+              Use <code>Query()</code>, <code>Path()</code>, and
+              <code>Header()</code> with <code>Annotated</code> to add
+              constraints, metadata, and aliases to individual parameters.
+            </p>
+
+            <h3>Query parameter validation</h3>
+            <pre><code>from typing import Annotated
+from fastapi import FastAPI, Query
+
+app = FastAPI()
+
+@app.get("/items/")
+async def read_items(
+    q: Annotated[str | None, Query(
+        min_length=3,
+        max_length=50,
+        pattern="^fixedquery$",
+        title="Query string",
+        description="Query string for filtering items",
+    )] = None
+):
+    return {"q": q}
+
+# Required query param (no default)
+@app.get("/items/")
+async def read_items(q: Annotated[str, Query(min_length=3)]):
+    return {"q": q}
+
+# List of values: GET /items/?q=foo&q=bar
+@app.get("/items/")
+async def read_items(q: Annotated[list[str], Query()] = ["foo", "bar"]):
+    return {"q": q}</code></pre>
+
+            <h3>Path parameter validation</h3>
+            <pre><code>from fastapi import Path
+
+@app.get("/items/{item_id}")
+async def read_item(
+    item_id: Annotated[int, Path(
+        title="The ID of the item",
+        ge=1,       # greater than or equal to 1
+        le=1000,    # less than or equal to 1000
+    )],
+    q: str | None = None,
+):
+    return {"item_id": item_id, "q": q}</code></pre>
+
+            <h3>Header parameters</h3>
+            <pre><code>from fastapi import Header
+
+@app.get("/items/")
+async def read_items(
+    user_agent: Annotated[str | None, Header()] = None,
+    x_token: Annotated[list[str] | None, Header()] = None,   # X-Token repeated
+):
+    return {"User-Agent": user_agent, "X-Token values": x_token}
+# FastAPI converts header names: user_agent → User-Agent automatically</code></pre>
+
+            <h3>Cookie parameters</h3>
+            <pre><code>from fastapi import Cookie
+
+@app.get("/items/")
+async def read_items(ads_id: Annotated[str | None, Cookie()] = None):
+    return {"ads_id": ads_id}</code></pre>
+
+            <h3>Extra data types</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Example value</th>
+                    <th>Python type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>UUID</code></td>
+                    <td><code>"a10f8e4d-..."</code></td>
+                    <td><code>uuid.UUID</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>datetime</code></td>
+                    <td><code>"2026-01-01T12:00:00"</code></td>
+                    <td><code>datetime.datetime</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>date</code></td>
+                    <td><code>"2026-01-01"</code></td>
+                    <td><code>datetime.date</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>timedelta</code></td>
+                    <td><code>"PT5M"</code> / seconds</td>
+                    <td><code>datetime.timedelta</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>Decimal</code></td>
+                    <td><code>10.99</code></td>
+                    <td><code>decimal.Decimal</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>bytes</code></td>
+                    <td>Base64 string in JSON</td>
+                    <td><code>bytes</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Numeric constraints cheat sheet</h3>
+            <pre><code>ge=1        # >= 1  (greater than or equal)
+gt=0        # >  0  (strictly greater than)
+le=100      # <= 100
+lt=100      # <  100
+multiple_of=5  # must be a multiple of 5</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+          <div class="section page-break" id="s5">
+            <div class="section-num">Section 05</div>
+            <h2 class="section-title">Dependency Injection</h2>
+            <p class="lead">
+              FastAPI's dependency injection system lets you share logic —
+              database connections, auth checks, pagination — across routes with
+              zero boilerplate. Dependencies are plain functions; FastAPI
+              resolves them automatically.
+            </p>
+
+            <h3>Basic dependency</h3>
+            <pre><code>from typing import Annotated
+from fastapi import Depends, FastAPI
+
+app = FastAPI()
+
+# Dependency — same signature rules as a path operation
+async def common_parameters(q: str | None = None, skip: int = 0, limit: int = 100):
+    return {"q": q, "skip": skip, "limit": limit}
+
+CommonsDep = Annotated[dict, Depends(common_parameters)]
+
+@app.get("/items/")
+async def read_items(commons: CommonsDep):
+    return commons
+
+@app.get("/users/")
+async def read_users(commons: CommonsDep):
+    return commons</code></pre>
+
+            <h3>Class-based dependencies</h3>
+            <pre><code>class CommonQueryParams:
+    def __init__(self, q: str | None = None, skip: int = 0, limit: int = 100):
+        self.q = q
+        self.skip = skip
+        self.limit = limit
+
+@app.get("/items/")
+async def read_items(commons: Annotated[CommonQueryParams, Depends(CommonQueryParams)]):
+    # shortcut: Depends() with no argument infers the type
+    # async def read_items(commons: Annotated[CommonQueryParams, Depends()]):
+    return {"q": commons.q, "skip": commons.skip, "limit": commons.limit}</code></pre>
+
+            <h3>Nested / sub-dependencies</h3>
+            <pre><code>async def query_extractor(q: str | None = None):
+    return q
+
+async def query_or_body(
+    q: Annotated[str | None, Depends(query_extractor)],
+    last_query: str | None = None,
+):
+    return q or last_query
+
+@app.get("/items/")
+async def read_items(query: Annotated[str | None, Depends(query_or_body)]):
+    return {"q": query}</code></pre>
+
+            <h3>Dependencies on path operations (no return value needed)</h3>
+            <pre><code>from fastapi import Depends, Header, HTTPException
+from typing import Annotated
+
+async def verify_token(x_token: Annotated[str, Header()]):
+    if x_token != "fake-super-secret-token":
+        raise HTTPException(status_code=400, detail="X-Token header invalid")
+
+async def verify_key(x_key: Annotated[str, Header()]):
+    if x_key != "fake-super-secret-key":
+        raise HTTPException(status_code=400, detail="X-Key header invalid")
+    return x_key
+
+# Both dependencies run on every request to this route
+@app.get("/items/", dependencies=[Depends(verify_token), Depends(verify_key)])
+async def read_items():
+    return [{"item": "Foo"}, {"item": "Bar"}]</code></pre>
+
+            <h3>Dependencies with yield — lifespan resources</h3>
+            <pre><code>from sqlalchemy.orm import Session
+from .database import SessionLocal
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db          # ← everything before yield = setup
+    finally:
+        db.close()        # ← everything after yield = teardown
+
+@app.get("/items/")
+async def read_items(db: Annotated[Session, Depends(get_db)]):
+    return db.query(Item).all()</code></pre>
+
+            <div class="callout callout-green">
+              <strong>Apply dependencies globally</strong>
+              <code>app = FastAPI(dependencies=[Depends(verify_token)])</code> —
+              runs on every route in the app. Useful for global API key auth.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+          <div class="section page-break" id="s6">
+            <div class="section-num">Section 06</div>
+            <h2 class="section-title">Response Models &amp; Status Codes</h2>
+            <p class="lead">
+              Response models let you control exactly what data is returned —
+              filtering out internal fields, enforcing output types, and driving
+              OpenAPI documentation — using the same Pydantic model pattern.
+            </p>
+
+            <h3>Response model via return type annotation</h3>
+            <pre><code>from pydantic import BaseModel
+
+class UserIn(BaseModel):
+    username: str
+    password: str       # input model — has password
+    email: str
+
+class UserOut(BaseModel):
+    username: str
+    email: str          # output model — NO password field
+
+@app.post("/users/", response_model=UserOut)
+async def create_user(user: UserIn) -> UserOut:
+    # Even if you accidentally return password, FastAPI filters it out
+    return user</code></pre>
+
+            <h3>response_model_exclude / response_model_include</h3>
+            <pre><code>@app.get("/items/{item_id}", response_model=Item,
+         response_model_exclude={"tax"},          # exclude specific fields
+         response_model_exclude_unset=True)       # omit fields not explicitly set
+async def read_item(item_id: str):
+    return items[item_id]</code></pre>
+
+            <h3>Status codes</h3>
+            <pre><code>from fastapi import status
+
+@app.post("/items/", status_code=status.HTTP_201_CREATED)
+async def create_item(item: Item):
+    return item
+
+@app.delete("/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_item(item_id: str):
+    del items[item_id]</code></pre>
+
+            <h3>Custom responses</h3>
+            <pre><code>from fastapi import Response
+from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse, FileResponse, StreamingResponse
+
+# Return HTML
+@app.get("/html", response_class=HTMLResponse)
+async def get_html():
+    return "&lt;h1&gt;Hello HTML&lt;/h1&gt;"
+
+# Return a redirect
+@app.get("/old-url")
+async def redirect():
+    return RedirectResponse(url="/new-url", status_code=301)
+
+# Return a file
+@app.get("/download/{filename}")
+async def download(filename: str):
+    return FileResponse(path=f"files/{filename}", filename=filename)
+
+# Return raw response (bypass serialisation)
+@app.get("/custom")
+async def custom():
+    return Response(content="raw bytes", media_type="application/octet-stream")</code></pre>
+
+            <h3>Dynamic status code</h3>
+            <pre><code>from fastapi import Response
+
+@app.post("/items/", status_code=201)
+async def upsert_item(item_id: str, item: Item, response: Response):
+    if item_id in db:
+        db[item_id] = item
+        response.status_code = 200   # update → 200
+    else:
+        db[item_id] = item           # create → 201 (default)
+    return item</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+          <div class="section page-break" id="s7">
+            <div class="section-num">Section 07</div>
+            <h2 class="section-title">Error Handling &amp; Middleware</h2>
+            <p class="lead">
+              Raise <code>HTTPException</code> to return error responses with
+              the right status code and detail message. Add middleware to
+              intercept every request and response — for CORS, logging,
+              authentication, and more.
+            </p>
+
+            <h3>HTTPException</h3>
+            <pre><code>from fastapi import FastAPI, HTTPException
+
+app = FastAPI()
+
+items = {"foo": "The Foo Wrestlers"}
+
+@app.get("/items/{item_id}")
+async def read_item(item_id: str):
+    if item_id not in items:
+        raise HTTPException(
+            status_code=404,
+            detail="Item not found",
+            headers={"X-Error": "There goes my error"},  # optional custom headers
+        )
+    return {"item": items[item_id]}</code></pre>
+
+            <h3>Custom exception handler</h3>
+            <pre><code>from fastapi import Request
+from fastapi.responses import JSONResponse
+
+class UnicornException(Exception):
+    def __init__(self, name: str):
+        self.name = name
+
+@app.exception_handler(UnicornException)
+async def unicorn_exception_handler(request: Request, exc: UnicornException):
+    return JSONResponse(
+        status_code=418,
+        content={"message": f"Oops! {exc.name} did something."},
+    )
+
+@app.get("/unicorns/{name}")
+async def read_unicorn(name: str):
+    if name == "yolo":
+        raise UnicornException(name=name)
+    return {"unicorn_name": name}</code></pre>
+
+            <h3>Override default 422 validation error handler</h3>
+            <pre><code>from fastapi.exceptions import RequestValidationError
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors(), "body": str(exc.body)},
+    )</code></pre>
+
+            <h3>Middleware</h3>
+            <pre><code>import time
+from fastapi import Request
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start = time.time()
+    response = await call_next(request)
+    response.headers["X-Process-Time"] = str(time.time() - start)
+    return response</code></pre>
+
+            <h3>CORS</h3>
+            <pre><code>from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://myapp.com", "http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],   # GET, POST, PUT, DELETE, etc.
+    allow_headers=["*"],
+)
+# For development only — do not use allow_origins=["*"] in production with credentials</code></pre>
+
+            <h3>Trusted Host / GZip / HTTPS redirect middleware</h3>
+            <pre><code>from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["myapp.com", "*.myapp.com"])
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(HTTPSRedirectMiddleware)  # redirect HTTP → HTTPS</code></pre>
+
+            <h3>Lifespan — startup and shutdown events</h3>
+            <pre><code>from contextlib import asynccontextmanager
+from fastapi import FastAPI
+
+ml_models = {}
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: load ML model, connect to DB, etc.
+    ml_models["ner"] = load_model("ner-model")
+    yield
+    # Shutdown: cleanup
+    ml_models.clear()
+
+app = FastAPI(lifespan=lifespan)</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+          <div class="section page-break" id="s8">
+            <div class="section-num">Section 08</div>
+            <h2 class="section-title">Authentication &amp; Security</h2>
+            <p class="lead">
+              FastAPI provides ready-made security utilities in
+              <code>fastapi.security</code>. The recommended production pattern
+              is OAuth2 Password flow + JWT tokens.
+            </p>
+
+            <h3>OAuth2 Password flow + JWT (production pattern)</h3>
+            <pre><code>pip install "python-jose[cryptography]" "passlib[bcrypt]"</code></pre>
+
+            <pre><code>from datetime import datetime, timedelta, timezone
+from typing import Annotated
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from pydantic import BaseModel
+
+SECRET_KEY = "change-me-in-production"   # use secrets.token_hex(32)
+ALGORITHM  = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+app = FastAPI()
+
+# ── Pydantic models ──────────────────────────────────────────────
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: str | None = None
+
+class User(BaseModel):
+    username: str
+    email: str | None = None
+    disabled: bool | None = None
+
+class UserInDB(User):
+    hashed_password: str
+
+# ── Password helpers ─────────────────────────────────────────────
+def verify_password(plain: str, hashed: str) -> bool:
+    return pwd_context.verify(plain, hashed)
+
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
+# ── JWT helpers ──────────────────────────────────────────────────
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+# ── User lookup (replace with real DB query) ─────────────────────
+fake_users_db = {
+    "johndoe": {"username": "johndoe", "email": "john@example.com",
+                "hashed_password": get_password_hash("secret"), "disabled": False},
+}
+
+def get_user(db: dict, username: str) -> UserInDB | None:
+    if username in db:
+        return UserInDB(**db[username])
+
+def authenticate_user(db: dict, username: str, password: str) -> UserInDB | None:
+    user = get_user(db, username)
+    if not user or not verify_password(password, user.hashed_password):
+        return None
+    return user
+
+# ── Current user dependency ──────────────────────────────────────
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = get_user(fake_users_db, token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+async def get_current_active_user(
+    current_user: Annotated[User, Depends(get_current_user)]
+) -> User:
+    if current_user.disabled:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+# ── Routes ───────────────────────────────────────────────────────
+@app.post("/token", response_model=Token)
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Incorrect username or password",
+                            headers={"WWW-Authenticate": "Bearer"})
+    access_token = create_access_token(
+        data={"sub": user.username},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/users/me", response_model=User)
+async def read_users_me(current_user: Annotated[User, Depends(get_current_active_user)]):
+    return current_user</code></pre>
+
+            <h3>API Key security</h3>
+            <pre><code>from fastapi.security import APIKeyHeader, APIKeyQuery, APIKeyCookie
+
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+api_key_query  = APIKeyQuery(name="api_key",  auto_error=False)
+
+async def get_api_key(
+    key_header: str | None = Depends(api_key_header),
+    key_query:  str | None = Depends(api_key_query),
+):
+    if key_header == "secret" or key_query == "secret":
+        return key_header or key_query
+    raise HTTPException(status_code=403, detail="Invalid API Key")
+
+@app.get("/secure/")
+async def secure_route(api_key: str = Depends(get_api_key)):
+    return {"message": "Access granted"}</code></pre>
+
+            <h3>HTTP Basic Auth</h3>
+            <pre><code>from fastapi.security import HTTPBasic, HTTPBasicCredentials
+import secrets
+
+security = HTTPBasic()
+
+@app.get("/users/me")
+def read_current_user(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
+    correct_username = secrets.compare_digest(credentials.username.encode(), b"admin")
+    correct_password = secrets.compare_digest(credentials.password.encode(), b"secret")
+    if not (correct_username and correct_password):
+        raise HTTPException(status_code=401, detail="Incorrect credentials",
+                            headers={"WWW-Authenticate": "Basic"})
+    return {"username": credentials.username}</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 9 ══════════════════════════ -->
+          <div class="section page-break" id="s9">
+            <div class="section-num">Section 09</div>
+            <h2 class="section-title">Background Tasks &amp; SSE</h2>
+            <p class="lead">
+              Background tasks run after the response is sent — perfect for
+              sending emails or writing logs without making the client wait.
+              Server-Sent Events (SSE) stream real-time data over a persistent
+              HTTP connection.
+            </p>
+
+            <h3>Background tasks</h3>
+            <pre><code>from fastapi import BackgroundTasks, FastAPI
+
+app = FastAPI()
+
+def write_notification(email: str, message: str = ""):
+    with open("log.txt", "a") as f:
+        f.write(f"Notification to {email}: {message}\n")
+
+@app.post("/send-notification/{email}")
+async def send_notification(email: str, background_tasks: BackgroundTasks):
+    background_tasks.add_task(write_notification, email, message="Welcome!")
+    return {"message": "Notification will be sent in the background"}
+
+# Also works with dependencies
+def get_query(background_tasks: BackgroundTasks, q: str | None = None):
+    if q:
+        background_tasks.add_task(write_log, f"Query: {q}")
+    return q</code></pre>
+
+            <div class="callout callout-amber">
+              <strong>BackgroundTasks vs Celery/ARQ</strong>
+              <code>BackgroundTasks</code> runs in the same process — use it for
+              lightweight fire-and-forget work (emails, logging). For heavy CPU
+              tasks, retries, scheduling, or distributed queues use Celery, ARQ,
+              or FastAPI's Taskiq integration instead.
+            </div>
+
+            <h3>Server-Sent Events (SSE)</h3>
+            <pre><code>from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+import asyncio
+
+app = FastAPI()
+
+async def event_stream(topic: str):
+    """Yield SSE-formatted events."""
+    count = 0
+    while True:
+        count += 1
+        yield f"data: {{'topic': '{topic}', 'count': {count}}}\n\n"
+        await asyncio.sleep(1)
+        if count >= 10:     # stop after 10 events
+            break
+
+@app.get("/events/{topic}")
+async def stream_events(topic: str):
+    return StreamingResponse(
+        event_stream(topic),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",   # disable Nginx buffering
+        },
+    )</code></pre>
+
+            <h3>SSE with named events and IDs</h3>
+            <pre><code>async def advanced_stream():
+    # SSE format: each field on its own line, double newline = end of event
+    yield "id: 1\n"
+    yield "event: update\n"
+    yield "data: {\"status\": \"processing\"}\n\n"
+
+    await asyncio.sleep(2)
+
+    yield "id: 2\n"
+    yield "event: complete\n"
+    yield "data: {\"status\": \"done\", \"result\": 42}\n\n"</code></pre>
+
+            <h3>JavaScript client for SSE</h3>
+            <pre><code>const source = new EventSource("/events/myTopic");
+
+source.addEventListener("update", (e) => {
+    console.log("Update:", JSON.parse(e.data));
+});
+
+source.addEventListener("complete", (e) => {
+    console.log("Done:", JSON.parse(e.data));
+    source.close();
+});
+
+source.onerror = () => source.close();</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 10 ══════════════════════════ -->
+          <div class="section page-break" id="s10">
+            <div class="section-num">Section 10</div>
+            <h2 class="section-title">WebSockets</h2>
+            <p class="lead">
+              FastAPI has built-in WebSocket support via Starlette. WebSockets
+              provide full-duplex communication over a persistent connection —
+              ideal for chat, live feeds, and collaborative tools.
+            </p>
+
+            <h3>Basic WebSocket endpoint</h3>
+            <pre><code>pip install websockets</code></pre>
+
+            <pre><code>from fastapi import FastAPI, WebSocket
+from fastapi.responses import HTMLResponse
+
+app = FastAPI()
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        data = await websocket.receive_text()
+        await websocket.send_text(f"You said: {data}")</code></pre>
+
+            <h3>Multi-client broadcast with ConnectionManager</h3>
+            <pre><code>from fastapi import WebSocket, WebSocketDisconnect
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_personal(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
+
+manager = ConnectionManager()
+
+@app.websocket("/ws/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: int):
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await manager.send_personal(f"You: {data}", websocket)
+            await manager.broadcast(f"#{client_id}: {data}")
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        await manager.broadcast(f"#{client_id} left the chat")</code></pre>
+
+            <h3>WebSocket with dependencies and path params</h3>
+            <pre><code>from fastapi import Cookie, Query, WebSocketException, status
+
+async def get_cookie_or_token(
+    websocket: WebSocket,
+    session: Annotated[str | None, Cookie()] = None,
+    token: Annotated[str | None, Query()] = None,
+):
+    if session is None and token is None:
+        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
+    return session or token
+
+@app.websocket("/items/{item_id}/ws")
+async def ws_endpoint(
+    websocket: WebSocket,
+    item_id: str,
+    auth: Annotated[str, Depends(get_cookie_or_token)],
+):
+    await websocket.accept()
+    while True:
+        data = await websocket.receive_text()
+        await websocket.send_text(f"[{item_id}] {data}")</code></pre>
+
+            <h3>Send / receive data types</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Receive</th>
+                    <th>Send</th>
+                    <th>Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>websocket.receive_text()</code></td>
+                    <td><code>websocket.send_text()</code></td>
+                    <td>str</td>
+                  </tr>
+                  <tr>
+                    <td><code>websocket.receive_bytes()</code></td>
+                    <td><code>websocket.send_bytes()</code></td>
+                    <td>bytes</td>
+                  </tr>
+                  <tr>
+                    <td><code>websocket.receive_json()</code></td>
+                    <td><code>websocket.send_json()</code></td>
+                    <td>dict / list</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout callout-amber">
+              <strong>Production multi-process note</strong>
+              The in-memory <code>ConnectionManager</code> only works with a
+              single-process server. For multiple workers use
+              <a href="https://github.com/encode/broadcaster" target="_blank"
+                >encode/broadcaster</a
+              >
+              with Redis pub/sub to share connections across processes.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 11 ══════════════════════════ -->
+          <div class="section page-break" id="s11">
+            <div class="section-num">Section 11</div>
+            <h2 class="section-title">Project Structure with APIRouter</h2>
+            <p class="lead">
+              <code>APIRouter</code> is FastAPI's equivalent of Flask
+              Blueprints. Split routes across multiple files, apply shared
+              prefixes, tags, and dependencies at the router level, then include
+              all routers in the main app.
+            </p>
+
+            <h3>Recommended file structure</h3>
+            <pre><code>app/
+├── __init__.py
+├── main.py           ← FastAPI instance + include_router calls
+├── dependencies.py   ← shared dependencies (DB, auth tokens)
+├── config.py         ← settings (pydantic-settings)
+└── routers/
+    ├── __init__.py
+    ├── items.py      ← /items routes
+    └── users.py      ← /users routes</code></pre>
+
+            <h3>app/dependencies.py</h3>
+            <pre><code>from typing import Annotated
+from fastapi import Header, HTTPException
+
+async def get_token_header(x_token: Annotated[str, Header()]):
+    if x_token != "fake-super-secret-token":
+        raise HTTPException(status_code=400, detail="X-Token header invalid")
+
+async def get_query_token(token: str):
+    if token != "jessica":
+        raise HTTPException(status_code=400, detail="No Jessica token provided")</code></pre>
+
+            <h3>app/routers/items.py</h3>
+            <pre><code>from fastapi import APIRouter, Depends, HTTPException
+from ..dependencies import get_token_header
+
+router = APIRouter(
+    prefix="/items",
+    tags=["items"],
+    dependencies=[Depends(get_token_header)],   # applies to ALL routes in this router
+    responses={404: {"description": "Not found"}},
+)
+
+fake_items_db = {"plumbus": {"name": "Plumbus"}, "gun": {"name": "Portal Gun"}}
+
+@router.get("/")
+async def read_items():
+    return fake_items_db
+
+@router.get("/{item_id}")
+async def read_item(item_id: str):
+    if item_id not in fake_items_db:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return {"name": fake_items_db[item_id]["name"], "item_id": item_id}
+
+@router.put("/{item_id}", tags=["custom"])   # override tag for one route
+async def update_item(item_id: str):
+    return {"item_id": item_id, "name": "The updated item"}</code></pre>
+
+            <h3>app/routers/users.py</h3>
+            <pre><code>from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/users/", tags=["users"])
+async def read_users():
+    return [{"username": "Rick"}, {"username": "Morty"}]
+
+@router.get("/users/me", tags=["users"])
+async def read_user_me():
+    return {"username": "fakecurrentuser"}
+
+@router.get("/users/{username}", tags=["users"])
+async def read_user(username: str):
+    return {"username": username}</code></pre>
+
+            <h3>app/main.py</h3>
+            <pre><code>from fastapi import Depends, FastAPI
+from .dependencies import get_query_token
+from .routers import items, users
+
+app = FastAPI(dependencies=[Depends(get_query_token)])  # global dependency
+
+app.include_router(users.router)
+app.include_router(items.router)
+
+# Include the same router with a different prefix (e.g. versioning)
+app.include_router(
+    items.router,
+    prefix="/v2",
+    tags=["items-v2"],
+)
+
+@app.get("/")
+async def root():
+    return {"message": "Hello Bigger Application!"}</code></pre>
+
+            <div class="callout callout-blue">
+              <strong>Router configuration precedence</strong>
+              Settings in <code>include_router()</code> override those in
+              <code>APIRouter()</code>. Tags and dependencies
+              <em>accumulate</em> — a route gets both the router-level tags and
+              any extra tags from <code>include_router</code>. Responses merge.
+              The prefix from <code>include_router</code> is prepended to the
+              router's own prefix.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 12 ══════════════════════════ -->
+          <div class="section page-break" id="s12">
+            <div class="section-num">Section 12</div>
+            <h2 class="section-title">Settings &amp; Configuration</h2>
+            <p class="lead">
+              Use <code>pydantic-settings</code> to manage environment variables
+              and <code>.env</code> files with automatic type validation. Inject
+              settings as a dependency for easy test overriding.
+            </p>
+
+            <h3>Install</h3>
+            <pre><code>pip install pydantic-settings
+# or
+pip install "fastapi[all]"</code></pre>
+
+            <h3>config.py</h3>
+            <pre><code>from pydantic_settings import BaseSettings, SettingsConfigDict
+
+class Settings(BaseSettings):
+    app_name: str = "My API"
+    debug: bool = False
+    admin_email: str              # required — must be set via env var
+    database_url: str = "sqlite:///./app.db"
+    secret_key: str               # required
+    access_token_expire_minutes: int = 30
+
+    model_config = SettingsConfigDict(
+        env_file=".env",          # load from .env file
+        env_file_encoding="utf-8",
+        case_sensitive=False,     # APP_NAME and app_name are equivalent
+    )</code></pre>
+
+            <h3>.env file</h3>
+            <pre><code>APP_NAME="Production API"
+ADMIN_EMAIL="admin@example.com"
+DATABASE_URL="postgresql://user:pass@localhost/mydb"
+SECRET_KEY="super-secret-key-change-me"
+ACCESS_TOKEN_EXPIRE_MINUTES=60</code></pre>
+
+            <h3>main.py — inject via dependency (recommended)</h3>
+            <pre><code>from functools import lru_cache
+from typing import Annotated
+from fastapi import Depends, FastAPI
+from .config import Settings
+
+app = FastAPI()
+
+@lru_cache          # settings object created once, cached for app lifetime
+def get_settings() -> Settings:
+    return Settings()
+
+@app.get("/info")
+async def info(settings: Annotated[Settings, Depends(get_settings)]):
+    return {
+        "app_name": settings.app_name,
+        "admin_email": settings.admin_email,
+        "debug": settings.debug,
+    }</code></pre>
+
+            <h3>Override in tests</h3>
+            <pre><code>from fastapi.testclient import TestClient
+from .main import app, get_settings
+from .config import Settings
+
+client = TestClient(app)
+
+def get_settings_override():
+    return Settings(admin_email="test@example.com", secret_key="test-key")
+
+app.dependency_overrides[get_settings] = get_settings_override
+
+def test_info():
+    response = client.get("/info")
+    assert response.json()["admin_email"] == "test@example.com"
+</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 13 ══════════════════════════ -->
+          <div class="section page-break" id="s13">
+            <div class="section-num">Section 13</div>
+            <h2 class="section-title">Testing</h2>
+            <p class="lead">
+              FastAPI's <code>TestClient</code> (backed by httpx) lets you test
+              routes synchronously without running a server. Use
+              <code>dependency_overrides</code> to swap out DB or auth
+              dependencies in tests.
+            </p>
+
+            <h3>Basic test setup</h3>
+            <pre><code>pip install httpx pytest</code></pre>
+
+            <pre><code># main.py
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+@app.get("/items/{item_id}")
+async def read_item(item_id: int, q: str | None = None):
+    return {"item_id": item_id, "q": q}</code></pre>
+
+            <pre><code># test_main.py
+from fastapi.testclient import TestClient
+from .main import app
+
+client = TestClient(app)
+
+def test_root():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.json() == {"message": "Hello World"}
+
+def test_read_item():
+    response = client.get("/items/42?q=test")
+    assert response.status_code == 200
+    assert response.json() == {"item_id": 42, "q": "test"}
+
+def test_invalid_item():
+    response = client.get("/items/not-an-int")
+    assert response.status_code == 422</code></pre>
+
+            <h3>Testing with authentication</h3>
+            <pre><code>def test_authenticated_route():
+    # First, get a token
+    response = client.post(
+        "/token",
+        data={"username": "johndoe", "password": "secret"},
+    )
+    token = response.json()["access_token"]
+
+    # Use it in subsequent requests
+    response = client.get(
+        "/users/me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
+    assert response.json()["username"] == "johndoe"</code></pre>
+
+            <h3>Override dependencies in tests</h3>
+            <pre><code>from .main import app, get_current_user
+from .models import User
+
+def override_get_current_user():
+    return User(username="testuser", email="test@example.com", disabled=False)
+
+app.dependency_overrides[get_current_user] = override_get_current_user
+
+def test_protected_route():
+    response = client.get("/users/me")  # no real auth needed
+    assert response.status_code == 200
+    assert response.json()["username"] == "testuser"
+
+# Clean up after tests
+app.dependency_overrides = {}</code></pre>
+
+            <h3>Async tests (httpx AsyncClient)</h3>
+            <pre><code>pip install anyio pytest-anyio</code></pre>
+
+            <pre><code>import pytest
+from httpx import AsyncClient, ASGITransport
+from .main import app
+
+@pytest.mark.anyio
+async def test_root_async():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.get("/")
+    assert response.status_code == 200
+    assert response.json() == {"message": "Hello World"}</code></pre>
+
+            <h3>Testing WebSockets</h3>
+            <pre><code>def test_websocket():
+    with client.websocket_connect("/ws") as ws:
+        ws.send_text("hello")
+        data = ws.receive_text()
+        assert data == "You said: hello"</code></pre>
+
+            <div class="callout callout-green">
+              <strong>Test structure recommendation</strong>
+              Keep a <code>conftest.py</code> with a shared
+              <code>client</code> fixture and a <code>db_override</code> fixture
+              that swaps the database dependency for a test SQLite database. Use
+              <code>pytest-anyio</code> for async tests and
+              <code>factory_boy</code> for generating test data.
+            </div>
+
+            <h3>Further Reading</h3>
+            <ul class="clean">
+              <li>
+                <a
+                  href="https://fastapi.tiangolo.com/tutorial/"
+                  target="_blank"
+                  rel="noopener"
+                  >FastAPI Tutorial — fastapi.tiangolo.com/tutorial</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://fastapi.tiangolo.com/advanced/"
+                  target="_blank"
+                  rel="noopener"
+                  >FastAPI Advanced Guide — fastapi.tiangolo.com/advanced</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://docs.pydantic.dev/"
+                  target="_blank"
+                  rel="noopener"
+                  >Pydantic Documentation — docs.pydantic.dev</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://www.uvicorn.org/"
+                  target="_blank"
+                  rel="noopener"
+                  >Uvicorn (ASGI server) — uvicorn.org</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://www.starlette.io/"
+                  target="_blank"
+                  rel="noopener"
+                  >Starlette (FastAPI's foundation) — starlette.io</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- <div class="footer">Synapse · FastAPI · May 2026</div> -->
+        </div>
+        <!-- /container -->
+      </div>
+      <!-- /main-scroll -->
+    </div>
+    <!-- /topic-page -->
+    <footer class="guide-footer">
+      Synapse &middot; AI &amp; LLM Engineering
+    </footer>
+    <script src="../assets/scroll-top.js"></script>
+  </body>
+</html>

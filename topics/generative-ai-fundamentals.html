@@ -238,11 +238,16 @@ body { display: flex; flex-direction: column; }
   <div class="section-num">01 — Overview</div>
   <h2 class="section-title">What is Generative AI?</h2>
 
-  <p class="lead">Generative AI is a class of model that <strong>creates new content</strong> — text, images, code, audio — rather than simply classifying or predicting a label from existing data.</p>
+  <p class="lead">Generative AI is a type of AI that <strong>creates new content</strong> — text, images, code, audio — instead of just putting existing content into categories. When you ask ChatGPT to write an email or Claude to explain a concept, that's generative AI at work.</p>
+
+  <div class="callout callout-blue">
+    <strong>Plain English: what does "generative" mean?</strong>
+    Imagine two students. One student can look at a painting and tell you "this is Impressionism" (classifying). The other student can actually <em>paint</em> a new Impressionist painting from scratch (generating). Generative AI is the second student — it doesn't just recognise patterns, it creates new things that fit those patterns.
+  </div>
 
   <h3>Discriminative vs Generative</h3>
-  <p>Traditional ML models are <strong>discriminative</strong>: given an input, they draw a boundary to decide which category it belongs to. A spam classifier, for example, looks at an email and outputs "spam" or "not spam".</p>
-  <p>A <strong>generative</strong> model learns the underlying structure of the data itself — it builds a model of <em>how the data was produced</em>. Because it understands the distribution, it can sample new examples from it. Ask it to "write an email" and it generates one that looks statistically like real emails it has seen.</p>
+  <p>Traditional AI models are <strong>discriminative</strong> — they learn to sort things into categories. A spam filter looks at an email and decides: spam or not spam? That's it. It can't write a new email; it can only judge existing ones.</p>
+  <p>A <strong>generative</strong> model does something harder: it learns the full structure of what something looks like so it can produce brand new examples. To do this, it builds a statistical picture of how the data is structured. Ask it to "write an email" and it generates one that looks like a real email — because it learned from millions of real emails what makes an email sound like an email.</p>
 
   <div class="vd">
     <div class="vd-label">Discriminative vs Generative</div>
@@ -280,11 +285,12 @@ body { display: flex; flex-direction: column; }
   </div>
 
   <h3>Large Language Models (LLMs)</h3>
-  <p>The dominant form of generative AI today is the <strong>Large Language Model</strong>. An LLM is trained on vast amounts of text and learns to predict what comes next in a sequence. This deceptively simple objective — <em>predict the next word</em> — forces the model to develop deep representations of grammar, facts, reasoning, and even common-sense world knowledge.</p>
+  <p>The most common form of generative AI today is the <strong>Large Language Model</strong> (LLM). An LLM is trained on enormous amounts of text — think billions of web pages, books, and articles — and learns one deceptively simple task: <em>predict what word comes next</em>.</p>
+  <p>That sounds almost too simple. But to consistently predict the next word, the model has to absorb grammar, facts, reasoning patterns, and even common sense. The next-word prediction task is like a forcing function that makes the model learn everything about language just to do it well.</p>
 
   <div class="callout callout-blue">
-    <strong>Key insight</strong>
-    An LLM doesn't "know" things the way a database does. It has compressed statistical patterns from billions of documents into billions of numerical parameters (weights). Its "knowledge" is encoded in those weights.
+    <strong>Key insight: LLMs don't "know" things like a dictionary does</strong>
+    A dictionary stores facts as text you can look up. An LLM stores knowledge very differently — it compresses billions of examples into billions of numbers (called "weights" or "parameters"). There's no list of facts you could extract. The knowledge is smeared across all those numbers in a way that only becomes useful when you ask a question. Think of it like how a person who has read thousands of books "knows" things — they can't cite every sentence, but the knowledge shaped how they think.
   </div>
 </div>
 
@@ -293,10 +299,15 @@ body { display: flex; flex-direction: column; }
   <div class="section-num">02 — Core Concept</div>
   <h2 class="section-title">Language as Probability</h2>
 
-  <p class="lead">At its core, an LLM is a <strong>probability distribution over the next token</strong>, given all previous tokens. Every word it produces is a probabilistic choice.</p>
+  <p class="lead">An LLM doesn't decide what to say — it <strong>rolls a weighted dice</strong>. For every word it writes, it calculates the probability of each possible next word, then picks one. This section explains exactly how that works.</p>
+
+  <div class="callout callout-blue">
+    <strong>Plain English: what is a "probability distribution"?</strong>
+    A probability distribution is just a list of possibilities with a percentage attached to each. Like a weather forecast: "30% chance of rain, 50% sun, 20% clouds." An LLM does the same thing for words: "42% chance the next word is 'blue', 18% chance it's 'clear', 9% chance it's 'dark'…" — across every word in its entire vocabulary (50,000+ words), every single step.
+  </div>
 
   <h3>Next-token prediction</h3>
-  <p>Given the sequence <em>"The sky is"</em>, a model assigns a probability to every word in its vocabulary for what comes next:</p>
+  <p>Given the sequence <em>"The sky is"</em>, the model scores every word in its vocabulary for how likely it is to come next, then picks one:</p>
 
   <div class="vd">
     <div class="vd-label">Next-token probability distribution — "The sky is ___"</div>
@@ -335,22 +346,26 @@ body { display: flex; flex-direction: column; }
     <p style="margin-top:0.75rem;font-size:0.82rem;color:var(--ink2);">Model samples <strong style="color:var(--accent);">"blue"</strong> → appends it → sequence becomes <strong>"The sky is blue"</strong> → repeat for next token.</p>
   </div>
 
-  <p>The model picks one token, appends it to the sequence, then repeats the whole process. This is called <strong>autoregressive generation</strong>. One forward pass through the network → one token → repeat.</p>
+  <p>The model picks one token, adds it to the sequence, then repeats the whole process from scratch with the now-longer sequence. One step → one word → repeat until done. This repetitive loop is called <strong>autoregressive generation</strong> — "auto" because it feeds its own output back as input.</p>
 
-  <h3>Why probability? Not rules?</h3>
-  <p>Early attempts at language understanding used hand-written rules ("if subject is singular, verb must be singular"). Rules don't scale — language has infinite edge cases. Probability-based models learn the rules implicitly from data, including all the messy exceptions.</p>
+  <h3>Why probability and not rules?</h3>
+  <p>Early AI systems tried to handle language with hand-written rules: "if the subject is singular, the verb must be singular." This failed because natural language has infinite exceptions and edge cases. You can't write rules for every pun, idiom, slang term, regional dialect, and sarcastic remark. Probability-based models sidestep this entirely — they learn all the patterns (including exceptions) directly from millions of real examples.</p>
 
   <div class="callout callout-amber">
-    <strong>Important mental model</strong>
-    The model never "decides" what to say. It calculates a probability distribution and samples from it. There is no reasoning engine, no knowledge base lookup — just very sophisticated pattern-based probability estimation over tokens.
+    <strong>Important mental model: no reasoning engine inside</strong>
+    It feels like the model is "thinking" — but it isn't, at least not the way you might imagine. There's no reasoning engine, no fact-checker, no knowledge database being queried. It's purely: take everything written so far, calculate probabilities for every possible next word, pick one. The output feels intelligent because the probability estimation is incredibly sophisticated — but it's still just probability estimation.
   </div>
 
-  <h3>Softmax: turning numbers into probabilities</h3>
-  <p>The model's last layer outputs a raw score (called a <strong>logit</strong>) for every token in the vocabulary. The <strong>softmax</strong> function converts these logits into probabilities that all add up to 1.0:</p>
+  <h3>How raw scores become probabilities (softmax)</h3>
+  <p>Internally, the model produces a raw score (called a <strong>logit</strong>) for every word in its vocabulary. These scores aren't percentages yet — they can be any number, positive or negative. The <strong>softmax</strong> function converts them into proper probabilities that all add up to 100%:</p>
 
-  <pre>softmax(logit_i) = exp(logit_i) / sum(exp(all_logits))</pre>
+  <pre>softmax(score_i) = exp(score_i) / sum(exp(all_scores))
 
-  <p>This is where <strong>temperature</strong> enters — it divides the logits before softmax, changing how "peaked" or "flat" the distribution is (covered in detail in Section 9).</p>
+Example:
+  Raw scores:  "blue" = 3.2,  "clear" = 2.1,  "dark" = 1.5
+  After softmax: "blue" = 0.42, "clear" = 0.18, "dark" = 0.09  (sum = 1.0)</pre>
+
+  <p>Think of softmax as a normaliser — it takes whatever raw scores the model computed and turns them into a proper probability distribution. The <strong>temperature</strong> parameter (covered in Section 9) tweaks these scores before softmax to make the model more or less adventurous with its word choices.</p>
 </div>
 
 <!-- ─────────────────────────────────────────────────────────── S3 -->
@@ -358,10 +373,15 @@ body { display: flex; flex-direction: column; }
   <div class="section-num">03 — Building Blocks</div>
   <h2 class="section-title">Tokenization</h2>
 
-  <p class="lead">Models don't process raw text — they process <strong>tokens</strong>, chunks of text mapped to integer IDs. Understanding tokenization explains many surprising LLM behaviours.</p>
+  <p class="lead">Before a model can work with text, it has to convert it into numbers. The first step is breaking text into <strong>tokens</strong> — small chunks that each get assigned an ID number. This is called tokenization, and it has surprising consequences.</p>
+
+  <div class="callout callout-blue">
+    <strong>Plain English: why can't the model just read words?</strong>
+    Computers fundamentally work with numbers, not text. Tokenization is the step that turns text into numbers the model can process. You could tokenize letter-by-letter (26 possible values), or word-by-word (millions of possible words) — but neither extreme is efficient. Tokens are a middle ground: common short words get their own token, longer or rarer words get split into 2–3 pieces.
+  </div>
 
   <h3>What is a token?</h3>
-  <p>A token is roughly 3–4 characters on average in English — not exactly a word. Common words are a single token; rare or long words split into multiple tokens. Punctuation and spaces are often separate tokens.</p>
+  <p>A token is roughly 3–4 characters on average in English — but it doesn't line up neatly with words. Common words ("the", "is", "of") are a single token. Longer or rarer words split into multiple tokens. Punctuation and even spaces are often their own tokens.</p>
 
   <div class="vd">
     <div class="vd-label">How text gets split into tokens</div>
@@ -396,8 +416,8 @@ body { display: flex; flex-direction: column; }
     </div>
   </div>
 
-  <h3>Byte-Pair Encoding (BPE)</h3>
-  <p>The most common tokenization algorithm. It starts with individual characters and greedily merges the most frequent adjacent pairs until a target vocabulary size (typically 50,000–100,000 tokens) is reached. The result: common substrings get their own token, rare ones are spelled out character by character.</p>
+  <h3>How the vocabulary is built: Byte-Pair Encoding (BPE)</h3>
+  <p>The most common tokenization algorithm is called <strong>Byte-Pair Encoding</strong>. Here's how it works in plain terms: start with every single character as its own token. Then, find the two tokens that appear next to each other most often and merge them into one new token. Repeat this thousands of times. After enough merges, common words and syllables have their own tokens, while rare words get broken into smaller pieces. The result is a vocabulary of about 50,000–100,000 tokens that efficiently covers most text.</p>
 
   <h3>Why tokenization matters</h3>
   <div class="card-grid">
@@ -425,10 +445,15 @@ body { display: flex; flex-direction: column; }
   <div class="section-num">04 — Representations</div>
   <h2 class="section-title">Embeddings</h2>
 
-  <p class="lead">Before the Transformer can process tokens, each token ID must become a <strong>vector of numbers</strong> — its <em>embedding</em>. Embeddings encode semantic meaning in geometric space.</p>
+  <p class="lead">Token IDs are just arbitrary numbers — 4521 means "king" only because we decided it does. To do anything useful, each token needs to be converted into a list of numbers that actually captures its <em>meaning</em>. These lists of numbers are called <strong>embeddings</strong>.</p>
+
+  <div class="callout callout-blue">
+    <strong>Plain English: what is an embedding?</strong>
+    Think of it like GPS coordinates, but for meaning. Just as every location on Earth has coordinates (latitude, longitude), every word gets coordinates in "meaning space." Words that mean similar things end up near each other. "Dog" and "puppy" have similar coordinates. "Dog" and "quantum" are far apart. The model uses these coordinates to understand relationships between words. Instead of just 2 coordinates (lat/lon), embeddings use thousands of dimensions — capturing thousands of subtle aspects of meaning simultaneously.
+  </div>
 
   <h3>The embedding table</h3>
-  <p>Every model has an <strong>embedding matrix</strong>: a lookup table with one row per vocabulary token. Token ID 4521 ("king") maps to a vector of, say, 4096 floating-point numbers. These numbers are learned during training and capture the token's meaning.</p>
+  <p>Every model has an <strong>embedding matrix</strong> — essentially a giant lookup table. For each of the 50,000 tokens in the vocabulary, there's a row of numbers (typically 4,096 numbers in a large model). When the model sees token ID 4521 ("king"), it looks up row 4521 in this table and gets back 4,096 numbers. These numbers are learned during training — they start random and gradually shift to capture meaning.</p>
 
   <pre>vocab size: 50,000 tokens
 embedding dim: 4,096 numbers per token
@@ -478,12 +503,13 @@ Total parameters in embedding layer: 205 million</pre>
 
   <p>This is why models can reason about analogies and relationships — the arithmetic of meaning is baked into the geometry of the embedding space.</p>
 
-  <h3>Contextual embeddings</h3>
-  <p>Raw embeddings from the lookup table are <em>static</em> — "bank" always maps to the same vector regardless of whether it means a river bank or a financial bank. The Transformer's job is to <strong>enrich these embeddings with context</strong>, producing different internal representations of "bank" in "river bank" vs "bank account". This is what the attention mechanism does.</p>
+  <h3>The problem: same word, different meanings</h3>
+  <p>Raw embeddings from the lookup table are <em>static</em> — "bank" always maps to the same coordinates, whether it means a river bank or a financial bank. That's a problem. The word "bank" in "I sat by the river bank" vs "I opened a bank account" should mean very different things to the model.</p>
+  <p>This is the Transformer's main job: take the static starting embeddings and <strong>update them based on surrounding words</strong>, so "bank" ends up with different coordinates in each sentence. After passing through the model's layers, "bank" near "river" and "water" gets different coordinates than "bank" near "account" and "money." This context-aware updating is what the attention mechanism does (explained in Section 6).</p>
 
   <div class="callout callout-green">
-    <strong>Embeddings vs vectors vs tokens</strong>
-    Token = the text chunk. Token ID = its integer index. Embedding = the learned vector representation for that token ID. The Transformer works entirely in embedding space — tokens are just entry points.
+    <strong>Clearing up the terminology</strong>
+    These three words are often used interchangeably but mean slightly different things: <strong>Token</strong> = the text chunk (the word or word-piece). <strong>Token ID</strong> = the number assigned to that chunk (like a dictionary entry number). <strong>Embedding</strong> = the list of numbers that represents that token's meaning. The model's internal processing works entirely with embeddings — tokens and IDs are just the on/off-ramp.
   </div>
 </div>
 
@@ -492,10 +518,15 @@ Total parameters in embedding layer: 205 million</pre>
   <div class="section-num">05 — Core Architecture</div>
   <h2 class="section-title">The Transformer Architecture</h2>
 
-  <p class="lead">Introduced in the 2017 paper <em>"Attention Is All You Need"</em>, the Transformer replaced recurrent networks (RNNs/LSTMs) and became the foundation of every major LLM today.</p>
+  <p class="lead">The Transformer is the engine inside every major AI model — GPT, Claude, Gemini, LLaMA. Introduced in 2017, it revolutionised how AI processes text by letting every word look at every other word at the same time, rather than reading left-to-right one word at a time.</p>
+
+  <div class="callout callout-blue">
+    <strong>Plain English: what does the Transformer actually do?</strong>
+    Imagine you're editing a document. Old AI (RNNs) read it like a person — word by word, left to right, holding a mental summary as they go. By the time they reach the end of a long document, early details are fuzzy. The Transformer is like having 10,000 eyes that all read the entire document simultaneously, letting every word directly "see" every other word at once. That's why it understands context so much better.
+  </div>
 
   <h3>The big picture</h3>
-  <p>A Transformer processes all tokens in a sequence <strong>in parallel</strong> (not one by one like an RNN). It does this through layers of <em>attention</em> and <em>feed-forward</em> operations, stacked repeatedly. Each layer refines the token representations a little more, adding more context and abstraction.</p>
+  <p>A Transformer processes all tokens in a sequence <strong>at the same time</strong> (in parallel), rather than one by one. Each token's meaning gets updated by looking at what every other token says — through the attention mechanism. This updating happens in many layers stacked on top of each other: the first layers pick up simple patterns (word order, punctuation), later layers pick up complex meaning (who is doing what to whom, what emotion is being expressed).</p>
 
   <div class="vd">
     <div class="vd-label">Transformer architecture — one forward pass</div>
@@ -530,21 +561,21 @@ Total parameters in embedding layer: 205 million</pre>
 
   <h3>Key components explained</h3>
 
-  <h4>Positional Encoding</h4>
-  <p>Since attention processes all tokens in parallel, the model needs a way to know <em>which position</em> each token occupies. Positional encodings add a position-dependent signal to each token's embedding — either fixed sinusoidal values (original Transformer) or learned position embeddings (GPT). Modern models use <strong>RoPE</strong> (Rotary Position Embedding) which scales better to long sequences.</p>
+  <h4>Positional Encoding — teaching the model about word order</h4>
+  <p>Because the Transformer reads all tokens simultaneously (not left-to-right), it doesn't naturally know which word came first. Positional encoding fixes this by adding a small position-specific signal to each token's embedding — essentially tagging each word with its position number (1st, 2nd, 3rd…). Without this, "dog bites man" and "man bites dog" would look identical to the model. Modern models use a technique called <strong>RoPE</strong> (Rotary Position Embedding) that handles very long texts efficiently.</p>
 
-  <h4>Residual Connections</h4>
-  <p>After each sub-layer (attention, FFN), the input is <em>added back</em> to the output: <code>output = sublayer(x) + x</code>. This lets gradients flow directly through many layers during training, preventing the vanishing gradient problem and allowing very deep networks.</p>
+  <h4>Residual Connections — a shortcut for deep networks</h4>
+  <p>A Transformer can have 96 or more layers stacked on top of each other. Training very deep networks is notoriously hard — adjustments made at the top struggle to reach the bottom layers (called the "vanishing gradient" problem). Residual connections solve this with a simple trick: after each layer, <em>add the original input back to the output</em>. This creates a shortcut that allows training signals to flow directly through many layers without getting lost. Formula: <code>output = what_layer_did(x) + x</code>.</p>
 
-  <h4>Layer Normalization</h4>
-  <p>Applied before or after each sub-layer, layer norm stabilizes the magnitude of activations, making training faster and more stable. Without it, deep networks become numerically unstable.</p>
+  <h4>Layer Normalization — keeping numbers stable</h4>
+  <p>As numbers flow through dozens of layers, they can grow wildly large or shrink to near zero — making the model numerically unstable and hard to train. Layer normalization is like a thermostat that rescales the numbers at each layer back to a manageable range. It doesn't change what the model "knows" — it just keeps the math well-behaved.</p>
 
-  <h4>Feed-Forward Network (FFN)</h4>
-  <p>After attention, each token vector passes through a small two-layer MLP independently. This is where the model is thought to store and retrieve factual knowledge — the FFN acts as a key-value memory. The FFN is typically 4× wider than the embedding dimension (e.g., 4096 → 16384 → 4096).</p>
+  <h4>Feed-Forward Network (FFN) — where knowledge is stored</h4>
+  <p>After the attention step, each token's updated representation passes through a small neural network independently. This two-layer network is where researchers believe the model stores its factual knowledge — specific facts, language patterns, and world knowledge get "looked up" here. The FFN is built wider than it is deep: a model with 4,096-dimensional embeddings typically expands to 16,384 inside the FFN, then compresses back to 4,096. This wide-then-narrow shape packs in a lot of capacity.</p>
 
   <div class="callout callout-purple">
-    <strong>Scale matters enormously</strong>
-    A larger model = more layers + wider dimensions + larger FFN. GPT-2 had 48 layers, 1.6B parameters. GPT-4 is estimated at ~1.8T parameters across a mixture of experts. Scale is the main driver of capability.
+    <strong>Why bigger models are smarter</strong>
+    More layers = more rounds of refining meaning. Wider dimensions = richer representations. Bigger FFN = more knowledge stored. This is why GPT-4 (estimated ~1.8 trillion parameters) dramatically outperforms GPT-2 (1.5 billion parameters) — not because of a fundamentally different design, but sheer scale. More parameters = more capacity to learn patterns from more data.
   </div>
 
   <div class="table-wrap">
@@ -566,13 +597,18 @@ Total parameters in embedding layer: 205 million</pre>
   <div class="section-num">06 — The Core Innovation</div>
   <h2 class="section-title">The Attention Mechanism</h2>
 
-  <p class="lead">Attention is the breakthrough that made Transformers work. It lets every token directly "look at" every other token in the sequence and decide how much to borrow from each one's representation.</p>
+  <p class="lead">Attention is the single most important idea in modern AI. It's how the model figures out which words are relevant to which other words — and borrows meaning accordingly. Once you understand attention, you understand what makes LLMs so powerful.</p>
 
-  <h3>The intuition</h3>
-  <p>Consider: <em>"The animal didn't cross the street because it was too tired."</em> What does "it" refer to? A human immediately links "it" to "animal". Attention is the mechanism that creates exactly this link — allowing "it" to attend to "animal" and borrow its semantic content.</p>
+  <h3>The problem attention solves</h3>
+  <p>Consider: <em>"The animal didn't cross the street because it was too tired."</em> What does "it" refer to? You know immediately — the animal. But how? You connected a pronoun ("it") to a noun ("animal") that appeared 8 words earlier. This kind of long-range connection is trivial for humans but was very hard for AI before the Transformer. Attention is the mechanism that solves this: it lets the word "it" reach back across the sentence, find "animal," and borrow its meaning.</p>
 
-  <h3>Queries, Keys, and Values (Q, K, V)</h3>
-  <p>Each token produces three vectors from its embedding via learned linear projections:</p>
+  <div class="callout callout-blue">
+    <strong>Plain English: attention as a search engine inside the model</strong>
+    Think of attention like a library search. Every word in the sentence is both a <em>searcher</em> (looking for relevant information) and a <em>document</em> (offering information about itself). Each word asks "what context do I need to understand my meaning?" and searches the other words for relevant answers. The words with the most relevant information contribute most to updating the searcher's meaning.
+  </div>
+
+  <h3>Queries, Keys, and Values (Q, K, V) — the search mechanics</h3>
+  <p>Each token generates three things from its embedding:</p>
 
   <div class="card-grid">
     <div class="card" style="border-left: 3px solid var(--accent);">
@@ -623,37 +659,36 @@ Total parameters in embedding layer: 205 million</pre>
     </div>
   </div>
 
-  <h3>Attention score computation</h3>
-  <pre># For each pair of tokens (i attends to j):
-score(i, j) = dot_product(Q_i, K_j) / sqrt(d_k)
+  <h3>How the scores are calculated</h3>
+  <pre># Step 1 — score how relevant each word is (dot product = similarity measure):
+score("it" asking, "animal" answering) = dot_product(Q_"it", K_"animal") / sqrt(128)
 
-# Convert scores to weights via softmax (they sum to 1):
-attention_weight(i, j) = softmax(score(i, j))
+# Step 2 — convert scores to percentages (softmax so they add up to 100%):
+attention_weight = softmax(all scores)
+# Result: "animal" gets 61%, "tired" gets 28%, others share the rest
 
-# New representation for token i = weighted sum of all Values:
-output_i = sum(attention_weight(i, j) * V_j  for all j)</pre>
+# Step 3 — borrow content proportionally:
+new_meaning_of_"it" = 0.61 × Value_"animal" + 0.28 × Value_"tired" + ...</pre>
 
-  <p>The <code>sqrt(d_k)</code> scaling prevents dot products from growing too large in high dimensions, keeping softmax from saturating.</p>
+  <p>The <code>/ sqrt(128)</code> scaling is a housekeeping detail — without it, the scores would grow too large in high-dimensional space and make the softmax collapse to one winner. The scaling keeps the distribution well-spread.</p>
 
-  <h3>Multi-Head Attention</h3>
-  <p>Instead of computing attention once, the model does it <strong>h times in parallel</strong> with different learned Q/K/V projections (called "heads"). Each head can specialize: one head might track syntactic dependencies, another tracks coreference (which pronoun refers to what), another tracks positional proximity.</p>
-
-  <pre>Typical config for a large model:
-  Embedding dim: 4,096
-  Number of heads: 32
-  Dimension per head: 4,096 / 32 = 128
-
-  Each head: 128-dim Q, K, V → 128-dim output
-  Concatenate all heads: 32 × 128 = 4,096-dim
-  Final linear projection → 4,096-dim output</pre>
+  <h3>Multi-Head Attention — looking from multiple angles</h3>
+  <p>Instead of doing this search process once, the model does it <strong>32 times simultaneously</strong> (in a large model), each time with different learned Q/K/V projections. Each "head" independently asks a different kind of question about the text:</p>
+  <ul class="clean">
+    <li>One head might focus on: "which noun does this pronoun refer to?"</li>
+    <li>Another head: "what is this verb's subject?"</li>
+    <li>Another head: "what adjectives describe this noun?"</li>
+    <li>Another head: "what words nearby give positional context?"</li>
+  </ul>
+  <p>The model learns which questions are useful during training — we don't hand-program them. All 32 results get stitched back together into a single output of the same size as the input. This gives the model a rich, multi-faceted view of each word's meaning in context.</p>
 
   <div class="callout callout-green">
-    <strong>Why attention beats RNNs</strong>
-    RNNs process tokens sequentially; information from 100 tokens ago must pass through 100 computation steps and often gets "forgotten". Attention reaches any token directly in one step — distant context is as easy as nearby context.
+    <strong>Why attention is so much better than what came before</strong>
+    The previous approach (RNNs) read text like a person reading out loud — one word at a time, keeping a running mental summary. The problem: by the time you reach word 200, your memory of word 1 is dim. Attention has no such forgetting — every word can directly examine every other word in one step, no matter how far apart they are. A word at the start of a chapter can directly influence a word at the end. Distance is irrelevant.
   </div>
 
-  <h3>Causal (masked) attention</h3>
-  <p>In decoder-only models (like GPT), each token can only attend to <em>previous</em> tokens, not future ones. This is enforced by adding <code>-infinity</code> to future positions before softmax, making their weights zero. This is called <strong>causal masking</strong> and ensures the model can't "cheat" by looking ahead during training.</p>
+  <h3>Causal masking — preventing the model from "cheating"</h3>
+  <p>During training, we want the model to predict the next word without already knowing what it is. This means we need to <em>block</em> each token from looking at future tokens. We do this by setting those attention scores to negative infinity before the softmax step — they come out as zero weight, effectively invisible. This blocking is called <strong>causal masking</strong>. At inference time (when the model is generating text), there are no future tokens anyway — the model is writing them one at a time.</p>
 
   <div class="vd">
     <div class="vd-label">Causal mask — each token can only see the past</div>
@@ -687,7 +722,7 @@ output_i = sum(attention_weight(i, j) * V_j  for all j)</pre>
   <div class="section-num">07 — Learning</div>
   <h2 class="section-title">How Models Are Trained</h2>
 
-  <p class="lead">Training an LLM is the process of adjusting billions of numerical weights so the model gets better and better at predicting the next token. It happens in two main phases.</p>
+  <p class="lead">Training an LLM is the process of starting with billions of random numbers and gradually nudging them — using trillions of examples — until the model is good at predicting the next word. It's like teaching by giving the model an exam over and over until it gets better. This happens in two main phases.</p>
 
   <div class="vd">
     <div class="vd-label">LLM training pipeline</div>
@@ -723,43 +758,44 @@ output_i = sum(attention_weight(i, j) * V_j  for all j)</pre>
     </div>
   </div>
 
-  <h3>Phase 1: Pre-training</h3>
-  <p>The model is trained on a massive corpus — internet text, books, code, scientific papers — often <strong>trillions of tokens</strong>. The objective is simple: given a sequence of tokens, predict what comes next. The error (loss) between the predicted probabilities and the actual next token is computed, and <strong>backpropagation</strong> adjusts every weight in the network to reduce that error.</p>
+  <h3>Phase 1: Pre-training — learning from the internet</h3>
+  <p>The model starts with all its weights set to random numbers (it knows nothing). It's then shown an enormous collection of text — web pages, books, code, scientific papers — often <strong>trillions of words</strong>. For each piece of text, the model tries to predict the next word. It will be wrong constantly at first. The training process measures <em>how wrong</em> (the "loss"), then works backwards through the network to figure out which weights made the prediction wrong, and nudges them slightly in the right direction. This backward calculation is called <strong>backpropagation</strong>.</p>
 
-  <pre>Training loop (simplified):
-  for each batch of text:
-    1. Feed tokens 1..N into the model
-    2. Model predicts probabilities for token at position 2..N+1
-    3. Compare predictions to actual tokens → compute cross-entropy loss
-    4. Backpropagate gradients through all layers
-    5. Update weights: w = w - learning_rate × gradient</pre>
+  <pre>Simplified training loop — repeated trillions of times:
+  1. Show the model: "The sky is ___"
+  2. Model guesses the next word (probably wrong at first)
+  3. Check: the correct answer was "blue"
+  4. Measure how wrong the guess was (loss)
+  5. Work backwards to find which weights caused the error (backpropagation)
+  6. Nudge those weights slightly toward better answers
+  7. Repeat with the next piece of text</pre>
 
-  <p>This process runs on thousands of GPUs for weeks or months. The result is a <strong>base model</strong> that can continue any text but has no instruction-following behaviour.</p>
+  <p>This loop runs on thousands of specialised chips (GPUs/TPUs) for weeks or months. After all this training, the result is a <strong>base model</strong> — a model that has absorbed vast language knowledge but doesn't know how to have a helpful conversation. Ask it a question and it might just continue the text in an unexpected direction, because it was only trained to predict what comes next, not to answer questions helpfully.</p>
 
-  <h3>Phase 2: Fine-tuning (alignment)</h3>
-  <p>The raw base model is not yet useful as an assistant. It must be fine-tuned to follow instructions and behave safely. This involves:</p>
+  <h3>Phase 2: Fine-tuning — making it a useful assistant</h3>
+  <p>The base model is smart but not helpful. It needs a second phase to learn how to behave as an assistant — following instructions, being polite, refusing harmful requests. This involves showing it carefully curated examples and adjusting it based on human feedback:</p>
 
   <div class="card-grid">
     <div class="card card-accent">
       <h4>Supervised Fine-Tuning (SFT)</h4>
-      <p>Train on curated (prompt, ideal response) pairs. Teaches the model the format and style of helpfulness.</p>
+      <p>Show the model thousands of (question, ideal answer) pairs written by humans. The model learns the format: "when given a question, respond helpfully like this." Think of it as showing the model role models to copy.</p>
     </div>
     <div class="card card-accent">
-      <h4>RLHF</h4>
-      <p>Human raters rank model outputs. A reward model is trained on these rankings, then used to fine-tune the LLM via reinforcement learning (PPO). Aligns the model with human preferences.</p>
+      <h4>RLHF (Reinforcement Learning from Human Feedback)</h4>
+      <p>Human raters compare pairs of model responses and say which is better. A separate "reward model" learns to predict what humans prefer. The main model is then trained to maximise that score — like training with a teacher who gives grades, not corrections.</p>
     </div>
     <div class="card card-accent">
       <h4>DPO / Constitutional AI</h4>
-      <p>Newer alternatives to RLHF that are more stable and cheaper. DPO directly optimizes preferences without a separate reward model.</p>
+      <p>Newer, simpler alternatives to RLHF. DPO directly trains the model on "preferred vs rejected" response pairs without needing a separate reward model. Constitutional AI (Anthropic's approach) has the model critique its own responses against a set of principles.</p>
     </div>
   </div>
 
-  <h3>Parameters = learned knowledge</h3>
-  <p>Every fact, pattern, and capability in the model is encoded in its weights. There is no separate knowledge base — it's all in the numbers. A 7B model has 7 billion floating-point weights; each contributes a tiny piece to the model's behaviour.</p>
+  <h3>All knowledge is in the weights</h3>
+  <p>There is no separate file of facts, no database being queried. Every piece of knowledge — grammar, history, coding patterns, world facts — is encoded across billions of floating-point numbers. A "7B model" has 7 billion such numbers; a "70B model" has 70 billion. More numbers = more capacity to store patterns from more training data.</p>
 
   <div class="callout callout-amber">
-    <strong>Pre-training is expensive; inference is cheap</strong>
-    Training GPT-3 cost an estimated $5M+ in compute. But running inference (generating responses) on a trained model costs pennies per thousand tokens. You pay the training cost once; the model serves billions of queries.
+    <strong>Why training costs millions but you pay pennies per query</strong>
+    Training GPT-3 cost an estimated $5M+ in electricity and hardware. But once trained, the weights are fixed. Running the model to answer a question (called "inference") is comparatively cheap — pennies per thousand tokens. The expensive learning happens once; the cheap answering happens billions of times.
   </div>
 </div>
 
@@ -768,9 +804,14 @@ output_i = sum(attention_weight(i, j) * V_j  for all j)</pre>
   <div class="section-num">08 — Inference</div>
   <h2 class="section-title">How Generation Works</h2>
 
-  <p class="lead">When you send a prompt, the model runs one forward pass per token it generates. Each pass takes the entire context so far and produces a probability distribution over the next token.</p>
+  <p class="lead">When you hit send on a message, the model doesn't read your prompt and then write out the full response. It writes <strong>one word at a time</strong>, re-reading everything from scratch before each word. This section explains exactly what happens between you pressing send and reading the response.</p>
 
-  <h3>Autoregressive generation loop</h3>
+  <div class="callout callout-blue">
+    <strong>Plain English: why one word at a time?</strong>
+    Each new word depends on all the words before it. "The cat sat on the ___" → "mat" is likely. But "The cat sat on the mat and then it jumped onto the ___" → now "table," "counter," or "bed" become more likely. The model can only know the right next word after it has already written everything that came before it. So it genuinely must go one word at a time.
+  </div>
+
+  <h3>What happens step by step</h3>
   <pre>prompt = "The capital of France is"
 
 Step 1: model sees ["The","capital","of","France","is"]
@@ -785,12 +826,12 @@ Step 3: model sees full sequence including "Paris."
         → predicts next (possibly &lt;end&gt; token or more content)
         → stops when it generates the end-of-sequence token</pre>
 
-  <h3>KV Cache</h3>
-  <p>Running the full attention computation from scratch for every new token would be very slow. The <strong>KV Cache</strong> saves the Key and Value matrices for all previous tokens. Each new step only processes the newest token and retrieves cached K/V from history — dramatically speeding up generation.</p>
+  <h3>The KV Cache — avoiding redundant work</h3>
+  <p>If the model re-reads the entire conversation from scratch for every single new word it generates, that would be enormously wasteful. The <strong>KV Cache</strong> is an optimisation: the first time the model reads your prompt, it saves the Key and Value matrices for every token. For each subsequent new token, it only processes that one new token and pulls the saved K/V data from the cache — instead of reprocessing everything from scratch. This is why generation speed stays relatively consistent rather than slowing down dramatically as the response grows.</p>
 
   <div class="callout callout-blue">
-    <strong>Why long contexts are expensive</strong>
-    Attention scales as O(n²) with sequence length. A 128k context window means 128,000² = 16.4 billion attention score computations per layer per forward pass. This is why longer contexts cost more and generate slower.
+    <strong>Why long contexts cost more and run slower</strong>
+    Attention has to compare every word to every other word. Double the length → four times the comparisons (it scales with length²). A 128k-token context window means up to 128,000 × 128,000 = 16.4 billion comparisons per layer, per token generated. This is why a 128k-context query costs significantly more than a 4k one, and why long responses take longer to stream.
   </div>
 
   <h3>Decoding strategies</h3>
@@ -811,10 +852,10 @@ Step 3: model sees full sequence including "Paris."
   <div class="section-num">09 — Controls</div>
   <h2 class="section-title">Key Generation Parameters</h2>
 
-  <p class="lead">These parameters let you control <em>how</em> the model samples from its probability distribution. Understanding them helps you tune outputs for your use case.</p>
+  <p class="lead">The model calculates probabilities for every possible next word — but how it then picks from those probabilities is up to you. These parameters are the dials that let you make the model more or less creative, focused, or verbose.</p>
 
-  <h3>Temperature</h3>
-  <p>Temperature divides the logits before softmax, controlling how <strong>peaked or spread out</strong> the distribution is:</p>
+  <h3>Temperature — the creativity dial</h3>
+  <p>Temperature controls how adventurous the model is when picking the next word. Low temperature makes it conservative (picks the most likely word almost every time). High temperature makes it bolder (gives unusual words a real chance). It works by scaling the raw scores before converting to probabilities:</p>
 
   <pre># Before softmax, divide logits by temperature T:
 adjusted_logit_i = logit_i / T
@@ -884,8 +925,8 @@ T = 1.0      → unchanged distribution (model's raw probabilities)</pre>
     Dividing by near-zero makes the highest logit dominate completely. The model always picks the single most probable token. Fully deterministic but may loop or be overly literal.
   </div>
 
-  <h3>Context Window</h3>
-  <p>The <strong>context window</strong> (also called <em>context length</em>) is the maximum number of tokens the model can process in one forward pass — both your input (prompt) and its output combined. Everything outside this window is invisible to the model.</p>
+  <h3>Context Window — the model's "working memory"</h3>
+  <p>The <strong>context window</strong> is the total amount of text the model can see at one time — your messages, the system prompt, the model's own replies, all of it. Think of it as the model's working memory: anything inside the window is available; anything outside is completely gone. The model cannot remember past sessions, retrieve old conversations, or look back further than the window allows.</p>
 
   <div class="vd">
     <div class="vd-label">Context window — what the model can "see"</div>
@@ -932,8 +973,8 @@ T = 1.0      → unchanged distribution (model's raw probabilities)</pre>
     </div>
   </div>
 
-  <h3>Top-k Sampling</h3>
-  <p>Instead of sampling from the full vocabulary, limit sampling to the <strong>k most probable tokens</strong>. Tokens outside the top-k get probability 0.</p>
+  <h3>Top-k Sampling — cut off the long tail</h3>
+  <p>The model's vocabulary has 50,000+ words. Most of them have near-zero probability in any given context. Top-k sampling says: <em>only consider the k most likely words</em>, throw out everything else, then sample from those k. This prevents the model from ever picking a completely absurd word just by statistical fluke.</p>
 
   <div class="vd">
     <div class="vd-label">Top-k = 3 — only keep the 3 most likely tokens</div>
@@ -963,8 +1004,8 @@ T = 1.0      → unchanged distribution (model's raw probabilities)</pre>
     </div>
   </div>
 
-  <h3>Top-p (Nucleus) Sampling</h3>
-  <p>Rather than a fixed k, top-p keeps the <strong>smallest set of tokens whose cumulative probability ≥ p</strong>. If <code>p = 0.9</code>, the model sums probabilities in descending order and stops once it reaches 90%, using only those tokens as candidates.</p>
+  <h3>Top-p (Nucleus) Sampling — a smarter version of top-k</h3>
+  <p>Top-k always keeps exactly k words regardless of context. Top-p is smarter: it keeps however many words are needed to cover p% of the total probability. When the model is confident, one word covers 95% of the probability — top-p picks just that one. When the model is uncertain, you might need 80 words to cover 90% — top-p picks all 80. This adapts naturally to the model's confidence level.</p>
 
   <div class="vd">
     <div class="vd-label">Top-p = 0.90 — keep tokens until you hit 90% cumulative probability</div>
@@ -1018,7 +1059,7 @@ T = 1.0      → unchanged distribution (model's raw probabilities)</pre>
   <div class="section-num">10 — Architecture Types</div>
   <h2 class="section-title">Model Architectures</h2>
 
-  <p class="lead">The original Transformer had an <strong>encoder</strong> and a <strong>decoder</strong>. Modern LLMs use variants of this design, each suited to different tasks.</p>
+  <p class="lead">Not all AI models are built the same way. There are three main Transformer designs, each suited to a different job. Understanding which is which helps you choose the right tool and understand why models like GPT or Claude are built differently from models used for search or translation.</p>
 
   <div class="vd">
     <div class="vd-label">Three Transformer variants</div>
@@ -1083,8 +1124,8 @@ T = 1.0      → unchanged distribution (model's raw probabilities)</pre>
     </div>
   </div>
 
-  <h3>Encoder-only (e.g. BERT, RoBERTa)</h3>
-  <p>Uses only the Transformer encoder. Every token can attend to every other token (bidirectional attention). Produces rich contextual embeddings of the entire input.</p>
+  <h3>Encoder-only — the "reader" (e.g. BERT, RoBERTa)</h3>
+  <p>This design reads the entire input all at once, with every word seeing every other word simultaneously (bidirectional). It produces a deep understanding of the full text. The catch: it doesn't generate — it can't write new text, only understand existing text. Use it for tasks that require understanding: is this review positive? What's the main topic of this document? Which words are people's names?</p>
 
   <div class="two-col">
     <div class="card card-accent">
@@ -1097,8 +1138,8 @@ T = 1.0      → unchanged distribution (model's raw probabilities)</pre>
     </div>
   </div>
 
-  <h3>Decoder-only (e.g. GPT series, LLaMA, Claude, Gemini)</h3>
-  <p>Uses only the Transformer decoder with <strong>causal (left-to-right) masking</strong>. Each token only sees previous tokens. Trained on next-token prediction. This is the dominant architecture for all major LLMs.</p>
+  <h3>Decoder-only — the "writer" (e.g. GPT, Claude, LLaMA, Gemini)</h3>
+  <p>This is the architecture behind every major chat AI. It generates text left-to-right, with each word only able to see the words that came before it (causal masking). It's trained to predict the next word. Turns out: if you scale this design up enough and train it on enough text, it becomes remarkably capable at conversation, coding, reasoning, and much more. This is the dominant architecture for modern AI assistants.</p>
 
   <div class="two-col">
     <div class="card" style="border-left:3px solid var(--purple);">
@@ -1111,8 +1152,8 @@ T = 1.0      → unchanged distribution (model's raw probabilities)</pre>
     </div>
   </div>
 
-  <h3>Encoder-Decoder (e.g. T5, BART, original Transformer)</h3>
-  <p>Separate encoder processes the input (bidirectional). Decoder generates the output while attending to encoder representations via <strong>cross-attention</strong>.</p>
+  <h3>Encoder-Decoder — the "translator" (e.g. T5, BART)</h3>
+  <p>This combines both: an encoder reads the source text fully (bidirectionally), then a decoder generates the output while being able to look back at the encoder's full understanding. This two-stage design makes it natural for tasks where the input and output are structurally separate — like translating English to French, or summarising a document into bullet points.</p>
 
   <div class="two-col">
     <div class="card" style="border-left:3px solid var(--teal);">
@@ -1142,15 +1183,15 @@ T = 1.0      → unchanged distribution (model's raw probabilities)</pre>
   <div class="section-num">11 — Limitations</div>
   <h2 class="section-title">Hallucinations &amp; Limits</h2>
 
-  <p class="lead">LLMs confidently generate false information. This is not a bug that will be patched — it is a fundamental consequence of how probability-based generation works.</p>
-
-  <h3>Why hallucinations happen</h3>
-  <p>The model's only objective during training was to produce plausible-looking next tokens. It was never trained to distinguish "things I know" from "things I'm making up". When it doesn't have reliable signal in its weights, it does what it always does: picks the most statistically plausible continuation — which may be factually wrong.</p>
+  <p class="lead">LLMs will confidently tell you things that are completely wrong. This isn't a bug that will eventually be fixed — it's a direct consequence of how the model works. Understanding why helps you use AI tools safely.</p>
 
   <div class="callout callout-rose">
-    <strong>The model has no access to truth</strong>
-    There is no internal "fact checker". The model cannot tell you when it's wrong. A confidently stated hallucination looks identical to a correct answer in the probability distribution.
+    <strong>Plain English: why does the model make things up?</strong>
+    The model was trained to produce text that looks plausible — not text that is factually correct. It has no internal fact-checker, no ability to "look something up," and no way to distinguish between "I'm confident about this" and "I'm making this up." When asked about something it doesn't have reliable information about, it does exactly what it always does: finds the most statistically plausible-sounding continuation. Unfortunately, "plausible-sounding" and "factually correct" are not the same thing.
   </div>
+
+  <h3>Why hallucinations happen</h3>
+  <p>During training, the model was rewarded for predicting text well — not for being accurate. It learned to produce responses that <em>sound like</em> a knowledgeable person wrote them, because that's what appeared in the training data. When queried about something rare or uncertain, it produces text that sounds like an authoritative answer, regardless of whether the content is true. There's no "I don't know" reflex — just the next most plausible word.</p>
 
   <h3>Common failure modes</h3>
   <div class="card-grid">
@@ -1174,12 +1215,12 @@ T = 1.0      → unchanged distribution (model's raw probabilities)</pre>
 
   <h3>Other fundamental limitations</h3>
   <ul class="clean">
-    <li><strong>No persistent memory:</strong> Each conversation starts fresh. The model has no memory of previous sessions unless explicitly given in context.</li>
-    <li><strong>No real-time information:</strong> Cannot browse the internet or access live data (without tools).</li>
-    <li><strong>Stochastic outputs:</strong> The same prompt with temperature &gt; 0 can produce different outputs each time.</li>
-    <li><strong>Context-window amnesia:</strong> Content scrolled out of the context window is completely gone — the model cannot retrieve it.</li>
-    <li><strong>Arithmetic &amp; counting:</strong> Models are weak at exact arithmetic and character-level tasks because these require a different type of processing than pattern matching over token sequences.</li>
-    <li><strong>Prompt sensitivity:</strong> Small changes in prompt wording can cause large changes in output — models are not robust in the way traditional software is.</li>
+    <li><strong>No persistent memory:</strong> Every new conversation starts completely blank. The model has no recollection of what you talked about yesterday, last hour, or even two minutes ago in a different tab. It only knows what's in the current context window.</li>
+    <li><strong>No real-time information:</strong> The model's knowledge was frozen when training ended. It has no internet access and cannot look up current news, prices, sports scores, or anything else (unless given tools to do so).</li>
+    <li><strong>Different output each time:</strong> With temperature > 0, the same prompt can produce different answers on different runs. This is by design (sampling from a distribution), but it means the model isn't like a calculator — you can't rely on it to give the identical answer twice.</li>
+    <li><strong>Context-window amnesia:</strong> Once content scrolls out of the context window, it's completely inaccessible. The model can't "remember" it or retrieve it — it simply doesn't exist as far as the model is concerned.</li>
+    <li><strong>Weak at exact arithmetic and counting:</strong> The model processes tokens, not numbers. "153 × 247" gets broken into tokens like "153", "×", "247" — the model learned patterns about how arithmetic answers look, not actual calculation. It's surprisingly good at rough estimates but unreliable for exact multi-digit arithmetic.</li>
+    <li><strong>Prompt sensitivity:</strong> Tiny changes in how you phrase a question can change the answer significantly. This is very different from normal software, where the same input always produces the same output. Models are statistically powerful but brittle in unexpected ways.</li>
   </ul>
 
   <h3>Mitigations</h3>

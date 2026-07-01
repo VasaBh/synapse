@@ -1,0 +1,2029 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pandas &amp; NumPy — Synapse</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1a1a2e;
+        --ink2: #3d3d5c;
+        --ink3: #6b6b8a;
+        --bg: #ffffff;
+        --bg2: #f4f3f0;
+        --bg3: #eae8e4;
+        --accent: #2563eb;
+        --accent2: #1d4ed8;
+        --accent-bg: #eff6ff;
+        --green: #059669;
+        --green-bg: #ecfdf5;
+        --amber: #d97706;
+        --amber-bg: #fffbeb;
+        --rose: #e11d48;
+        --rose-bg: #fff1f2;
+        --purple: #7c3aed;
+        --purple-bg: #f5f3ff;
+        --teal: #0d9488;
+        --teal-bg: #f0fdfa;
+        --coral: #ea580c;
+        --coral-bg: #fff7ed;
+        --border: #e2e0dc;
+        --code-bg: #f8f7f5;
+        --serif: "Fraunces", Georgia, serif;
+        --sans: "DM Sans", system-ui, sans-serif;
+        --mono: "JetBrains Mono", "Fira Code", monospace;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        font-size: 15px;
+      }
+      body {
+        font-family: var(--sans);
+        color: var(--ink);
+        background: var(--bg);
+        line-height: 1.65;
+      }
+      @media print {
+        body {
+          font-size: 10pt;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .page-break {
+          page-break-before: always;
+        }
+        .card {
+          break-inside: avoid;
+        }
+        pre {
+          font-size: 8pt;
+        }
+        h1 {
+          font-size: 22pt;
+        }
+        h2 {
+          font-size: 14pt;
+        }
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+      .cover {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background: linear-gradient(
+          160deg,
+          #0f172a 0%,
+          #1e293b 40%,
+          #1a1a2e 100%
+        );
+        color: white;
+        padding: 4rem 2rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .cover::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background:
+          radial-gradient(
+            ellipse at 30% 50%,
+            rgba(5, 150, 105, 0.15) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse at 70% 30%,
+            rgba(37, 99, 235, 0.1) 0%,
+            transparent 50%
+          );
+      }
+      .cover * {
+        position: relative;
+      }
+      .cover-label {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 2rem;
+      }
+      .cover h1 {
+        font-family: var(--serif);
+        font-size: 3.5rem;
+        font-weight: 700;
+        line-height: 1.15;
+        margin-bottom: 1rem;
+        max-width: 700px;
+      }
+      .cover h1 span {
+        background: linear-gradient(135deg, #34d399, #60a5fa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .cover-sub {
+        font-size: 1.15rem;
+        color: rgba(255, 255, 255, 0.65);
+        max-width: 600px;
+        line-height: 1.7;
+        margin-bottom: 3rem;
+      }
+      .cover-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+        max-width: 650px;
+      }
+      .cover-tag {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        padding: 0.35rem 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        color: rgba(255, 255, 255, 0.6);
+      }
+      .cover-date {
+        margin-top: 3rem;
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.35);
+      }
+      .toc {
+        padding: 3rem 0;
+      }
+      .toc h2 {
+        font-family: var(--serif);
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        color: var(--ink);
+      }
+      .toc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 0.5rem;
+      }
+      .toc-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.65rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--ink);
+        transition: background 0.15s;
+      }
+      .toc-item:hover {
+        background: var(--bg2);
+      }
+      .toc-num {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--accent);
+        font-weight: 600;
+        min-width: 28px;
+      }
+      .toc-label {
+        font-size: 0.9rem;
+      }
+      .section {
+        padding: 2.5rem 0 1.5rem;
+        border-top: 1px solid var(--border);
+      }
+      .section-num {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--accent);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+      }
+      h2.section-title {
+        font-family: var(--serif);
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 0.75rem;
+        line-height: 1.3;
+      }
+      h3 {
+        font-family: var(--sans);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 1.5rem 0 0.5rem;
+      }
+      h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--ink2);
+        margin: 1.2rem 0 0.4rem;
+      }
+      p {
+        margin-bottom: 0.75rem;
+        color: var(--ink2);
+      }
+      p.lead {
+        font-size: 1.05rem;
+        color: var(--ink);
+        line-height: 1.7;
+      }
+      strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+      .card {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.1rem 1.2rem;
+      }
+      .card-accent {
+        border-left: 3px solid var(--accent);
+      }
+      .card h4 {
+        margin: 0 0 0.4rem;
+        font-size: 0.9rem;
+        color: var(--ink);
+      }
+      .card p {
+        font-size: 0.82rem;
+        margin: 0;
+        color: var(--ink3);
+        line-height: 1.5;
+      }
+      .table-wrap {
+        overflow-x: auto;
+        margin: 1rem 0;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+      }
+      thead {
+        background: var(--ink);
+        color: white;
+      }
+      th {
+        padding: 0.65rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.78rem;
+        letter-spacing: 0.3px;
+      }
+      td {
+        padding: 0.6rem 1rem;
+        border-top: 1px solid var(--border);
+        color: var(--ink2);
+      }
+      tr:nth-child(even) {
+        background: var(--bg2);
+      }
+      td:first-child {
+        font-weight: 500;
+        color: var(--ink);
+      }
+      pre {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem 1.2rem;
+        overflow-x: auto;
+        margin: 0.75rem 0;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        line-height: 1.6;
+        color: var(--ink2);
+      }
+      code {
+        font-family: var(--mono);
+        font-size: 0.82em;
+        background: var(--bg2);
+        padding: 0.15em 0.4em;
+        border-radius: 4px;
+        color: var(--ink);
+      }
+      pre code {
+        background: none;
+        padding: 0;
+      }
+      .callout {
+        border-radius: 10px;
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-size: 0.88rem;
+      }
+      .callout-blue {
+        background: var(--accent-bg);
+        border-left: 3px solid var(--accent);
+      }
+      .callout-green {
+        background: var(--green-bg);
+        border-left: 3px solid var(--green);
+      }
+      .callout-amber {
+        background: var(--amber-bg);
+        border-left: 3px solid var(--amber);
+      }
+      .callout-rose {
+        background: var(--rose-bg);
+        border-left: 3px solid var(--rose);
+      }
+      .callout-purple {
+        background: var(--purple-bg);
+        border-left: 3px solid var(--purple);
+      }
+      .callout strong {
+        display: block;
+        margin-bottom: 0.3rem;
+      }
+      .pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin: 0.5rem 0;
+      }
+      .pill {
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+        font-weight: 500;
+      }
+      .pill-blue {
+        background: var(--accent-bg);
+        color: var(--accent2);
+      }
+      .pill-green {
+        background: var(--green-bg);
+        color: var(--green);
+      }
+      .pill-purple {
+        background: var(--purple-bg);
+        color: var(--purple);
+      }
+      .pill-amber {
+        background: var(--amber-bg);
+        color: var(--amber);
+      }
+      .pill-teal {
+        background: var(--teal-bg);
+        color: var(--teal);
+      }
+      .pill-coral {
+        background: var(--coral-bg);
+        color: var(--coral);
+      }
+      ul.clean {
+        list-style: none;
+        padding: 0;
+      }
+      ul.clean li {
+        padding: 0.3rem 0 0.3rem 1.5rem;
+        position: relative;
+        font-size: 0.9rem;
+        color: var(--ink2);
+      }
+      ul.clean li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.7rem;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin: 1rem 0;
+      }
+      @media (max-width: 700px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+      .sep {
+        height: 1px;
+        background: var(--border);
+        margin: 2rem 0;
+      }
+      .footer {
+        text-align: center;
+        padding: 2rem;
+        color: var(--ink3);
+        font-size: 0.8rem;
+        border-top: 1px solid var(--border);
+        margin-top: 2rem;
+      }
+      /* ── CSS Flow Diagrams ── */
+      .fd {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 1.25rem 0;
+      }
+      .fd-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .fd-col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .fd-node {
+        border-radius: 8px;
+        padding: 0.45rem 1rem;
+        font-size: 0.78rem;
+        font-family: var(--mono);
+        font-weight: 500;
+        border: 1.5px solid;
+        text-align: center;
+        line-height: 1.45;
+      }
+      .fd-node sub {
+        font-size: 0.65rem;
+        opacity: 0.75;
+        display: block;
+        font-weight: 400;
+      }
+      .fd-node-blue {
+        background: var(--accent-bg);
+        border-color: var(--accent);
+        color: var(--accent2);
+      }
+      .fd-node-green {
+        background: var(--green-bg);
+        border-color: var(--green);
+        color: var(--green);
+      }
+      .fd-node-purple {
+        background: var(--purple-bg);
+        border-color: var(--purple);
+        color: var(--purple);
+      }
+      .fd-node-amber {
+        background: var(--amber-bg);
+        border-color: var(--amber);
+        color: var(--amber);
+      }
+      .fd-node-teal {
+        background: var(--teal-bg);
+        border-color: var(--teal);
+        color: var(--teal);
+      }
+      .fd-node-dark {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: #fff;
+      }
+      .fd-arr-d {
+        width: 2px;
+        height: 28px;
+        background: var(--ink3);
+        margin: 0 auto;
+        position: relative;
+      }
+      .fd-arr-d::after {
+        content: "";
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 7px solid var(--ink3);
+      }
+      .fd-arr-r {
+        width: 32px;
+        height: 2px;
+        background: var(--ink3);
+        position: relative;
+        flex-shrink: 0;
+      }
+      .fd-arr-r::after {
+        content: "";
+        position: absolute;
+        right: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 7px solid var(--ink3);
+      }
+      .fd-group {
+        border: 2px dashed var(--border);
+        border-radius: 12px;
+        padding: 1rem 1.2rem;
+        background: var(--bg2);
+      }
+      .fd-group-title {
+        font-size: 0.65rem;
+        font-family: var(--mono);
+        color: var(--ink3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.6rem;
+        text-align: center;
+      }
+      .fd-note {
+        font-size: 0.68rem;
+        font-family: var(--sans);
+        color: var(--ink3);
+        text-align: center;
+        max-width: 200px;
+        line-height: 1.35;
+        margin-top: 0.2rem;
+      }
+      .fd-gap {
+        width: 1.5rem;
+        flex-shrink: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      .guide-header {
+        background: #1a202c;
+        color: #fff;
+        padding: 0.9rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        flex-shrink: 0;
+      }
+      .guide-header .back-home {
+        color: #a0aec0;
+        text-decoration: none;
+        font-size: 0.82rem;
+        white-space: nowrap;
+        transition: color 0.15s;
+      }
+      .guide-header .back-home:hover {
+        color: #fff;
+      }
+      .guide-header h1 {
+        font-family: var(--sans);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #fff;
+      }
+      .topic-page {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+      .sidebar {
+        width: 260px;
+        background: #2d3748;
+        color: #e2e8f0;
+        padding: 1.25rem 0 2rem;
+        flex-shrink: 0;
+        overflow-y: auto;
+      }
+      .sidebar-title {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #a0aec0;
+        padding: 0 1.25rem 0.6rem;
+        font-family: var(--sans);
+      }
+      .sidebar nav ul {
+        list-style: none;
+      }
+      .sidebar nav ul li a {
+        display: block;
+        padding: 0.45rem 1.25rem;
+        color: #cbd5e0;
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-family: var(--sans);
+        line-height: 1.45;
+        transition:
+          background 0.1s,
+          color 0.1s;
+      }
+      .sidebar nav ul li a:hover,
+      .sidebar nav ul li a.active {
+        background: #4a5568;
+        color: #fff;
+      }
+      .sidebar nav ul ul {
+        margin: 0;
+        padding: 0;
+      }
+      .sidebar nav ul ul li a {
+        padding: 0.3rem 1.25rem 0.3rem 2.2rem;
+        font-size: 0.74rem;
+        color: #a0aec0;
+      }
+      .sidebar nav ul ul li a:hover {
+        background: #3d4d63;
+        color: #e2e8f0;
+      }
+      .sidebar .toc-num {
+        font-size: 0.65rem;
+        color: #90cdf4;
+        margin-right: 0.35rem;
+        font-family: var(--mono);
+      }
+      .main-scroll {
+        flex: 1;
+        overflow-y: auto;
+      }
+      .guide-footer {
+        text-align: center;
+        padding: 0.75rem;
+        color: #718096;
+        font-size: 0.78rem;
+        background: #1a202c;
+        flex-shrink: 0;
+      }
+    </style>
+    <link rel="stylesheet" href="../assets/mobile.css" />
+  </head>
+  <body>
+    <header class="guide-header">
+      <a href="../index.html" class="back-home">← Synapse</a>
+      <h1>Pandas &amp; NumPy</h1>
+    </header>
+
+    <div class="topic-page">
+      <aside class="sidebar">
+        <p class="sidebar-title">Pandas &amp; NumPy</p>
+        <nav>
+          <ul>
+            <li>
+              <a href="#s1"><span class="toc-num">01</span>NumPy Fundamentals</a>
+            </li>
+            <li>
+              <a href="#s2"
+                ><span class="toc-num">02</span>Indexing, Slicing &amp; Masking</a
+              >
+            </li>
+            <li>
+              <a href="#s3"
+                ><span class="toc-num">03</span>Broadcasting &amp; Vectorization</a
+              >
+            </li>
+            <li>
+              <a href="#s4"
+                ><span class="toc-num">04</span>Aggregations, Random &amp; Linear Algebra</a
+              >
+            </li>
+            <li>
+              <a href="#s5"
+                ><span class="toc-num">05</span>Pandas Series &amp; DataFrame</a
+              >
+            </li>
+            <li>
+              <a href="#s6"><span class="toc-num">06</span>Indexing &amp; Selection</a>
+            </li>
+            <li>
+              <a href="#s7"
+                ><span class="toc-num">07</span>Cleaning &amp; Missing Data</a
+              >
+            </li>
+            <li>
+              <a href="#s8"><span class="toc-num">08</span>GroupBy &amp; Aggregation</a>
+            </li>
+            <li>
+              <a href="#s9"
+                ><span class="toc-num">09</span>Merge, Join &amp; Concat</a
+              >
+            </li>
+            <li>
+              <a href="#s10"><span class="toc-num">10</span>Time Series</a>
+            </li>
+            <li>
+              <a href="#s11"><span class="toc-num">11</span>Reading &amp; Writing Data</a>
+            </li>
+            <li>
+              <a href="#s12"
+                ><span class="toc-num">12</span>Performance &amp; Best Practices</a
+              >
+            </li>
+            <li>
+              <a href="#s13"
+                ><span class="toc-num">13</span>Tricky Interview Questions</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <div class="main-scroll">
+        <div class="cover">
+          <div class="cover-label">Complete Technical Reference — July 2026</div>
+          <h1>Pandas <span>&amp; NumPy</span></h1>
+          <p class="cover-sub">
+            The numerical and tabular data foundation of the Python data
+            stack — arrays, vectorization, broadcasting, DataFrames, groupby,
+            merging, time series, and the performance habits that separate
+            fast pipelines from slow ones.
+          </p>
+          <div class="cover-tags">
+            <span class="cover-tag">ndarray</span>
+            <span class="cover-tag">Broadcasting</span>
+            <span class="cover-tag">Vectorization</span>
+            <span class="cover-tag">DataFrame</span>
+            <span class="cover-tag">Series</span>
+            <span class="cover-tag">GroupBy</span>
+            <span class="cover-tag">Merge / Join</span>
+            <span class="cover-tag">Time Series</span>
+            <span class="cover-tag">Missing Data</span>
+            <span class="cover-tag">I/O</span>
+            <span class="cover-tag">Performance</span>
+            <span class="cover-tag">Interview Questions</span>
+          </div>
+          <div class="cover-date">v1.0 — July 2026</div>
+        </div>
+
+        <div class="container">
+          <div class="toc page-break">
+            <h2>Contents</h2>
+            <div class="toc-grid">
+              <a class="toc-item" href="#s1"
+                ><span class="toc-num">01</span
+                ><span class="toc-label">NumPy Fundamentals</span></a
+              >
+              <a class="toc-item" href="#s2"
+                ><span class="toc-num">02</span
+                ><span class="toc-label">Indexing, Slicing &amp; Masking</span></a
+              >
+              <a class="toc-item" href="#s3"
+                ><span class="toc-num">03</span
+                ><span class="toc-label">Broadcasting &amp; Vectorization</span></a
+              >
+              <a class="toc-item" href="#s4"
+                ><span class="toc-num">04</span
+                ><span class="toc-label"
+                  >Aggregations, Random &amp; Linear Algebra</span
+                ></a
+              >
+              <a class="toc-item" href="#s5"
+                ><span class="toc-num">05</span
+                ><span class="toc-label">Pandas Series &amp; DataFrame</span></a
+              >
+              <a class="toc-item" href="#s6"
+                ><span class="toc-num">06</span
+                ><span class="toc-label">Indexing &amp; Selection</span></a
+              >
+              <a class="toc-item" href="#s7"
+                ><span class="toc-num">07</span
+                ><span class="toc-label">Cleaning &amp; Missing Data</span></a
+              >
+              <a class="toc-item" href="#s8"
+                ><span class="toc-num">08</span
+                ><span class="toc-label">GroupBy &amp; Aggregation</span></a
+              >
+              <a class="toc-item" href="#s9"
+                ><span class="toc-num">09</span
+                ><span class="toc-label">Merge, Join &amp; Concat</span></a
+              >
+              <a class="toc-item" href="#s10"
+                ><span class="toc-num">10</span
+                ><span class="toc-label">Time Series</span></a
+              >
+              <a class="toc-item" href="#s11"
+                ><span class="toc-num">11</span
+                ><span class="toc-label">Reading &amp; Writing Data</span></a
+              >
+              <a class="toc-item" href="#s12"
+                ><span class="toc-num">12</span
+                ><span class="toc-label">Performance &amp; Best Practices</span></a
+              >
+              <a class="toc-item" href="#s13"
+                ><span class="toc-num">13</span
+                ><span class="toc-label">Tricky Interview Questions</span></a
+              >
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+          <div class="section page-break" id="s1">
+            <div class="section-num">Section 01</div>
+            <h2 class="section-title">NumPy Fundamentals</h2>
+            <p class="lead">
+              NumPy (Numerical Python) provides the <code>ndarray</code> — a
+              fixed-type, contiguous, N-dimensional array that stores data
+              compactly in memory and lets operations run as compiled C loops
+              instead of Python bytecode. Pandas, scikit-learn, PyTorch, and
+              nearly every numerical Python library are built on it.
+            </p>
+
+            <h3>Install &amp; import</h3>
+            <pre><code>pip install numpy
+
+import numpy as np</code></pre>
+
+            <h3>Array creation</h3>
+            <pre><code>np.array([1, 2, 3])                  # from a list → 1D array
+np.array([[1, 2], [3, 4]])            # from nested lists → 2D array
+np.zeros((3, 4))                      # 3×4 array of 0.0
+np.ones((2, 3), dtype=int)            # 2×3 array of 1 (int)
+np.full((2, 2), 7)                    # filled with a constant
+np.eye(3)                             # 3×3 identity matrix
+np.arange(0, 10, 2)                   # [0, 2, 4, 6, 8] — like range()
+np.linspace(0, 1, 5)                  # 5 evenly spaced points in [0, 1]
+np.empty((2, 2))                      # uninitialized — fast, garbage values
+np.array([1, 2, 3]).copy()            # explicit deep copy</code></pre>
+
+            <h3>ndarray vs Python list</h3>
+            <div class="card-grid">
+              <div class="card card-accent">
+                <h4>Fixed, homogeneous dtype</h4>
+                <p>
+                  Every element shares one type (<code>int64</code>,
+                  <code>float64</code>, ...), stored as raw contiguous memory
+                  — no per-element Python object overhead.
+                </p>
+              </div>
+              <div class="card card-accent">
+                <h4>Vectorized operations</h4>
+                <p>
+                  <code>a + b</code> runs element-wise in compiled C, not a
+                  Python <code>for</code> loop — often 10–100x faster than
+                  list comprehensions.
+                </p>
+              </div>
+              <div class="card card-accent">
+                <h4>Fixed size</h4>
+                <p>
+                  Arrays don't grow in place like lists — reshaping or
+                  appending allocates a new array under the hood.
+                </p>
+              </div>
+              <div class="card card-accent">
+                <h4>N-dimensional</h4>
+                <p>
+                  A single object represents vectors, matrices, or tensors
+                  with any number of axes — <code>shape</code> describes them
+                  all uniformly.
+                </p>
+              </div>
+            </div>
+
+            <h3>Common dtypes</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>dtype</th>
+                    <th>Description</th>
+                    <th>Example</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>int8 / int16 / int32 / int64</code></td>
+                    <td>Signed integers of increasing width</td>
+                    <td><code>np.array([1], dtype=np.int32)</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>uint8 ... uint64</code></td>
+                    <td>Unsigned integers — common for image pixels (0–255)</td>
+                    <td><code>np.array([255], dtype=np.uint8)</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>float32 / float64</code></td>
+                    <td>Floating point — <code>float64</code> is the default</td>
+                    <td><code>np.array([1.5], dtype=np.float32)</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>bool</code></td>
+                    <td>Boolean — used heavily for masking</td>
+                    <td><code>np.array([True, False])</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>object</code></td>
+                    <td>Fallback for mixed/arbitrary Python objects — slow, avoid</td>
+                    <td><code>np.array([1, "a", None])</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>datetime64[ns]</code></td>
+                    <td>Nanosecond-precision timestamps</td>
+                    <td><code>np.array(['2026-01-01'], dtype='datetime64')</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Array attributes</h3>
+            <pre><code>a = np.arange(12).reshape(3, 4)
+
+a.shape      # (3, 4)          — size along each axis
+a.ndim       # 2               — number of dimensions
+a.size       # 12              — total number of elements
+a.dtype      # dtype('int64')
+a.itemsize   # 8               — bytes per element
+a.nbytes     # 96              — total bytes (size * itemsize)</code></pre>
+
+            <h3>Reshaping &amp; transposing</h3>
+            <pre><code>a = np.arange(6)               # array([0, 1, 2, 3, 4, 5])
+
+a.reshape(2, 3)                 # → [[0,1,2],[3,4,5]]  (view when possible)
+a.reshape(2, -1)                 # -1 = "infer this dimension" → same as above
+a.reshape(2, 3).ravel()          # flatten back to 1D — view when possible
+a.reshape(2, 3).flatten()        # flatten — ALWAYS returns a copy
+a.reshape(2, 3).T                # transpose → shape (3, 2)
+np.expand_dims(a, axis=0)        # shape (1, 6) — add a new axis
+a[:, np.newaxis]                 # shape (6, 1) — same idea, indexing syntax</code></pre>
+
+            <div class="callout callout-blue">
+              <strong>Row-major (C order) by default</strong>
+              NumPy stores arrays in row-major order — the last axis varies
+              fastest in memory. <code>reshape</code> and <code>ravel</code>
+              return a <em>view</em> whenever the new shape is compatible with
+              the existing memory layout, avoiding a copy.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+          <div class="section page-break" id="s2">
+            <div class="section-num">Section 02</div>
+            <h2 class="section-title">Indexing, Slicing &amp; Boolean Masking</h2>
+            <p class="lead">
+              NumPy supports the same slice syntax as Python lists, extended
+              to N dimensions, plus two more powerful mechanisms — fancy
+              (integer-array) indexing and boolean masking — that pandas
+              relies on constantly under the hood.
+            </p>
+
+            <h3>Basic indexing &amp; slicing</h3>
+            <pre><code>a = np.arange(10)               # [0 1 2 3 4 5 6 7 8 9]
+a[3]                             # 3
+a[2:5]                           # [2 3 4]
+a[::-1]                          # [9 8 7 6 5 4 3 2 1 0] — reversed
+a[::2]                           # [0 2 4 6 8] — every other element
+
+m = np.arange(12).reshape(3, 4)
+m[1, 2]                          # 6         — row 1, col 2
+m[1]                             # [4 5 6 7] — entire row 1
+m[:, 2]                          # [2 6 10]  — entire column 2
+m[0:2, 1:3]                      # rows 0-1, cols 1-2 → 2×2 sub-matrix</code></pre>
+
+            <div class="callout callout-amber">
+              <strong>Slices return views, not copies</strong>
+              <code>b = a[2:5]</code> shares memory with <code>a</code> —
+              mutating <code>b</code> mutates <code>a</code>. Use
+              <code>a[2:5].copy()</code> when you need an independent array.
+              Fancy indexing (below) is the opposite: it always copies.
+            </div>
+
+            <h3>Fancy indexing (integer arrays)</h3>
+            <pre><code>a = np.array([10, 20, 30, 40, 50])
+idx = np.array([0, 2, 4])
+a[idx]                           # [10 30 50] — always a copy
+
+m = np.arange(12).reshape(3, 4)
+m[[0, 2], [1, 3]]                # [m[0,1], m[2,3]] → [1, 11] — paired coords
+m[[0, 2]]                        # rows 0 and 2, all columns</code></pre>
+
+            <h3>Boolean masking</h3>
+            <pre><code>a = np.array([1, -2, 3, -4, 5])
+mask = a > 0                     # array([ True, False,  True, False,  True])
+a[mask]                          # [1 3 5]
+a[a > 0]                         # same thing, inline
+a[a < 0] = 0                     # conditional assignment — zero out negatives
+
+# Combine conditions with & / | (NOT `and`/`or`) — parentheses required
+a[(a > -3) & (a < 4)]            # elementwise AND
+
+np.where(a > 0, a, 0)            # vectorized ternary: value if cond else 0
+np.select(                        # multi-branch vectorized if/elif/else
+    [a < 0, a == 0, a > 0],
+    ["negative", "zero", "positive"],
+)</code></pre>
+
+            <div class="callout callout-rose">
+              <strong>Use <code>&amp;</code> / <code>|</code>, never <code>and</code> / <code>or</code></strong>
+              Python's <code>and</code>/<code>or</code> expect a single
+              boolean, but a comparison on an array returns an array of
+              booleans — this raises
+              <code>ValueError: truth value of an array is ambiguous</code>.
+              Always parenthesize each condition:
+              <code>(a &gt; 0) &amp; (a &lt; 10)</code>.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+          <div class="section page-break" id="s3">
+            <div class="section-num">Section 03</div>
+            <h2 class="section-title">Broadcasting &amp; Vectorization</h2>
+            <p class="lead">
+              Broadcasting lets NumPy apply operations between arrays of
+              different shapes without writing explicit loops or manually
+              replicating data — it's the mechanism that makes
+              <code>array + scalar</code> and row/column operations work.
+            </p>
+
+            <h3>Broadcasting rules</h3>
+            <p>
+              Compare shapes from the <strong>trailing</strong> (rightmost)
+              dimension. Two dimensions are compatible if they're equal, or
+              one of them is 1. Missing leading dimensions are treated as 1.
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Shape A</th>
+                    <th>Shape B</th>
+                    <th>Result</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>(3, 4)</code></td>
+                    <td><code>()</code> scalar</td>
+                    <td><code>(3, 4)</code> — scalar applied to every element</td>
+                  </tr>
+                  <tr>
+                    <td><code>(3, 4)</code></td>
+                    <td><code>(4,)</code></td>
+                    <td><code>(3, 4)</code> — row vector broadcasts down each row</td>
+                  </tr>
+                  <tr>
+                    <td><code>(3, 1)</code></td>
+                    <td><code>(1, 4)</code></td>
+                    <td><code>(3, 4)</code> — outer-product-style expansion</td>
+                  </tr>
+                  <tr>
+                    <td><code>(3, 4)</code></td>
+                    <td><code>(3,)</code></td>
+                    <td>Error — trailing dims (4 vs 3) don't match</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Broadcasting in practice</h3>
+            <pre><code>a = np.array([1, 2, 3])
+a * 2                             # [2 4 6] — scalar broadcast
+
+m = np.arange(12).reshape(3, 4)
+row = np.array([1, 0, 1, 0])
+m + row                           # row broadcasts across all 3 rows
+
+col = np.array([[10], [20], [30]])  # shape (3, 1)
+m + col                           # col broadcasts across all 4 columns
+
+# Normalize each row to sum to 1 — a very common pattern
+row_sums = m.sum(axis=1, keepdims=True)   # shape (3, 1), NOT (3,)
+normalized = m / row_sums                  # broadcasts (3,4) / (3,1)</code></pre>
+
+            <div class="callout callout-blue">
+              <strong><code>keepdims=True</code> is the broadcasting trick</strong>
+              Reducing with <code>axis=1</code> collapses that axis to shape
+              <code>(3,)</code>, which won't broadcast cleanly against
+              <code>(3, 4)</code>. <code>keepdims=True</code> keeps it as
+              <code>(3, 1)</code> so the division broadcasts correctly.
+            </div>
+
+            <h3>Vectorized operations vs Python loops</h3>
+            <pre><code>import numpy as np, timeit
+
+n = 1_000_000
+a = np.random.default_rng(0).random(n)
+
+def loop_version():
+    return [x * 2 + 1 for x in a]
+
+def vectorized_version():
+    return a * 2 + 1
+
+timeit.timeit(loop_version, number=5)        # ~0.6s
+timeit.timeit(vectorized_version, number=5)  # ~0.01s — ~50-100x faster</code></pre>
+
+            <h3>Universal functions (ufuncs)</h3>
+            <pre><code>np.sqrt(a)      np.exp(a)       np.log(a)
+np.sin(a)       np.abs(a)       np.round(a, 2)
+np.add(a, b)    np.subtract(a, b)   np.multiply(a, b)   np.divide(a, b)
+np.maximum(a, b)   # elementwise max — NOT the same as max(a, b)
+np.clip(a, 0, 1)   # clamp values into [0, 1]</code></pre>
+
+            <div class="callout callout-amber">
+              <strong><code>np.vectorize</code> is not a performance tool</strong>
+              It's a convenience wrapper that still calls a Python function
+              once per element under the hood — no faster than a plain loop.
+              Real speed comes from ufuncs and broadcasting operating on whole
+              arrays at once.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+          <div class="section page-break" id="s4">
+            <div class="section-num">Section 04</div>
+            <h2 class="section-title">Aggregations, Random &amp; Linear Algebra</h2>
+            <p class="lead">
+              NumPy reduces arrays to summary statistics along any axis, draws
+              reproducible random numbers via the modern
+              <code>Generator</code> API, and provides the linear algebra
+              primitives that power ML libraries.
+            </p>
+
+            <h3>Aggregations &amp; the <code>axis</code> parameter</h3>
+            <pre><code>m = np.arange(12).reshape(3, 4)
+#  [[ 0  1  2  3]
+#   [ 4  5  6  7]
+#   [ 8  9 10 11]]
+
+m.sum()             # 66        — sum of all elements
+m.sum(axis=0)       # [12 15 18 21]  — sum DOWN each column (collapses rows)
+m.sum(axis=1)       # [ 6 22 38]     — sum ACROSS each row (collapses columns)
+m.mean(axis=0)      # column means
+m.std(axis=1)       # per-row standard deviation
+m.min(), m.max()    # 0, 11
+m.argmin(), m.argmax()  # index of min/max in the FLATTENED array
+np.unravel_index(m.argmax(), m.shape)  # (row, col) of the max</code></pre>
+
+            <div class="callout callout-blue">
+              <strong>Mnemonic for <code>axis</code></strong>
+              <code>axis=0</code> collapses rows (result has one value per
+              <em>column</em>); <code>axis=1</code> collapses columns (one
+              value per <em>row</em>). This is the single most common source
+              of NumPy/pandas confusion — the axis you name is the one that
+              disappears.
+            </div>
+
+            <h3>Random number generation</h3>
+            <pre><code># Modern API (NumPy ≥ 1.17) — prefer this over np.random.seed()
+rng = np.random.default_rng(seed=42)   # seed → reproducible results
+
+rng.random(5)                    # 5 floats in [0, 1)
+rng.integers(0, 10, size=5)      # 5 ints in [0, 10)
+rng.normal(loc=0, scale=1, size=(2, 3))   # Gaussian samples
+rng.choice([1, 2, 3, 4], size=3, replace=False)  # sample without replacement
+rng.shuffle(a)                   # in-place shuffle</code></pre>
+
+            <h3>Linear algebra</h3>
+            <pre><code>A = np.array([[1, 2], [3, 4]])
+B = np.array([[5, 6], [7, 8]])
+
+A @ B                   # matrix multiplication (preferred syntax)
+np.dot(A, B)            # equivalent to A @ B for 2D arrays
+A * B                   # elementwise multiplication — NOT matrix multiply!
+
+np.linalg.inv(A)        # matrix inverse
+np.linalg.det(A)        # determinant
+np.linalg.solve(A, b)   # solve Ax = b  (faster & more stable than inv(A) @ b)
+np.linalg.eig(A)        # eigenvalues and eigenvectors
+np.linalg.norm(A)       # Frobenius norm (or vector norm for 1D)
+np.linalg.svd(A)        # singular value decomposition</code></pre>
+
+            <div class="callout callout-rose">
+              <strong><code>*</code> vs <code>@</code></strong>
+              <code>A * B</code> multiplies elementwise (requires matching
+              shapes or broadcastable ones). <code>A @ B</code> is true
+              matrix multiplication (inner dimensions must match). Confusing
+              the two is a very common silent bug — both run without error
+              but produce different results.
+            </div>
+
+            <h3>Sorting &amp; uniqueness</h3>
+            <pre><code>a = np.array([3, 1, 4, 1, 5, 9, 2, 6])
+
+np.sort(a)                 # [1 1 2 3 4 5 6 9] — new sorted array
+a.argsort()                # indices that WOULD sort a — useful for sorting other arrays in tandem
+np.unique(a)               # [1 2 3 4 5 6 9] — sorted unique values
+np.unique(a, return_counts=True)  # (values, counts) — like a frequency table</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+          <div class="section page-break" id="s5">
+            <div class="section-num">Section 05</div>
+            <h2 class="section-title">Pandas Series &amp; DataFrame</h2>
+            <p class="lead">
+              Pandas builds two labeled data structures on top of NumPy: the
+              1D <code>Series</code> (a column with an index) and the 2D
+              <code>DataFrame</code> (a table of columns sharing a row
+              index) — the workhorses of tabular data analysis in Python.
+            </p>
+
+            <h3>Install &amp; import</h3>
+            <pre><code>pip install pandas
+
+import pandas as pd
+import numpy as np</code></pre>
+
+            <h3>Series</h3>
+            <pre><code>s = pd.Series([10, 20, 30], index=["a", "b", "c"], name="score")
+#  a    10
+#  b    20
+#  c    30
+#  Name: score, dtype: int64
+
+s["b"]            # 20 — label-based lookup
+s.values           # array([10, 20, 30]) — underlying NumPy array
+s.index             # Index(['a', 'b', 'c'])
+s * 2               # vectorized, same as NumPy — index is preserved</code></pre>
+
+            <h3>DataFrame construction</h3>
+            <pre><code># From a dict of columns (most common)
+df = pd.DataFrame({
+    "name": ["Alice", "Bob", "Carol"],
+    "age":  [30, 25, 35],
+    "city": ["NYC", "LA", "NYC"],
+})
+
+# From a list of row dicts
+pd.DataFrame([{"a": 1, "b": 2}, {"a": 3, "b": 4}])
+
+# From a NumPy array with explicit columns
+pd.DataFrame(np.arange(6).reshape(2, 3), columns=["x", "y", "z"])
+
+# From a CSV / other source
+pd.read_csv("data.csv")</code></pre>
+
+            <h3>Inspecting a DataFrame</h3>
+            <pre><code>df.shape          # (3, 3) — (rows, columns)
+df.columns         # Index(['name', 'age', 'city'])
+df.index           # RangeIndex(start=0, stop=3, step=1)
+df.dtypes          # dtype of each column
+df.info()          # column names, non-null counts, dtypes, memory usage
+df.describe()      # count/mean/std/min/quartiles/max for numeric columns
+df.head(2)         # first 2 rows
+df.tail(2)         # last 2 rows
+df.sample(2)       # 2 random rows
+df.nunique()       # number of unique values per column
+df.memory_usage(deep=True)  # per-column memory, including object overhead</code></pre>
+
+            <h3>Column &amp; row basics</h3>
+            <pre><code>df["age"]                      # a Series (single column)
+df[["name", "age"]]            # a DataFrame (subset of columns)
+df["is_adult"] = df["age"] >= 18   # add a new column — vectorized
+df.rename(columns={"name": "full_name"})   # returns new frame (inplace=True to mutate)
+df.drop(columns=["city"])      # drop a column
+df.drop(index=0)               # drop a row by label
+df.sort_values("age", ascending=False)     # sort by column
+df.sort_values(["city", "age"])            # multi-column sort</code></pre>
+
+            <div class="card-grid">
+              <div class="card card-accent">
+                <h4>Every column is a Series</h4>
+                <p>
+                  A DataFrame is conceptually a dict of same-length Series
+                  sharing one row index — each column can hold its own dtype.
+                </p>
+              </div>
+              <div class="card card-accent">
+                <h4>Index is not just row numbers</h4>
+                <p>
+                  The index carries labels (dates, IDs, categories) that
+                  survive filtering, joins, and reordering — it's how pandas
+                  aligns data automatically.
+                </p>
+              </div>
+              <div class="card card-accent">
+                <h4>Most methods return new objects</h4>
+                <p>
+                  <code>sort_values</code>, <code>drop</code>,
+                  <code>rename</code>, etc. return a new DataFrame by default;
+                  pass <code>inplace=True</code> to mutate (increasingly
+                  discouraged in modern pandas).
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+          <div class="section page-break" id="s6">
+            <div class="section-num">Section 06</div>
+            <h2 class="section-title">Indexing &amp; Selection</h2>
+            <p class="lead">
+              Pandas offers two primary selectors — <code>.loc</code> for
+              label-based access and <code>.iloc</code> for purely
+              positional access — plus boolean filtering and
+              <code>.query()</code> for readable conditional selection.
+            </p>
+
+            <h3><code>.loc</code> vs <code>.iloc</code></h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Accessor</th>
+                    <th>Basis</th>
+                    <th>Example</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>.loc[]</code></td>
+                    <td>Label-based — uses index/column <em>names</em></td>
+                    <td><code>df.loc[2, "age"]</code> · <code>df.loc[0:2, "name":"age"]</code> (end inclusive!)</td>
+                  </tr>
+                  <tr>
+                    <td><code>.iloc[]</code></td>
+                    <td>Position-based — integer offsets, like NumPy</td>
+                    <td><code>df.iloc[0, 1]</code> · <code>df.iloc[0:2, 0:2]</code> (end exclusive)</td>
+                  </tr>
+                  <tr>
+                    <td><code>.at[]</code> / <code>.iat[]</code></td>
+                    <td>Scalar-only fast path for label / position</td>
+                    <td><code>df.at[2, "age"]</code> — faster than <code>.loc</code> for a single value</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <pre><code>df.loc[0]                      # row with label 0 (as a Series)
+df.loc[0, "age"]               # scalar at row 0, column "age"
+df.loc[:, "age"]               # all rows, column "age"
+df.loc[df["age"] > 28, "name"] # boolean row filter + column selection
+
+df.iloc[0]                     # first row, by position
+df.iloc[-1]                    # last row
+df.iloc[0:2, [0, 2]]           # first 2 rows, columns 0 and 2</code></pre>
+
+            <h3>Boolean filtering &amp; <code>.query()</code></h3>
+            <pre><code>df[df["age"] > 28]                          # rows where age > 28
+df[(df["age"] > 25) & (df["city"] == "NYC")]  # combine with & / | (parenthesize!)
+df[df["city"].isin(["NYC", "LA"])]          # membership test
+
+df.query("age > 25 and city == 'NYC'")      # same filter, readable syntax
+df.query("age > @min_age")                  # reference a local variable with @</code></pre>
+
+            <h3>Setting values safely</h3>
+            <pre><code># Correct — single .loc call, unambiguous target
+df.loc[df["age"] > 28, "is_senior"] = True
+
+# Risky — chained indexing may write to a temporary copy
+df[df["age"] > 28]["is_senior"] = True   # SettingWithCopyWarning — may silently fail</code></pre>
+
+            <div class="callout callout-amber">
+              <strong>SettingWithCopyWarning</strong>
+              Chained indexing (<code>df[cond][col] = x</code>) performs two
+              separate <code>__getitem__</code> calls — pandas can't
+              guarantee the first returned a view rather than a copy, so the
+              assignment may not stick. Always assign through a single
+              <code>.loc[row_selector, col_selector] = value</code> call.
+            </div>
+
+            <h3>MultiIndex (brief)</h3>
+            <pre><code>df2 = df.set_index(["city", "name"])   # hierarchical row index
+df2.loc["NYC"]                         # all NYC rows
+df2.loc[("NYC", "Alice")]              # exact (city, name) match
+df2.reset_index()                      # collapse back to columns</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+          <div class="section page-break" id="s7">
+            <div class="section-num">Section 07</div>
+            <h2 class="section-title">Cleaning &amp; Missing Data</h2>
+            <p class="lead">
+              Real-world data arrives messy — missing values, duplicate rows,
+              inconsistent types, and untrimmed strings. Pandas represents
+              missing data as <code>NaN</code> (or <code>pd.NA</code> /
+              <code>NaT</code> for nullable/datetime types) and gives you
+              vectorized tools to clean it.
+            </p>
+
+            <h3>Detecting &amp; handling missing values</h3>
+            <pre><code>df.isna()                 # boolean DataFrame — True where value is missing
+df.isna().sum()           # count of missing values per column
+df.isna().sum().sum()     # total missing values in the whole frame
+
+df.dropna()                       # drop rows with ANY missing value
+df.dropna(axis=1)                 # drop COLUMNS with any missing value
+df.dropna(subset=["age"])         # only consider the "age" column
+df.dropna(thresh=2)                # keep rows with at least 2 non-null values
+
+df.fillna(0)                       # replace all NaN with 0
+df.fillna({"age": df["age"].mean(), "city": "Unknown"})  # per-column fill
+df["age"].fillna(method="ffill")   # forward-fill from the previous valid value
+df.interpolate()                    # linear interpolation for numeric gaps</code></pre>
+
+            <h3>Duplicates</h3>
+            <pre><code>df.duplicated()                 # boolean Series — True for repeat rows
+df.duplicated(subset=["name"])  # duplicates based on a subset of columns
+df.drop_duplicates()             # keep first occurrence by default
+df.drop_duplicates(keep="last")</code></pre>
+
+            <h3>Type conversion &amp; element-wise transforms</h3>
+            <pre><code>df["age"] = df["age"].astype("float64")
+df["city"] = df["city"].astype("category")   # memory-efficient for low-cardinality columns
+
+df["age"].apply(lambda x: x * 2)         # Series.apply — one function, elementwise
+df.apply(lambda col: col.max(), axis=0)   # DataFrame.apply — per-column by default
+df.apply(lambda row: row["age"] + 1, axis=1)  # per-row — slower, avoid when vectorizable
+df["name"].map({"Alice": "A", "Bob": "B"})    # Series.map — value lookup/substitution
+df.replace({"city": {"NYC": "New York"}})     # find-and-replace values</code></pre>
+
+            <h3>String operations — the <code>.str</code> accessor</h3>
+            <pre><code>df["name"].str.lower()
+df["name"].str.strip()
+df["name"].str.contains("li", case=False)
+df["name"].str.split(" ", expand=True)   # split into separate columns
+df["name"].str.len()
+df["email"].str.extract(r"(\w+)@(\w+)\.com")   # regex capture groups → columns</code></pre>
+
+            <div class="callout callout-blue">
+              <strong>Vectorized string methods beat <code>.apply()</code></strong>
+              <code>.str.*</code> methods are implemented in optimized pandas
+              code and handle missing values gracefully (propagating
+              <code>NaN</code> instead of raising). Prefer them over
+              <code>.apply(lambda s: s.lower())</code>, which falls back to a
+              slow, per-element Python call.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+          <div class="section page-break" id="s8">
+            <div class="section-num">Section 08</div>
+            <h2 class="section-title">GroupBy &amp; Aggregation</h2>
+            <p class="lead">
+              <code>groupby</code> implements the split-apply-combine
+              pattern: split rows into groups by key, apply a function to
+              each group independently, then combine the results back into a
+              single object.
+            </p>
+
+            <div class="fd">
+              <div class="fd-node fd-node-dark" style="min-width: 220px">
+                Full DataFrame
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-blue" style="min-width: 220px">
+                SPLIT — group rows by key(s)<br /><sub>df.groupby("city")</sub>
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-purple" style="min-width: 220px">
+                APPLY — run a function per group<br /><sub>.mean() / .agg() / .apply()</sub>
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-green" style="min-width: 220px">
+                COMBINE — merge results back<br /><sub>into a Series / DataFrame</sub>
+              </div>
+            </div>
+
+            <h3>Basic groupby</h3>
+            <pre><code>df.groupby("city")["age"].mean()          # mean age per city
+df.groupby("city").size()                 # row count per group
+df.groupby("city").agg(                    # multiple named aggregations
+    avg_age=("age", "mean"),
+    max_age=("age", "max"),
+    n=("age", "size"),
+)
+df.groupby(["city", "is_adult"])["age"].mean()   # group by multiple keys</code></pre>
+
+            <h3><code>agg</code> vs <code>transform</code> vs <code>apply</code></h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Method</th>
+                    <th>Output shape</th>
+                    <th>Use case</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>.agg()</code></td>
+                    <td>One row per group</td>
+                    <td>Summary statistics (mean, sum, count, custom reducers)</td>
+                  </tr>
+                  <tr>
+                    <td><code>.transform()</code></td>
+                    <td>Same shape as input</td>
+                    <td>Broadcast a per-group value back to every original row (e.g., group mean subtracted from each row)</td>
+                  </tr>
+                  <tr>
+                    <td><code>.apply()</code></td>
+                    <td>Flexible — whatever the function returns</td>
+                    <td>Custom per-group logic that doesn't fit agg/transform — slowest, most general</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <pre><code># transform: normalize each value against its group's mean
+df["age_centered"] = df["age"] - df.groupby("city")["age"].transform("mean")
+
+# apply: return a whole sub-DataFrame per group (e.g., top-2 rows by age)
+df.groupby("city").apply(lambda g: g.nlargest(2, "age"), include_groups=False)</code></pre>
+
+            <h3>Pivot tables &amp; cross-tabulation</h3>
+            <pre><code>pd.pivot_table(
+    df, values="age", index="city", columns="is_adult", aggfunc="mean"
+)
+pd.crosstab(df["city"], df["is_adult"])        # frequency counts, city × is_adult
+df.pivot(index="name", columns="city", values="age")  # reshape without aggregation</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 9 ══════════════════════════ -->
+          <div class="section page-break" id="s9">
+            <div class="section-num">Section 09</div>
+            <h2 class="section-title">Merge, Join &amp; Concatenation</h2>
+            <p class="lead">
+              Combine multiple DataFrames the way you'd combine SQL tables —
+              <code>merge</code> for relational joins on key columns,
+              <code>concat</code> for stacking frames along an axis, and
+              <code>join</code> as a shorthand for index-based merges.
+            </p>
+
+            <h3><code>pd.concat</code> — stacking</h3>
+            <pre><code>pd.concat([df1, df2])                 # stack rows (axis=0), like UNION ALL
+pd.concat([df1, df2], axis=1)         # stack columns side by side, aligned by index
+pd.concat([df1, df2], ignore_index=True)  # renumber the resulting index 0..n-1
+pd.concat([df1, df2], keys=["a", "b"])    # add a MultiIndex level to track origin</code></pre>
+
+            <h3><code>pd.merge</code> — relational joins</h3>
+            <pre><code>orders = pd.DataFrame({"order_id": [1, 2, 3], "cust_id": [1, 2, 4]})
+customers = pd.DataFrame({"cust_id": [1, 2, 3], "name": ["Alice", "Bob", "Carol"]})
+
+pd.merge(orders, customers, on="cust_id", how="inner")  # only matching cust_id in both
+pd.merge(orders, customers, on="cust_id", how="left")   # all orders, NaN where no match
+pd.merge(orders, customers, on="cust_id", how="outer")  # all rows from both, NaN where unmatched
+pd.merge(orders, customers, left_on="cust_id", right_on="cust_id", how="left",
+         indicator=True)   # adds "_merge" column: left_only / right_only / both</code></pre>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th><code>how=</code></th>
+                    <th>Keeps</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>"inner"</code></td>
+                    <td>Only keys present in <strong>both</strong> frames (default)</td>
+                  </tr>
+                  <tr>
+                    <td><code>"left"</code></td>
+                    <td>All rows from the left frame; unmatched right columns become <code>NaN</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>"right"</code></td>
+                    <td>All rows from the right frame; unmatched left columns become <code>NaN</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>"outer"</code></td>
+                    <td>Union of keys from both frames</td>
+                  </tr>
+                  <tr>
+                    <td><code>"cross"</code></td>
+                    <td>Cartesian product of every row in both frames (no key needed)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3><code>.join()</code> — index-based shorthand</h3>
+            <pre><code>orders.set_index("cust_id").join(customers.set_index("cust_id"), how="left")
+# equivalent to merge on the index instead of a column</code></pre>
+
+            <div class="callout callout-amber">
+              <strong>Check for row-count blowup before merging</strong>
+              If the key column isn't unique on either side, <code>merge</code>
+              produces the cross product of matching rows — a "many-to-many"
+              merge can silently multiply row counts. Use
+              <code>validate="one_to_many"</code> (or the appropriate variant)
+              to raise an error instead of guessing.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 10 ══════════════════════════ -->
+          <div class="section page-break" id="s10">
+            <div class="section-num">Section 10</div>
+            <h2 class="section-title">Time Series</h2>
+            <p class="lead">
+              Pandas has first-class support for datetime data —
+              <code>DatetimeIndex</code> enables label-based date slicing,
+              resampling to a different frequency, and rolling-window
+              calculations without manual date arithmetic.
+            </p>
+
+            <h3>Parsing &amp; building datetime indexes</h3>
+            <pre><code>pd.to_datetime("2026-07-01")                 # single Timestamp
+pd.to_datetime(df["date_str"])                # parse a whole column
+pd.to_datetime(df["date_str"], format="%d/%m/%Y")  # explicit format — faster, unambiguous
+
+df = df.set_index(pd.to_datetime(df["date"]))
+pd.date_range("2026-01-01", periods=7, freq="D")    # 7 daily timestamps
+pd.date_range("2026-01-01", "2026-12-31", freq="MS")  # month-start dates in a year</code></pre>
+
+            <h3>Date-based selection</h3>
+            <pre><code>ts = df.set_index("date")
+ts["2026-03"]                # every row in March 2026 — label-based, index must be sorted
+ts["2026-01-01":"2026-03-31"]  # inclusive date range slice
+ts.index.year                # array of years
+ts.index.dayofweek           # 0=Monday ... 6=Sunday</code></pre>
+
+            <h3>Resampling — changing frequency</h3>
+            <pre><code>ts["value"].resample("D").mean()    # downsample to daily means
+ts["value"].resample("ME").sum()    # monthly totals (month-end anchored)
+ts["value"].resample("h").ffill()   # upsample to hourly, forward-filling gaps</code></pre>
+
+            <div class="callout callout-blue">
+              <strong><code>resample</code> vs <code>groupby</code></strong>
+              <code>resample</code> is <code>groupby</code> specialized for
+              time — it understands calendar frequencies ("month end",
+              "business day") so it can create bins even for timestamps that
+              don't exist in the data, then optionally fill the gaps.
+            </div>
+
+            <h3>Rolling &amp; expanding windows</h3>
+            <pre><code>ts["value"].rolling(window=7).mean()     # 7-period moving average
+ts["value"].rolling(window=7, min_periods=1).mean()  # allow partial windows at the start
+ts["value"].expanding().mean()            # cumulative mean from the start
+ts["value"].ewm(span=7).mean()            # exponentially weighted moving average</code></pre>
+
+            <h3>Shifting &amp; differencing</h3>
+            <pre><code>ts["value"].shift(1)          # lag by 1 period — previous row's value
+ts["value"].diff()            # value[t] - value[t-1]
+ts["value"].pct_change()      # percent change period-over-period</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 11 ══════════════════════════ -->
+          <div class="section page-break" id="s11">
+            <div class="section-num">Section 11</div>
+            <h2 class="section-title">Reading &amp; Writing Data</h2>
+            <p class="lead">
+              Pandas reads and writes nearly every common tabular format with
+              a consistent <code>read_*</code> / <code>to_*</code> naming
+              convention.
+            </p>
+
+            <h3>CSV</h3>
+            <pre><code>pd.read_csv("data.csv")
+pd.read_csv(
+    "data.csv",
+    sep=";",                        # custom delimiter
+    usecols=["name", "age"],        # only load these columns — saves memory
+    dtype={"age": "int32"},         # specify dtypes upfront — faster, less memory
+    parse_dates=["signup_date"],    # parse straight into datetime64
+    na_values=["NA", "-", ""],      # treat these strings as missing
+    nrows=1000,                     # only read the first 1000 rows
+    chunksize=100_000,              # returns an iterator of DataFrame chunks — for huge files
+)
+
+df.to_csv("out.csv", index=False)   # index=False avoids writing the row index as a column</code></pre>
+
+            <h3>Other formats</h3>
+            <pre><code>pd.read_json("data.json")
+pd.read_excel("data.xlsx", sheet_name="Sheet1")
+pd.read_sql("SELECT * FROM orders", con=engine)     # engine = SQLAlchemy connection
+pd.read_parquet("data.parquet")                      # columnar, compressed, fast
+
+df.to_json("out.json", orient="records")
+df.to_excel("out.xlsx", index=False)
+df.to_sql("orders", con=engine, if_exists="append")
+df.to_parquet("out.parquet")   # preserves dtypes exactly — preferred for pipelines</code></pre>
+
+            <div class="callout callout-green">
+              <strong>Prefer Parquet for intermediate pipeline data</strong>
+              Parquet is columnar, compressed, and stores dtypes exactly
+              (unlike CSV, which round-trips everything through text). Reads
+              are typically 5–20x faster than CSV for large files, and you
+              avoid re-parsing dates/numbers on every load.
+            </div>
+
+            <h3>Chunked reading for files larger than memory</h3>
+            <pre><code>total = 0
+for chunk in pd.read_csv("huge.csv", chunksize=500_000):
+    total += chunk["amount"].sum()   # process one chunk at a time</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 12 ══════════════════════════ -->
+          <div class="section page-break" id="s12">
+            <div class="section-num">Section 12</div>
+            <h2 class="section-title">Performance &amp; Best Practices</h2>
+            <p class="lead">
+              Most pandas performance problems come from writing row-by-row
+              Python loops where a vectorized operation would do — the same
+              lesson as NumPy, applied to labeled tabular data.
+            </p>
+
+            <h3>Avoid <code>iterrows()</code></h3>
+            <pre><code># Slow — iterrows() reconstructs a Series per row (loses dtypes, boxes everything)
+total = 0
+for _, row in df.iterrows():
+    total += row["price"] * row["qty"]
+
+# Fast — vectorized column-wise multiply, then sum
+total = (df["price"] * df["qty"]).sum()
+
+# If you truly need per-row logic that can't vectorize, itertuples() is ~10x
+# faster than iterrows() because it yields lightweight namedtuples
+for row in df.itertuples():
+    ...</code></pre>
+
+            <div class="callout callout-rose">
+              <strong><code>iterrows()</code> is almost always the wrong tool</strong>
+              It's commonly 50-100x slower than the vectorized equivalent on
+              medium-sized frames. Reach for it only when profiling shows no
+              vectorized alternative exists.
+            </div>
+
+            <h3>Use <code>category</code> dtype for low-cardinality columns</h3>
+            <pre><code>df["city"].nunique()          # e.g., 5 unique cities across 1M rows
+df["city"] = df["city"].astype("category")
+# Memory drops from one string per row to one small integer code per row,
+# and groupby/value_counts on category columns run faster too</code></pre>
+
+            <h3><code>eval()</code> / <code>query()</code> for large frames</h3>
+            <pre><code># For frames with 100k+ rows, eval/query avoid building intermediate
+# temporary arrays for each step of a compound expression
+df.eval("total = price * qty", inplace=True)
+df.query("total > 100 and city == 'NYC'")</code></pre>
+
+            <h3>Method chaining for readable pipelines</h3>
+            <pre><code>result = (
+    df
+    .query("age >= 18")
+    .assign(total=lambda d: d["price"] * d["qty"])
+    .groupby("city", as_index=False)
+    .agg(revenue=("total", "sum"), orders=("total", "size"))
+    .sort_values("revenue", ascending=False)
+)</code></pre>
+
+            <h3>Checklist</h3>
+            <div class="card-grid">
+              <div class="card card-accent">
+                <h4>Vectorize first</h4>
+                <p>
+                  Reach for column-wise operations, <code>.str</code>
+                  accessors, and ufuncs before <code>.apply()</code>, and
+                  reach for <code>.apply()</code> before a raw Python loop.
+                </p>
+              </div>
+              <div class="card card-accent">
+                <h4>Set dtypes explicitly</h4>
+                <p>
+                  Specify <code>dtype=</code> on read to avoid pandas
+                  guessing (and often over-allocating with
+                  <code>int64</code>/<code>float64</code> or
+                  <code>object</code>).
+                </p>
+              </div>
+              <div class="card card-accent">
+                <h4>Know views vs copies</h4>
+                <p>
+                  Chained indexing and slices can silently alias the original
+                  data — assign through a single <code>.loc[]</code> call and
+                  call <code>.copy()</code> when you need independence.
+                </p>
+              </div>
+              <div class="card card-accent">
+                <h4>Profile before optimizing</h4>
+                <p>
+                  Use <code>%timeit</code> in a notebook or
+                  <code>df.memory_usage(deep=True)</code> to confirm where
+                  time and memory actually go before rewriting code.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 13 ══════════════════════════ -->
+          <div class="section page-break" id="s13">
+            <div class="section-num">Section 13</div>
+            <h2 class="section-title">Tricky Interview Questions</h2>
+            <p class="lead">
+              A set of pandas/NumPy puzzles that come up repeatedly in data
+              analyst / data scientist / ML engineer interviews — each with a
+              worked solution and the gotcha it's really testing.
+            </p>
+
+            <h3>Q1. Find the second-highest value per group</h3>
+            <p>
+              Table <code>df(dept, name, salary)</code> — one row per
+              employee. Ties should count once (matching SQL's
+              <code>DENSE_RANK</code> semantics).
+            </p>
+            <pre><code># nlargest per group — simple but keeps duplicate VALUES as separate rows
+df.groupby("dept")["salary"].apply(lambda s: s.nlargest(2).iloc[-1])
+
+# dense-rank style — ties share a rank, matches SQL DENSE_RANK() = 2
+df["rnk"] = df.groupby("dept")["salary"].rank(method="dense", ascending=False)
+second_highest = df[df["rnk"] == 2]</code></pre>
+            <div class="callout callout-amber">
+              <strong>
+                <code>nlargest(2).iloc[-1]</code> is not the same as "2nd
+                distinct value"
+              </strong>
+              If the top salary is tied between two people,
+              <code>nlargest(2)</code> returns that same salary twice — so
+              <code>.iloc[-1]</code> gives you the tied top salary again, not
+              the true second-highest. Use
+              <code>.rank(method="dense")</code> when ties must collapse to
+              one rank, exactly like SQL's <code>DENSE_RANK()</code>.
+            </div>
+
+            <h3>Q2. Find duplicate rows and keep only the first occurrence</h3>
+            <pre><code>df.duplicated()                          # bool mask, True for repeats after the first
+df[df.duplicated(keep=False)]            # ALL rows involved in a duplicate group
+df.drop_duplicates(subset=["email"], keep="first")
+
+# Which specific columns caused rows to collide, without dropping anything
+dupe_counts = df.groupby(list(df.columns)).size()
+dupe_counts[dupe_counts > 1]</code></pre>
+
+            <h3>Q3. Detect when a value changes — group consecutive runs ("gaps and islands")</h3>
+            <p>
+              Table <code>df(day, status)</code> sorted by day — collapse
+              consecutive rows with the same <code>status</code> into
+              <code>(status, start_day, end_day)</code> ranges, the pandas
+              equivalent of the SQL gaps-and-islands pattern.
+            </p>
+            <pre><code>df["block"] = (df["status"] != df["status"].shift()).cumsum()  # new block id on every change
+
+result = (
+    df.groupby("block")
+      .agg(status=("status", "first"), start_day=("day", "min"), end_day=("day", "max"))
+      .reset_index(drop=True)
+)</code></pre>
+            <div class="callout callout-green">
+              <strong>The trick: compare each row to <code>.shift()</code>, then <code>.cumsum()</code></strong>
+              <code>series != series.shift()</code> is <code>True</code> only
+              where a new run starts; cumulatively summing that boolean mask
+              produces a constant integer for every row inside one run —
+              turning "find consecutive groups" into an ordinary
+              <code>groupby</code>, identically to the SQL version of this
+              problem.
+            </div>
+
+            <h3>Q4. Running total and percent of group total</h3>
+            <pre><code>df["running_total"] = df.groupby("region")["revenue"].cumsum()
+df["pct_of_region"] = (
+    df["revenue"] / df.groupby("region")["revenue"].transform("sum") * 100
+)</code></pre>
+
+            <h3>Q5. Pivot long data to wide without losing rows</h3>
+            <p>
+              Table <code>df(region, quarter, amount)</code> — one row per
+              region, one column per quarter.
+            </p>
+            <pre><code>df.pivot_table(index="region", columns="quarter", values="amount", aggfunc="sum", fill_value=0)
+
+# pivot() (not pivot_table) raises if (region, quarter) isn't unique — use it to VALIDATE
+# your assumption that there's exactly one row per combination
+df.pivot(index="region", columns="quarter", values="amount")</code></pre>
+            <div class="callout callout-blue">
+              <strong><code>pivot</code> vs <code>pivot_table</code></strong>
+              <code>pivot()</code> is a pure reshape — it errors on duplicate
+              index/column combinations, which makes it a good sanity check.
+              <code>pivot_table()</code> silently aggregates duplicates with
+              <code>aggfunc</code> (default <code>mean</code>) — convenient,
+              but it can mask a data-quality bug that <code>pivot()</code>
+              would have caught.
+            </div>
+
+            <h3>Q6. Merge that unexpectedly multiplies row count</h3>
+            <pre><code>orders = pd.DataFrame({"order_id": [1, 2, 3], "cust_id": [1, 1, 2]})
+addresses = pd.DataFrame({"cust_id": [1, 1, 2], "address": ["A", "B", "C"]})
+
+merged = orders.merge(addresses, on="cust_id")
+len(merged)   # 5, not 3 — customer 1 has two addresses, so each of their
+              # 2 orders is duplicated once per matching address row
+
+# Guard against this in production code:
+orders.merge(addresses, on="cust_id", validate="many_to_one")
+# raises MergeError immediately if "addresses" isn't unique on cust_id</code></pre>
+
+            <h3>Q7. Reindex a time series to fill in missing dates</h3>
+            <pre><code>ts = df.set_index("date")
+full_range = pd.date_range(ts.index.min(), ts.index.max(), freq="D")
+ts = ts.reindex(full_range)          # missing dates appear as NaN rows
+ts["value"] = ts["value"].fillna(0)  # or .ffill() depending on the semantics needed</code></pre>
+            <div class="callout callout-amber">
+              <strong>A groupby on a gappy date column silently skips missing dates</strong>
+              <code>df.groupby("date").sum()</code> only produces rows for
+              dates that exist in the data — if a date had zero rows because
+              nothing happened, it simply won't appear in the output.
+              <code>reindex</code> against a complete <code>date_range</code>
+              is what actually surfaces the gap.
+            </div>
+
+            <h3>Q8. Explode a column of lists into one row per element</h3>
+            <pre><code>df = pd.DataFrame({"order_id": [1, 2], "items": [["a", "b"], ["c"]]})
+df.explode("items")
+#   order_id items
+#   1        a
+#   1        b
+#   2        c</code></pre>
+
+            <h3>Q9. Why did <code>df["is_adult"] = df["age"] >= 18</code> raise a warning?</h3>
+            <pre><code>subset = df[df["dept"] == "Sales"]
+subset["bonus"] = subset["salary"] * 0.1     # SettingWithCopyWarning
+
+# subset MAY be a view or a copy of df — pandas can't guarantee which,
+# so the assignment might silently not affect anything you can rely on.
+# Fix: be explicit about wanting an independent copy before mutating it.
+subset = df[df["dept"] == "Sales"].copy()
+subset["bonus"] = subset["salary"] * 0.1     # safe — subset is unambiguously its own object</code></pre>
+
+            <h3>Q10. Vectorize a row-wise conditional instead of <code>.apply(axis=1)</code></h3>
+            <pre><code># Slow — calls a Python function once per row
+df["tier"] = df.apply(
+    lambda row: "A" if row["score"] >= 90 else "B" if row["score"] >= 70 else "C",
+    axis=1,
+)
+
+# Fast — vectorized, evaluated once over the whole column
+df["tier"] = np.select(
+    [df["score"] >= 90, df["score"] >= 70],
+    ["A", "B"],
+    default="C",
+)</code></pre>
+            <div class="callout callout-purple">
+              <strong>Interview tip</strong>
+              Most "tricky" pandas questions are testing the same three
+              underlying instincts: reach for a vectorized/groupby solution
+              before <code>.apply(axis=1)</code>, know when an operation
+              returns a view vs. a copy, and check whether ties/duplicates/
+              missing values change the expected answer — the exact same
+              instincts the <a href="sql.html">SQL interview questions</a>
+              are testing, applied to DataFrames instead of tables.
+            </div>
+
+            <h3>Further Reading</h3>
+            <ul class="clean">
+              <li>
+                <a
+                  href="https://numpy.org/doc/stable/"
+                  target="_blank"
+                  rel="noopener"
+                  >NumPy Documentation — numpy.org/doc/stable</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://pandas.pydata.org/docs/"
+                  target="_blank"
+                  rel="noopener"
+                  >Pandas Documentation — pandas.pydata.org/docs</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://pandas.pydata.org/docs/user_guide/enhancingperf.html"
+                  target="_blank"
+                  rel="noopener"
+                  >Enhancing Performance — pandas user guide</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://pandas.pydata.org/docs/user_guide/cookbook.html"
+                  target="_blank"
+                  rel="noopener"
+                  >Pandas Cookbook — worked recipes for common patterns</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <!-- /container -->
+      </div>
+      <!-- /main-scroll -->
+    </div>
+    <!-- /topic-page -->
+    <footer class="guide-footer">
+      Synapse &middot; AI &amp; LLM Engineering
+    </footer>
+    <script src="../assets/scroll-top.js"></script>
+  </body>
+</html>

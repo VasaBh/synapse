@@ -211,6 +211,9 @@ body { display: flex; flex-direction: column; }
 .sidebar nav ul { list-style: none; }
 .sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
 .sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar nav ul ul { margin: 0; padding: 0; }
+.sidebar nav ul ul li a { padding: 0.3rem 1.25rem 0.3rem 2.2rem; font-size: 0.74rem; color: #a0aec0; }
+.sidebar nav ul ul li a:hover { background: #3d4d63; color: #e2e8f0; }
 .sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
 .main-scroll { flex: 1; overflow-y: auto; }
 .guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
@@ -232,7 +235,13 @@ body { display: flex; flex-direction: column; }
       <ul>
         <li><a href="#s1"><span class="toc-num">01</span>What Makes an Agent</a></li>
         <li><a href="#s2"><span class="toc-num">02</span>LangChain</a></li>
-        <li><a href="#s3"><span class="toc-num">03</span>LangGraph</a></li>
+        <li><a href="#s3"><span class="toc-num">03</span>LangGraph &amp; LangSmith</a>
+          <ul>
+            <li><a href="#s3-studio">&#8627; Studio</a></li>
+            <li><a href="#s3-platform">&#8627; Platform</a></li>
+            <li><a href="#s3-langsmith">&#8627; LangSmith</a></li>
+          </ul>
+        </li>
         <li><a href="#s4"><span class="toc-num">04</span>CrewAI</a></li>
         <li><a href="#s5"><span class="toc-num">05</span>AutoGen</a></li>
         <li><a href="#s6"><span class="toc-num">06</span>OpenAI Agents SDK</a></li>
@@ -249,10 +258,11 @@ body { display: flex; flex-direction: column; }
 <div class="cover">
   <div class="cover-label">Complete Technical Reference &#8212; May 2026</div>
   <h1>Agentic AI &amp; <span>Frameworks</span></h1>
-  <p class="cover-sub">LangChain, LangGraph, CrewAI, AutoGen, OpenAI Agents SDK, Pydantic AI, ReAct loops, multi-agent orchestration, memory architectures, and production patterns &#8212; the complete agentic AI playbook.</p>
+  <p class="cover-sub">LangChain, LangGraph, LangSmith, CrewAI, AutoGen, OpenAI Agents SDK, Pydantic AI, ReAct loops, multi-agent orchestration, memory architectures, and production patterns &#8212; the complete agentic AI playbook.</p>
   <div class="cover-tags">
     <span class="cover-tag">LangChain</span>
     <span class="cover-tag">LangGraph</span>
+    <span class="cover-tag">LangSmith</span>
     <span class="cover-tag">CrewAI</span>
     <span class="cover-tag">AutoGen</span>
     <span class="cover-tag">OpenAI Agents SDK</span>
@@ -272,7 +282,7 @@ body { display: flex; flex-direction: column; }
   <div class="toc-grid">
     <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">What Makes an Agent</span></a>
     <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">LangChain &amp; LCEL</span></a>
-    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">LangGraph</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">LangGraph &amp; LangSmith</span></a>
     <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">CrewAI</span></a>
     <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">AutoGen</span></a>
     <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">OpenAI Agents SDK</span></a>
@@ -534,7 +544,7 @@ print(result["output"])</code></pre>
 <!-- ════ SECTION 3 ════ -->
 <div class="section page-break" id="s3">
   <div class="section-num">Section 03</div>
-  <h2 class="section-title">LangGraph</h2>
+  <h2 class="section-title">LangGraph &amp; LangSmith</h2>
   <p class="lead">LangGraph extends LangChain with a graph-based stateful agent framework. Nodes are Python functions; edges define control flow including cycles; a shared TypedDict state threads through every node. This enables complex, long-running, resumable, and multi-agent workflows with full persistence.</p>
 
   <h3>StateGraph Control Flow</h3>
@@ -669,6 +679,234 @@ for event in app.stream(None, config=config, stream_mode="values"):
         <tr><td>Conditional Edge</td><td>A router function that inspects state and returns a string key mapping to the next node &#8212; enables branching and loops.</td></tr>
         <tr><td>Checkpointer</td><td>Persists full graph state after every node transition. Enables resumability, human-in-the-loop, and audit trails.</td></tr>
         <tr><td>Interrupt</td><td><code>interrupt_before</code> or <code>interrupt_after</code> pauses graph execution at a named node so an external process can inspect and resume.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="s3-studio">LangGraph Studio</h3>
+  <p>LangGraph Studio is a desktop IDE (Mac/Windows) for visually building, running, and debugging LangGraph agents locally. It connects directly to a running LangGraph server and provides a real-time graph visualisation, step-by-step state inspection, and an interactive thread panel for replaying and editing past runs.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Feature</th><th>What It Does</th></tr></thead>
+      <tbody>
+        <tr><td>Live graph view</td><td>Renders nodes and edges as the graph executes; highlights the active node at each step.</td></tr>
+        <tr><td>State inspector</td><td>Shows the full TypedDict state after every node transition — no print statements needed.</td></tr>
+        <tr><td>Time-travel debugging</td><td>Fork execution from any prior checkpoint to replay or experiment with different inputs.</td></tr>
+        <tr><td>Human-in-the-loop UI</td><td>When a graph is paused at an interrupt, Studio surfaces the pending state and lets you approve, edit, or reject before resuming.</td></tr>
+        <tr><td>Thread history</td><td>Browse all previous runs by thread ID; compare state snapshots across executions.</td></tr>
+        <tr><td>Hot reload</td><td>Edits to graph code are picked up automatically — no server restart required during development.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout callout-blue">
+    <strong>Studio Requires a <code>langgraph.json</code> Config File</strong>
+    LangGraph Studio discovers your graph via a <code>langgraph.json</code> manifest at the project root. It specifies the graph entrypoint, dependencies, and environment variables. The same file is used by LangGraph Platform for cloud deployment, so local Studio development maps directly to production.
+  </div>
+<pre><code># langgraph.json &#8212; required by both Studio and Platform
+{
+  "graphs": {
+    "agent": "./agent.py:app"   // module_path:compiled_graph_variable
+  },
+  "dependencies": ["."],        // install local package in editable mode
+  "env": ".env"                 // load environment variables from .env file
+}</code></pre>
+
+  <h3 id="s3-platform">LangGraph Platform</h3>
+  <p>LangGraph Platform is the managed cloud service for deploying LangGraph agents to production. It provides a persistent execution engine, built-in checkpointing, a REST + streaming API, cron and webhook triggers, and an ops dashboard — all without managing infrastructure.</p>
+  <div class="fd">
+    <div class="fd-row" style="gap:1rem;align-items:flex-start;flex-wrap:wrap">
+      <div class="fd-col" style="align-items:center;gap:0.4rem">
+        <div class="fd-node fd-node-blue" style="min-width:140px">Your Code<sub>langgraph.json</sub></div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-node fd-node-green" style="min-width:140px">Platform Deploy<sub>git push / CLI</sub></div>
+      </div>
+      <div class="fd-note" style="align-self:center">&#8594;</div>
+      <div class="fd-col" style="align-items:center;gap:0.4rem">
+        <div class="fd-node fd-node-purple" style="min-width:160px">Execution Engine<sub>durable runs · queuing</sub></div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-node fd-node-teal" style="min-width:160px">Checkpointer<sub>Postgres · auto-managed</sub></div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-node fd-node-amber" style="min-width:160px">REST / Streaming API<sub>invoke · stream · webhook</sub></div>
+      </div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Capability</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><td>Deployment</td><td>Push a repo with <code>langgraph.json</code> via the CLI (<code>langgraph deploy</code>) or connect a GitHub repo for auto-deploy on push.</td></tr>
+        <tr><td>Durable execution</td><td>Runs are persisted end-to-end. A server crash mid-run resumes from the last checkpoint automatically.</td></tr>
+        <tr><td>Managed Postgres checkpointer</td><td>Fully managed, production-grade state persistence — no need to provision or operate a database.</td></tr>
+        <tr><td>Streaming API</td><td>SSE stream returns node-level events, token-level LLM output, or full state snapshots via <code>/runs/stream</code>.</td></tr>
+        <tr><td>Background runs</td><td>Fire-and-forget execution via <code>/runs</code>; poll or webhook for completion. Suitable for long-running research or batch tasks.</td></tr>
+        <tr><td>Cron &amp; webhook triggers</td><td>Schedule recurring graph runs or trigger on external events without custom orchestration code.</td></tr>
+        <tr><td>Double-texting control</td><td>Configure per-deployment policy for concurrent requests on the same thread: <code>reject</code>, <code>enqueue</code>, <code>interrupt</code>, or <code>rollback</code> the in-flight run.</td></tr>
+        <tr><td>Ops dashboard</td><td>View live and historical runs, inspect state at any step, and trigger human-in-the-loop approvals through the same Studio UI connected to the cloud deployment.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Example: Deploying to LangGraph Platform</h3>
+<pre><code># 1. Install CLI
+pip install "langgraph-cli[inmem]"
+
+# 2. Authenticate
+langgraph auth login
+
+# 3. Deploy (builds Docker image, provisions infra, returns endpoint URL)
+langgraph deploy --project my-agent
+
+# ─── Calling the deployed agent via REST ────────────────────────────────────
+import httpx, json
+
+BASE = "https://api.smith.langchain.com/langgraph/my-agent"
+HEADERS = {"x-api-key": "lsv2_YOUR_KEY"}
+
+# Create a background run
+resp = httpx.post(f"{BASE}/runs", headers=HEADERS, json={
+    "assistant_id": "agent",
+    "input": {"messages": [{"role": "user", "content": "Summarise today&#39;s AI news"}]},
+    "config": {"configurable": {"thread_id": "thread-001"}},
+})
+run_id = resp.json()["run_id"]
+
+# Stream events back (Server-Sent Events)
+with httpx.stream("GET", f"{BASE}/runs/{run_id}/stream", headers=HEADERS) as r:
+    for line in r.iter_lines():
+        if line.startswith("data:"):
+            event = json.loads(line[5:])
+            print(event)</code></pre>
+
+  <div class="callout callout-amber">
+    <strong>Studio &#8594; Platform: Same Config, Two Environments</strong>
+    The <code>langgraph.json</code> manifest and the compiled graph object work identically in Studio (local) and Platform (cloud). Develop and debug locally in Studio, then <code>langgraph deploy</code> to push the exact same graph to production. Human-in-the-loop interrupts, time-travel debugging, and the ops dashboard all work the same way in both environments.
+  </div>
+
+  <h3 id="s3-langsmith">LangSmith</h3>
+  <p>LangSmith is LangChain's observability, evaluation, and dataset management platform. It automatically captures traces from any LangChain or LangGraph run — recording every LLM call, tool invocation, token count, latency, and cost as a structured span tree — with zero instrumentation required beyond setting two environment variables.</p>
+
+  <h3>LangSmith Architecture</h3>
+  <div class="fd">
+    <div class="fd-row" style="gap:1rem;align-items:flex-start;flex-wrap:wrap">
+      <div class="fd-col" style="align-items:center;gap:0.4rem">
+        <div class="fd-node fd-node-blue" style="min-width:150px">Your Agent<sub>LangGraph / LangChain</sub></div>
+        <div class="fd-arr-d"></div>
+        <div class="fd-node fd-node-teal" style="min-width:150px">Auto-instrumentation<sub>LANGCHAIN_TRACING_V2=true</sub></div>
+      </div>
+      <div class="fd-note" style="align-self:center">&#8594;</div>
+      <div class="fd-col" style="gap:0.4rem">
+        <div class="fd-node fd-node-purple" style="min-width:160px">Trace Store<sub>runs · spans · feedback</sub></div>
+        <div class="fd-node fd-node-green" style="min-width:160px">Datasets &amp; Evals<sub>examples · evaluators</sub></div>
+        <div class="fd-node fd-node-amber" style="min-width:160px">Monitoring<sub>dashboards · alerts</sub></div>
+      </div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Capability</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><td>Automatic tracing</td><td>Set <code>LANGCHAIN_TRACING_V2=true</code> — every LangChain and LangGraph run is captured as a full span tree with no code changes.</td></tr>
+        <tr><td>Manual spans</td><td><code>@traceable</code> decorator or <code>with trace(...)</code> context manager to instrument arbitrary Python functions as child spans.</td></tr>
+        <tr><td>Run explorer</td><td>Web UI to browse, filter, and inspect individual traces — drill from the top-level run down to each LLM token and tool output.</td></tr>
+        <tr><td>Datasets</td><td>Save any run's input/output as a labelled example. Build golden datasets for regression testing and prompt iteration.</td></tr>
+        <tr><td>Evaluators</td><td>Run LLM-as-judge, exact-match, or custom Python evaluators over a dataset. Score outputs and compare across prompt versions.</td></tr>
+        <tr><td>Annotation queues</td><td>Route runs to human reviewers for labelling, correction, or quality scoring — feeds back into datasets automatically.</td></tr>
+        <tr><td>Monitoring dashboards</td><td>Track p50/p95 latency, error rate, token spend, and custom metrics over time. Set threshold alerts.</td></tr>
+        <tr><td>Prompt hub</td><td>Version and manage prompts centrally; pull them by name and version in code so prompt changes don&#39;t require deploys.</td></tr>
+        <tr><td>Playground</td><td>Replay any captured run in an interactive editor — swap the model, tweak the prompt, and compare outputs side-by-side.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Example: Auto-Tracing a LangGraph Agent</h3>
+<pre><code>import os
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_API_KEY"]    = "lsv2_YOUR_KEY"
+os.environ["LANGCHAIN_PROJECT"]    = "my-agent-project"   # optional &#8212; groups traces
+
+# Nothing else changes &#8212; all LangGraph / LangChain calls are traced automatically
+from langgraph.graph import StateGraph, START, END
+from langchain_openai import ChatOpenAI
+
+# ... build and compile graph as normal ...
+result = app.invoke({"messages": [HumanMessage(content="Summarise today&#39;s AI news")]})
+# Full trace appears in LangSmith: nodes, LLM calls, tool calls, token usage, latency</code></pre>
+
+  <h3>Example: Custom Spans with <code>@traceable</code></h3>
+<pre><code>from langsmith import traceable, trace
+import httpx
+
+@traceable(name="web_search", metadata={"source": "serper"})
+def web_search(query: str) -> str:
+    """Wrap any function &#8212; LangSmith records inputs, outputs, and latency."""
+    resp = httpx.get("https://api.serper.dev/search",
+                     headers={"X-API-KEY": os.environ["SERPER_KEY"]},
+                     params={"q": query})
+    return resp.json()["organic"][0]["snippet"]
+
+# Inline context manager for ad-hoc spans
+with trace("rerank_results", inputs={"count": 10}) as run:
+    top = sorted(results, key=lambda r: r["score"], reverse=True)[:3]
+    run.end(outputs={"top": top})</code></pre>
+
+  <h3>Example: Dataset Evaluation</h3>
+<pre><code>from langsmith import Client
+from langsmith.evaluation import evaluate, LangChainStringEvaluator
+
+client = Client()
+
+# 1. Create (or reuse) a dataset
+dataset = client.create_dataset("qa-golden-set", description="QA regression suite")
+client.create_examples(
+    inputs=[{"question": "What is RAG?"}, {"question": "What is LangGraph?"}],
+    outputs=[{"answer": "Retrieval-Augmented Generation"}, {"answer": "A stateful graph agent framework"}],
+    dataset_id=dataset.id,
+)
+
+# 2. Define the system under test
+def my_agent(inputs: dict) -> dict:
+    result = app.invoke({"messages": [HumanMessage(content=inputs["question"])]})
+    return {"answer": result["messages"][-1].content}
+
+# 3. Run evaluation &#8212; LLM-as-judge scores each output
+results = evaluate(
+    my_agent,
+    data=dataset.name,
+    evaluators=[LangChainStringEvaluator("qa", config={"llm": ChatOpenAI(model="gpt-4o")})],
+    experiment_prefix="v2-prompt-update",
+)
+print(results.to_pandas()[["input", "output", "score"]].head())</code></pre>
+
+  <h3>Example: Pulling a Versioned Prompt from the Hub</h3>
+<pre><code>from langsmith import Client
+from langchain import hub
+
+# Push a prompt (one-time, or via the UI)
+# hub.push("my-org/research-agent-system", prompt_template, new_repo_is_public=False)
+
+# Pull by name — pin to a specific commit hash for reproducibility
+system_prompt = hub.pull("my-org/research-agent-system:3f4a9b1")
+
+llm = ChatOpenAI(model="gpt-4o")
+chain = system_prompt | llm   # LCEL pipe &#8212; prompt feeds directly into the model</code></pre>
+
+  <div class="callout callout-green">
+    <strong>LangSmith Closes the Prod Feedback Loop</strong>
+    The typical LangGraph workflow: develop in Studio &#8594; deploy to Platform &#8594; monitor with LangSmith. When LangSmith flags a regression or a bad run, you can save that run as a dataset example, replay it in the Playground to debug, fix the prompt or graph logic, and evaluate against the full dataset before re-deploying &#8212; all without leaving the LangChain ecosystem.
+  </div>
+
+  <h3>LangSmith vs Alternatives</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Dimension</th><th>LangSmith</th><th>Arize / Phoenix</th><th>Datadog LLM Obs.</th><th>Helicone</th></tr></thead>
+      <tbody>
+        <tr><td>Auto-instrumentation</td><td>LangChain / LangGraph native &#8212; zero config</td><td>OpenTelemetry SDK required</td><td>APM agent + LLM plugin</td><td>Proxy URL swap</td></tr>
+        <tr><td>Evaluation / datasets</td><td>First-class: built-in evaluators, dataset UI, experiment tracking</td><td>Strong: open-source evals, Phoenix UI</td><td>Limited &#8212; metric dashboards only</td><td>Minimal</td></tr>
+        <tr><td>Prompt management</td><td>Prompt Hub with versioning and <code>hub.pull()</code></td><td>Not included</td><td>Not included</td><td>Not included</td></tr>
+        <tr><td>Human annotation</td><td>Annotation queues built-in</td><td>Via Phoenix UI</td><td>Not included</td><td>Not included</td></tr>
+        <tr><td>Framework lock-in</td><td>LangChain ecosystem; OSS SDK for others</td><td>Any framework via OTEL</td><td>Any framework via agent</td><td>Any OpenAI-compatible endpoint</td></tr>
+        <tr><td>Self-hosted option</td><td>Yes (LangSmith self-hosted)</td><td>Yes (Phoenix OSS)</td><td>No (SaaS only)</td><td>No (SaaS only)</td></tr>
+        <tr><td>Best for</td><td>Teams already using LangGraph / LangChain</td><td>Framework-agnostic teams wanting OSS</td><td>Orgs with existing Datadog investment</td><td>Quick cost/latency dashboard on any endpoint</td></tr>
       </tbody>
     </table>
   </div>

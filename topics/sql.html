@@ -1,0 +1,1624 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SQL — Synapse</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1a1a2e;
+        --ink2: #3d3d5c;
+        --ink3: #6b6b8a;
+        --bg: #ffffff;
+        --bg2: #f4f3f0;
+        --bg3: #eae8e4;
+        --accent: #2563eb;
+        --accent2: #1d4ed8;
+        --accent-bg: #eff6ff;
+        --green: #059669;
+        --green-bg: #ecfdf5;
+        --amber: #d97706;
+        --amber-bg: #fffbeb;
+        --rose: #e11d48;
+        --rose-bg: #fff1f2;
+        --purple: #7c3aed;
+        --purple-bg: #f5f3ff;
+        --teal: #0d9488;
+        --teal-bg: #f0fdfa;
+        --coral: #ea580c;
+        --coral-bg: #fff7ed;
+        --border: #e2e0dc;
+        --code-bg: #f8f7f5;
+        --serif: "Fraunces", Georgia, serif;
+        --sans: "DM Sans", system-ui, sans-serif;
+        --mono: "JetBrains Mono", "Fira Code", monospace;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        font-size: 15px;
+      }
+      body {
+        font-family: var(--sans);
+        color: var(--ink);
+        background: var(--bg);
+        line-height: 1.65;
+      }
+      @media print {
+        body {
+          font-size: 10pt;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .page-break {
+          page-break-before: always;
+        }
+        .card {
+          break-inside: avoid;
+        }
+        pre {
+          font-size: 8pt;
+        }
+        h1 {
+          font-size: 22pt;
+        }
+        h2 {
+          font-size: 14pt;
+        }
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+      .cover {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background: linear-gradient(
+          160deg,
+          #0f172a 0%,
+          #1e293b 40%,
+          #1a1a2e 100%
+        );
+        color: white;
+        padding: 4rem 2rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .cover::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background:
+          radial-gradient(
+            ellipse at 30% 50%,
+            rgba(5, 150, 105, 0.15) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse at 70% 30%,
+            rgba(37, 99, 235, 0.1) 0%,
+            transparent 50%
+          );
+      }
+      .cover * {
+        position: relative;
+      }
+      .cover-label {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 2rem;
+      }
+      .cover h1 {
+        font-family: var(--serif);
+        font-size: 3.5rem;
+        font-weight: 700;
+        line-height: 1.15;
+        margin-bottom: 1rem;
+        max-width: 700px;
+      }
+      .cover h1 span {
+        background: linear-gradient(135deg, #34d399, #60a5fa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .cover-sub {
+        font-size: 1.15rem;
+        color: rgba(255, 255, 255, 0.65);
+        max-width: 600px;
+        line-height: 1.7;
+        margin-bottom: 3rem;
+      }
+      .cover-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+        max-width: 650px;
+      }
+      .cover-tag {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        padding: 0.35rem 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        color: rgba(255, 255, 255, 0.6);
+      }
+      .cover-date {
+        margin-top: 3rem;
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.35);
+      }
+      .toc {
+        padding: 3rem 0;
+      }
+      .toc h2 {
+        font-family: var(--serif);
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        color: var(--ink);
+      }
+      .toc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 0.5rem;
+      }
+      .toc-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.65rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--ink);
+        transition: background 0.15s;
+      }
+      .toc-item:hover {
+        background: var(--bg2);
+      }
+      .toc-num {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--accent);
+        font-weight: 600;
+        min-width: 28px;
+      }
+      .toc-label {
+        font-size: 0.9rem;
+      }
+      .section {
+        padding: 2.5rem 0 1.5rem;
+        border-top: 1px solid var(--border);
+      }
+      .section-num {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--accent);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+      }
+      h2.section-title {
+        font-family: var(--serif);
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 0.75rem;
+        line-height: 1.3;
+      }
+      h3 {
+        font-family: var(--sans);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 1.5rem 0 0.5rem;
+      }
+      h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--ink2);
+        margin: 1.2rem 0 0.4rem;
+      }
+      p {
+        margin-bottom: 0.75rem;
+        color: var(--ink2);
+      }
+      p.lead {
+        font-size: 1.05rem;
+        color: var(--ink);
+        line-height: 1.7;
+      }
+      strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+      .card {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.1rem 1.2rem;
+      }
+      .card-accent {
+        border-left: 3px solid var(--accent);
+      }
+      .card h4 {
+        margin: 0 0 0.4rem;
+        font-size: 0.9rem;
+        color: var(--ink);
+      }
+      .card p {
+        font-size: 0.82rem;
+        margin: 0;
+        color: var(--ink3);
+        line-height: 1.5;
+      }
+      .table-wrap {
+        overflow-x: auto;
+        margin: 1rem 0;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+      }
+      thead {
+        background: var(--ink);
+        color: white;
+      }
+      th {
+        padding: 0.65rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.78rem;
+        letter-spacing: 0.3px;
+      }
+      td {
+        padding: 0.6rem 1rem;
+        border-top: 1px solid var(--border);
+        color: var(--ink2);
+      }
+      tr:nth-child(even) {
+        background: var(--bg2);
+      }
+      td:first-child {
+        font-weight: 500;
+        color: var(--ink);
+      }
+      pre {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem 1.2rem;
+        overflow-x: auto;
+        margin: 0.75rem 0;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        line-height: 1.6;
+        color: var(--ink2);
+      }
+      code {
+        font-family: var(--mono);
+        font-size: 0.82em;
+        background: var(--bg2);
+        padding: 0.15em 0.4em;
+        border-radius: 4px;
+        color: var(--ink);
+      }
+      pre code {
+        background: none;
+        padding: 0;
+      }
+      .callout {
+        border-radius: 10px;
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-size: 0.88rem;
+      }
+      .callout-blue {
+        background: var(--accent-bg);
+        border-left: 3px solid var(--accent);
+      }
+      .callout-green {
+        background: var(--green-bg);
+        border-left: 3px solid var(--green);
+      }
+      .callout-amber {
+        background: var(--amber-bg);
+        border-left: 3px solid var(--amber);
+      }
+      .callout-rose {
+        background: var(--rose-bg);
+        border-left: 3px solid var(--rose);
+      }
+      .callout-purple {
+        background: var(--purple-bg);
+        border-left: 3px solid var(--purple);
+      }
+      .callout strong {
+        display: block;
+        margin-bottom: 0.3rem;
+      }
+      .pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin: 0.5rem 0;
+      }
+      .pill {
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+        font-weight: 500;
+      }
+      .pill-blue {
+        background: var(--accent-bg);
+        color: var(--accent2);
+      }
+      .pill-green {
+        background: var(--green-bg);
+        color: var(--green);
+      }
+      .pill-purple {
+        background: var(--purple-bg);
+        color: var(--purple);
+      }
+      .pill-amber {
+        background: var(--amber-bg);
+        color: var(--amber);
+      }
+      .pill-teal {
+        background: var(--teal-bg);
+        color: var(--teal);
+      }
+      .pill-coral {
+        background: var(--coral-bg);
+        color: var(--coral);
+      }
+      ul.clean {
+        list-style: none;
+        padding: 0;
+      }
+      ul.clean li {
+        padding: 0.3rem 0 0.3rem 1.5rem;
+        position: relative;
+        font-size: 0.9rem;
+        color: var(--ink2);
+      }
+      ul.clean li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.7rem;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin: 1rem 0;
+      }
+      @media (max-width: 700px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+      .sep {
+        height: 1px;
+        background: var(--border);
+        margin: 2rem 0;
+      }
+      .footer {
+        text-align: center;
+        padding: 2rem;
+        color: var(--ink3);
+        font-size: 0.8rem;
+        border-top: 1px solid var(--border);
+        margin-top: 2rem;
+      }
+      /* ── CSS Flow Diagrams ── */
+      .fd {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 1.25rem 0;
+      }
+      .fd-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .fd-col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .fd-node {
+        border-radius: 8px;
+        padding: 0.45rem 1rem;
+        font-size: 0.78rem;
+        font-family: var(--mono);
+        font-weight: 500;
+        border: 1.5px solid;
+        text-align: center;
+        line-height: 1.45;
+      }
+      .fd-node sub {
+        font-size: 0.65rem;
+        opacity: 0.75;
+        display: block;
+        font-weight: 400;
+      }
+      .fd-node-blue {
+        background: var(--accent-bg);
+        border-color: var(--accent);
+        color: var(--accent2);
+      }
+      .fd-node-green {
+        background: var(--green-bg);
+        border-color: var(--green);
+        color: var(--green);
+      }
+      .fd-node-purple {
+        background: var(--purple-bg);
+        border-color: var(--purple);
+        color: var(--purple);
+      }
+      .fd-node-amber {
+        background: var(--amber-bg);
+        border-color: var(--amber);
+        color: var(--amber);
+      }
+      .fd-node-teal {
+        background: var(--teal-bg);
+        border-color: var(--teal);
+        color: var(--teal);
+      }
+      .fd-node-dark {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: #fff;
+      }
+      .fd-arr-d {
+        width: 2px;
+        height: 28px;
+        background: var(--ink3);
+        margin: 0 auto;
+        position: relative;
+      }
+      .fd-arr-d::after {
+        content: "";
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 7px solid var(--ink3);
+      }
+      .fd-arr-r {
+        width: 32px;
+        height: 2px;
+        background: var(--ink3);
+        position: relative;
+        flex-shrink: 0;
+      }
+      .fd-arr-r::after {
+        content: "";
+        position: absolute;
+        right: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 7px solid var(--ink3);
+      }
+      .fd-group {
+        border: 2px dashed var(--border);
+        border-radius: 12px;
+        padding: 1rem 1.2rem;
+        background: var(--bg2);
+      }
+      .fd-group-title {
+        font-size: 0.65rem;
+        font-family: var(--mono);
+        color: var(--ink3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.6rem;
+        text-align: center;
+      }
+      .fd-note {
+        font-size: 0.68rem;
+        font-family: var(--sans);
+        color: var(--ink3);
+        text-align: center;
+        max-width: 200px;
+        line-height: 1.35;
+        margin-top: 0.2rem;
+      }
+      .fd-gap {
+        width: 1.5rem;
+        flex-shrink: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      .guide-header {
+        background: #1a202c;
+        color: #fff;
+        padding: 0.9rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        flex-shrink: 0;
+      }
+      .guide-header .back-home {
+        color: #a0aec0;
+        text-decoration: none;
+        font-size: 0.82rem;
+        white-space: nowrap;
+        transition: color 0.15s;
+      }
+      .guide-header .back-home:hover {
+        color: #fff;
+      }
+      .guide-header h1 {
+        font-family: var(--sans);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #fff;
+      }
+      .topic-page {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+      .sidebar {
+        width: 260px;
+        background: #2d3748;
+        color: #e2e8f0;
+        padding: 1.25rem 0 2rem;
+        flex-shrink: 0;
+        overflow-y: auto;
+      }
+      .sidebar-title {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #a0aec0;
+        padding: 0 1.25rem 0.6rem;
+        font-family: var(--sans);
+      }
+      .sidebar nav ul {
+        list-style: none;
+      }
+      .sidebar nav ul li a {
+        display: block;
+        padding: 0.45rem 1.25rem;
+        color: #cbd5e0;
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-family: var(--sans);
+        line-height: 1.45;
+        transition:
+          background 0.1s,
+          color 0.1s;
+      }
+      .sidebar nav ul li a:hover,
+      .sidebar nav ul li a.active {
+        background: #4a5568;
+        color: #fff;
+      }
+      .sidebar nav ul ul {
+        margin: 0;
+        padding: 0;
+      }
+      .sidebar nav ul ul li a {
+        padding: 0.3rem 1.25rem 0.3rem 2.2rem;
+        font-size: 0.74rem;
+        color: #a0aec0;
+      }
+      .sidebar nav ul ul li a:hover {
+        background: #3d4d63;
+        color: #e2e8f0;
+      }
+      .sidebar .toc-num {
+        font-size: 0.65rem;
+        color: #90cdf4;
+        margin-right: 0.35rem;
+        font-family: var(--mono);
+      }
+      .main-scroll {
+        flex: 1;
+        overflow-y: auto;
+      }
+      .guide-footer {
+        text-align: center;
+        padding: 0.75rem;
+        color: #718096;
+        font-size: 0.78rem;
+        background: #1a202c;
+        flex-shrink: 0;
+      }
+    </style>
+    <link rel="stylesheet" href="../assets/mobile.css" />
+  </head>
+  <body>
+    <header class="guide-header">
+      <a href="../index.html" class="back-home">← Synapse</a>
+      <h1>SQL</h1>
+    </header>
+
+    <div class="topic-page">
+      <aside class="sidebar">
+        <p class="sidebar-title">SQL</p>
+        <nav>
+          <ul>
+            <li>
+              <a href="#s1"><span class="toc-num">01</span>Core Query Anatomy</a>
+            </li>
+            <li>
+              <a href="#s2"><span class="toc-num">02</span>Joins</a>
+            </li>
+            <li>
+              <a href="#s3"
+                ><span class="toc-num">03</span>Aggregation, GROUP BY &amp; HAVING</a
+              >
+            </li>
+            <li>
+              <a href="#s4"><span class="toc-num">04</span>Subqueries &amp; CTEs</a>
+            </li>
+            <li>
+              <a href="#s5"><span class="toc-num">05</span>Window Functions</a>
+            </li>
+            <li>
+              <a href="#s6"
+                ><span class="toc-num">06</span>Set Operations &amp; NULL Logic</a
+              >
+            </li>
+            <li>
+              <a href="#s7"
+                ><span class="toc-num">07</span>Indexes &amp; Query Performance</a
+              >
+            </li>
+            <li>
+              <a href="#s8"
+                ><span class="toc-num">08</span>Transactions &amp; Isolation</a
+              >
+            </li>
+            <li>
+              <a href="#s9"
+                ><span class="toc-num">09</span>Tricky Interview Questions I</a
+              >
+            </li>
+            <li>
+              <a href="#s10"
+                ><span class="toc-num">10</span>Tricky Interview Questions II</a
+              >
+            </li>
+            <li>
+              <a href="#s11"
+                ><span class="toc-num">11</span>Tricky Interview Questions III</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <div class="main-scroll">
+        <div class="cover">
+          <div class="cover-label">Complete Technical Reference — July 2026</div>
+          <h1>SQL <span>Deep Dive</span></h1>
+          <p class="cover-sub">
+            Query anatomy, joins, window functions, and transactions — then a
+            curated set of the trickiest SQL interview questions
+            (Nth-highest-salary, gaps &amp; islands, running totals, pivoting)
+            with fully worked queries and explanations.
+          </p>
+          <div class="cover-tags">
+            <span class="cover-tag">Joins</span>
+            <span class="cover-tag">GROUP BY / HAVING</span>
+            <span class="cover-tag">CTEs</span>
+            <span class="cover-tag">Window Functions</span>
+            <span class="cover-tag">Indexes</span>
+            <span class="cover-tag">Transactions</span>
+            <span class="cover-tag">Interview Questions</span>
+          </div>
+          <div class="cover-date">v1.0 — July 2026</div>
+        </div>
+
+        <div class="container">
+          <div class="toc page-break">
+            <h2>Contents</h2>
+            <div class="toc-grid">
+              <a class="toc-item" href="#s1"
+                ><span class="toc-num">01</span
+                ><span class="toc-label">Core Query Anatomy</span></a
+              >
+              <a class="toc-item" href="#s2"
+                ><span class="toc-num">02</span
+                ><span class="toc-label">Joins</span></a
+              >
+              <a class="toc-item" href="#s3"
+                ><span class="toc-num">03</span
+                ><span class="toc-label">Aggregation, GROUP BY &amp; HAVING</span></a
+              >
+              <a class="toc-item" href="#s4"
+                ><span class="toc-num">04</span
+                ><span class="toc-label">Subqueries &amp; CTEs</span></a
+              >
+              <a class="toc-item" href="#s5"
+                ><span class="toc-num">05</span
+                ><span class="toc-label">Window Functions</span></a
+              >
+              <a class="toc-item" href="#s6"
+                ><span class="toc-num">06</span
+                ><span class="toc-label">Set Operations &amp; NULL Logic</span></a
+              >
+              <a class="toc-item" href="#s7"
+                ><span class="toc-num">07</span
+                ><span class="toc-label">Indexes &amp; Query Performance</span></a
+              >
+              <a class="toc-item" href="#s8"
+                ><span class="toc-num">08</span
+                ><span class="toc-label">Transactions &amp; Isolation</span></a
+              >
+              <a class="toc-item" href="#s9"
+                ><span class="toc-num">09</span
+                ><span class="toc-label">Tricky Interview Questions I</span></a
+              >
+              <a class="toc-item" href="#s10"
+                ><span class="toc-num">10</span
+                ><span class="toc-label">Tricky Interview Questions II</span></a
+              >
+              <a class="toc-item" href="#s11"
+                ><span class="toc-num">11</span
+                ><span class="toc-label">Tricky Interview Questions III</span></a
+              >
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+          <div class="section page-break" id="s1">
+            <div class="section-num">Section 01</div>
+            <h2 class="section-title">Core Query Anatomy</h2>
+            <p class="lead">
+              Every SQL query is evaluated in a logical order that differs
+              from how it's written — understanding that order explains why
+              you can't reference a <code>SELECT</code> alias in
+              <code>WHERE</code>, but can in <code>ORDER BY</code>.
+            </p>
+
+            <h3>Logical processing order</h3>
+            <div class="fd">
+              <div class="fd-node fd-node-dark" style="min-width: 260px">
+                FROM / JOIN — build the working row set
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-blue" style="min-width: 260px">
+                WHERE — filter individual rows
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-purple" style="min-width: 260px">
+                GROUP BY — collapse rows into groups
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-amber" style="min-width: 260px">
+                HAVING — filter groups
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-green" style="min-width: 260px">
+                SELECT — compute output columns / aliases
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-teal" style="min-width: 260px">
+                ORDER BY — sort the result
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-dark" style="min-width: 260px">
+                LIMIT / OFFSET — page the result
+              </div>
+            </div>
+
+            <div class="callout callout-amber">
+              <strong>Why you can't use a SELECT alias in WHERE</strong>
+              <code>WHERE</code> runs before <code>SELECT</code> in logical
+              order, so an alias defined in <code>SELECT</code> doesn't exist
+              yet. <code>ORDER BY</code> runs last, so aliases (and even
+              column positions like <code>ORDER BY 2</code>) are valid there.
+            </div>
+
+            <h3>Basic SELECT</h3>
+            <pre><code>SELECT DISTINCT department, salary
+FROM employees
+WHERE salary > 50000
+  AND department IN ('Engineering', 'Sales')
+ORDER BY salary DESC
+LIMIT 10 OFFSET 20;      -- skip the first 20, return the next 10 (pagination)</code></pre>
+
+            <h3>Pattern matching &amp; ranges</h3>
+            <pre><code>SELECT * FROM employees WHERE name LIKE 'A%';        -- starts with A
+SELECT * FROM employees WHERE name LIKE '%son';       -- ends with "son"
+SELECT * FROM employees WHERE name ILIKE '%SMITH%';   -- case-insensitive (Postgres)
+SELECT * FROM employees WHERE hire_date BETWEEN '2024-01-01' AND '2024-12-31';
+SELECT * FROM employees WHERE manager_id IS NULL;     -- never use = NULL</code></pre>
+
+            <h3>CASE expressions</h3>
+            <pre><code>SELECT
+  name,
+  salary,
+  CASE
+    WHEN salary >= 100000 THEN 'Senior'
+    WHEN salary >= 60000  THEN 'Mid'
+    ELSE 'Junior'
+  END AS band
+FROM employees;</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+          <div class="section page-break" id="s2">
+            <div class="section-num">Section 02</div>
+            <h2 class="section-title">Joins</h2>
+            <p class="lead">
+              Joins combine rows from two or more tables based on a related
+              column. The join type controls what happens to rows on either
+              side that have no match.
+            </p>
+
+            <h3>Join types</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Join</th>
+                    <th>Returns</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>INNER JOIN</code></td>
+                    <td>Only rows with a match on both sides</td>
+                  </tr>
+                  <tr>
+                    <td><code>LEFT JOIN</code></td>
+                    <td>All left rows; unmatched right columns are <code>NULL</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>RIGHT JOIN</code></td>
+                    <td>All right rows; unmatched left columns are <code>NULL</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>FULL OUTER JOIN</code></td>
+                    <td>Union of left and right; unmatched side is <code>NULL</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>CROSS JOIN</code></td>
+                    <td>Cartesian product — every left row paired with every right row</td>
+                  </tr>
+                  <tr>
+                    <td><code>SELF JOIN</code></td>
+                    <td>A table joined to itself (via aliases) — e.g., employee ↔ manager</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <pre><code>-- INNER JOIN — only employees that have a matching department
+SELECT e.name, d.dept_name
+FROM employees e
+INNER JOIN departments d ON e.dept_id = d.dept_id;
+
+-- LEFT JOIN — every employee, department is NULL if unassigned
+SELECT e.name, d.dept_name
+FROM employees e
+LEFT JOIN departments d ON e.dept_id = d.dept_id;
+
+-- Find rows with NO match — the "anti-join" pattern
+SELECT e.name
+FROM employees e
+LEFT JOIN departments d ON e.dept_id = d.dept_id
+WHERE d.dept_id IS NULL;                 -- employees with no department
+
+-- SELF JOIN — employees and their managers, side by side
+SELECT emp.name AS employee, mgr.name AS manager
+FROM employees emp
+LEFT JOIN employees mgr ON emp.manager_id = mgr.emp_id;</code></pre>
+
+            <div class="callout callout-rose">
+              <strong>WHERE vs the ON clause with outer joins</strong>
+              Putting a filter on the right-hand table in <code>WHERE</code>
+              (e.g. <code>WHERE d.active = true</code>) silently turns a
+              <code>LEFT JOIN</code> into an <code>INNER JOIN</code>, because
+              <code>NULL</code> rows fail the <code>WHERE</code> filter.
+              Conditions on the joined-in table that should still allow
+              unmatched rows belong in the <code>ON</code> clause instead.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+          <div class="section page-break" id="s3">
+            <div class="section-num">Section 03</div>
+            <h2 class="section-title">Aggregation, GROUP BY &amp; HAVING</h2>
+            <p class="lead">
+              Aggregate functions collapse many rows into one value per group.
+              <code>WHERE</code> filters rows before grouping;
+              <code>HAVING</code> filters groups after aggregation.
+            </p>
+
+            <pre><code>SELECT department, COUNT(*) AS headcount, AVG(salary) AS avg_salary
+FROM employees
+WHERE hire_date >= '2020-01-01'    -- filters ROWS before grouping
+GROUP BY department
+HAVING COUNT(*) > 5                -- filters GROUPS after aggregation
+ORDER BY avg_salary DESC;</code></pre>
+
+            <h3>Aggregate functions</h3>
+            <pre><code>COUNT(*)              -- all rows, including NULLs
+COUNT(column)          -- non-NULL values only
+COUNT(DISTINCT column) -- distinct non-NULL values
+SUM(salary), AVG(salary), MIN(salary), MAX(salary)
+STRING_AGG(name, ', ')       -- Postgres/SQL Server: concatenate group values
+GROUP_CONCAT(name SEPARATOR ', ')  -- MySQL equivalent</code></pre>
+
+            <div class="callout callout-blue">
+              <strong>Every non-aggregated SELECT column must be in GROUP BY</strong>
+              Standard SQL requires that any column in <code>SELECT</code>
+              that isn't wrapped in an aggregate function appear in
+              <code>GROUP BY</code> — otherwise which row's value would it
+              show for a group of many rows? MySQL's legacy
+              <code>ONLY_FULL_GROUP_BY</code>-off mode is the one notable
+              exception, and relying on it produces nondeterministic results.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+          <div class="section page-break" id="s4">
+            <div class="section-num">Section 04</div>
+            <h2 class="section-title">Subqueries &amp; CTEs</h2>
+            <p class="lead">
+              Common Table Expressions (<code>WITH</code>) name a query so it
+              can be referenced like a table — improving readability over
+              deeply nested subqueries, and enabling recursion.
+            </p>
+
+            <h3>Scalar, row, and correlated subqueries</h3>
+            <pre><code>-- Scalar subquery — single value used inline
+SELECT name, salary
+FROM employees
+WHERE salary > (SELECT AVG(salary) FROM employees);
+
+-- Correlated subquery — re-evaluated per outer row
+SELECT e.name, e.salary, e.dept_id
+FROM employees e
+WHERE e.salary = (
+  SELECT MAX(salary) FROM employees e2 WHERE e2.dept_id = e.dept_id
+);                                          -- highest earner in each department
+
+-- EXISTS — often faster than IN for correlated existence checks
+SELECT d.dept_name
+FROM departments d
+WHERE EXISTS (SELECT 1 FROM employees e WHERE e.dept_id = d.dept_id);</code></pre>
+
+            <h3>CTEs (<code>WITH</code>)</h3>
+            <pre><code>WITH dept_avg AS (
+  SELECT dept_id, AVG(salary) AS avg_salary
+  FROM employees
+  GROUP BY dept_id
+)
+SELECT e.name, e.salary, d.avg_salary
+FROM employees e
+JOIN dept_avg d ON e.dept_id = d.dept_id
+WHERE e.salary > d.avg_salary;             -- earns more than their dept average
+
+-- Multiple CTEs chained together
+WITH high_earners AS (
+  SELECT * FROM employees WHERE salary > 100000
+),
+by_dept AS (
+  SELECT dept_id, COUNT(*) AS n FROM high_earners GROUP BY dept_id
+)
+SELECT * FROM by_dept ORDER BY n DESC;</code></pre>
+
+            <h3>Recursive CTE — org chart / hierarchy traversal</h3>
+            <pre><code>WITH RECURSIVE org_chart AS (
+  -- anchor member: the top-level row(s)
+  SELECT emp_id, name, manager_id, 1 AS level
+  FROM employees
+  WHERE manager_id IS NULL
+
+  UNION ALL
+
+  -- recursive member: joins back to the CTE itself
+  SELECT e.emp_id, e.name, e.manager_id, oc.level + 1
+  FROM employees e
+  JOIN org_chart oc ON e.manager_id = oc.emp_id
+)
+SELECT * FROM org_chart ORDER BY level, emp_id;</code></pre>
+
+            <div class="callout callout-green">
+              <strong>Recursive CTE structure</strong>
+              Every recursive CTE has an <strong>anchor</strong> query (the
+              base case), a <code>UNION ALL</code>, and a
+              <strong>recursive</strong> query that references the CTE's own
+              name — the engine repeats the recursive step until it returns
+              zero new rows.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+          <div class="section page-break" id="s5">
+            <div class="section-num">Section 05</div>
+            <h2 class="section-title">Window Functions</h2>
+            <p class="lead">
+              Window functions compute a value across a set of related rows
+              (the "window") <em>without</em> collapsing them the way
+              <code>GROUP BY</code> does — each input row keeps its place in
+              the output.
+            </p>
+
+            <h3>Ranking functions</h3>
+            <pre><code>SELECT
+  name, department, salary,
+  ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS row_num,
+  RANK()       OVER (PARTITION BY department ORDER BY salary DESC) AS rnk,
+  DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dense_rnk
+FROM employees;</code></pre>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Function</th>
+                    <th>Behavior on ties</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>ROW_NUMBER()</code></td>
+                    <td>Always unique, sequential (1, 2, 3, 4...) — ties broken arbitrarily</td>
+                  </tr>
+                  <tr>
+                    <td><code>RANK()</code></td>
+                    <td>Ties share a rank; the next rank skips (1, 2, 2, 4...)</td>
+                  </tr>
+                  <tr>
+                    <td><code>DENSE_RANK()</code></td>
+                    <td>Ties share a rank; no gap in the sequence (1, 2, 2, 3...)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Offset functions — LAG / LEAD</h3>
+            <pre><code>SELECT
+  order_date, revenue,
+  LAG(revenue, 1)  OVER (ORDER BY order_date) AS prev_day_revenue,
+  LEAD(revenue, 1) OVER (ORDER BY order_date) AS next_day_revenue,
+  revenue - LAG(revenue, 1) OVER (ORDER BY order_date) AS day_over_day_change
+FROM daily_sales;</code></pre>
+
+            <h3>Frame-based aggregates — running totals &amp; moving averages</h3>
+            <pre><code>SELECT
+  order_date, revenue,
+  SUM(revenue) OVER (ORDER BY order_date
+                      ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total,
+  AVG(revenue) OVER (ORDER BY order_date
+                      ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS trailing_7day_avg,
+  FIRST_VALUE(revenue) OVER (PARTITION BY DATE_TRUNC('month', order_date)
+                              ORDER BY order_date) AS month_first_day_revenue
+FROM daily_sales;</code></pre>
+
+            <div class="callout callout-blue">
+              <strong>Window functions run after GROUP BY / HAVING, before ORDER BY</strong>
+              You can use an aggregate <em>and</em> a window function in the
+              same query — e.g. <code>SUM(x) OVER (...)</code> alongside a
+              plain <code>GROUP BY</code> aggregate — because windowing is
+              evaluated in the SELECT stage over the (possibly already
+              grouped) result set.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+          <div class="section page-break" id="s6">
+            <div class="section-num">Section 06</div>
+            <h2 class="section-title">Set Operations &amp; NULL Logic</h2>
+            <p class="lead">
+              Set operators combine the results of two queries with the same
+              column shape. NULL introduces three-valued logic
+              (<code>TRUE</code> / <code>FALSE</code> / <code>UNKNOWN</code>)
+              that trips up filters and comparisons in predictable ways.
+            </p>
+
+            <h3>UNION / INTERSECT / EXCEPT</h3>
+            <pre><code>SELECT city FROM customers
+UNION                          -- combine + de-duplicate
+SELECT city FROM suppliers;
+
+SELECT city FROM customers
+UNION ALL                      -- combine, KEEP duplicates (faster — no dedup pass)
+SELECT city FROM suppliers;
+
+SELECT customer_id FROM orders_2024
+INTERSECT                      -- rows present in BOTH queries
+SELECT customer_id FROM orders_2023;
+
+SELECT customer_id FROM orders_2024
+EXCEPT                         -- rows in the first query, NOT in the second
+SELECT customer_id FROM orders_2023;</code></pre>
+
+            <h3>NULL — three-valued logic</h3>
+            <pre><code>NULL = NULL          -- UNKNOWN, not TRUE — never matches with =
+NULL <> NULL         -- also UNKNOWN
+1 = NULL             -- UNKNOWN
+NULL IS NULL         -- TRUE — the only correct way to test for NULL
+COALESCE(a, b, 0)    -- first non-NULL value in the list
+NULLIF(a, 0)         -- returns NULL if a = 0, else returns a (guards against /0)
+a / NULLIF(b, 0)     -- safe division pattern</code></pre>
+
+            <div class="callout callout-rose">
+              <strong>WHERE NOT IN silently returns zero rows if the subquery has a NULL</strong>
+              <code>WHERE id NOT IN (SELECT ref_id FROM t)</code> returns an
+              empty result set if <em>any</em> row in <code>t.ref_id</code> is
+              <code>NULL</code>, because <code>x &lt;&gt; NULL</code> is
+              <code>UNKNOWN</code> for every comparison, not <code>FALSE</code>.
+              Prefer <code>NOT EXISTS</code>, which doesn't have this trap.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+          <div class="section page-break" id="s7">
+            <div class="section-num">Section 07</div>
+            <h2 class="section-title">Indexes &amp; Query Performance</h2>
+            <p class="lead">
+              An index is a separate, ordered data structure (typically a
+              B-tree) that lets the engine locate rows without scanning the
+              whole table — at the cost of extra storage and slower writes.
+            </p>
+
+            <h3>Reading an execution plan</h3>
+            <pre><code>EXPLAIN ANALYZE
+SELECT * FROM orders WHERE customer_id = 42;
+
+-- Look for:
+--  Seq Scan   → full table scan, no usable index (slow on large tables)
+--  Index Scan → uses an index to jump straight to matching rows
+--  Index Only Scan → satisfies the query from the index alone, no table lookup</code></pre>
+
+            <h3>Index types &amp; when they help</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Index</th>
+                    <th>Good for</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Single-column B-tree</td>
+                    <td>Equality and range filters on one column (<code>WHERE col = ?</code>, <code>BETWEEN</code>)</td>
+                  </tr>
+                  <tr>
+                    <td>Composite <code>(a, b)</code></td>
+                    <td>Filters on <code>a</code> alone, or <code>a AND b</code> together — order matters, doesn't help a lone <code>b</code> filter</td>
+                  </tr>
+                  <tr>
+                    <td>Unique index</td>
+                    <td>Enforces uniqueness and speeds up equality lookups (primary/foreign keys)</td>
+                  </tr>
+                  <tr>
+                    <td>Covering index</td>
+                    <td>Includes every column the query needs — enables index-only scans</td>
+                  </tr>
+                  <tr>
+                    <td>Partial index</td>
+                    <td>Indexes only rows matching a condition (e.g. <code>WHERE active = true</code>) — smaller, faster for skewed data</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout callout-amber">
+              <strong>Indexes aren't free</strong>
+              Every <code>INSERT</code>/<code>UPDATE</code>/<code>DELETE</code>
+              must also update every index on the table. Index the columns
+              your read queries actually filter/join/sort on — indexing
+              everything slows down writes for no benefit.
+            </div>
+
+            <h3>Common performance killers</h3>
+            <pre><code>-- Function on an indexed column defeats the index (can't seek, must scan + compute)
+WHERE YEAR(order_date) = 2026            -- bad: scans every row
+WHERE order_date >= '2026-01-01' AND order_date < '2027-01-01'   -- good: sargable
+
+-- Leading wildcard defeats a B-tree index
+WHERE name LIKE '%smith'                 -- bad — can't use the index's sort order
+WHERE name LIKE 'smith%'                 -- good — index can seek to the "smith" range</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+          <div class="section page-break" id="s8">
+            <div class="section-num">Section 08</div>
+            <h2 class="section-title">Transactions &amp; Isolation</h2>
+            <p class="lead">
+              A transaction groups statements into one atomic unit. Isolation
+              levels trade off consistency guarantees against concurrency —
+              stricter levels prevent more anomalies but block more.
+            </p>
+
+            <h3>ACID</h3>
+            <div class="card-grid">
+              <div class="card card-accent">
+                <h4>Atomicity</h4>
+                <p>All statements in the transaction succeed, or none do — <code>ROLLBACK</code> undoes everything.</p>
+              </div>
+              <div class="card card-accent">
+                <h4>Consistency</h4>
+                <p>A transaction moves the database from one valid state to another, respecting constraints.</p>
+              </div>
+              <div class="card card-accent">
+                <h4>Isolation</h4>
+                <p>Concurrent transactions don't see each other's uncommitted changes (to a degree set by the isolation level).</p>
+              </div>
+              <div class="card card-accent">
+                <h4>Durability</h4>
+                <p>Once committed, changes survive a crash — written to durable storage.</p>
+              </div>
+            </div>
+
+            <pre><code>BEGIN;
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+COMMIT;                       -- both updates persist together, or...
+-- ROLLBACK;                  -- ...neither does, if something failed</code></pre>
+
+            <h3>Isolation levels &amp; the anomalies they prevent</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Level</th>
+                    <th>Dirty read</th>
+                    <th>Non-repeatable read</th>
+                    <th>Phantom read</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>READ UNCOMMITTED</td>
+                    <td>Possible</td>
+                    <td>Possible</td>
+                    <td>Possible</td>
+                  </tr>
+                  <tr>
+                    <td>READ COMMITTED</td>
+                    <td>Prevented</td>
+                    <td>Possible</td>
+                    <td>Possible</td>
+                  </tr>
+                  <tr>
+                    <td>REPEATABLE READ</td>
+                    <td>Prevented</td>
+                    <td>Prevented</td>
+                    <td>Possible (MySQL InnoDB actually prevents this too)</td>
+                  </tr>
+                  <tr>
+                    <td>SERIALIZABLE</td>
+                    <td>Prevented</td>
+                    <td>Prevented</td>
+                    <td>Prevented</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout callout-blue">
+              <strong>Default isolation level varies by engine</strong>
+              PostgreSQL and Oracle default to <code>READ COMMITTED</code>;
+              MySQL's InnoDB defaults to <code>REPEATABLE READ</code>. Higher
+              isolation reduces anomalies but increases lock contention and
+              the chance of serialization failures that require a retry.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 9 ══════════════════════════ -->
+          <div class="section page-break" id="s9">
+            <div class="section-num">Section 09</div>
+            <h2 class="section-title">Tricky Interview Questions I — Ranking &amp; Duplicates</h2>
+            <p class="lead">
+              Assume a table
+              <code>employees(emp_id, name, salary, dept_id, manager_id)</code>
+              unless a question states otherwise.
+            </p>
+
+            <h3>Q1. Find the Nth highest salary</h3>
+            <p>Three common approaches, in order of preference:</p>
+            <pre><code>-- 1. DENSE_RANK — correctly handles duplicate salaries (ties share a rank)
+SELECT salary FROM (
+  SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) AS rnk
+  FROM employees
+) t
+WHERE rnk = 3;                       -- 3rd highest, ties count once
+
+-- 2. OFFSET/FETCH — simple, but treats each ROW as distinct (duplicates count separately)
+SELECT DISTINCT salary FROM employees
+ORDER BY salary DESC
+OFFSET 2 ROWS FETCH NEXT 1 ROWS ONLY;  -- N-1 offset for the Nth value
+
+-- 3. Correlated subquery — portable to engines without window functions
+SELECT MAX(salary) FROM employees e1
+WHERE 2 = (
+  SELECT COUNT(DISTINCT e2.salary) FROM employees e2 WHERE e2.salary > e1.salary
+);                                     -- exactly 2 distinct salaries above → 3rd highest</code></pre>
+
+            <div class="callout callout-amber">
+              <strong>The classic mistake: LIMIT/OFFSET without DISTINCT</strong>
+              <code>ORDER BY salary DESC LIMIT 1 OFFSET 2</code> gives the
+              3rd <em>row</em>, not the 3rd distinct <em>value</em> — if two
+              people tie for 1st, this returns the 2nd-highest salary twice
+              instead of skipping past the tie. Always clarify with the
+              interviewer whether ties should count once or per-row.
+            </div>
+
+            <h3>Q2. Top N salaries per department</h3>
+            <pre><code>SELECT * FROM (
+  SELECT
+    name, dept_id, salary,
+    DENSE_RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS rnk
+  FROM employees
+) ranked
+WHERE rnk <= 3;                      -- top 3 earners in EACH department</code></pre>
+
+            <h3>Q3. Find duplicate rows (e.g., duplicate emails)</h3>
+            <pre><code>-- Which values are duplicated, and how many times
+SELECT email, COUNT(*) AS cnt
+FROM users
+GROUP BY email
+HAVING COUNT(*) > 1;
+
+-- Delete duplicates, keeping the lowest id per email
+DELETE FROM users
+WHERE id NOT IN (
+  SELECT MIN(id) FROM users GROUP BY email
+);
+
+-- Same idea with a window function (works even without a unique id trick)
+WITH ranked AS (
+  SELECT id, email, ROW_NUMBER() OVER (PARTITION BY email ORDER BY id) AS rn
+  FROM users
+)
+DELETE FROM users WHERE id IN (SELECT id FROM ranked WHERE rn > 1);</code></pre>
+
+            <h3>Q4. Employees who earn more than their manager</h3>
+            <pre><code>SELECT emp.name AS employee, emp.salary, mgr.name AS manager, mgr.salary AS mgr_salary
+FROM employees emp
+JOIN employees mgr ON emp.manager_id = mgr.emp_id
+WHERE emp.salary > mgr.salary;</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 10 ══════════════════════════ -->
+          <div class="section page-break" id="s10">
+            <div class="section-num">Section 10</div>
+            <h2 class="section-title">Tricky Interview Questions II — Sequences &amp; Time</h2>
+
+            <h3>Q5. Rising temperature — compare each row to the previous day</h3>
+            <p>
+              Table <code>weather(id, record_date, temperature)</code>. Find
+              dates where the temperature was higher than the previous
+              calendar day (dates may have gaps).
+            </p>
+            <pre><code>SELECT w1.id
+FROM weather w1
+JOIN weather w2 ON w1.record_date = w2.record_date + INTERVAL '1 day'
+WHERE w1.temperature > w2.temperature;
+
+-- LAG() alternative — also correctly needs a gap check if dates aren't contiguous
+SELECT id FROM (
+  SELECT
+    id, temperature, record_date,
+    LAG(temperature) OVER (ORDER BY record_date) AS prev_temp,
+    LAG(record_date) OVER (ORDER BY record_date) AS prev_date
+  FROM weather
+) t
+WHERE temperature > prev_temp AND record_date = prev_date + INTERVAL '1 day';</code></pre>
+
+            <h3>Q6. Find three (or more) consecutive rows with the same value</h3>
+            <p>
+              Table <code>logs(id, num)</code> with sequential ids — find
+              every <code>num</code> that appears at least 3 times in a row.
+            </p>
+            <pre><code>SELECT DISTINCT l1.num
+FROM logs l1
+JOIN logs l2 ON l2.id = l1.id + 1 AND l2.num = l1.num
+JOIN logs l3 ON l3.id = l1.id + 2 AND l3.num = l1.num;</code></pre>
+
+            <h3>Q7. Gaps and islands — group consecutive dates into ranges</h3>
+            <p>
+              Table <code>sessions(user_id, activity_date)</code> — one row
+              per active day. Collapse consecutive days into
+              <code>(start_date, end_date)</code> ranges per user.
+            </p>
+            <pre><code>WITH numbered AS (
+  SELECT
+    user_id, activity_date,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY activity_date) AS rn
+  FROM sessions
+),
+grouped AS (
+  SELECT
+    user_id, activity_date,
+    activity_date - (rn * INTERVAL '1 day') AS island_key   -- constant within a run
+  FROM numbered
+)
+SELECT user_id, MIN(activity_date) AS start_date, MAX(activity_date) AS end_date
+FROM grouped
+GROUP BY user_id, island_key
+ORDER BY user_id, start_date;</code></pre>
+
+            <div class="callout callout-green">
+              <strong>The "gaps and islands" trick</strong>
+              Subtracting a strictly increasing row number from a strictly
+              increasing date produces a constant value for every row inside
+              one consecutive run, and a different constant for each separate
+              run — turning "find consecutive groups" into an ordinary
+              <code>GROUP BY</code>.
+            </div>
+
+            <h3>Q8. Running total &amp; percent of total</h3>
+            <pre><code>SELECT
+  order_date, revenue,
+  SUM(revenue) OVER (ORDER BY order_date) AS running_total,
+  ROUND(100.0 * revenue / SUM(revenue) OVER (), 2) AS pct_of_grand_total
+FROM daily_sales
+ORDER BY order_date;</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 11 ══════════════════════════ -->
+          <div class="section page-break" id="s11">
+            <div class="section-num">Section 11</div>
+            <h2 class="section-title">Tricky Interview Questions III — Pivoting &amp; Medians</h2>
+
+            <h3>Q9. Pivot rows into columns without a PIVOT operator</h3>
+            <p>
+              Table <code>sales(region, quarter, amount)</code> — produce one
+              row per region with a column per quarter.
+            </p>
+            <pre><code>SELECT
+  region,
+  SUM(CASE WHEN quarter = 'Q1' THEN amount ELSE 0 END) AS q1,
+  SUM(CASE WHEN quarter = 'Q2' THEN amount ELSE 0 END) AS q2,
+  SUM(CASE WHEN quarter = 'Q3' THEN amount ELSE 0 END) AS q3,
+  SUM(CASE WHEN quarter = 'Q4' THEN amount ELSE 0 END) AS q4
+FROM sales
+GROUP BY region;</code></pre>
+
+            <h3>Q10. Median without a built-in MEDIAN function</h3>
+            <pre><code>-- Portable: average the middle one or two values after ranking
+WITH ordered AS (
+  SELECT
+    salary,
+    ROW_NUMBER() OVER (ORDER BY salary) AS rn,
+    COUNT(*) OVER () AS n
+  FROM employees
+)
+SELECT AVG(salary) AS median
+FROM ordered
+WHERE rn IN (FLOOR((n + 1) / 2.0), CEIL((n + 1) / 2.0));
+
+-- Postgres shortcut
+SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY salary) AS median
+FROM employees;</code></pre>
+
+            <h3>Q11. Second highest salary WITHOUT LIMIT/OFFSET or window functions</h3>
+            <p>Useful when asked to solve it in "plain SQL-92":</p>
+            <pre><code>SELECT MAX(salary) AS second_highest
+FROM employees
+WHERE salary < (SELECT MAX(salary) FROM employees);
+
+-- Returns NULL if there's no second distinct salary — often the expected edge case</code></pre>
+
+            <h3>Q12. Cumulative distinct count ("how many new customers each month")</h3>
+            <p>
+              Table <code>orders(customer_id, order_date)</code> — for each
+              month, count customers who are ordering for the very first
+              time.
+            </p>
+            <pre><code>WITH first_order AS (
+  SELECT customer_id, MIN(order_date) AS first_order_date
+  FROM orders
+  GROUP BY customer_id
+)
+SELECT
+  DATE_TRUNC('month', first_order_date) AS month,
+  COUNT(*) AS new_customers
+FROM first_order
+GROUP BY 1
+ORDER BY 1;</code></pre>
+
+            <div class="callout callout-purple">
+              <strong>Interview tip</strong>
+              Interviewers are usually testing whether you reach for
+              <code>ROW_NUMBER</code>/<code>DENSE_RANK</code> and
+              <code>PARTITION BY</code> before falling back to
+              self-joins or correlated subqueries — mention the window-
+              function approach first, then the portable fallback, and call
+              out how ties/duplicates/NULLs change the answer.
+            </div>
+
+            <h3>Further Reading</h3>
+            <ul class="clean">
+              <li>
+                <a
+                  href="https://www.postgresql.org/docs/current/sql.html"
+                  target="_blank"
+                  rel="noopener"
+                  >PostgreSQL SQL Command Reference</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://www.postgresql.org/docs/current/tutorial-window.html"
+                  target="_blank"
+                  rel="noopener"
+                  >PostgreSQL Window Functions Tutorial</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://use-the-index-luke.com/"
+                  target="_blank"
+                  rel="noopener"
+                  >Use The Index, Luke — SQL indexing &amp; performance</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <!-- /container -->
+      </div>
+      <!-- /main-scroll -->
+    </div>
+    <!-- /topic-page -->
+    <footer class="guide-footer">
+      Synapse &middot; AI &amp; LLM Engineering
+    </footer>
+    <script src="../assets/scroll-top.js"></script>
+  </body>
+</html>

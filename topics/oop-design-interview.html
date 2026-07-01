@@ -1,0 +1,1762 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OOP &amp; Low-Level Design Interviews — Synapse</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1a1a2e;
+        --ink2: #3d3d5c;
+        --ink3: #6b6b8a;
+        --bg: #ffffff;
+        --bg2: #f4f3f0;
+        --bg3: #eae8e4;
+        --accent: #2563eb;
+        --accent2: #1d4ed8;
+        --accent-bg: #eff6ff;
+        --green: #059669;
+        --green-bg: #ecfdf5;
+        --amber: #d97706;
+        --amber-bg: #fffbeb;
+        --rose: #e11d48;
+        --rose-bg: #fff1f2;
+        --purple: #7c3aed;
+        --purple-bg: #f5f3ff;
+        --teal: #0d9488;
+        --teal-bg: #f0fdfa;
+        --coral: #ea580c;
+        --coral-bg: #fff7ed;
+        --border: #e2e0dc;
+        --code-bg: #f8f7f5;
+        --serif: "Fraunces", Georgia, serif;
+        --sans: "DM Sans", system-ui, sans-serif;
+        --mono: "JetBrains Mono", "Fira Code", monospace;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        font-size: 15px;
+      }
+      body {
+        font-family: var(--sans);
+        color: var(--ink);
+        background: var(--bg);
+        line-height: 1.65;
+      }
+      @media print {
+        body {
+          font-size: 10pt;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .page-break {
+          page-break-before: always;
+        }
+        .card {
+          break-inside: avoid;
+        }
+        pre {
+          font-size: 8pt;
+        }
+        h1 {
+          font-size: 22pt;
+        }
+        h2 {
+          font-size: 14pt;
+        }
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+      .cover {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background: linear-gradient(
+          160deg,
+          #0f172a 0%,
+          #1e293b 40%,
+          #1a1a2e 100%
+        );
+        color: white;
+        padding: 4rem 2rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .cover::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background:
+          radial-gradient(
+            ellipse at 30% 50%,
+            rgba(5, 150, 105, 0.15) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse at 70% 30%,
+            rgba(37, 99, 235, 0.1) 0%,
+            transparent 50%
+          );
+      }
+      .cover * {
+        position: relative;
+      }
+      .cover-label {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 2rem;
+      }
+      .cover h1 {
+        font-family: var(--serif);
+        font-size: 3.5rem;
+        font-weight: 700;
+        line-height: 1.15;
+        margin-bottom: 1rem;
+        max-width: 700px;
+      }
+      .cover h1 span {
+        background: linear-gradient(135deg, #34d399, #60a5fa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .cover-sub {
+        font-size: 1.15rem;
+        color: rgba(255, 255, 255, 0.65);
+        max-width: 600px;
+        line-height: 1.7;
+        margin-bottom: 3rem;
+      }
+      .cover-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+        max-width: 650px;
+      }
+      .cover-tag {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        padding: 0.35rem 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        color: rgba(255, 255, 255, 0.6);
+      }
+      .cover-date {
+        margin-top: 3rem;
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.35);
+      }
+      .toc {
+        padding: 3rem 0;
+      }
+      .toc h2 {
+        font-family: var(--serif);
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        color: var(--ink);
+      }
+      .toc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 0.5rem;
+      }
+      .toc-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.65rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--ink);
+        transition: background 0.15s;
+      }
+      .toc-item:hover {
+        background: var(--bg2);
+      }
+      .toc-num {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--accent);
+        font-weight: 600;
+        min-width: 28px;
+      }
+      .toc-label {
+        font-size: 0.9rem;
+      }
+      .section {
+        padding: 2.5rem 0 1.5rem;
+        border-top: 1px solid var(--border);
+      }
+      .section-num {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--accent);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+      }
+      h2.section-title {
+        font-family: var(--serif);
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 0.75rem;
+        line-height: 1.3;
+      }
+      h3 {
+        font-family: var(--sans);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--ink);
+        margin: 1.5rem 0 0.5rem;
+      }
+      h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--ink2);
+        margin: 1.2rem 0 0.4rem;
+      }
+      p {
+        margin-bottom: 0.75rem;
+        color: var(--ink2);
+      }
+      p.lead {
+        font-size: 1.05rem;
+        color: var(--ink);
+        line-height: 1.7;
+      }
+      strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+      .card {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.1rem 1.2rem;
+      }
+      .card-accent {
+        border-left: 3px solid var(--accent);
+      }
+      .card h4 {
+        margin: 0 0 0.4rem;
+        font-size: 0.9rem;
+        color: var(--ink);
+      }
+      .card p {
+        font-size: 0.82rem;
+        margin: 0;
+        color: var(--ink3);
+        line-height: 1.5;
+      }
+      .table-wrap {
+        overflow-x: auto;
+        margin: 1rem 0;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+      }
+      thead {
+        background: var(--ink);
+        color: white;
+      }
+      th {
+        padding: 0.65rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.78rem;
+        letter-spacing: 0.3px;
+      }
+      td {
+        padding: 0.6rem 1rem;
+        border-top: 1px solid var(--border);
+        color: var(--ink2);
+      }
+      tr:nth-child(even) {
+        background: var(--bg2);
+      }
+      td:first-child {
+        font-weight: 500;
+        color: var(--ink);
+      }
+      pre {
+        background: var(--code-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem 1.2rem;
+        overflow-x: auto;
+        margin: 0.75rem 0;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        line-height: 1.6;
+        color: var(--ink2);
+      }
+      code {
+        font-family: var(--mono);
+        font-size: 0.82em;
+        background: var(--bg2);
+        padding: 0.15em 0.4em;
+        border-radius: 4px;
+        color: var(--ink);
+      }
+      pre code {
+        background: none;
+        padding: 0;
+      }
+      .callout {
+        border-radius: 10px;
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-size: 0.88rem;
+      }
+      .callout-blue {
+        background: var(--accent-bg);
+        border-left: 3px solid var(--accent);
+      }
+      .callout-green {
+        background: var(--green-bg);
+        border-left: 3px solid var(--green);
+      }
+      .callout-amber {
+        background: var(--amber-bg);
+        border-left: 3px solid var(--amber);
+      }
+      .callout-rose {
+        background: var(--rose-bg);
+        border-left: 3px solid var(--rose);
+      }
+      .callout-purple {
+        background: var(--purple-bg);
+        border-left: 3px solid var(--purple);
+      }
+      .callout strong {
+        display: block;
+        margin-bottom: 0.3rem;
+      }
+      .pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin: 0.5rem 0;
+      }
+      .pill {
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+        font-weight: 500;
+      }
+      .pill-blue {
+        background: var(--accent-bg);
+        color: var(--accent2);
+      }
+      .pill-green {
+        background: var(--green-bg);
+        color: var(--green);
+      }
+      .pill-purple {
+        background: var(--purple-bg);
+        color: var(--purple);
+      }
+      .pill-amber {
+        background: var(--amber-bg);
+        color: var(--amber);
+      }
+      .pill-teal {
+        background: var(--teal-bg);
+        color: var(--teal);
+      }
+      .pill-coral {
+        background: var(--coral-bg);
+        color: var(--coral);
+      }
+      ul.clean {
+        list-style: none;
+        padding: 0;
+      }
+      ul.clean li {
+        padding: 0.3rem 0 0.3rem 1.5rem;
+        position: relative;
+        font-size: 0.9rem;
+        color: var(--ink2);
+      }
+      ul.clean li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.7rem;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin: 1rem 0;
+      }
+      @media (max-width: 700px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+      .sep {
+        height: 1px;
+        background: var(--border);
+        margin: 2rem 0;
+      }
+      .footer {
+        text-align: center;
+        padding: 2rem;
+        color: var(--ink3);
+        font-size: 0.8rem;
+        border-top: 1px solid var(--border);
+        margin-top: 2rem;
+      }
+      /* ── CSS Flow Diagrams ── */
+      .fd {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 1.25rem 0;
+      }
+      .fd-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .fd-col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .fd-node {
+        border-radius: 8px;
+        padding: 0.45rem 1rem;
+        font-size: 0.78rem;
+        font-family: var(--mono);
+        font-weight: 500;
+        border: 1.5px solid;
+        text-align: center;
+        line-height: 1.45;
+      }
+      .fd-node sub {
+        font-size: 0.65rem;
+        opacity: 0.75;
+        display: block;
+        font-weight: 400;
+      }
+      .fd-node-blue {
+        background: var(--accent-bg);
+        border-color: var(--accent);
+        color: var(--accent2);
+      }
+      .fd-node-green {
+        background: var(--green-bg);
+        border-color: var(--green);
+        color: var(--green);
+      }
+      .fd-node-purple {
+        background: var(--purple-bg);
+        border-color: var(--purple);
+        color: var(--purple);
+      }
+      .fd-node-amber {
+        background: var(--amber-bg);
+        border-color: var(--amber);
+        color: var(--amber);
+      }
+      .fd-node-teal {
+        background: var(--teal-bg);
+        border-color: var(--teal);
+        color: var(--teal);
+      }
+      .fd-node-dark {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: #fff;
+      }
+      .fd-arr-d {
+        width: 2px;
+        height: 28px;
+        background: var(--ink3);
+        margin: 0 auto;
+        position: relative;
+      }
+      .fd-arr-d::after {
+        content: "";
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 7px solid var(--ink3);
+      }
+      .fd-arr-r {
+        width: 32px;
+        height: 2px;
+        background: var(--ink3);
+        position: relative;
+        flex-shrink: 0;
+      }
+      .fd-arr-r::after {
+        content: "";
+        position: absolute;
+        right: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 7px solid var(--ink3);
+      }
+      .fd-group {
+        border: 2px dashed var(--border);
+        border-radius: 12px;
+        padding: 1rem 1.2rem;
+        background: var(--bg2);
+      }
+      .fd-group-title {
+        font-size: 0.65rem;
+        font-family: var(--mono);
+        color: var(--ink3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.6rem;
+        text-align: center;
+      }
+      .fd-note {
+        font-size: 0.68rem;
+        font-family: var(--sans);
+        color: var(--ink3);
+        text-align: center;
+        max-width: 200px;
+        line-height: 1.35;
+        margin-top: 0.2rem;
+      }
+      .fd-gap {
+        width: 1.5rem;
+        flex-shrink: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+      .guide-header {
+        background: #1a202c;
+        color: #fff;
+        padding: 0.9rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        flex-shrink: 0;
+      }
+      .guide-header .back-home {
+        color: #a0aec0;
+        text-decoration: none;
+        font-size: 0.82rem;
+        white-space: nowrap;
+        transition: color 0.15s;
+      }
+      .guide-header .back-home:hover {
+        color: #fff;
+      }
+      .guide-header h1 {
+        font-family: var(--sans);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #fff;
+      }
+      .topic-page {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+      .sidebar {
+        width: 260px;
+        background: #2d3748;
+        color: #e2e8f0;
+        padding: 1.25rem 0 2rem;
+        flex-shrink: 0;
+        overflow-y: auto;
+      }
+      .sidebar-title {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #a0aec0;
+        padding: 0 1.25rem 0.6rem;
+        font-family: var(--sans);
+      }
+      .sidebar nav ul {
+        list-style: none;
+      }
+      .sidebar nav ul li a {
+        display: block;
+        padding: 0.45rem 1.25rem;
+        color: #cbd5e0;
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-family: var(--sans);
+        line-height: 1.45;
+        transition:
+          background 0.1s,
+          color 0.1s;
+      }
+      .sidebar nav ul li a:hover,
+      .sidebar nav ul li a.active {
+        background: #4a5568;
+        color: #fff;
+      }
+      .sidebar nav ul ul {
+        margin: 0;
+        padding: 0;
+      }
+      .sidebar nav ul ul li a {
+        padding: 0.3rem 1.25rem 0.3rem 2.2rem;
+        font-size: 0.74rem;
+        color: #a0aec0;
+      }
+      .sidebar nav ul ul li a:hover {
+        background: #3d4d63;
+        color: #e2e8f0;
+      }
+      .sidebar .toc-num {
+        font-size: 0.65rem;
+        color: #90cdf4;
+        margin-right: 0.35rem;
+        font-family: var(--mono);
+      }
+      .main-scroll {
+        flex: 1;
+        overflow-y: auto;
+      }
+      .guide-footer {
+        text-align: center;
+        padding: 0.75rem;
+        color: #718096;
+        font-size: 0.78rem;
+        background: #1a202c;
+        flex-shrink: 0;
+      }
+    </style>
+    <link rel="stylesheet" href="../assets/mobile.css" />
+  </head>
+  <body>
+    <header class="guide-header">
+      <a href="../index.html" class="back-home">← Synapse</a>
+      <h1>OOP &amp; Low-Level Design Interviews</h1>
+    </header>
+
+    <div class="topic-page">
+      <aside class="sidebar">
+        <p class="sidebar-title">OOP &amp; LLD Interviews</p>
+        <nav>
+          <ul>
+            <li>
+              <a href="#s1"><span class="toc-num">01</span>Approaching OOD Interviews</a>
+            </li>
+            <li>
+              <a href="#s2"
+                ><span class="toc-num">02</span>Employee Hierarchy (Org Chart)</a
+              >
+            </li>
+            <li>
+              <a href="#s3"><span class="toc-num">03</span>Parking Lot System</a>
+            </li>
+            <li>
+              <a href="#s4"><span class="toc-num">04</span>LRU Cache</a>
+            </li>
+            <li>
+              <a href="#s5"><span class="toc-num">05</span>Elevator System</a>
+            </li>
+            <li>
+              <a href="#s6"
+                ><span class="toc-num">06</span>Library Management System</a
+              >
+            </li>
+            <li>
+              <a href="#s7"
+                ><span class="toc-num">07</span>Vending Machine (State Pattern)</a
+              >
+            </li>
+            <li>
+              <a href="#s8"><span class="toc-num">08</span>Rate Limiter</a>
+            </li>
+            <li>
+              <a href="#s9"
+                ><span class="toc-num">09</span>Design Patterns Cheat Sheet</a
+              >
+            </li>
+            <li>
+              <a href="#s10"
+                ><span class="toc-num">10</span>Tricky Follow-Ups &amp; Trade-offs</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <div class="main-scroll">
+        <div class="cover">
+          <div class="cover-label">Complete Technical Reference — July 2026</div>
+          <h1>OOP <span>&amp; Low-Level Design</span></h1>
+          <p class="cover-sub">
+            Object-oriented design interview questions worked end-to-end in
+            Python — employee hierarchies, parking lots, LRU caches,
+            elevators, vending machines, and the design-pattern instincts
+            interviewers are really probing for.
+          </p>
+          <div class="cover-tags">
+            <span class="cover-tag">SOLID</span>
+            <span class="cover-tag">Composite Pattern</span>
+            <span class="cover-tag">Employee Hierarchy</span>
+            <span class="cover-tag">Parking Lot</span>
+            <span class="cover-tag">LRU Cache</span>
+            <span class="cover-tag">State Pattern</span>
+            <span class="cover-tag">Strategy Pattern</span>
+            <span class="cover-tag">Observer Pattern</span>
+            <span class="cover-tag">Rate Limiter</span>
+          </div>
+          <div class="cover-date">v1.0 — July 2026</div>
+        </div>
+
+        <div class="container">
+          <div class="toc page-break">
+            <h2>Contents</h2>
+            <div class="toc-grid">
+              <a class="toc-item" href="#s1"
+                ><span class="toc-num">01</span
+                ><span class="toc-label">Approaching OOD Interviews</span></a
+              >
+              <a class="toc-item" href="#s2"
+                ><span class="toc-num">02</span
+                ><span class="toc-label">Employee Hierarchy (Org Chart)</span></a
+              >
+              <a class="toc-item" href="#s3"
+                ><span class="toc-num">03</span
+                ><span class="toc-label">Parking Lot System</span></a
+              >
+              <a class="toc-item" href="#s4"
+                ><span class="toc-num">04</span
+                ><span class="toc-label">LRU Cache</span></a
+              >
+              <a class="toc-item" href="#s5"
+                ><span class="toc-num">05</span
+                ><span class="toc-label">Elevator System</span></a
+              >
+              <a class="toc-item" href="#s6"
+                ><span class="toc-num">06</span
+                ><span class="toc-label">Library Management System</span></a
+              >
+              <a class="toc-item" href="#s7"
+                ><span class="toc-num">07</span
+                ><span class="toc-label">Vending Machine (State Pattern)</span></a
+              >
+              <a class="toc-item" href="#s8"
+                ><span class="toc-num">08</span
+                ><span class="toc-label">Rate Limiter</span></a
+              >
+              <a class="toc-item" href="#s9"
+                ><span class="toc-num">09</span
+                ><span class="toc-label">Design Patterns Cheat Sheet</span></a
+              >
+              <a class="toc-item" href="#s10"
+                ><span class="toc-num">10</span
+                ><span class="toc-label">Tricky Follow-Ups &amp; Trade-offs</span></a
+              >
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+          <div class="section page-break" id="s1">
+            <div class="section-num">Section 01</div>
+            <h2 class="section-title">Approaching OOD Interviews</h2>
+            <p class="lead">
+              Object-oriented design ("low-level design" / LLD) interviews
+              ask you to model a real-world system as classes — the bar isn't
+              "does it run," it's whether your design is extensible, follows
+              single-responsibility boundaries, and survives the
+              interviewer's follow-up curveballs.
+            </p>
+
+            <h3>A repeatable approach</h3>
+            <div class="fd">
+              <div class="fd-node fd-node-dark" style="min-width: 260px">
+                1. Clarify requirements &amp; scope
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-blue" style="min-width: 260px">
+                2. Identify the core entities (nouns)
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-purple" style="min-width: 260px">
+                3. Identify behaviors &amp; relationships (verbs)
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-amber" style="min-width: 260px">
+                4. Pick design patterns that fit naturally
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-green" style="min-width: 260px">
+                5. Code the core classes, then extend for follow-ups
+              </div>
+            </div>
+
+            <h3>SOLID, in one line each</h3>
+            <div class="card-grid">
+              <div class="card card-accent">
+                <h4>Single Responsibility</h4>
+                <p>A class should have one reason to change — one job, one owner.</p>
+              </div>
+              <div class="card card-accent">
+                <h4>Open/Closed</h4>
+                <p>Open for extension, closed for modification — add a new subclass instead of editing existing branches.</p>
+              </div>
+              <div class="card card-accent">
+                <h4>Liskov Substitution</h4>
+                <p>A subclass must be usable anywhere its base class is expected, without breaking correctness.</p>
+              </div>
+              <div class="card card-accent">
+                <h4>Interface Segregation</h4>
+                <p>Prefer several small, focused interfaces over one bloated one that forces unused methods on implementers.</p>
+              </div>
+              <div class="card card-accent">
+                <h4>Dependency Inversion</h4>
+                <p>Depend on abstractions (interfaces/ABCs), not concrete classes — makes components swappable and testable.</p>
+              </div>
+            </div>
+
+            <div class="callout callout-blue">
+              <strong>What interviewers are actually scoring</strong>
+              Clean entity boundaries, correct use of inheritance vs
+              composition, whether you reach for a known pattern when one
+              genuinely fits (not pattern-for-pattern's-sake), and how
+              gracefully your design absorbs a follow-up requirement without
+              a rewrite.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+          <div class="section page-break" id="s2">
+            <div class="section-num">Section 02</div>
+            <h2 class="section-title">Employee Hierarchy (Org Chart)</h2>
+            <p class="lead">
+              Prompt: <em>"Design a class structure to represent a company's
+              employee hierarchy. Support adding employees under a manager,
+              counting total reports, computing team salary cost, and
+              printing the org chart."</em>
+              This is a textbook <strong>Composite pattern</strong> — a
+              manager is just an employee that happens to hold other
+              employees.
+            </p>
+
+            <h3>Core classes</h3>
+            <pre><code>from abc import ABC, abstractmethod
+
+class Employee(ABC):
+    def __init__(self, name: str, salary: float):
+        self.name = name
+        self.salary = salary
+        self.subordinates: list["Employee"] = []
+
+    def add_subordinate(self, employee: "Employee") -> None:
+        self.subordinates.append(employee)
+
+    def remove_subordinate(self, employee: "Employee") -> None:
+        self.subordinates.remove(employee)
+
+    @abstractmethod
+    def role(self) -> str:
+        ...
+
+    def total_reports(self) -> int:
+        """Direct + indirect reports beneath this employee."""
+        count = len(self.subordinates)
+        for sub in self.subordinates:
+            count += sub.total_reports()
+        return count
+
+    def total_team_cost(self) -> float:
+        return self.salary + sum(sub.total_team_cost() for sub in self.subordinates)
+
+    def print_org_chart(self, level: int = 0) -> None:
+        print("  " * level + f"{self.name} ({self.role()}) — ${self.salary:,.0f}")
+        for sub in self.subordinates:
+            sub.print_org_chart(level + 1)
+
+
+class Manager(Employee):
+    def role(self) -> str:
+        return "Manager"
+
+
+class Developer(Employee):
+    def role(self) -> str:
+        return "Developer"
+
+
+ceo   = Manager("Grace", 250_000)
+vp    = Manager("Han", 180_000)
+dev_a = Developer("Ivy", 120_000)
+dev_b = Developer("Jax", 115_000)
+
+ceo.add_subordinate(vp)
+vp.add_subordinate(dev_a)
+vp.add_subordinate(dev_b)
+
+ceo.print_org_chart()
+print("Total reports under CEO:", ceo.total_reports())     # 3
+print("Total team cost:", ceo.total_team_cost())            # 665,000.0</code></pre>
+
+            <div class="callout callout-green">
+              <strong>Why this is the Composite pattern</strong>
+              <code>Employee</code> is the shared component interface;
+              <code>Manager</code> is a "composite" that holds children, and
+              a leaf <code>Developer</code> just happens to have an empty
+              <code>subordinates</code> list. Every method
+              (<code>total_reports</code>, <code>total_team_cost</code>,
+              <code>print_org_chart</code>) works identically whether it's
+              called on the CEO or an individual contributor — no
+              <code>isinstance</code> branching required.
+            </div>
+
+            <h3>Common follow-ups</h3>
+            <pre><code>from collections import deque
+
+# 1. Find an employee by name — BFS across the tree
+def find_employee(root: Employee, name: str) -> Employee | None:
+    queue = deque([root])
+    while queue:
+        current = queue.popleft()
+        if current.name == name:
+            return current
+        queue.extend(current.subordinates)
+    return None
+
+# 2. Find an employee's manager — needs a reverse (parent) map
+def build_manager_map(root: Employee, parent: Employee | None = None,
+                       out: dict[str, Employee] | None = None) -> dict[str, Employee]:
+    out = {} if out is None else out
+    if parent is not None:
+        out[root.name] = parent
+    for sub in root.subordinates:
+        build_manager_map(sub, root, out)
+    return out
+
+# 3. Depth of the org chart (longest management chain)
+def max_depth(employee: Employee) -> int:
+    if not employee.subordinates:
+        return 1
+    return 1 + max(max_depth(sub) for sub in employee.subordinates)
+
+# 4. Employee with the most DIRECT reports
+def widest_manager(root: Employee) -> Employee:
+    best = root
+    queue = deque([root])
+    while queue:
+        current = queue.popleft()
+        if len(current.subordinates) > len(best.subordinates):
+            best = current
+        queue.extend(current.subordinates)
+    return best</code></pre>
+
+            <div class="callout callout-amber">
+              <strong>Curveball: "What if an employee can report to two managers?"</strong>
+              That breaks the tree assumption — it becomes a DAG. A
+              <code>list[Employee]</code> of subordinates alone no longer
+              lets you find <em>all</em> managers of a node in O(1); you'd
+              need each employee to track its own
+              <code>managers: list[Employee]</code> too, and any traversal
+              (like <code>total_reports</code>) must now track visited nodes
+              to avoid double-counting someone reachable through two paths.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+          <div class="section page-break" id="s3">
+            <div class="section-num">Section 03</div>
+            <h2 class="section-title">Parking Lot System</h2>
+            <p class="lead">
+              Prompt: <em>"Design a parking lot that supports multiple spot
+              sizes and vehicle types, tracks availability, and issues a
+              ticket on entry."</em> Tests enums for fixed categories,
+              encapsulating allocation logic, and separating the lot from its
+              floors/spots.
+            </p>
+
+            <pre><code>from enum import Enum, auto
+from dataclasses import dataclass, field
+from datetime import datetime
+
+class SpotSize(Enum):
+    MOTORCYCLE = auto()
+    COMPACT = auto()
+    LARGE = auto()
+
+class VehicleType(Enum):
+    MOTORCYCLE = SpotSize.MOTORCYCLE
+    CAR = SpotSize.COMPACT
+    BUS = SpotSize.LARGE
+
+@dataclass
+class Vehicle:
+    license_plate: str
+    vehicle_type: VehicleType
+
+@dataclass
+class ParkingSpot:
+    spot_id: str
+    size: SpotSize
+    vehicle: Vehicle | None = None
+
+    def is_available(self) -> bool:
+        return self.vehicle is None
+
+    def fits(self, vehicle: Vehicle) -> bool:
+        return self.size.value >= vehicle.vehicle_type.value.value
+
+@dataclass
+class Ticket:
+    vehicle: Vehicle
+    spot: ParkingSpot
+    entry_time: datetime = field(default_factory=datetime.now)
+
+class ParkingLot:
+    def __init__(self, spots: list[ParkingSpot]):
+        self.spots = spots
+        self.active_tickets: dict[str, Ticket] = {}   # license_plate -> Ticket
+
+    def find_available_spot(self, vehicle: Vehicle) -> ParkingSpot | None:
+        # smallest fitting spot first — don't waste a LARGE spot on a motorcycle
+        candidates = [s for s in self.spots if s.is_available() and s.fits(vehicle)]
+        return min(candidates, key=lambda s: s.size.value, default=None)
+
+    def park(self, vehicle: Vehicle) -> Ticket | None:
+        spot = self.find_available_spot(vehicle)
+        if spot is None:
+            return None                      # lot full for this vehicle class
+        spot.vehicle = vehicle
+        ticket = Ticket(vehicle=vehicle, spot=spot)
+        self.active_tickets[vehicle.license_plate] = ticket
+        return ticket
+
+    def unpark(self, license_plate: str) -> float:
+        ticket = self.active_tickets.pop(license_plate)
+        ticket.spot.vehicle = None
+        hours = max(1, (datetime.now() - ticket.entry_time).seconds // 3600)
+        return hours * 5.0                    # flat $5/hour billing</code></pre>
+
+            <div class="callout callout-blue">
+              <strong>Why <code>SpotSize.value >= vehicle.vehicle_type.value.value</code></strong>
+              Ordering the enum by physical size lets one comparison decide
+              fit — a bus needs LARGE, a car fits COMPACT or LARGE, a
+              motorcycle fits anywhere. Picking the <em>smallest</em> fitting
+              spot (rather than the first available) keeps large spots free
+              for vehicles that actually need them.
+            </div>
+
+            <h3>Common follow-ups</h3>
+            <ul class="clean">
+              <li>Multiple floors — add a <code>ParkingFloor</code> that owns a subset of spots; the lot iterates floors.</li>
+              <li>Concurrency — two cars arriving simultaneously must not claim the same spot; guard <code>park()</code> with a lock per spot or use atomic compare-and-swap on <code>spot.vehicle</code>.</li>
+              <li>Reservations — add a <code>reserve(spot, vehicle, expiry)</code> step before <code>park()</code> actually occupies it.</li>
+              <li>Dynamic pricing — replace the flat <code>hours * 5.0</code> with a <code>PricingStrategy</code> interface (Strategy pattern) swapped per lot.</li>
+            </ul>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+          <div class="section page-break" id="s4">
+            <div class="section-num">Section 04</div>
+            <h2 class="section-title">LRU Cache</h2>
+            <p class="lead">
+              Prompt: <em>"Design a cache with a fixed capacity that evicts
+              the Least Recently Used item when full — get and put must both
+              run in O(1)."</em> The canonical solution pairs a hash map
+              (O(1) lookup) with a doubly linked list (O(1) reordering).
+            </p>
+
+            <h3>Quick version — <code>OrderedDict</code></h3>
+            <pre><code>from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.cache: OrderedDict[int, int] = OrderedDict()
+
+    def get(self, key: int) -> int:
+        if key not in self.cache:
+            return -1
+        self.cache.move_to_end(key)          # mark as most recently used
+        return self.cache[key]
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.cache:
+            self.cache.move_to_end(key)
+        self.cache[key] = value
+        if len(self.cache) > self.capacity:
+            self.cache.popitem(last=False)   # evict the LEAST recently used</code></pre>
+
+            <h3>What the interviewer usually wants — manual doubly linked list</h3>
+            <pre><code>class Node:
+    __slots__ = ("key", "value", "prev", "next")
+    def __init__(self, key=0, value=0):
+        self.key, self.value = key, value
+        self.prev: "Node | None" = None
+        self.next: "Node | None" = None
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.map: dict[int, Node] = {}
+        # sentinel head/tail avoid null-checks at the list boundaries
+        self.head, self.tail = Node(), Node()
+        self.head.next, self.tail.prev = self.tail, self.head
+
+    def _remove(self, node: Node) -> None:
+        node.prev.next, node.next.prev = node.next, node.prev
+
+    def _add_to_front(self, node: Node) -> None:
+        node.next = self.head.next
+        node.prev = self.head
+        self.head.next.prev = node
+        self.head.next = node
+
+    def get(self, key: int) -> int:
+        if key not in self.map:
+            return -1
+        node = self.map[key]
+        self._remove(node)
+        self._add_to_front(node)
+        return node.value
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.map:
+            self._remove(self.map[key])
+        node = Node(key, value)
+        self.map[key] = node
+        self._add_to_front(node)
+        if len(self.map) > self.capacity:
+            lru = self.tail.prev
+            self._remove(lru)
+            del self.map[lru.key]</code></pre>
+
+            <div class="callout callout-amber">
+              <strong>Why sentinel head/tail nodes</strong>
+              Without them, removing the first or last real node requires
+              special-casing <code>None</code> checks on both ends. Two
+              dummy nodes that never hold real data mean
+              <code>_remove</code>/<code>_add_to_front</code> work
+              identically for every position — fewer edge cases, fewer bugs.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+          <div class="section page-break" id="s5">
+            <div class="section-num">Section 05</div>
+            <h2 class="section-title">Elevator System</h2>
+            <p class="lead">
+              Prompt: <em>"Design an elevator control system for a building
+              with multiple elevators — dispatch the best elevator for a
+              pickup request and serve floors efficiently."</em> Tests
+              modeling state machines and a dispatch strategy that can be
+              swapped independently of the elevator itself.
+            </p>
+
+            <pre><code>from enum import Enum, auto
+import heapq
+
+class Direction(Enum):
+    UP = auto()
+    DOWN = auto()
+    IDLE = auto()
+
+class Elevator:
+    def __init__(self, elevator_id: int, capacity: int = 10):
+        self.id = elevator_id
+        self.current_floor = 0
+        self.direction = Direction.IDLE
+        self.capacity = capacity
+        self._up_requests: list[int] = []      # min-heap of floors above
+        self._down_requests: list[int] = []    # max-heap (negated) below
+
+    def request_floor(self, floor: int) -> None:
+        if floor > self.current_floor:
+            heapq.heappush(self._up_requests, floor)
+        elif floor < self.current_floor:
+            heapq.heappush(self._down_requests, -floor)
+        self._update_direction()
+
+    def _update_direction(self) -> None:
+        if self.direction == Direction.IDLE:
+            if self._up_requests:
+                self.direction = Direction.UP
+            elif self._down_requests:
+                self.direction = Direction.DOWN
+
+    def step(self) -> None:
+        """Advance one floor toward the next requested stop."""
+        if self.direction == Direction.UP and self._up_requests:
+            self.current_floor += 1
+            if self.current_floor == self._up_requests[0]:
+                heapq.heappop(self._up_requests)
+        elif self.direction == Direction.DOWN and self._down_requests:
+            self.current_floor -= 1
+            if self.current_floor == -self._down_requests[0]:
+                heapq.heappop(self._down_requests)
+        if not self._up_requests and not self._down_requests:
+            self.direction = Direction.IDLE
+
+class ElevatorController:
+    def __init__(self, num_elevators: int):
+        self.elevators = [Elevator(i) for i in range(num_elevators)]
+
+    def dispatch(self, pickup_floor: int, direction: Direction) -> Elevator:
+        """Nearest-elevator strategy — swap this method to change dispatch policy."""
+        idle_or_matching = [
+            e for e in self.elevators
+            if e.direction in (Direction.IDLE, direction)
+        ]
+        pool = idle_or_matching or self.elevators
+        best = min(pool, key=lambda e: abs(e.current_floor - pickup_floor))
+        best.request_floor(pickup_floor)
+        return best</code></pre>
+
+            <div class="callout callout-blue">
+              <strong>Two heaps model SCAN/elevator scheduling</strong>
+              Separating "floors to visit while going up" from "floors to
+              visit while going down" into two heaps means the elevator
+              always serves the nearest stop in its current direction before
+              reversing — the same algorithm as the OS disk-scheduling
+              "elevator algorithm" this system is named after.
+            </div>
+
+            <h3>Common follow-ups</h3>
+            <ul class="clean">
+              <li>Capacity limits — reject a pickup for a full elevator, or model weight sensors.</li>
+              <li>Multiple dispatch strategies — extract <code>dispatch</code> into a <code>DispatchStrategy</code> interface (Strategy pattern) with "nearest," "least busy," and "zone-based" implementations.</li>
+              <li>Fairness — track wait time per request and prioritize floors waiting longest to avoid starvation.</li>
+            </ul>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+          <div class="section page-break" id="s6">
+            <div class="section-num">Section 06</div>
+            <h2 class="section-title">Library Management System</h2>
+            <p class="lead">
+              Prompt: <em>"Design a system to manage books, members, and
+              borrowing — including due dates and overdue fines."</em> Tests
+              modeling a many-to-many relationship (books ↔ members, over
+              time) with a join entity (<code>Loan</code>) rather than
+              cramming state into either side.
+            </p>
+
+            <pre><code>from dataclasses import dataclass, field
+from datetime import date, timedelta
+
+@dataclass
+class Book:
+    isbn: str
+    title: str
+    copies_total: int
+    copies_available: int
+
+@dataclass
+class Member:
+    member_id: str
+    name: str
+    active_loans: list["Loan"] = field(default_factory=list)
+
+@dataclass
+class Loan:
+    book: Book
+    member: Member
+    checkout_date: date
+    due_date: date
+    returned_date: date | None = None
+
+class Library:
+    LOAN_PERIOD_DAYS = 14
+    FINE_PER_DAY = 0.25
+
+    def __init__(self):
+        self.books: dict[str, Book] = {}
+        self.members: dict[str, Member] = {}
+        self.loans: list[Loan] = []
+
+    def checkout(self, isbn: str, member_id: str, today: date) -> Loan:
+        book, member = self.books[isbn], self.members[member_id]
+        if book.copies_available == 0:
+            raise ValueError(f"No copies of '{book.title}' available")
+        book.copies_available -= 1
+        loan = Loan(book, member, today, today + timedelta(days=self.LOAN_PERIOD_DAYS))
+        member.active_loans.append(loan)
+        self.loans.append(loan)
+        return loan
+
+    def return_book(self, loan: Loan, today: date) -> float:
+        loan.returned_date = today
+        loan.book.copies_available += 1
+        loan.member.active_loans.remove(loan)
+        overdue_days = max(0, (today - loan.due_date).days)
+        return overdue_days * self.FINE_PER_DAY
+
+    def overdue_loans(self, today: date) -> list[Loan]:
+        return [l for l in self.loans if l.returned_date is None and today > l.due_date]</code></pre>
+
+            <div class="callout callout-green">
+              <strong>Why a separate <code>Loan</code> entity</strong>
+              A book can be checked out by different members over time, and a
+              member can hold multiple loans — that's a many-to-many
+              relationship with its own attributes (checkout date, due date,
+              fine). Modeling <code>Loan</code> as its own class instead of a
+              flag on <code>Book</code> or <code>Member</code> is what makes
+              history, fines, and concurrent multi-copy checkouts possible.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+          <div class="section page-break" id="s7">
+            <div class="section-num">Section 07</div>
+            <h2 class="section-title">Vending Machine (State Pattern)</h2>
+            <p class="lead">
+              Prompt: <em>"Design a vending machine that accepts coins,
+              lets a user select an item, and dispenses it or returns
+              change."</em> A textbook fit for the <strong>State
+              pattern</strong> — behavior for "insert coin," "select item,"
+              and "dispense" changes entirely depending on what state the
+              machine is in.
+            </p>
+
+            <pre><code>from abc import ABC, abstractmethod
+
+class VendingMachine:
+    def __init__(self):
+        self.balance = 0
+        self.selected_item: str | None = None
+        self.inventory: dict[str, tuple[int, int]] = {  # name -> (price, stock)
+            "soda": (150, 5), "chips": (200, 3),
+        }
+        self.state: "State" = IdleState(self)
+
+    def insert_coin(self, cents: int) -> None:
+        self.state.insert_coin(cents)
+
+    def select_item(self, name: str) -> None:
+        self.state.select_item(name)
+
+    def dispense(self) -> None:
+        self.state.dispense()
+
+
+class State(ABC):
+    def __init__(self, machine: VendingMachine):
+        self.machine = machine
+
+    def insert_coin(self, cents: int) -> None:
+        raise ValueError(f"Cannot insert coins in state {type(self).__name__}")
+
+    def select_item(self, name: str) -> None:
+        raise ValueError(f"Cannot select an item in state {type(self).__name__}")
+
+    def dispense(self) -> None:
+        raise ValueError(f"Cannot dispense in state {type(self).__name__}")
+
+
+class IdleState(State):
+    def insert_coin(self, cents: int) -> None:
+        self.machine.balance += cents
+        self.machine.state = HasMoneyState(self.machine)
+
+
+class HasMoneyState(State):
+    def insert_coin(self, cents: int) -> None:
+        self.machine.balance += cents
+
+    def select_item(self, name: str) -> None:
+        price, stock = self.machine.inventory[name]
+        if stock == 0:
+            raise ValueError("Item out of stock")
+        if self.machine.balance < price:
+            raise ValueError(f"Insufficient funds — need {price - self.machine.balance} more cents")
+        self.machine.selected_item = name
+        self.machine.state = DispensingState(self.machine)
+
+
+class DispensingState(State):
+    def dispense(self) -> None:
+        name = self.machine.selected_item
+        price, stock = self.machine.inventory[name]
+        self.machine.inventory[name] = (price, stock - 1)
+        change = self.machine.balance - price
+        print(f"Dispensing {name}. Change returned: {change} cents")
+        self.machine.balance = 0
+        self.machine.selected_item = None
+        self.machine.state = IdleState(self.machine)</code></pre>
+
+            <div class="callout callout-blue">
+              <strong>Why State beats a pile of <code>if self.status == "..."</code> checks</strong>
+              Each state class only implements the transitions valid from
+              that state — calling <code>select_item()</code> while
+              <code>IdleState</code> is active raises automatically via the
+              base class, with no explicit guard needed. Adding a new state
+              (e.g. <code>MaintenanceState</code>) means adding one class,
+              not editing a growing conditional in every method.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+          <div class="section page-break" id="s8">
+            <div class="section-num">Section 08</div>
+            <h2 class="section-title">Rate Limiter</h2>
+            <p class="lead">
+              Prompt: <em>"Design a rate limiter that allows at most N
+              requests per client per time window."</em> Tests picking the
+              right algorithm for the accuracy/memory trade-off and
+              encapsulating it behind one <code>allow_request()</code> call.
+            </p>
+
+            <h3>Token bucket</h3>
+            <pre><code>import time
+
+class TokenBucketLimiter:
+    def __init__(self, capacity: int, refill_rate_per_sec: float):
+        self.capacity = capacity
+        self.refill_rate = refill_rate_per_sec
+        self.tokens = float(capacity)
+        self.last_refill = time.monotonic()
+
+    def _refill(self) -> None:
+        now = time.monotonic()
+        elapsed = now - self.last_refill
+        self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)
+        self.last_refill = now
+
+    def allow_request(self) -> bool:
+        self._refill()
+        if self.tokens >= 1:
+            self.tokens -= 1
+            return True
+        return False</code></pre>
+
+            <h3>Sliding window log (precise, more memory)</h3>
+            <pre><code>from collections import deque
+import time
+
+class SlidingWindowLimiter:
+    def __init__(self, max_requests: int, window_seconds: float):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self.requests: dict[str, deque[float]] = {}   # per-client timestamps
+
+    def allow_request(self, client_id: str) -> bool:
+        now = time.monotonic()
+        q = self.requests.setdefault(client_id, deque())
+        while q and now - q[0] > self.window_seconds:
+            q.popleft()                       # drop timestamps outside the window
+        if len(q) < self.max_requests:
+            q.append(now)
+            return True
+        return False</code></pre>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Algorithm</th>
+                    <th>Memory</th>
+                    <th>Accuracy</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Fixed window counter</td>
+                    <td>O(1) per client</td>
+                    <td>Allows up to 2x burst at window boundaries</td>
+                  </tr>
+                  <tr>
+                    <td>Sliding window log</td>
+                    <td>O(requests in window) per client</td>
+                    <td>Exact</td>
+                  </tr>
+                  <tr>
+                    <td>Token bucket</td>
+                    <td>O(1) per client</td>
+                    <td>Exact rate, allows controlled bursts up to capacity</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout callout-amber">
+              <strong>Interviewer curveball: distributed rate limiting</strong>
+              Both implementations above are per-process, in-memory —
+              across multiple API servers you'd need the counters in a
+              shared store (Redis) with atomic increment + expiry, and should
+              expect to discuss the consistency/latency trade-off of
+              checking a remote store on every request.
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 9 ══════════════════════════ -->
+          <div class="section page-break" id="s9">
+            <div class="section-num">Section 09</div>
+            <h2 class="section-title">Design Patterns Cheat Sheet</h2>
+            <p class="lead">
+              The patterns that show up over and over in LLD interviews —
+              recognize the shape of the problem, don't force-fit a pattern
+              where plain composition would do.
+            </p>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Pattern</th>
+                    <th>Problem it solves</th>
+                    <th>Seen in this guide</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Composite</td>
+                    <td>Treat a single object and a group of objects uniformly</td>
+                    <td>Employee hierarchy (§2)</td>
+                  </tr>
+                  <tr>
+                    <td>State</td>
+                    <td>Behavior changes based on internal state, without giant conditionals</td>
+                    <td>Vending machine (§7)</td>
+                  </tr>
+                  <tr>
+                    <td>Strategy</td>
+                    <td>Swap an algorithm at runtime behind one interface</td>
+                    <td>Elevator dispatch, pricing (§3, §5)</td>
+                  </tr>
+                  <tr>
+                    <td>Observer</td>
+                    <td>Notify many dependents automatically when one object changes</td>
+                    <td>Notification systems, event buses</td>
+                  </tr>
+                  <tr>
+                    <td>Factory Method</td>
+                    <td>Delegate object creation so callers don't depend on concrete classes</td>
+                    <td>Creating the right <code>ParkingSpot</code>/<code>Vehicle</code> subtype</td>
+                  </tr>
+                  <tr>
+                    <td>Singleton</td>
+                    <td>Guarantee exactly one instance of a shared resource</td>
+                    <td><code>ParkingLot</code>, <code>ElevatorController</code> (one per building)</td>
+                  </tr>
+                  <tr>
+                    <td>Decorator</td>
+                    <td>Attach responsibilities to an object dynamically, without subclassing</td>
+                    <td>Wrapping a cache with logging/metrics</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Observer — quick example</h3>
+            <pre><code>from abc import ABC, abstractmethod
+
+class Observer(ABC):
+    @abstractmethod
+    def notify(self, event: str) -> None: ...
+
+class EmailObserver(Observer):
+    def notify(self, event: str) -> None:
+        print(f"Emailing user: {event}")
+
+class Subject:
+    def __init__(self):
+        self._observers: list[Observer] = []
+
+    def subscribe(self, observer: Observer) -> None:
+        self._observers.append(observer)
+
+    def publish(self, event: str) -> None:
+        for observer in self._observers:
+            observer.notify(event)
+
+# e.g. Library.publish("book_available") notifies everyone waiting on a hold</code></pre>
+
+            <h3>Singleton — the Pythonic way</h3>
+            <pre><code>class ElevatorController:
+    _instance: "ElevatorController | None" = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+# NOTE: in interviews, mention the trade-off — singletons make unit testing
+# harder (global state persists across tests) and are often better replaced
+# by dependency injection (pass one shared instance around explicitly).</code></pre>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 10 ══════════════════════════ -->
+          <div class="section page-break" id="s10">
+            <div class="section-num">Section 10</div>
+            <h2 class="section-title">Tricky Follow-Ups &amp; Trade-offs</h2>
+            <p class="lead">
+              The design itself is only half the interview — how you handle
+              the follow-up "now what if..." questions is usually what
+              separates a pass from a strong pass.
+            </p>
+
+            <h3>Q1. "The CEO retires — promote the VP to CEO." (Employee hierarchy)</h3>
+            <pre><code>def promote_to_root(new_root: Employee, old_root: Employee) -> Employee:
+    old_root.remove_subordinate(new_root)          # detach from old parent
+    for sibling in old_root.subordinates:
+        new_root.add_subordinate(sibling)          # old root's other reports move under new_root
+    new_root.add_subordinate(old_root)              # old CEO optionally becomes an advisor/report
+    return new_root</code></pre>
+            <p>
+              This is why storing only a <code>subordinates</code> list (not
+              a back-reference to one's manager) can bite you — re-parenting
+              requires walking from the root to find and detach the promoted
+              node, unless each <code>Employee</code> also tracks its own
+              <code>manager</code> reference for O(1) lookups.
+            </p>
+
+            <h3>Q2. "Make the Parking Lot thread-safe." (Concurrency)</h3>
+            <pre><code>import threading
+
+class ParkingSpot:
+    def __init__(self, spot_id: str, size: SpotSize):
+        self.spot_id, self.size = spot_id, size
+        self.vehicle: Vehicle | None = None
+        self._lock = threading.Lock()
+
+    def try_claim(self, vehicle: Vehicle) -> bool:
+        with self._lock:                     # atomic check-then-set per spot
+            if self.vehicle is None:
+                self.vehicle = vehicle
+                return True
+            return False</code></pre>
+            <p>
+              A per-spot lock (rather than one lock for the whole lot) keeps
+              two cars claiming <em>different</em> spots from blocking each
+              other — only genuine contention for the same spot serializes.
+            </p>
+
+            <h3>Q3. "Add contractors, who don't get benefits, without touching Employee/Manager." (Open/Closed)</h3>
+            <pre><code>class Contractor(Employee):
+    def role(self) -> str:
+        return "Contractor"
+
+    def total_team_cost(self) -> float:
+        return self.salary * 1.0   # e.g., no benefits multiplier applied here vs full-time</code></pre>
+            <p>
+              Because every consumer of <code>Employee</code> only depends on
+              its abstract interface, adding <code>Contractor</code> requires
+              zero changes to <code>find_employee</code>,
+              <code>print_org_chart</code>, or any existing subclass — the
+              definition of "open for extension, closed for modification."
+            </p>
+
+            <h3>Q4. "How would you unit test the vending machine's states in isolation?"</h3>
+            <pre><code>def test_cannot_select_item_while_idle():
+    machine = VendingMachine()
+    with pytest.raises(ValueError):
+        machine.select_item("soda")   # IdleState.select_item raises by design
+
+def test_insert_coin_transitions_to_has_money():
+    machine = VendingMachine()
+    machine.insert_coin(100)
+    assert isinstance(machine.state, HasMoneyState)</code></pre>
+            <p>
+              Because each state is its own class with its own methods, you
+              can assert on <code>type(machine.state)</code> directly instead
+              of reverse-engineering a status string — a concrete benefit of
+              the State pattern for testability.
+            </p>
+
+            <div class="callout callout-purple">
+              <strong>General interview instinct</strong>
+              Whenever a follow-up asks "what if X could have multiple Y" or
+              "what if this needs to run concurrently," check whether your
+              current data structure assumed a tree (one parent), a single
+              owner, or single-threaded access — those three assumptions are
+              where nearly every LLD follow-up question aims.
+            </div>
+
+            <h3>Further Reading</h3>
+            <ul class="clean">
+              <li>
+                <a
+                  href="https://refactoring.guru/design-patterns"
+                  target="_blank"
+                  rel="noopener"
+                  >Refactoring Guru — Design Patterns catalog</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://docs.python.org/3/library/abc.html"
+                  target="_blank"
+                  rel="noopener"
+                  >Python <code>abc</code> module — abstract base classes</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://docs.python.org/3/library/collections.html#collections.OrderedDict"
+                  target="_blank"
+                  rel="noopener"
+                  >Python <code>collections.OrderedDict</code></a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <!-- /container -->
+      </div>
+      <!-- /main-scroll -->
+    </div>
+    <!-- /topic-page -->
+    <footer class="guide-footer">
+      Synapse &middot; AI &amp; LLM Engineering
+    </footer>
+    <script src="../assets/scroll-top.js"></script>
+  </body>
+</html>

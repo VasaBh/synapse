@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C# &amp; .NET — Synapse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e; --ink2: #3d3d5c; --ink3: #6b6b8a;
+  --bg: #ffffff; --bg2: #f4f3f0; --bg3: #eae8e4;
+  --accent: #2563eb; --accent2: #1d4ed8; --accent-bg: #eff6ff;
+  --green: #059669; --green-bg: #ecfdf5;
+  --amber: #d97706; --amber-bg: #fffbeb;
+  --rose: #e11d48; --rose-bg: #fff1f2;
+  --purple: #7c3aed; --purple-bg: #f5f3ff;
+  --teal: #0d9488; --teal-bg: #f0fdfa;
+  --coral: #ea580c; --coral-bg: #fff7ed;
+  --border: #e2e0dc; --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+@media print {
+  body { font-size: 10pt; } .no-print { display: none !important; }
+  .page-break { page-break-before: always; } .card { break-inside: avoid; }
+  pre { font-size: 8pt; } h1 { font-size: 22pt; } h2 { font-size: 14pt; }
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+.cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%); color: white; padding: 4rem 2rem; position: relative; overflow: hidden; }
+.cover::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 50%, rgba(37,99,235,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(124,58,237,0.1) 0%, transparent 50%); }
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+.diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; margin: 1rem 0; font-family: var(--mono); font-size: 0.75rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink2); }
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+/* ── CSS Flow Diagrams ── */
+.fd { display: flex; flex-direction: column; align-items: center; margin: 1.25rem 0; }
+.fd-row { display: flex; align-items: center; justify-content: center; }
+.fd-col { display: flex; flex-direction: column; align-items: center; }
+.fd-node { border-radius: 8px; padding: 0.45rem 1rem; font-size: 0.78rem; font-family: var(--mono); font-weight: 500; border: 1.5px solid; text-align: center; line-height: 1.45; }
+.fd-node sub { font-size: 0.65rem; opacity: 0.75; display: block; font-weight: 400; }
+.fd-node-blue   { background: var(--accent-bg);  border-color: var(--accent);  color: var(--accent2); }
+.fd-node-green  { background: var(--green-bg);   border-color: var(--green);   color: var(--green); }
+.fd-node-purple { background: var(--purple-bg);  border-color: var(--purple);  color: var(--purple); }
+.fd-node-amber  { background: var(--amber-bg);   border-color: var(--amber);   color: var(--amber); }
+.fd-node-teal   { background: var(--teal-bg);    border-color: var(--teal);    color: var(--teal); }
+.fd-node-coral  { background: var(--coral-bg);   border-color: var(--coral);   color: var(--coral); }
+.fd-node-rose   { background: var(--rose-bg);    border-color: var(--rose);    color: var(--rose); }
+.fd-node-dark   { background: var(--ink);        border-color: var(--ink);     color: #fff; }
+.fd-node-gray   { background: var(--bg2);        border-color: var(--border);  color: var(--ink2); }
+.fd-arr-d { width: 2px; height: 28px; background: var(--ink3); margin: 0 auto; position: relative; }
+.fd-arr-d::after { content:''; position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); border-left:5px solid transparent; border-right:5px solid transparent; border-top:7px solid var(--ink3); }
+.fd-arr-u { width: 2px; height: 28px; background: var(--ink3); margin: 0 auto; position: relative; }
+.fd-arr-u::before { content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%); border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:7px solid var(--ink3); }
+.fd-arr-r { width: 32px; height: 2px; background: var(--ink3); position: relative; flex-shrink: 0; }
+.fd-arr-r::after { content:''; position:absolute; right:-6px; top:50%; transform:translateY(-50%); border-top:5px solid transparent; border-bottom:5px solid transparent; border-left:7px solid var(--ink3); }
+.fd-arr-l { width: 32px; height: 2px; background: var(--ink3); position: relative; flex-shrink: 0; }
+.fd-arr-l::before { content:''; position:absolute; left:-6px; top:50%; transform:translateY(-50%); border-top:5px solid transparent; border-bottom:5px solid transparent; border-right:7px solid var(--ink3); }
+.fd-group { border: 2px dashed var(--border); border-radius: 12px; padding: 1rem 1.2rem; background: var(--bg2); }
+.fd-group-title { font-size: 0.65rem; font-family: var(--mono); color: var(--ink3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.6rem; text-align: center; }
+.fd-note { font-size: 0.68rem; font-family: var(--sans); color: var(--ink3); text-align: center; max-width: 200px; line-height: 1.35; margin-top: 0.2rem; }
+.fd-gap { width: 1.5rem; flex-shrink: 0; }
+.fd-gap-v { height: 0.75rem; }
+.fd-diamond { min-width: 100px; padding: 0.5rem 0.75rem; background: var(--amber-bg); border: 1.5px solid var(--amber); color: var(--amber); font-size: 0.72rem; font-family: var(--mono); display: flex; align-items: center; justify-content: center; clip-path: polygon(50% 0%,100% 50%,50% 100%,0% 50%); text-align: center; font-weight: 600; }
+.fd-mini-label { font-size: 0.62rem; font-family: var(--mono); color: var(--ink3); text-align: center; margin-top: 0.15rem; }
+.fd-start-end { font-family: var(--mono); font-size: 0.72rem; background: var(--ink); color: #fff; border-radius: 20px; padding: 0.25rem 0.9rem; font-weight: 600; }
+@media (max-width: 600px) { .fd-row { flex-wrap: wrap; gap: 0.5rem; } .fd-arr-r, .fd-arr-l { display: none; } }
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar nav ul ul { margin: 0; padding: 0; }
+.sidebar nav ul ul li a { padding: 0.3rem 1.25rem 0.3rem 2.2rem; font-size: 0.74rem; color: #a0aec0; }
+.sidebar nav ul ul li a:hover { background: #3d4d63; color: #e2e8f0; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+</style>
+<link rel="stylesheet" href="../assets/mobile.css">
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← Synapse</a>
+  <h1>C# &amp; .NET</h1>
+</header>
+
+<div class="topic-page">
+  <aside class="sidebar">
+    <p class="sidebar-title">C# &amp; .NET</p>
+    <nav><ul>
+      <li><a href="#s1"><span class="toc-num">01</span>Basics of the .NET Framework</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>.NET Framework vs .NET Core vs Modern .NET</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>C# Fundamentals</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>LINQ</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>Multithreading, TPL &amp; Async/Await</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>Advanced .NET Concepts</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>Advanced C#</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>Orleans Framework</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>OOP Principles &amp; SOLID</a></li>
+      <li><a href="#s10"><span class="toc-num">10</span>SignalR</a></li>
+      <li><a href="#s11"><span class="toc-num">11</span>Advanced Interview Questions</a></li>
+    </ul></nav>
+  </aside>
+
+  <div class="main-scroll">
+    <div class="cover">
+      <div class="cover-label">Complete Technical Reference — July 2026</div>
+      <h1>C# &amp; .NET <span>Deep Dive</span></h1>
+      <p class="cover-sub">
+        CLR internals, the .NET Framework → .NET Core → modern .NET timeline, C# language
+        fundamentals through advanced features, LINQ, the Task Parallel Library, Orleans,
+        SignalR, and OOP/SOLID — written at the depth expected from a senior (15+ year) engineer.
+      </p>
+      <div class="cover-tags">
+        <span class="cover-tag">CLR &amp; BCL</span>
+        <span class="cover-tag">.NET Core / Modern .NET</span>
+        <span class="cover-tag">LINQ</span>
+        <span class="cover-tag">TPL / async-await</span>
+        <span class="cover-tag">Orleans</span>
+        <span class="cover-tag">SignalR</span>
+        <span class="cover-tag">SOLID</span>
+        <span class="cover-tag">Interview Questions</span>
+      </div>
+      <div class="cover-date">v1.0 — July 2026</div>
+    </div>
+
+    <div class="container">
+      <div class="callout callout-blue" style="margin-top:2rem">
+        <strong>Companion guide</strong>
+        For an exhaustive tour of C# language syntax itself — classes &amp; static constructors,
+        interfaces vs abstract classes, generics, delegates/events, pattern matching, records,
+        async/await internals, and C# 8 → 13 syntax — see
+        <a href="csharp-language.html">C# Language Features</a>.
+      </div>
+
+      <div class="toc page-break">
+        <h2>Contents</h2>
+        <div class="toc-grid">
+          <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">Basics of the .NET Framework</span></a>
+          <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">.NET Framework vs .NET Core vs Modern .NET</span></a>
+          <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">C# Fundamentals</span></a>
+          <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">LINQ</span></a>
+          <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">Multithreading, TPL &amp; Async/Await</span></a>
+          <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Advanced .NET Concepts</span></a>
+          <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Advanced C#</span></a>
+          <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">Orleans Framework</span></a>
+          <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">OOP Principles &amp; SOLID</span></a>
+          <a class="toc-item" href="#s10"><span class="toc-num">10</span><span class="toc-label">SignalR</span></a>
+          <a class="toc-item" href="#s11"><span class="toc-num">11</span><span class="toc-label">Advanced Interview Questions</span></a>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+      <div class="section page-break" id="s1">
+        <div class="section-num">Section 01</div>
+        <h2 class="section-title">Basics of the .NET Framework</h2>
+        <p class="lead">
+          .NET is a managed platform: your source code never runs directly on the CPU.
+          It's compiled to an intermediate, platform-neutral bytecode (IL), packaged into an
+          assembly with metadata, and only turned into real machine code at load/run time by
+          the CLR's JIT compiler. That indirection is what buys you cross-language interop,
+          automatic memory management, and type safety.
+        </p>
+
+        <h3>From source to native code</h3>
+        <div class="fd">
+          <div class="fd-row" style="gap:0.5rem;flex-wrap:wrap">
+            <div class="fd-node fd-node-gray">C#<sub>.cs</sub></div>
+            <div class="fd-node fd-node-gray">F#<sub>.fs</sub></div>
+            <div class="fd-node fd-node-gray">VB.NET<sub>.vb</sub></div>
+          </div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-blue" style="min-width:260px">Language Compiler (Roslyn, etc.)<sub>enforces the language's own rules</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-purple" style="min-width:260px">Assembly (.dll / .exe)<sub>CIL (MSIL) + metadata + manifest</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-amber" style="min-width:260px">CLR — Common Language Runtime<sub>loader, type-checker, JIT, GC</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-teal" style="min-width:260px">JIT Compiler<sub>IL → native machine code, per method, on first call</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-dark" style="min-width:260px">Native code executing on the CPU</div>
+        </div>
+
+        <div class="callout callout-blue">
+          <strong>Why the IL indirection matters</strong>
+          Because every .NET language compiles down to the same IL + CTS type model, a C#
+          class can inherit from an F# class, a VB.NET assembly can implement a C# interface,
+          and tools like decompilers, profilers, and the debugger all work identically regardless
+          of source language. This is the entire point of the CLR: one runtime, many front-end languages.
+        </div>
+
+        <h3>Core building blocks</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Component</th><th>What it actually does</th></tr></thead>
+            <tbody>
+              <tr><td>CLR</td><td>The execution engine: loads assemblies, verifies IL type-safety, JIT-compiles methods, manages the GC heap, handles exceptions/threads.</td></tr>
+              <tr><td>BCL (Base Class Library)</td><td>The <code>System.*</code> namespaces — collections, I/O, strings, threading, networking. Ships inside the runtime.</td></tr>
+              <tr><td>FCL (Framework Class Library)</td><td>BCL + the higher-level frameworks built on top (ASP.NET, WPF, WCF, EF).</td></tr>
+              <tr><td>CTS (Common Type System)</td><td>The universal type rulebook — defines what a "class", "struct", "interface", "delegate" is at the runtime level, independent of source language.</td></tr>
+              <tr><td>CLS (Common Language Specification)</td><td>A stricter subset of CTS. A library that only exposes CLS-compliant members is guaranteed usable from <em>any</em> .NET language (e.g., no unsigned types in a public API, since VB.NET historically lacked them).</td></tr>
+              <tr><td>Assembly</td><td>The unit of deployment and versioning — a .dll/.exe containing IL, a manifest (name, version, referenced assemblies), and type metadata.</td></tr>
+              <tr><td>GAC (Global Assembly Cache)</td><td>Machine-wide store for strong-named, shared assemblies. A .NET Framework-only concept — modern .NET uses local, side-by-side NuGet-restored dependencies instead.</td></tr>
+              <tr><td>AppDomain</td><td>Legacy in-process isolation boundary (unload code without killing the process). Removed from the runtime model in .NET Core — replaced by <code>AssemblyLoadContext</code>.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>What the CLR is responsible for at runtime</h3>
+        <div class="card-grid">
+          <div class="card card-accent"><h4>Memory management</h4><p>Allocates objects on the managed heap and reclaims them via the garbage collector — no manual <code>free()</code>.</p></div>
+          <div class="card card-accent"><h4>Type safety &amp; verification</h4><p>IL is verified before execution; you can't reinterpret a <code>string</code> as an <code>int*</code> the way you can in unsafe C/C++.</p></div>
+          <div class="card card-accent"><h4>Exception handling</h4><p>A unified exception model (<code>try/catch/finally</code>) works the same across all managed languages.</p></div>
+          <div class="card card-accent"><h4>JIT compilation</h4><p>Compiles IL to native code per-method on first invocation (or ahead-of-time with NativeAOT/ReadyToRun — see §2).</p></div>
+          <div class="card card-accent"><h4>Thread &amp; task scheduling</h4><p>Owns the managed <code>ThreadPool</code> that the TPL and async/await build on (see §5).</p></div>
+          <div class="card card-accent"><h4>Security</h4><p>Historically enforced Code Access Security (CAS) sandboxing; modern .NET relies on OS-level sandboxing instead (CAS is effectively retired).</p></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+      <div class="section page-break" id="s2">
+        <div class="section-num">Section 02</div>
+        <h2 class="section-title">.NET Framework vs .NET Core vs Modern .NET</h2>
+        <p class="lead">
+          There have been effectively three eras of .NET. Getting the timeline straight matters
+          for interviews because it explains <em>why</em> certain APIs exist twice, why "port to
+          .NET Core" was a multi-year industry migration, and why the version number jumped from
+          4.8 straight to 5.
+        </p>
+
+        <h3>Timeline</h3>
+        <div class="fd">
+          <div class="fd-group" style="width:100%;max-width:820px">
+            <div class="fd-group-title">One brand, three runtimes over 20+ years</div>
+            <div class="fd-row" style="gap:0.5rem;flex-wrap:wrap;justify-content:center">
+              <div class="fd-col">
+                <div class="fd-node fd-node-dark" style="min-width:150px">.NET Framework<sub>2002 – 2019 (4.8, last version)</sub></div>
+                <div class="fd-mini-label">Windows only · closed-source runtime</div>
+              </div>
+              <div class="fd-arr-r"></div>
+              <div class="fd-col">
+                <div class="fd-node fd-node-blue" style="min-width:150px">.NET Core<sub>2016 – 2020 (1.0 → 3.1)</sub></div>
+                <div class="fd-mini-label">Cross-platform rewrite, open source</div>
+              </div>
+              <div class="fd-arr-r"></div>
+              <div class="fd-col">
+                <div class="fd-node fd-node-teal" style="min-width:150px">.NET 5, 6, 7, 8, 9…<sub>2020 → present, yearly</sub></div>
+                <div class="fd-mini-label">Unified — "Core" dropped from the name</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="fd-note" style="max-width:none;margin-top:0.75rem">
+          .NET 5 was deliberately numbered to skip "4" so nobody would confuse it with .NET Framework 4.x. Since .NET 5,
+          there is exactly one .NET going forward — "modern .NET" — released every November, with every even number
+          (6, 8, 10…) as a 3-year LTS release and odd numbers as 18-month STS/current releases.
+        </div>
+
+        <h3>Head-to-head</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Dimension</th><th>.NET Framework</th><th>.NET Core</th><th>Modern .NET (5+)</th></tr></thead>
+            <tbody>
+              <tr><td>Platform</td><td>Windows only</td><td>Windows, Linux, macOS</td><td>Windows, Linux, macOS, WASM, mobile (via MAUI)</td></tr>
+              <tr><td>Open source</td><td>No (mostly)</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>Deployment</td><td>Machine-wide (GAC), shared runtime</td><td>Side-by-side, self-contained option</td><td>Side-by-side, self-contained, single-file, NativeAOT</td></tr>
+              <tr><td>Web stack</td><td>ASP.NET (System.Web, WebForms, MVC 5)</td><td>ASP.NET Core (Kestrel, middleware pipeline)</td><td>ASP.NET Core, Minimal APIs, Blazor</td></tr>
+              <tr><td>Performance</td><td>Baseline</td><td>Significantly faster GC &amp; JIT</td><td>Fastest — tiered PGO, NativeAOT, Span-heavy BCL</td></tr>
+              <tr><td>Container-friendly</td><td>Poor (large image, Windows-only)</td><td>Good</td><td>Excellent (small Alpine/distroless images)</td></tr>
+              <tr><td>Future investment</td><td>Servicing only, no new features</td><td>Superseded</td><td>Active, yearly releases</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>.NET Standard — the bridge, not a runtime</h3>
+        <p>
+          <strong>.NET Standard</strong> is a <em>specification</em> (a set of APIs a library promises to implement),
+          not a runtime you execute. A library targeting <code>netstandard2.0</code> can be referenced from both
+          .NET Framework 4.6.1+ and .NET Core 2.0+, which is how the ecosystem shared class libraries during the
+          multi-year migration window. Since .NET 5 unified the runtimes, new class libraries typically just multi-target
+          modern TFMs (e.g. <code>net8.0</code>) directly and only reach for <code>netstandard2.0</code> if they must
+          still support .NET Framework consumers.
+        </p>
+
+        <h3>Runtime flavors you'll meet in the wild</h3>
+        <div class="card-grid">
+          <div class="card card-accent"><h4>CoreCLR</h4><p>The default modern .NET runtime — what you get from <code>dotnet run</code>.</p></div>
+          <div class="card card-accent"><h4>Mono</h4><p>Lighter runtime used by Xamarin, Unity, and Blazor WebAssembly (interpreter/AOT hybrid, small footprint).</p></div>
+          <div class="card card-accent"><h4>NativeAOT</h4><p>Compiles straight to a self-contained native executable ahead of time — no JIT, near-instant startup, smaller memory, but no runtime reflection-heavy dynamic code.</p></div>
+          <div class="card card-accent"><h4>ReadyToRun (R2R)</h4><p>Pre-JITs IL into native code stored alongside the assembly to cut cold-start time, while still allowing the JIT to re-optimize hot paths.</p></div>
+        </div>
+
+        <div class="callout callout-amber">
+          <strong>Where you'll still run into .NET Framework in 2026</strong>
+          Legacy WCF services (not fully ported — use CoreWCF or gRPC when modernizing), classic
+          WebForms apps, and COM/Windows-specific interop (e.g. Office automation) that never had
+          a reason to move. Everything net-new should target the current LTS of modern .NET.
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+      <div class="section page-break" id="s3">
+        <div class="section-num">Section 03</div>
+        <h2 class="section-title">C# Fundamentals</h2>
+        <p class="lead">
+          The fundamentals that everything else in this guide leans on: how value and reference
+          types actually live in memory, what boxing costs, the property/exception idioms that
+          show up in every C# codebase, and the two abstraction mechanisms — interfaces and
+          delegates — that the rest of the language (LINQ, events, DI, async) is built on top of.
+        </p>
+
+        <h3>Value types vs reference types</h3>
+        <div class="fd">
+          <div class="fd-row" style="gap:2rem;align-items:flex-start;flex-wrap:wrap;justify-content:center">
+            <div class="fd-group">
+              <div class="fd-group-title">Stack</div>
+              <div class="fd-node fd-node-green" style="min-width:170px">int x = 42<sub>value types: struct, enum, primitives</sub></div>
+              <div class="fd-gap-v"></div>
+              <div class="fd-node fd-node-blue" style="min-width:170px">Person p ──┐<sub>reference variable lives here</sub></div>
+            </div>
+            <div class="fd-col">
+              <div class="fd-arr-r" style="width:44px"></div>
+              <div class="fd-mini-label">points to</div>
+            </div>
+            <div class="fd-group">
+              <div class="fd-group-title">Managed Heap</div>
+              <div class="fd-node fd-node-purple" style="min-width:170px">Person object<sub>reference types: class, string, array, delegate</sub></div>
+            </div>
+          </div>
+        </div>
+        <p>
+          Copying a value type copies the bits (a new, independent 42). Copying a reference type
+          copies the pointer — both variables now point at the same heap object, so mutating
+          through one is visible through the other.
+        </p>
+
+        <h3>Boxing and unboxing</h3>
+        <pre><code>int i = 42;
+object boxed = i;        // boxing: heap-allocates a wrapper, copies the value in
+int back = (int)boxed;   // unboxing: type-checked copy back out
+
+// Every non-generic collection member access on a value type boxes:
+ArrayList list = new ArrayList();
+list.Add(42);             // boxes
+int x = (int)list[0];     // unboxes</code></pre>
+        <div class="callout callout-rose">
+          <strong>Why this matters in interviews</strong>
+          Boxing is a hidden heap allocation and a hidden copy — a classic cause of GC pressure
+          in hot loops. It's exactly the problem generics (<code>List&lt;int&gt;</code> instead
+          of <code>ArrayList</code>) were introduced to eliminate, since a generic collection is
+          specialized per value type at JIT time and never boxes.
+        </div>
+
+        <h3>Properties</h3>
+        <pre><code>public class Order
+{
+    public int Id { get; set; }                     // auto-implemented property
+    public decimal Total { get; init; }              // settable only at construction (C# 9+)
+    public string Summary => $"{Id}: {Total:C}";      // expression-bodied, read-only, computed
+
+    private string _status = "Pending";
+    public string Status                              // full property with backing field
+    {
+        get => _status;
+        set => _status = value ?? throw new ArgumentNullException(nameof(value));
+    }
+}</code></pre>
+
+        <h3>Access modifiers</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Modifier</th><th>Visible to</th></tr></thead>
+            <tbody>
+              <tr><td><code>public</code></td><td>Everyone</td></tr>
+              <tr><td><code>private</code></td><td>The declaring type only (default for class members)</td></tr>
+              <tr><td><code>protected</code></td><td>The declaring type and its subclasses</td></tr>
+              <tr><td><code>internal</code></td><td>Anything in the same assembly</td></tr>
+              <tr><td><code>protected internal</code></td><td>Same assembly <em>OR</em> any subclass, even in another assembly</td></tr>
+              <tr><td><code>private protected</code></td><td>Subclasses, but only within the same assembly (C# 7.2+)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Interfaces</h3>
+        <p>
+          An interface is a pure contract — a set of members a type promises to implement, with
+          no state of its own. It's the mechanism that makes abstraction (§9) concrete in C#: code
+          depends on <code>IShape</code>, never on which concrete shape it got.
+        </p>
+        <div class="fd">
+          <div class="fd-node fd-node-dark" style="min-width:200px">IShape<sub>double Area(); double Perimeter();</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-row" style="gap:0.6rem">
+            <div class="fd-node fd-node-blue">Circle : IShape</div>
+            <div class="fd-node fd-node-teal">Rectangle : IShape</div>
+            <div class="fd-node fd-node-purple">Triangle : IShape</div>
+          </div>
+        </div>
+        <pre><code>public interface IShape
+{
+    double Area();
+    double Perimeter();
+
+    // default interface method (C# 8+) — a body ships WITH the interface;
+    // implementers get it for free unless they choose to override it
+    string Describe() => $"Area = {Area():F2}, Perimeter = {Perimeter():F2}";
+}
+
+public class Circle : IShape
+{
+    public double Radius { get; init; }
+    public double Area() => Math.PI * Radius * Radius;
+    public double Perimeter() => 2 * Math.PI * Radius;
+}
+
+// Code depends on the abstraction, not the concrete type:
+void PrintShape(IShape shape) => Console.WriteLine(shape.Describe());
+PrintShape(new Circle { Radius = 3 });</code></pre>
+
+        <h4>Interface vs abstract class</h4>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>Interface</th><th>Abstract class</th></tr></thead>
+            <tbody>
+              <tr><td>State (fields)</td><td>No instance fields</td><td>Can hold fields and full constructors</td></tr>
+              <tr><td>Multiple inheritance</td><td>A type can implement any number of interfaces</td><td>A class can inherit from only one base class</td></tr>
+              <tr><td>Method bodies</td><td>Optional via default interface methods (C# 8+)</td><td>Mix of abstract (no body) and concrete (implemented) members</td></tr>
+              <tr><td>Use it when</td><td>You need a capability contract across unrelated types (<code>IDisposable</code>, <code>IComparable</code>)</td><td>You have a true is-a hierarchy that shares real implementation, not just a signature</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout-blue">
+          <strong>Why default interface methods exist</strong>
+          Before C# 8, adding a new member to a published interface was a breaking change for every
+          implementer. Default interface methods let library authors extend an interface
+          (e.g. adding a new LINQ-style method) without breaking existing implementations that
+          simply inherit the default body.
+        </div>
+
+        <h3>Delegates, <code>Func</code>, <code>Action</code> &amp; <code>Predicate</code></h3>
+        <p>
+          A delegate is a type-safe reference to a method — effectively a type-checked function
+          pointer. You rarely declare your own delegate type in modern C#; the BCL's generic
+          <code>Func</code>/<code>Action</code>/<code>Predicate</code> families cover almost every
+          case, and this is exactly what every LINQ operator in §4 takes as an argument.
+        </p>
+        <pre><code>// Declaring your own delegate type (uncommon today, but this is what a delegate IS)
+public delegate int Operation(int a, int b);
+Operation add = (a, b) => a + b;
+int result = add(2, 3);   // 5 — invoking the method through the delegate
+
+// The built-in generic delegates cover almost everything in practice:
+Func&lt;int, int, int&gt; multiply = (a, b) => a * b;     // has a return value
+Action&lt;string&gt; log = msg => Console.WriteLine(msg); // no return value (void)
+Predicate&lt;int&gt; isEven = n => n % 2 == 0;             // returns bool — used by List&lt;T&gt;.Find/FindAll
+
+var evens = new List&lt;int&gt; { 1, 2, 3, 4 }.FindAll(isEven);</code></pre>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Type</th><th>Signature shape</th><th>Typical use</th></tr></thead>
+            <tbody>
+              <tr><td><code>Func&lt;T1,...,TResult&gt;</code></td><td>Takes 0-16 params, returns <code>TResult</code></td><td>LINQ projections/predicates, any "compute and return a value" callback</td></tr>
+              <tr><td><code>Action&lt;T1,...&gt;</code></td><td>Takes 0-16 params, returns <code>void</code></td><td>Callbacks/handlers that perform a side effect</td></tr>
+              <tr><td><code>Predicate&lt;T&gt;</code></td><td><code>bool Predicate(T obj)</code></td><td>Legacy <code>List&lt;T&gt;</code> methods (<code>Find</code>, <code>RemoveAll</code>) — <code>Func&lt;T,bool&gt;</code> is the modern equivalent used everywhere else, including LINQ's <code>Where</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout-purple">
+          <strong>Where this goes next</strong>
+          A delegate variable can hold more than one method at once (a <strong>multicast</strong>
+          delegate) — that's the mechanism C#'s <code>event</code> keyword builds on, and it's
+          covered in depth in §7 alongside variance and expression trees.
+        </div>
+
+        <h3>Exception handling</h3>
+        <pre><code>try
+{
+    ProcessOrder(order);
+}
+catch (ValidationException ex) when (ex.Severity == Severity.Warning)
+{
+    // exception filter: only catches when the "when" predicate is true —
+    // the exception keeps its original stack trace if the filter fails
+    Log.Warn(ex.Message);
+}
+catch (ValidationException ex)
+{
+    throw new OrderProcessingException("Order failed validation", ex); // wrap, preserve inner exception
+}
+finally
+{
+    connection.Dispose();   // always runs, even if the catch block re-throws
+}</code></pre>
+        <div class="callout callout-blue">
+          <strong><code>throw;</code> vs <code>throw ex;</code></strong>
+          <code>throw;</code> re-throws and preserves the original stack trace. <code>throw ex;</code>
+          resets the stack trace to the current line — almost always a bug when rethrowing inside a catch block.
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+      <div class="section page-break" id="s4">
+        <div class="section-num">Section 04</div>
+        <h2 class="section-title">LINQ</h2>
+        <p class="lead">
+          LINQ (Language Integrated Query) lets you query in-memory collections, databases, XML,
+          and more with the same syntax. The two things that separate a senior engineer's
+          understanding from a junior's: deferred execution, and the <code>IEnumerable</code> vs
+          <code>IQueryable</code> distinction.
+        </p>
+
+        <h3>The query pipeline</h3>
+        <div class="fd">
+          <div class="fd-row" style="gap:0">
+            <div class="fd-node fd-node-gray">Source<sub>IEnumerable&lt;T&gt;</sub></div>
+            <div class="fd-arr-r"></div>
+            <div class="fd-node fd-node-blue">.Where()</div>
+            <div class="fd-arr-r"></div>
+            <div class="fd-node fd-node-purple">.Select()</div>
+            <div class="fd-arr-r"></div>
+            <div class="fd-node fd-node-amber">.OrderBy()</div>
+            <div class="fd-arr-r"></div>
+            <div class="fd-node fd-node-dark">.ToList()<sub>materializes — executes now</sub></div>
+          </div>
+          <div class="fd-note" style="max-width:520px;margin-top:0.6rem">
+            Everything before <code>.ToList()</code> builds up a lazy query description. No row
+            has been touched yet — the pipeline only runs when something enumerates it
+            (<code>ToList</code>, <code>foreach</code>, <code>First()</code>, etc.).
+          </div>
+        </div>
+
+        <h3>Deferred vs immediate execution</h3>
+        <pre><code>var query = orders.Where(o => o.Total > 100);   // nothing executes yet — just builds an iterator
+
+orders.Add(new Order { Total = 500 });          // mutate the source BEFORE enumerating…
+
+foreach (var o in query) { /* ... */ }          // …and the new order IS included here!
+
+var list = orders.Where(o => o.Total > 100).ToList();  // executes immediately, snapshot taken now</code></pre>
+        <div class="callout callout-amber">
+          <strong>Classic gotcha</strong>
+          Forgetting that a query variable is a re-runnable recipe, not a result, leads to
+          "why did this LINQ query see data I added after I built it?" — and the opposite bug:
+          re-enumerating an expensive query twice (e.g. once for <code>Count()</code>, once for
+          <code>foreach</code>) silently re-executes the whole pipeline (or re-hits the database) twice.
+        </div>
+
+        <h3>IEnumerable&lt;T&gt; vs IQueryable&lt;T&gt;</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>IEnumerable&lt;T&gt;</th><th>IQueryable&lt;T&gt;</th></tr></thead>
+            <tbody>
+              <tr><td>Represents</td><td>An in-memory sequence (LINQ to Objects)</td><td>An <strong>expression tree</strong> to be translated by a provider (LINQ to Entities/SQL)</td></tr>
+              <tr><td>Where filtering happens</td><td>In .NET process memory</td><td>Translated to SQL and run in the database</td></tr>
+              <tr><td>Typical source</td><td><code>List&lt;T&gt;</code>, arrays, in-memory collections</td><td><code>DbSet&lt;T&gt;</code> in Entity Framework Core</td></tr>
+              <tr><td>Danger</td><td>—</td><td>Calling <code>.ToList()</code> too early pulls the whole table into memory before filtering</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <pre><code>// BAD: .ToList() materializes ALL rows first, then filters in memory
+var expensive = dbContext.Orders.ToList().Where(o => o.Total > 100);
+
+// GOOD: filter stays part of the expression tree, translated to a SQL WHERE clause
+var cheap = dbContext.Orders.Where(o => o.Total > 100).ToList();</code></pre>
+
+        <h3>Method syntax vs query syntax</h3>
+        <pre><code>// Method syntax (far more common in real codebases)
+var result = employees.Where(e => e.Department == "Eng")
+                       .OrderBy(e => e.Salary)
+                       .Select(e => new { e.Name, e.Salary });
+
+// Query syntax — sugar that compiles to the exact same method calls
+var result2 = from e in employees
+              where e.Department == "Eng"
+              orderby e.Salary
+              select new { e.Name, e.Salary };</code></pre>
+
+        <h3>Operators you're expected to know cold</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Operator</th><th>Use</th></tr></thead>
+            <tbody>
+              <tr><td><code>Select</code> / <code>SelectMany</code></td><td>Project each item / flatten a sequence of sequences into one</td></tr>
+              <tr><td><code>Where</code></td><td>Filter</td></tr>
+              <tr><td><code>GroupBy</code></td><td>Bucket items by a key</td></tr>
+              <tr><td><code>Join</code> / <code>GroupJoin</code></td><td>Inner join / left-outer-join style grouping between two sequences</td></tr>
+              <tr><td><code>OrderBy</code>/<code>ThenBy</code></td><td>Stable multi-key sort</td></tr>
+              <tr><td><code>Aggregate</code></td><td>General-purpose fold/reduce</td></tr>
+              <tr><td><code>Any</code> / <code>All</code></td><td>Short-circuiting existence/universality checks</td></tr>
+              <tr><td><code>First</code>/<code>FirstOrDefault</code>/<code>Single</code>/<code>SingleOrDefault</code></td><td><code>Single*</code> throws if more than one match — use it to assert uniqueness, not just "get one"</td></tr>
+              <tr><td><code>Skip</code> / <code>Take</code></td><td>Paging</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-purple">
+          <strong>Expression trees &amp; PLINQ, briefly</strong>
+          <code>IQueryable</code> works because a lambda can be compiled either to a delegate
+          (executable code) or to an <strong>expression tree</strong> (a data structure describing
+          the code) depending on context — that's the mechanism EF Core uses to turn your C#
+          lambda into SQL. Separately, <code>.AsParallel()</code> (PLINQ) partitions a query across
+          multiple cores for CPU-bound in-memory workloads — it doesn't help with I/O-bound work,
+          which is what <code>async</code>/<code>await</code> is for (see §5).
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+      <div class="section page-break" id="s5">
+        <div class="section-num">Section 05</div>
+        <h2 class="section-title">Multithreading, TPL &amp; Async/Await</h2>
+        <p class="lead">
+          The most interview-tested area of .NET. The key mental model: <code>async</code>/<code>await</code>
+          is about <strong>not blocking a thread</strong> while waiting on I/O; it is not, by itself,
+          about running things on other threads — that's what the Task Parallel Library and
+          <code>Parallel</code>/PLINQ are for.
+        </p>
+
+        <h3>Thread vs Task</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>Thread</th><th>Task</th></tr></thead>
+            <tbody>
+              <tr><td>Represents</td><td>An actual OS thread</td><td>A unit of work that <em>may</em> run on a pooled thread — a promise of a future result</td></tr>
+              <tr><td>Cost</td><td>~1MB stack, expensive to create</td><td>Lightweight, scheduled onto the shared <code>ThreadPool</code></td></tr>
+              <tr><td>Composability</td><td>Manual (join, signal)</td><td><code>await</code>, <code>ContinueWith</code>, <code>WhenAll</code>/<code>WhenAny</code></td></tr>
+              <tr><td>Typical use today</td><td>Rare — long-lived, dedicated background work</td><td>Default for essentially everything else</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The ThreadPool</h3>
+        <div class="fd">
+          <div class="fd-node fd-node-dark" style="min-width:220px">Global Work Queue<sub>Tasks queued here</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-row" style="gap:0.6rem;flex-wrap:wrap;justify-content:center">
+            <div class="fd-node fd-node-blue">Worker 1</div>
+            <div class="fd-node fd-node-blue">Worker 2</div>
+            <div class="fd-node fd-node-blue">Worker 3</div>
+            <div class="fd-node fd-node-blue">Worker N</div>
+          </div>
+          <div class="fd-note" style="max-width:420px;margin-top:0.5rem">
+            The pool grows/shrinks based on load. Blocking a pool thread (e.g. calling
+            <code>.Result</code> synchronously) starves the pool — that thread can't pick up other
+            queued work while it waits.
+          </div>
+        </div>
+
+        <h3>What <code>async</code>/<code>await</code> actually compiles to</h3>
+        <p>
+          The compiler rewrites an <code>async</code> method into a state machine: each
+          <code>await</code> becomes a suspend point. When the awaited task isn't finished yet,
+          the method returns control to its caller immediately — <strong>the calling thread is
+          freed to do other work</strong> — and a continuation is registered to resume the state
+          machine (potentially on a different pooled thread) once the awaited operation completes.
+        </p>
+        <pre><code>public async Task&lt;Order&gt; GetOrderAsync(int id)
+{
+    var order = await _db.Orders.FindAsync(id);   // suspend point 1 — thread released while DB I/O runs
+    var pricing = await _pricingApi.GetAsync(order.SkuId); // suspend point 2
+    order.Total = pricing.Price;
+    return order;
+}</code></pre>
+
+        <h3>SynchronizationContext &amp; ConfigureAwait</h3>
+        <div class="fd">
+          <div class="fd-row" style="gap:3rem;align-items:flex-start;flex-wrap:wrap;justify-content:center">
+            <div class="fd-col">
+              <div style="font-size:0.65rem;font-family:var(--mono);color:var(--rose);margin-bottom:0.3rem">UI apps (WPF/WinForms)</div>
+              <div class="fd-node fd-node-rose" style="min-width:180px">await someTask;</div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-amber" style="min-width:180px">Continuation posted back to<sub>the captured UI SynchronizationContext</sub></div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-dark" style="min-width:180px">Resumes on the UI thread<sub>safe to touch controls</sub></div>
+            </div>
+            <div class="fd-col">
+              <div style="font-size:0.65rem;font-family:var(--mono);color:var(--green);margin-bottom:0.3rem">ASP.NET Core / libraries</div>
+              <div class="fd-node fd-node-green" style="min-width:180px">await someTask.ConfigureAwait(false);</div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-teal" style="min-width:180px">No context to return to</div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-dark" style="min-width:180px">Resumes on any pool thread<sub>avoids a pointless context hop</sub></div>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-rose">
+          <strong>The classic deadlock</strong>
+          In a UI or old ASP.NET (System.Web) app, calling <code>.Result</code> or <code>.Wait()</code>
+          synchronously on the UI/request thread blocks that thread while it waits for the
+          continuation — but the continuation needs to resume on that exact same captured
+          context, which is busy blocking. Deadlock. Fix: <code>await</code> all the way up the
+          call stack ("async all the way"), or add <code>ConfigureAwait(false)</code> in library
+          code that doesn't need the original context. Note: ASP.NET Core has no
+          <code>SynchronizationContext</code> at all, so this specific deadlock mostly disappeared
+          there — but blocking still starves the thread pool under load.
+        </div>
+
+        <h3>Cancellation</h3>
+        <pre><code>public async Task ProcessAsync(CancellationToken ct)
+{
+    using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+    cts.CancelAfter(TimeSpan.FromSeconds(30));
+
+    await foreach (var item in _repo.StreamAsync(cts.Token))
+    {
+        ct.ThrowIfCancellationRequested();
+        await HandleAsync(item, cts.Token);
+    }
+}</code></pre>
+
+        <h3>Synchronization primitives</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Primitive</th><th>When to use</th></tr></thead>
+            <tbody>
+              <tr><td><code>lock</code> (Monitor)</td><td>Simple mutual exclusion around a critical section, synchronous code only</td></tr>
+              <tr><td><code>SemaphoreSlim</code></td><td>Limit concurrency (N at a time); the only common primitive that's safely <code>await</code>-able</td></tr>
+              <tr><td><code>Interlocked</code></td><td>Lock-free atomic increment/compare-exchange on a single variable — cheapest option when it fits</td></tr>
+              <tr><td><code>ReaderWriterLockSlim</code></td><td>Many concurrent readers, exclusive writer</td></tr>
+              <tr><td><code>Mutex</code></td><td>Cross-process synchronization (named mutex)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Parallel.For / PLINQ &amp; combinators</h3>
+        <pre><code>// CPU-bound, data-parallel work — spreads iterations across cores
+Parallel.ForEach(images, image => Resize(image));
+
+// Waiting on many independent async operations
+var results = await Task.WhenAll(GetAsync(1), GetAsync(2), GetAsync(3));
+
+// React to whichever finishes first (e.g. request hedging / timeouts)
+var first = await Task.WhenAny(PrimaryCallAsync(), TimeoutAsync(TimeSpan.FromSeconds(2)));</code></pre>
+        <div class="callout callout-blue">
+          <strong><code>ValueTask&lt;T&gt;</code></strong>
+          A struct-based alternative to <code>Task&lt;T&gt;</code> for hot paths that frequently
+          complete synchronously (e.g. a cache hit) — it avoids allocating a <code>Task</code>
+          object on the common path. Trade-off: a <code>ValueTask</code> must only be awaited once
+          and shouldn't be stored/awaited multiple times, unlike a <code>Task</code>.
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+      <div class="section page-break" id="s6">
+        <div class="section-num">Section 06</div>
+        <h2 class="section-title">Advanced .NET Concepts</h2>
+        <p class="lead">
+          The runtime and hosting mechanics that separate "I can write C#" from "I understand
+          what my C# is actually doing to memory, threads, and the process."
+        </p>
+
+        <h3>Garbage collection &amp; generations</h3>
+        <div class="fd">
+          <div class="fd-row" style="gap:0">
+            <div class="fd-node fd-node-green">Gen 0<sub>new objects, collected constantly, cheap</sub></div>
+            <div class="fd-arr-r"></div>
+            <div class="fd-node fd-node-amber">Gen 1<sub>survived one collection — buffer zone</sub></div>
+            <div class="fd-arr-r"></div>
+            <div class="fd-node fd-node-rose">Gen 2<sub>long-lived objects, expensive full collection</sub></div>
+          </div>
+          <div class="fd-gap-v"></div>
+          <div class="fd-node fd-node-purple" style="min-width:220px">LOH — Large Object Heap<sub>objects ≥ 85,000 bytes, collected with Gen 2</sub></div>
+        </div>
+        <p>
+          The GC is generational because most objects die young (the "generational hypothesis").
+          Gen 0 collections are extremely fast; objects that survive get promoted, so the GC
+          spends effort proportional to how long-lived an object turns out to be.
+          <strong>Workstation GC</strong> optimizes for low latency on a client machine;
+          <strong>Server GC</strong> (default for ASP.NET Core) uses per-core heaps for higher
+          throughput under concurrent load.
+        </p>
+
+        <h3>IDisposable, using, and finalizers</h3>
+        <pre><code>public sealed class FileWriterWrapper : IDisposable
+{
+    private readonly FileStream _stream;
+    private bool _disposed;
+
+    public FileWriterWrapper(string path) => _stream = File.OpenWrite(path);
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _stream.Dispose();       // release the unmanaged file handle deterministically
+        _disposed = true;
+        GC.SuppressFinalize(this); // no finalizer needed once explicitly disposed
+    }
+}
+
+using var writer = new FileWriterWrapper("out.txt"); // Dispose() called automatically at scope exit</code></pre>
+        <div class="callout callout-amber">
+          <strong>GC ≠ resource cleanup</strong>
+          The GC only reclaims <em>managed memory</em>. File handles, sockets, DB connections, and
+          other unmanaged/OS resources need deterministic cleanup via <code>IDisposable</code> —
+          relying on a finalizer alone means the resource is held until the next Gen 2 collection,
+          which is unpredictable and slow.
+        </div>
+
+        <h3>Dependency injection &amp; service lifetimes</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Lifetime</th><th>Behavior</th></tr></thead>
+            <tbody>
+              <tr><td><code>Transient</code></td><td>New instance every time it's requested</td></tr>
+              <tr><td><code>Scoped</code></td><td>One instance per request/scope (e.g. one per HTTP request in ASP.NET Core)</td></tr>
+              <tr><td><code>Singleton</code></td><td>One instance for the lifetime of the application</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout-rose">
+          <strong>Captive dependency</strong>
+          Injecting a <code>Scoped</code> (or <code>Transient</code> that internally holds scoped
+          state) service into a <code>Singleton</code> silently pins it for the app's entire
+          lifetime — a common source of stale-data and threading bugs. The built-in container
+          validates this if <code>ValidateScopes</code> is enabled.
+        </div>
+
+        <h3>The ASP.NET Core middleware pipeline</h3>
+        <div class="fd">
+          <div class="fd-row" style="gap:0">
+            <div class="fd-node fd-node-dark">Request</div>
+            <div class="fd-arr-r"></div>
+            <div class="fd-node fd-node-blue">Exception Handler</div>
+            <div class="fd-arr-r"></div>
+            <div class="fd-node fd-node-amber">Auth</div>
+            <div class="fd-arr-r"></div>
+            <div class="fd-node fd-node-purple">Routing</div>
+            <div class="fd-arr-r"></div>
+            <div class="fd-node fd-node-teal">Endpoint</div>
+          </div>
+          <div class="fd-note" style="max-width:480px;margin-top:0.5rem">
+            Each middleware wraps the next like nested onion layers — it can act before calling
+            <code>next()</code>, after, or both, and can short-circuit the pipeline entirely
+            (e.g. auth failure returns 401 without ever reaching routing).
+          </div>
+        </div>
+
+        <h3>Span&lt;T&gt; and Memory&lt;T&gt;</h3>
+        <pre><code>ReadOnlySpan&lt;char&gt; span = "Hello, World".AsSpan(7, 5); // "World" — no allocation, no copy
+int total = ParseInts(numberString.AsSpan());              // parse directly over a slice</code></pre>
+        <p>
+          <code>Span&lt;T&gt;</code> is a stack-only (<code>ref struct</code>) view over contiguous
+          memory (array, string, stackalloc'd buffer) that lets you slice and parse without
+          allocating new arrays/substrings — critical in high-throughput parsing (JSON, HTTP)
+          code paths. <code>Memory&lt;T&gt;</code> is the heap-allowed counterpart, usable in
+          async methods and fields where a <code>ref struct</code> can't go.
+        </p>
+
+        <h3>Reflection, attributes &amp; configuration</h3>
+        <ul class="clean">
+          <li><strong>Reflection</strong> inspects types/members at runtime — powers serializers, DI containers, and ORMs, at a real perf cost versus compiled code.</li>
+          <li><strong>Attributes</strong> (<code>[Required]</code>, <code>[JsonPropertyName]</code>) attach declarative metadata that reflection-based frameworks read.</li>
+          <li><strong>Options pattern</strong> (<code>IOptions&lt;T&gt;</code> / <code>IOptionsSnapshot&lt;T&gt;</code>) binds strongly-typed settings from <code>appsettings.json</code>, env vars, and secrets, with <code>IOptionsSnapshot</code> supporting per-request reload.</li>
+          <li><strong>Source generators</strong> (e.g. <code>System.Text.Json</code>'s source-gen serializer) do at compile time what reflection used to do at runtime — trading flexibility for startup speed and NativeAOT compatibility.</li>
+        </ul>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+      <div class="section page-break" id="s7">
+        <div class="section-num">Section 07</div>
+        <h2 class="section-title">Advanced C#</h2>
+        <p class="lead">
+          Language features that show up constantly in modern, idiomatic C# codebases and in
+          interviews for senior roles specifically.
+        </p>
+
+        <h3>Generics &amp; variance</h3>
+        <pre><code>public interface IProducer&lt;out T&gt;   { T Produce(); }          // covariant — can widen the return type
+public interface IConsumer&lt;in T&gt;    { void Consume(T item); }  // contravariant — can accept a wider param
+
+IProducer&lt;string&gt; strings = ...;
+IProducer&lt;object&gt; objects = strings;    // OK — a producer of strings IS-A producer of objects
+
+IConsumer&lt;object&gt; objConsumer = ...;
+IConsumer&lt;string&gt; strConsumer = objConsumer; // OK — a consumer of anything can consume a string</code></pre>
+        <div class="callout callout-rose">
+          <strong>Array covariance is a trap</strong>
+          <code>string[]</code> is implicitly convertible to <code>object[]</code> (arrays are
+          covariant), but this is not type-safe: <code>object[] arr = new string[3]; arr[0] = 42;</code>
+          compiles but throws <code>ArrayTypeMismatchException</code> at runtime. Generic interfaces
+          made covariance/contravariance <em>explicit and compiler-checked</em> — arrays predate generics.
+        </div>
+
+        <h3>Delegates &amp; events</h3>
+        <div class="fd">
+          <div class="fd-node fd-node-blue" style="min-width:200px">Publisher<sub>event OrderShipped</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-amber" style="min-width:200px">Multicast delegate<sub>invocation list of subscribers</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-row" style="gap:0.6rem">
+            <div class="fd-node fd-node-green">EmailService.Notify</div>
+            <div class="fd-node fd-node-teal">Analytics.Track</div>
+          </div>
+        </div>
+        <pre><code>public event EventHandler&lt;OrderShippedEventArgs&gt;? OrderShipped;
+
+protected virtual void OnOrderShipped(OrderShippedEventArgs e) =>
+    OrderShipped?.Invoke(this, e);   // null-conditional guards "no subscribers"
+
+// Func<T,TResult>, Action<T>, Predicate<T> are just pre-defined generic delegates
+Func&lt;int, int, int&gt; add = (a, b) =&gt; a + b;</code></pre>
+
+        <h3>Pattern matching</h3>
+        <pre><code>string Describe(object shape) => shape switch
+{
+    Circle { Radius: 0 } => "a point",
+    Circle c when c.Radius > 100 => "a huge circle",
+    Circle c => $"a circle of radius {c.Radius}",
+    Rectangle { Width: var w, Height: var h } when w == h => "a square",
+    (Rectangle or Triangle) and not null => "some other polygon",
+    null => throw new ArgumentNullException(nameof(shape)),
+    _ => "unknown shape"
+};</code></pre>
+
+        <h3>Records vs classes vs structs</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>class</th><th>record</th><th>struct / record struct</th></tr></thead>
+            <tbody>
+              <tr><td>Storage</td><td>Heap (reference type)</td><td>Heap (reference type)</td><td>Stack/inline (value type)</td></tr>
+              <tr><td>Equality</td><td>Reference equality by default</td><td>Value equality (member-wise), auto-generated</td><td>Value equality (member-wise) built in</td></tr>
+              <tr><td>Immutability idiom</td><td>Manual</td><td><code>with</code> expressions for non-destructive mutation</td><td><code>readonly struct</code> for enforced immutability</td></tr>
+              <tr><td>Best for</td><td>Entities with identity, mutable behavior-rich objects</td><td>DTOs, value objects, message/event payloads</td><td>Small, frequently-copied data (avoid if large — copies are expensive)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <pre><code>public record Money(decimal Amount, string Currency);
+
+var price = new Money(100m, "USD");
+var discounted = price with { Amount = 90m };   // new instance, Currency unchanged
+Console.WriteLine(price == new Money(100m, "USD")); // True — value equality</code></pre>
+
+        <h3>Nullable reference types (NRT)</h3>
+        <pre><code>#nullable enable
+public class Customer
+{
+    public string Name { get; set; } = "";       // non-nullable — compiler warns if left uninitialized
+    public string? MiddleName { get; set; }      // explicitly nullable — must null-check before use
+}
+
+string GetGreeting(Customer? customer) =>
+    customer?.Name is { Length: > 0 } name ? $"Hi {name}" : "Hi stranger"; // pattern + null-conditional</code></pre>
+        <div class="callout callout-blue">
+          <strong>NRT is compile-time only</strong>
+          Nullable annotations are static analysis with zero runtime enforcement — <code>string</code>
+          is still nullable at the IL level. It catches a large class of null-ref bugs at compile
+          time via warnings, but a cast or deserialized payload can still hand you a null a
+          non-nullable-annotated variable "promised" not to have.
+        </div>
+
+        <h3>Extension methods</h3>
+        <pre><code>public static class StringExtensions
+{
+    public static bool IsNullOrBlank(this string? s) => string.IsNullOrWhiteSpace(s);
+}
+
+if (input.IsNullOrBlank()) { ... }   // reads like an instance method, resolved at compile time</code></pre>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+      <div class="section page-break" id="s8">
+        <div class="section-num">Section 08</div>
+        <h2 class="section-title">Orleans Framework</h2>
+        <p class="lead">
+          Microsoft Orleans is a <strong>virtual actor model</strong> framework for building
+          distributed, stateful services without hand-rolling distributed locks, sharding, or
+          cache invalidation. It was built at Microsoft Research for Halo's cloud services and now
+          powers parts of Azure, Xbox, and Skype's backend.
+        </p>
+
+        <h3>Cluster topology</h3>
+        <div class="fd">
+          <div class="fd-node fd-node-dark" style="min-width:200px">Client<sub>Orleans client / gateway connection</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-group" style="width:100%;max-width:640px">
+            <div class="fd-group-title">Silo Cluster</div>
+            <div class="fd-row" style="gap:0.6rem;flex-wrap:wrap;justify-content:center">
+              <div class="fd-col">
+                <div class="fd-node fd-node-blue" style="min-width:150px">Silo 1</div>
+                <div class="fd-mini-label">Grain: Player(42)<br>Grain: Order(7)</div>
+              </div>
+              <div class="fd-col">
+                <div class="fd-node fd-node-teal" style="min-width:150px">Silo 2</div>
+                <div class="fd-mini-label">Grain: Player(99)</div>
+              </div>
+              <div class="fd-col">
+                <div class="fd-node fd-node-purple" style="min-width:150px">Silo 3</div>
+                <div class="fd-mini-label">Grain: Order(19)</div>
+              </div>
+            </div>
+          </div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-amber" style="min-width:260px">Membership &amp; Persistence Provider<sub>Azure Table / SQL / Consul, grain state store</sub></div>
+        </div>
+
+        <h3>The virtual actor model</h3>
+        <p>
+          A <strong>grain</strong> is Orleans's unit of state + behavior — conceptually always
+          "existing" (virtual), regardless of whether it's currently loaded in memory anywhere.
+          You never explicitly create or destroy a grain, and you never manually decide which
+          silo hosts it — the runtime activates it on-demand, on whichever silo makes sense, and
+          deactivates it after idling. This is the key difference from the classic actor model
+          (like Akka), where you explicitly manage actor lifecycle.
+        </p>
+        <div class="fd">
+          <div class="fd-row" style="gap:0">
+            <div class="fd-node fd-node-gray">Not activated<sub>logically "exists" but no memory footprint</sub></div>
+            <div class="fd-arr-r"></div>
+            <div class="fd-node fd-node-green">First call arrives<sub>runtime activates it on a silo</sub></div>
+            <div class="fd-arr-r"></div>
+            <div class="fd-node fd-node-blue">Active in memory<sub>processes calls one at a time</sub></div>
+            <div class="fd-arr-r"></div>
+            <div class="fd-node fd-node-amber">Idle timeout<sub>state persisted, then deactivated</sub></div>
+          </div>
+        </div>
+        <div class="callout callout-green">
+          <strong>Why no locks inside a grain</strong>
+          Orleans guarantees single-threaded, turn-based execution per grain activation — the
+          runtime never lets two calls run concurrently against the same grain instance. That
+          single guarantee eliminates the entire class of race conditions and manual locking you'd
+          otherwise need for per-entity state (e.g. a player's inventory, a shopping cart) in a
+          distributed system.
+        </div>
+
+        <h3>A grain, end to end</h3>
+        <pre><code>public interface IPlayerGrain : IGrainWithIntegerKey
+{
+    Task&lt;int&gt; GetScoreAsync();
+    Task AddScoreAsync(int delta);
+}
+
+public class PlayerGrain : Grain, IPlayerGrain
+{
+    private readonly IPersistentState&lt;PlayerState&gt; _state;
+    public PlayerGrain([PersistentState("player")] IPersistentState&lt;PlayerState&gt; state) => _state = state;
+
+    public Task&lt;int&gt; GetScoreAsync() => Task.FromResult(_state.State.Score);
+
+    public async Task AddScoreAsync(int delta)
+    {
+        _state.State.Score += delta;
+        await _state.WriteStateAsync();   // persisted via the configured storage provider
+    }
+}
+
+// Calling it — grain "42" is transparently activated wherever the runtime decides to place it
+var player = client.GetGrain&lt;IPlayerGrain&gt;(42);
+await player.AddScoreAsync(10);</code></pre>
+
+        <h3>Reminders vs Timers</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>Timer</th><th>Reminder</th></tr></thead>
+            <tbody>
+              <tr><td>Durability</td><td>In-memory only — lost if the grain deactivates</td><td>Persisted, survives deactivation and silo restarts</td></tr>
+              <tr><td>Precision</td><td>Sub-second capable</td><td>Coarser (minute-level), backed by storage</td></tr>
+              <tr><td>Use case</td><td>Short-lived in-activation housekeeping</td><td>"Wake this grain up daily to send a digest email"</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Streams</strong> add a pub/sub layer on top of grains for event-driven pipelines without every producer/consumer needing a direct grain reference.</p>
+
+        <div class="callout callout-purple">
+          <strong>Orleans vs "just microservices on Kubernetes"</strong>
+          Orleans shines when your domain is naturally entity-per-actor with per-entity state
+          (games, IoT device twins, per-user session state, digital twins) and you want that state
+          held in memory close to the logic instead of round-tripping to a database on every call.
+          It's not a replacement for service boundaries at the macro-architecture level — teams
+          commonly run an Orleans cluster as one stateful service within a broader microservice/K8s estate.
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 9 ══════════════════════════ -->
+      <div class="section page-break" id="s9">
+        <div class="section-num">Section 09</div>
+        <h2 class="section-title">OOP Principles &amp; SOLID</h2>
+        <p class="lead">
+          The four pillars aren't academic trivia — each maps to a concrete C# language feature,
+          and SOLID is the set of principles that keeps a large C# codebase changeable over years
+          rather than years-old and fragile.
+        </p>
+
+        <h3>The four pillars</h3>
+        <div class="card-grid">
+          <div class="card card-accent">
+            <h4>Encapsulation</h4>
+            <p>Hide internal state behind a controlled surface. In C#: <code>private</code> fields + public properties/methods that enforce invariants.</p>
+          </div>
+          <div class="card card-accent">
+            <h4>Abstraction</h4>
+            <p>Expose <em>what</em> without <em>how</em>. In C#: interfaces and abstract classes define a contract; callers depend on <code>IRepository</code>, not <code>SqlRepository</code>.</p>
+          </div>
+          <div class="card card-accent">
+            <h4>Inheritance</h4>
+            <p>Reuse and specialize behavior via a base type. In C#: <code>class Dog : Animal</code>; overusing it creates rigid hierarchies — prefer composition when there's no true is-a relationship.</p>
+          </div>
+          <div class="card card-accent">
+            <h4>Polymorphism</h4>
+            <p>One interface, many implementations, resolved at runtime. In C#: <code>virtual</code>/<code>override</code> (runtime dispatch) vs method overloading (compile-time dispatch — a different, weaker form).</p>
+          </div>
+        </div>
+
+        <h3>Runtime polymorphism in practice</h3>
+        <div class="fd">
+          <div class="fd-node fd-node-dark" style="min-width:180px">Animal<sub>virtual Speak()</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-row" style="gap:0.6rem">
+            <div class="fd-node fd-node-blue">Dog<sub>override Speak() → "Woof"</sub></div>
+            <div class="fd-node fd-node-teal">Cat<sub>override Speak() → "Meow"</sub></div>
+          </div>
+        </div>
+        <pre><code>List&lt;Animal&gt; animals = new() { new Dog(), new Cat() };
+foreach (var a in animals) a.Speak(); // dispatches to the ACTUAL runtime type via the vtable, not the declared type</code></pre>
+
+        <h3>SOLID</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Principle</th><th>In one line</th><th>C# smell it prevents</th></tr></thead>
+            <tbody>
+              <tr><td><strong>S</strong>ingle Responsibility</td><td>A class should have one reason to change</td><td>A <code>UserService</code> that also formats emails and writes logs</td></tr>
+              <tr><td><strong>O</strong>pen/Closed</td><td>Open for extension, closed for modification</td><td>A giant <code>switch</code> on a type enum that grows every sprint — use polymorphism/strategy instead</td></tr>
+              <tr><td><strong>L</strong>iskov Substitution</td><td>Subtypes must be usable wherever the base type is expected</td><td>A <code>Square : Rectangle</code> that overrides <code>SetWidth</code> in a way that breaks callers expecting <code>Rectangle</code> semantics</td></tr>
+              <tr><td><strong>I</strong>nterface Segregation</td><td>Prefer many small interfaces over one fat one</td><td>An <code>IRepository</code> with 20 methods forcing every implementer to stub out 15 of them</td></tr>
+              <tr><td><strong>D</strong>ependency Inversion</td><td>Depend on abstractions, not concrete types</td><td><code>new SqlLogger()</code> hardcoded inside a business class instead of injecting <code>ILogger</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-blue">
+          <strong>Composition over inheritance</strong>
+          When you find yourself asking "is a <code>Penguin</code> really-and-truly a <code>Bird</code>
+          if it can't <code>Fly()</code>?", that's the Liskov principle telling you inheritance is
+          the wrong tool. Injecting an <code>IFlightBehavior</code> strategy composed into the
+          object is usually more robust than deepening a class hierarchy to work around the exception.
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 10 ══════════════════════════ -->
+      <div class="section page-break" id="s10">
+        <div class="section-num">Section 10</div>
+        <h2 class="section-title">SignalR</h2>
+        <p class="lead">
+          ASP.NET Core SignalR is a library for real-time, bidirectional communication between
+          server and client — the server can push to connected clients the instant something
+          happens, instead of clients polling for updates.
+        </p>
+
+        <h3>Transport negotiation</h3>
+        <div class="fd">
+          <div class="fd-node fd-node-blue" style="min-width:220px">Client connects</div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-green" style="min-width:260px">1. WebSockets<sub>preferred — full duplex, lowest overhead</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-amber" style="min-width:260px">2. Server-Sent Events<sub>fallback — server→client stream over HTTP</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-rose" style="min-width:260px">3. Long Polling<sub>last resort — works through almost any proxy</sub></div>
+        </div>
+        <p>SignalR negotiates the best available transport automatically and falls back down this list transparently if a proxy or firewall blocks the better options.</p>
+
+        <h3>A minimal hub</h3>
+        <pre><code>public class ChatHub : Hub
+{
+    public async Task SendMessage(string user, string message) =>
+        await Clients.All.SendAsync("ReceiveMessage", user, message);
+
+    public async Task JoinRoom(string room) =>
+        await Groups.AddToGroupAsync(Context.ConnectionId, room);
+}
+
+// Program.cs
+app.MapHub&lt;ChatHub&gt;("/chatHub");</code></pre>
+        <pre><code>// JS client
+const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+connection.on("ReceiveMessage", (user, msg) => appendToChat(user, msg));
+await connection.start();
+await connection.invoke("SendMessage", "Alice", "hello");</code></pre>
+
+        <h3>Groups &amp; users</h3>
+        <ul class="clean">
+          <li><strong>Connections</strong> — one per physical client connection (a user with two tabs open has two).</li>
+          <li><strong>Groups</strong> — server-managed named sets of connections (<code>Clients.Group("room-42")</code>) — no client-side awareness needed.</li>
+          <li><strong>Users</strong> — <code>Clients.User(userId)</code> targets every connection belonging to one authenticated identity, across devices/tabs.</li>
+        </ul>
+
+        <h3>Scaling out</h3>
+        <div class="fd">
+          <div class="fd-row" style="gap:0.6rem;flex-wrap:wrap;justify-content:center">
+            <div class="fd-node fd-node-blue">Server A<sub>holds Client 1's connection</sub></div>
+            <div class="fd-node fd-node-blue">Server B<sub>holds Client 2's connection</sub></div>
+          </div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-amber" style="min-width:260px">Backplane<sub>Redis / Azure SignalR Service</sub></div>
+          <div class="fd-note" style="max-width:480px;margin-top:0.5rem">
+            A single server only knows about its own connections. Once you scale to N instances
+            behind a load balancer, Server A has no way to reach Client 2 directly — every server
+            publishes outgoing messages to the backplane, and every server subscribes to it, so a
+            broadcast reaches connections regardless of which instance they landed on.
+          </div>
+        </div>
+        <div class="callout callout-amber">
+          <strong>Sticky sessions still matter</strong>
+          Because a client's WebSocket connection is pinned to whichever server accepted it, the
+          load balancer needs sticky sessions (or you use the managed Azure SignalR Service, which
+          removes this constraint entirely by decoupling connection management from your app servers).
+        </div>
+
+        <h3>When to reach for SignalR</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Technology</th><th>Best fit</th></tr></thead>
+            <tbody>
+              <tr><td>SignalR</td><td>Server-initiated pushes to browsers/.NET clients — chat, live dashboards, notifications — with automatic transport fallback</td></tr>
+              <tr><td>Raw WebSockets</td><td>You need the wire protocol itself, or you're interoperating with a non-.NET client that only speaks plain WebSocket frames</td></tr>
+              <tr><td>gRPC streaming</td><td>Service-to-service, strongly-typed, high-throughput streaming — not aimed at browser clients</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 11 ══════════════════════════ -->
+      <div class="section page-break" id="s11">
+        <div class="section-num">Section 11</div>
+        <h2 class="section-title">Advanced Interview Questions</h2>
+        <p class="lead">The questions that actually separate a mid-level from a senior C#/.NET engineer — with the reasoning interviewers are listening for, not just the one-liner answer.</p>
+
+        <h3>Q1. Why is <code>async void</code> dangerous, and when is it the right choice?</h3>
+        <p>
+          Exceptions thrown inside an <code>async void</code> method can't be awaited or caught by
+          the caller — they're raised directly on the <code>SynchronizationContext</code>, which
+          typically crashes the process. It also can't be composed with <code>Task.WhenAll</code>
+          or awaited. The one legitimate use is top-level UI event handlers (<code>button.Click</code>)
+          which must return <code>void</code> to match the delegate signature — everywhere else,
+          return <code>Task</code>.
+        </p>
+
+        <h3>Q2. Where exactly does a "filter after materialize" bug bite with EF Core?</h3>
+        <pre><code>var big = dbContext.Orders.ToList().Where(o => o.Total > 100); // pulls EVERY row into memory first</code></pre>
+        <p>
+          Because <code>ToList()</code> is called before <code>Where</code>, the entire table is
+          materialized in-process and the filter runs in C#, not SQL — on a large table this is a
+          production incident waiting to happen. The fix is ordering: keep everything as
+          <code>IQueryable</code> until the final materialization call.
+        </p>
+
+        <h3>Q3. When would you choose a <code>struct</code> over a <code>class</code>, and what's the cost if you get it wrong?</h3>
+        <p>
+          Prefer a struct for small (rule of thumb: ≤ 16 bytes), immutable, short-lived,
+          frequently-created value-like data (a <code>Point</code>, a <code>Money</code> amount) —
+          it avoids heap allocation and GC pressure. Get it wrong (a large mutable struct passed
+          around by value) and you pay for silent, expensive copies on every assignment/parameter
+          pass, plus surprising "I mutated it but the original didn't change" bugs. A
+          <code>readonly struct</code> prevents the latter by making mutation a compile error.
+        </p>
+
+        <h3>Q4. Walk through exactly why <code>.Result</code> deadlocks a UI thread.</h3>
+        <p>
+          Calling an async method from the UI thread and immediately blocking on <code>.Result</code>
+          holds the UI thread hostage. The awaited task's continuation was captured to resume on
+          that same UI <code>SynchronizationContext</code> — but the UI thread is now blocked
+          waiting for <code>.Result</code>, so the continuation can never run, so <code>.Result</code>
+          never returns. Fix: <code>await</code> the whole way up, or use
+          <code>ConfigureAwait(false)</code> in library code so the continuation doesn't need the
+          original context at all.
+        </p>
+
+        <h3>Q5. Why can two objects be <code>!=</code> by reference but "equal" for your business logic, and what breaks if you override <code>Equals</code> without <code>GetHashCode</code>?</h3>
+        <p>
+          Default reference equality compares identity, not content — two separate
+          <code>Money(100, "USD")</code> objects are different references even though they
+          represent the same value. If you override <code>Equals</code> to compare values but
+          leave the inherited <code>GetHashCode</code> (identity-based) untouched, you violate the
+          contract that equal objects must have equal hash codes — the object will silently fail
+          to be found in a <code>Dictionary</code>/<code>HashSet</code> even though
+          <code>Equals</code> says it matches an existing key.
+        </p>
+
+        <h3>Q6. .NET has a garbage collector — how do memory leaks still happen?</h3>
+        <p>
+          The GC only reclaims objects with <em>no reachable reference</em>. The most common real
+          leak: a long-lived publisher (often a singleton or static event) holding a subscription
+          to a short-lived object's event handler — the subscriber can never be collected because
+          the publisher's invocation list still references it. Other culprits: static collections
+          that only ever grow, and captured closures in cached delegates holding onto large objects
+          indirectly.
+        </p>
+
+        <h3>Q7. Give an example where array covariance causes a runtime exception that generics would have caught at compile time.</h3>
+        <pre><code>object[] objects = new string[3];   // legal — arrays are covariant
+objects[0] = 42;                    // compiles, throws ArrayTypeMismatchException at runtime
+
+List&lt;object&gt; list = new List&lt;string&gt;(); // COMPILE ERROR — generics are invariant by default, caught immediately</code></pre>
+
+        <h3>Q8. How does Orleans avoid the race conditions a normal multi-threaded service would need locks for?</h3>
+        <p>
+          Every grain activation processes one request at a time by runtime guarantee — Orleans
+          serializes calls into a single-threaded turn per activation, so there's never concurrent
+          mutation of a grain's own state to guard against. The trade-off is you must not block
+          synchronously inside a grain method (it stalls that grain's entire turn queue) and
+          cross-grain calls should go through grain references, not shared mutable objects.
+        </p>
+
+        <h3>Q9. A SignalR chat app works locally but messages don't reach all clients once you scale to 3 instances behind a load balancer — why, and how do you fix it?</h3>
+        <p>
+          Each server instance only tracks the connections it physically accepted; broadcasting to
+          "all clients" from Server A never reaches clients connected to Server B or C. The fix is
+          a backplane (Redis, SQL Server, or the managed Azure SignalR Service) that every instance
+          publishes to and subscribes from, so a broadcast fans out across the whole cluster
+          regardless of which instance a client landed on.
+        </p>
+
+        <h3>Q10. <code>Task.Run</code> vs <code>Task.Factory.StartNew</code> — what's the difference in their defaults, and why does it matter?</h3>
+        <p>
+          <code>Task.Run</code> is effectively a safe-default shorthand: it always schedules to the
+          thread pool and, if given an async delegate, automatically unwraps the outer/inner task
+          so awaiting it awaits actual completion. <code>Task.Factory.StartNew</code> exposes more
+          knobs (custom scheduler, creation options) but does <em>not</em> unwrap a
+          <code>Task&lt;Task&gt;</code> automatically — awaiting it without <code>.Unwrap()</code>
+          gives you the outer task's completion (scheduling), not the inner work's completion, a
+          classic subtle bug when someone "upgrades" old <code>StartNew</code> code to be async.
+        </p>
+
+        <h3>Q11. What's the practical difference between .NET Standard, framework-dependent deployment, and NativeAOT when someone asks "how do I ship this?"</h3>
+        <p>
+          .NET Standard is a compile-time contract for sharing <em>libraries</em> across runtimes —
+          it says nothing about deployment. Framework-dependent deployment ships just your app,
+          relying on a shared runtime already installed on the target machine (smaller artifact,
+          requires runtime provisioning). Self-contained deployment bundles the runtime with your
+          app (larger, no external dependency). NativeAOT goes further and compiles everything
+          ahead-of-time into one native binary with no JIT at all — fastest startup and lowest
+          memory, at the cost of losing runtime reflection-heavy features (so some serializers/DI
+          patterns need source-generator equivalents).
+        </p>
+
+        <h3>Q12. Why does <code>IEnumerable&lt;out T&gt;</code> compile but <code>IList&lt;out T&gt;</code> wouldn't (if you tried to mark it covariant)?</h3>
+        <p>
+          Covariance is only sound for interfaces that exclusively <em>produce</em> <code>T</code>
+          (methods that return <code>T</code>, never accept it as an input) — that's exactly
+          <code>IEnumerable&lt;T&gt;</code>'s shape (just <code>GetEnumerator</code>). <code>IList&lt;T&gt;</code>
+          has <code>Add(T item)</code> — an input position — so allowing
+          <code>IList&lt;object&gt; x = new List&lt;string&gt;()</code> would let you call
+          <code>x.Add(42)</code> against a real <code>List&lt;string&gt;</code>, which is exactly
+          the unsound scenario array covariance allows (Q7) and the compiler correctly refuses to
+          permit for generic interfaces.
+        </p>
+      </div>
+
+      <div class="section" style="border-top:1px solid var(--border)">
+        <h3>Further Reading</h3>
+        <ul class="clean">
+          <li><a href="https://learn.microsoft.com/en-us/dotnet/standard/clr" target="_blank" rel="noopener">Microsoft Learn — Common Language Runtime</a></li>
+          <li><a href="https://learn.microsoft.com/en-us/dotnet/csharp/" target="_blank" rel="noopener">Microsoft Learn — C# Language Reference</a></li>
+          <li><a href="https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap" target="_blank" rel="noopener">Task-based Asynchronous Pattern (TAP)</a></li>
+          <li><a href="https://learn.microsoft.com/en-us/dotnet/orleans/overview" target="_blank" rel="noopener">Microsoft Orleans Documentation</a></li>
+          <li><a href="https://learn.microsoft.com/en-us/aspnet/core/signalr/introduction" target="_blank" rel="noopener">ASP.NET Core SignalR Overview</a></li>
+        </ul>
+      </div>
+    </div>
+    <!-- /container -->
+  </div>
+  <!-- /main-scroll -->
+</div>
+<!-- /topic-page -->
+<footer class="guide-footer">
+  Synapse &middot; AI &amp; LLM Engineering
+</footer>
+<script src="../assets/scroll-top.js"></script>
+</body>
+</html>

@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snowflake Data Cloud — Synapse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e; --ink2: #3d3d5c; --ink3: #6b6b8a;
+  --bg: #ffffff; --bg2: #f4f3f0; --bg3: #eae8e4;
+  --accent: #0ea5e9; --accent2: #0284c7; --accent-bg: #f0f9ff;
+  --green: #059669; --green-bg: #ecfdf5;
+  --amber: #d97706; --amber-bg: #fffbeb;
+  --rose: #e11d48; --rose-bg: #fff1f2;
+  --purple: #7c3aed; --purple-bg: #f5f3ff;
+  --teal: #0d9488; --teal-bg: #f0fdfa;
+  --coral: #ea580c; --coral-bg: #fff7ed;
+  --border: #e2e0dc; --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+@media print {
+  body { font-size: 10pt; } .no-print { display: none !important; }
+  .page-break { page-break-before: always; } .card { break-inside: avoid; }
+  pre { font-size: 8pt; } h1 { font-size: 22pt; } h2 { font-size: 14pt; }
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+.cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%); color: white; padding: 4rem 2rem; position: relative; overflow: hidden; }
+.cover::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 50%, rgba(14,165,233,0.18) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(56,189,248,0.1) 0%, transparent 50%); }
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #38bdf8, #7dd3fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+.diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; margin: 1rem 0; font-family: var(--mono); font-size: 0.75rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink2); }
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #7dd3fc; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+</style>
+<link rel="stylesheet" href="../assets/mobile.css">
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← Synapse</a>
+  <h1>Snowflake Data Cloud</h1>
+</header>
+
+<div class="topic-page">
+  <aside class="sidebar">
+    <p class="sidebar-title">Snowflake Data Cloud</p>
+    <nav><ul>
+      <li><a href="#s1"><span class="toc-num">01</span>Architecture</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>Virtual Warehouses</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>Micro-partitions &amp; Clustering</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>Semi-structured Data</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>Time Travel &amp; Cloning</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>Streams, Tasks &amp; Snowpipe</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>Data Sharing</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>Cost Optimization</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>Interview Questions</a></li>
+    </ul></nav>
+  </aside>
+
+  <div class="main-scroll">
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference — July 2026</div>
+  <h1>Snowflake <span>Data Cloud</span></h1>
+  <p class="cover-sub">Storage/compute separation, virtual warehouses, micro-partitions, semi-structured VARIANT data, Time Travel, Streams &amp; Tasks, data sharing, and cost governance.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">Multi-cluster Warehouses</span>
+    <span class="cover-tag">Micro-partitions</span>
+    <span class="cover-tag">VARIANT / JSON</span>
+    <span class="cover-tag">Time Travel</span>
+    <span class="cover-tag">Zero-Copy Cloning</span>
+    <span class="cover-tag">Streams &amp; Tasks</span>
+    <span class="cover-tag">Snowpipe</span>
+    <span class="cover-tag">Secure Data Sharing</span>
+  </div>
+  <div class="cover-date">v1.0 — Last updated July 2026</div>
+</div>
+
+<div class="container">
+<div class="toc page-break">
+  <h2>Contents</h2>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">Architecture</span></a>
+    <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">Virtual Warehouses</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">Micro-partitions &amp; Clustering</span></a>
+    <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">Semi-structured Data</span></a>
+    <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">Time Travel &amp; Cloning</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Streams, Tasks &amp; Snowpipe</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Data Sharing</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">Cost Optimization</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">Interview Questions</span></a>
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+<div class="section page-break" id="s1">
+  <div class="section-num">Section 01</div>
+  <h2 class="section-title">Architecture</h2>
+  <p class="lead">Snowflake's core innovation is a three-layer architecture that fully separates storage, compute, and services — each scales independently, which is what makes multiple teams able to query the same data concurrently without contending for resources.</p>
+
+  <div class="diagram">┌─────────────────────────────────────────────────────────────────┐
+│                     CLOUD SERVICES LAYER                          │
+│   Query optimizer · Metadata · Security/Auth · Result cache       │
+│   Infrastructure mgmt · Transaction mgmt (ACID)                   │
+└──────────────────────────┬──────────────────────────────────────┘
+                            │
+   ┌────────────────────────┼────────────────────────┐
+   ▼                        ▼                        ▼
+┌─────────┐            ┌─────────┐            ┌─────────┐
+│Warehouse │            │Warehouse │            │Warehouse │  ← COMPUTE LAYER
+│  (ETL)   │            │  (BI)    │            │(Data Sci)│    independent,
+│ X-Small  │            │  Large   │            │  Medium  │    elastic clusters
+└────┬────┘            └────┬────┘            └────┬────┘
+     └──────────────────────┼──────────────────────┘
+                            ▼
+              ┌───────────────────────────┐
+              │      STORAGE LAYER         │   ← single copy of data,
+              │  Columnar, compressed,     │      on cloud object store
+              │  micro-partitioned         │      (S3 / Azure Blob / GCS)
+              └───────────────────────────┘</div>
+
+  <h3>Why the Separation Matters</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Traditional MPP (shared-nothing)</th><th>Snowflake</th></tr></thead>
+    <tbody>
+      <tr><td>Storage and compute bound to the same nodes</td><td>Storage is independent of any warehouse</td></tr>
+      <tr><td>Scaling compute means reshuffling data</td><td>Spin up/down warehouses instantly — no data movement</td></tr>
+      <tr><td>One workload's load slows down others sharing the cluster</td><td>Each team/workload gets its own warehouse — zero contention</td></tr>
+      <tr><td>Data duplicated per cluster for isolation</td><td>Single copy of data shared by every warehouse</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-blue">
+    <strong>Cloud Services layer does more than you'd think</strong>
+    It holds all table metadata (not the query engine), handles authentication/RBAC, optimises and compiles queries, and serves the <strong>result cache</strong> — an identical repeated query can return in milliseconds with zero warehouse compute cost.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+<div class="section page-break" id="s2">
+  <div class="section-num">Section 02</div>
+  <h2 class="section-title">Virtual Warehouses</h2>
+  <p class="lead">A virtual warehouse is an independent MPP compute cluster used to execute queries. Warehouses can be resized, suspended, resumed, and scaled out into multi-cluster groups — all without touching the underlying data.</p>
+
+  <h3>Warehouse Sizing</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Size</th><th>Servers (credits/hr)</th><th>Typical Use</th></tr></thead>
+    <tbody>
+      <tr><td>X-Small</td><td>1 (1 credit/hr)</td><td>Dev, small ETL, ad-hoc queries</td></tr>
+      <tr><td>Small → Medium</td><td>2–4 credits/hr</td><td>Standard BI dashboards, moderate ETL</td></tr>
+      <tr><td>Large → X-Large</td><td>8–16 credits/hr</td><td>Heavy transforms, large joins</td></tr>
+      <tr><td>2X-Large → 6X-Large</td><td>32–512 credits/hr</td><td>Massive batch loads, huge aggregations</td></tr>
+    </tbody>
+  </table></div>
+  <p>Doubling warehouse size doubles compute (and cost) linearly and typically <em>halves query time</em> for parallelisable workloads — but does not help a query bottlenecked by something other than raw compute (e.g., a poor join order or excessive scanning).</p>
+
+  <h3>Creating &amp; Tuning a Warehouse</h3>
+<pre><code>CREATE WAREHOUSE etl_wh
+  WAREHOUSE_SIZE = 'MEDIUM'
+  AUTO_SUSPEND = 60            -- seconds idle before suspend (billing stops)
+  AUTO_RESUME = TRUE           -- wake automatically on next query
+  INITIALLY_SUSPENDED = TRUE
+  MIN_CLUSTER_COUNT = 1
+  MAX_CLUSTER_COUNT = 4        -- multi-cluster: scale OUT for concurrency
+  SCALING_POLICY = 'STANDARD'; -- vs 'ECONOMY' (favors cost over latency)</code></pre>
+
+  <h3>Scale Up vs Scale Out</h3>
+  <div class="two-col">
+    <div class="card card-accent"><h4>Scale Up (bigger warehouse)</h4><p>Use when a <em>single query</em> is slow — more servers per cluster means more parallelism for one statement. Fixes latency.</p></div>
+    <div class="card card-accent"><h4>Scale Out (multi-cluster)</h4><p>Use when <em>many concurrent users</em> queue behind each other on the same warehouse. Snowflake spins up additional identically-sized clusters automatically. Fixes queuing, not per-query speed.</p></div>
+  </div>
+
+  <div class="callout callout-amber">
+    <strong>Auto-suspend is the #1 cost lever</strong>
+    Billing is per-second (min 60s) while a warehouse is running, regardless of load. A warehouse left <code>AUTO_SUSPEND</code>-disabled or set too high (e.g., 30 minutes) burns credits sitting idle. Most workloads should suspend after 60–300 seconds of inactivity.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+<div class="section page-break" id="s3">
+  <div class="section-num">Section 03</div>
+  <h2 class="section-title">Micro-partitions &amp; Clustering</h2>
+  <p class="lead">Snowflake automatically divides every table into <strong>micro-partitions</strong> — immutable, columnar-compressed blocks of 50–500MB uncompressed data. Metadata about the min/max values in each column of each micro-partition drives pruning, Snowflake's core query-acceleration mechanism.</p>
+
+  <div class="diagram">Table "orders" (100M rows)
+   ├─ Micro-partition 1   [order_date: 2026-01-01 → 2026-01-03]
+   ├─ Micro-partition 2   [order_date: 2026-01-03 → 2026-01-05]
+   ├─ Micro-partition 3   [order_date: 2026-01-05 → 2026-01-07]
+   ...
+   └─ Micro-partition N   [order_date: 2026-06-28 → 2026-06-30]
+
+Query: WHERE order_date = '2026-01-04'
+  → optimizer reads partition metadata (min/max), only scans partition 2
+  → "PRUNING" — never touches the other N-1 partitions</div>
+
+  <h3>Clustering Keys</h3>
+<pre><code>-- Snowflake auto-clusters small/medium tables on natural load order.
+-- For very large tables (100GB+) with poor natural ordering on the
+-- filtered column, define an explicit clustering key:
+
+ALTER TABLE events CLUSTER BY (event_date, tenant_id);
+
+-- Check clustering health
+SELECT SYSTEM$CLUSTERING_INFORMATION('events', '(event_date, tenant_id)');
+-- returns avg_overlaps / avg_depth — lower is better</code></pre>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Concept</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td>Partition pruning</td><td>Skips micro-partitions whose min/max range can't satisfy the filter — the single biggest performance win available</td></tr>
+      <tr><td>Clustering depth</td><td>How many overlapping partitions must be scanned for a given value — automatic reclustering (background, billed) reduces it over time</td></tr>
+      <tr><td>Automatic clustering</td><td>Snowflake re-sorts partitions in the background as data changes — no manual <code>OPTIMIZE</code> needed, but consumes credits</td></tr>
+      <tr><td>When to add a clustering key</td><td>Only on large (100GB+) tables where queries consistently filter/join on a column whose natural order has drifted (e.g., frequent updates)</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-green">
+    <strong>Don't over-cluster</strong>
+    Clustering keys add ongoing background re-clustering cost. Most tables need none — Snowflake's natural micro-partition pruning on load order is often sufficient. Add a clustering key only after confirming (via query profile) that pruning is poor on a genuinely large table.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+<div class="section page-break" id="s4">
+  <div class="section-num">Section 04</div>
+  <h2 class="section-title">Semi-structured Data</h2>
+  <p class="lead">Snowflake natively stores and queries JSON, Avro, Parquet, ORC, and XML via the <strong>VARIANT</strong> type — no separate NoSQL system needed. VARIANT columns are automatically columnarized and pruned like any other column.</p>
+
+  <h3>Loading &amp; Querying VARIANT</h3>
+<pre><code>CREATE TABLE raw_events (payload VARIANT);
+
+INSERT INTO raw_events
+SELECT PARSE_JSON('{
+  "user_id": 42,
+  "event": "purchase",
+  "items": [{"sku": "A1", "qty": 2}, {"sku": "B7", "qty": 1}],
+  "meta": {"source": "mobile", "app_version": "3.2"}
+}');
+
+-- Dot notation + array indexing, fully queryable with SQL
+SELECT
+  payload:user_id::INT               AS user_id,
+  payload:event::STRING              AS event,
+  payload:meta.source::STRING        AS source,
+  payload:items[0].sku::STRING       AS first_sku
+FROM raw_events;
+
+-- FLATTEN explodes nested arrays into rows (like $unwind in Mongo)
+SELECT r.payload:user_id::INT AS user_id, i.value:sku::STRING AS sku, i.value:qty::INT AS qty
+FROM raw_events r, LATERAL FLATTEN(input => r.payload:items) i;</code></pre>
+
+  <h3>Structured vs Semi-structured Storage</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Approach</th><th>Query Speed</th><th>Flexibility</th><th>Use When</th></tr></thead>
+    <tbody>
+      <tr><td>VARIANT column</td><td>Fast (auto-columnarized + pruned)</td><td>High — schema can drift</td><td>Ingest-first, schema-on-read, evolving event payloads</td></tr>
+      <tr><td>Extracted relational columns</td><td>Fastest</td><td>Low — needs migration on schema change</td><td>Stable, high-QPS analytical columns — extract via a view or stream</td></tr>
+      <tr><td>Hybrid (VARIANT + generated columns)</td><td>Fast for hot fields</td><td>High</td><td>Best of both — <code>ALTER TABLE ADD COLUMN sku STRING AS (payload:items[0].sku::STRING)</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-blue">
+    <strong>No separate document DB required</strong>
+    Because VARIANT is pruned and columnarized under the hood, teams often land raw JSON straight into Snowflake (schema-on-read) and materialise relational views on top — skipping a separate MongoDB/DynamoDB staging hop entirely for analytical workloads.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+<div class="section page-break" id="s5">
+  <div class="section-num">Section 05</div>
+  <h2 class="section-title">Time Travel &amp; Cloning</h2>
+  <p class="lead">Because storage is immutable micro-partitions, Snowflake can cheaply retain historical versions of data (<strong>Time Travel</strong>) and create instant, storage-free copies (<strong>Zero-Copy Cloning</strong>) by just referencing existing partitions.</p>
+
+  <h3>Time Travel — Query &amp; Restore the Past</h3>
+<pre><code>-- Query data as of a point in time (up to 90 days on Enterprise, 1 day Standard)
+SELECT * FROM orders AT (TIMESTAMP => '2026-07-10 09:00:00'::TIMESTAMP);
+SELECT * FROM orders BEFORE (STATEMENT => '8e5d3f2a-...');
+
+-- Undo an accidental DELETE/UPDATE without a backup restore
+UNDROP TABLE orders;                          -- table dropped by mistake
+CREATE OR REPLACE TABLE orders AS
+  SELECT * FROM orders AT (OFFSET => -3600);   -- 1 hour ago</code></pre>
+
+  <h3>Zero-Copy Cloning</h3>
+<pre><code>-- Instant, metadata-only copy — no data is physically duplicated
+CREATE TABLE orders_dev CLONE orders;
+CREATE SCHEMA analytics_staging CLONE analytics;
+CREATE DATABASE full_prod_copy CLONE prod;
+
+-- Storage cost is $0 until the clone diverges (copy-on-write)
+-- Diverged blocks are billed only for the delta, not the full copy</code></pre>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Feature</th><th>Mechanism</th><th>Typical Use</th></tr></thead>
+    <tbody>
+      <tr><td>Time Travel</td><td>Retains prior micro-partition versions for a retention window</td><td>Undo mistakes, audit historical state, point-in-time queries</td></tr>
+      <tr><td>Fail-safe</td><td>Additional 7-day Snowflake-managed recovery period after Time Travel expires</td><td>Disaster recovery only — not user-queryable, Snowflake support required</td></tr>
+      <tr><td>Zero-copy clone</td><td>New table/schema/DB pointing at the same micro-partitions until writes diverge</td><td>Spin up a full prod-like dev/test/staging environment in seconds</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-amber">
+    <strong>Time Travel has a storage cost</strong>
+    Retaining changed/deleted data for the Time Travel window means storage isn't freed immediately. High-churn tables with long retention (up to 90 days) can meaningfully inflate storage billing — tune <code>DATA_RETENTION_TIME_IN_DAYS</code> per table to what's actually needed.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+<div class="section page-break" id="s6">
+  <div class="section-num">Section 06</div>
+  <h2 class="section-title">Streams, Tasks &amp; Snowpipe</h2>
+  <p class="lead">Streams capture row-level changes for CDC, Tasks schedule SQL execution, and Snowpipe continuously ingests files as they land — together they let you build ELT pipelines entirely inside Snowflake with no external orchestrator.</p>
+
+  <div class="diagram">Files land in S3/Azure/GCS stage
+        │
+        ▼ (event notification, near-real-time)
+   SNOWPIPE  ──► raw_events table (auto-ingest, serverless compute)
+        │
+        ▼ (row-level change capture)
+    STREAM  ──► tracks INSERT/UPDATE/DELETE since last consumed offset
+        │
+        ▼ (scheduled or chained execution)
+     TASK    ──► MERGE into curated table, on a cron or after upstream task</div>
+
+  <h3>Streams — Change Data Capture</h3>
+<pre><code>CREATE STREAM orders_stream ON TABLE raw_orders;
+
+-- Stream exposes METADATA$ACTION / METADATA$ISUPDATE / METADATA$ROW_ID
+SELECT * FROM orders_stream;   -- consuming a stream in a DML advances its offset
+
+MERGE INTO curated_orders t
+USING orders_stream s ON t.order_id = s.order_id
+WHEN MATCHED AND s.METADATA$ACTION = 'DELETE' THEN DELETE
+WHEN MATCHED AND s.METADATA$ACTION = 'INSERT' THEN UPDATE SET t.amount = s.amount
+WHEN NOT MATCHED THEN INSERT (order_id, amount) VALUES (s.order_id, s.amount);</code></pre>
+
+  <h3>Tasks — Scheduled/Chained SQL</h3>
+<pre><code>CREATE TASK refresh_curated
+  WAREHOUSE = etl_wh
+  SCHEDULE = 'USING CRON */10 * * * * UTC'   -- every 10 minutes
+  WHEN SYSTEM$STREAM_HAS_DATA('orders_stream')  -- skip run if nothing changed
+AS
+  MERGE INTO curated_orders t USING orders_stream s ON t.order_id = s.order_id
+  WHEN MATCHED THEN UPDATE SET t.amount = s.amount
+  WHEN NOT MATCHED THEN INSERT (order_id, amount) VALUES (s.order_id, s.amount);
+
+ALTER TASK refresh_curated RESUME;   -- tasks are created suspended</code></pre>
+
+  <h3>Snowpipe — Continuous Ingestion</h3>
+<pre><code>CREATE PIPE raw_events_pipe AUTO_INGEST = TRUE AS
+  COPY INTO raw_events
+  FROM @my_s3_stage
+  FILE_FORMAT = (TYPE = 'JSON');
+
+-- Cloud storage event notification (SNS/Event Grid/Pub-Sub) triggers Snowpipe
+-- automatically — files typically visible in the table within ~1 minute,
+-- billed per-file on serverless compute (no warehouse required)</code></pre>
+
+  <div class="callout callout-green">
+    <strong>Streams + Tasks = ELT without Airflow</strong>
+    For pipelines that live entirely inside Snowflake, Streams (what changed) chained to Tasks (when to act) replace a lot of what teams reach for an external orchestrator to do — with the tradeoff of less cross-system coordination and observability than a dedicated orchestrator provides.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+<div class="section page-break" id="s7">
+  <div class="section-num">Section 07</div>
+  <h2 class="section-title">Data Sharing</h2>
+  <p class="lead">Secure Data Sharing lets one Snowflake account grant another account live, read-only access to data — no data copying, no ETL, no FTP. The consumer queries the provider's data directly against the provider's storage.</p>
+
+  <div class="diagram">PROVIDER account                    CONSUMER account
+┌───────────────┐                  ┌───────────────┐
+│  orders table  │ ── SHARE ──────► │ (no copy!)     │
+│  (storage)     │    (metadata     │ queries live   │
+│                │     pointer      │ data using own │
+│                │     only)        │ compute/warehouse│
+└───────────────┘                  └───────────────┘
+   Billed for storage                 Billed for their
+   + own query compute                own query compute</div>
+
+  <h3>Sharing Mechanisms</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Mechanism</th><th>Scope</th><th>Use Case</th></tr></thead>
+    <tbody>
+      <tr><td>Direct Share</td><td>Account-to-account, same cloud region</td><td>Share curated tables with a known partner or internal BU</td></tr>
+      <tr><td>Snowflake Marketplace</td><td>Public/private listing across any Snowflake account</td><td>Monetize or consume third-party datasets (market data, weather, demographics)</td></tr>
+      <tr><td>Data Clean Room</td><td>Governed, privacy-preserving joint queries</td><td>Two parties analyze combined data (e.g., ad matching) without exposing raw rows</td></tr>
+      <tr><td>Cross-cloud/region auto-fulfillment</td><td>Snowflake replicates automatically to consumer's region</td><td>Global distribution without manual replication pipelines</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Creating a Share</h3>
+<pre><code>CREATE SHARE sales_share;
+GRANT USAGE ON DATABASE sales_db TO SHARE sales_share;
+GRANT USAGE ON SCHEMA sales_db.public TO SHARE sales_share;
+GRANT SELECT ON TABLE sales_db.public.orders TO SHARE sales_share;
+ALTER SHARE sales_share ADD ACCOUNTS = ('partner_account_id');
+
+-- Consumer side — creates a read-only database backed by the share
+CREATE DATABASE shared_sales FROM SHARE provider_account.sales_share;</code></pre>
+
+  <div class="callout callout-purple">
+    <strong>Why this beats traditional data export</strong>
+    No file transfer, no staleness (consumer always sees live data), no duplicated storage cost for the provider, and the provider retains full governance (revoke access instantly, row-access policies still apply). This is the mechanism behind the entire Snowflake Marketplace.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+<div class="section page-break" id="s8">
+  <div class="section-num">Section 08</div>
+  <h2 class="section-title">Cost Optimization</h2>
+  <p class="lead">Snowflake bills separately for compute (per-second warehouse credits) and storage (compressed bytes/month), plus serverless features like Snowpipe and automatic clustering. Cost control is mostly about compute governance.</p>
+
+  <h3>Levers, Ranked by Impact</h3>
+  <div class="card-grid">
+    <div class="card card-accent"><h4>Aggressive auto-suspend</h4><p>60s suspend on dev/ad-hoc warehouses. Idle compute is the single largest source of waste.</p></div>
+    <div class="card card-accent"><h4>Right-size, don't over-provision</h4><p>Start small, scale up only when query profile shows spillage to local/remote disk — a common sign of an undersized warehouse.</p></div>
+    <div class="card card-accent"><h4>Resource monitors</h4><p>Set credit-quota alerts/suspensions per warehouse or account to hard-cap runaway spend.</p></div>
+    <div class="card card-accent"><h4>Separate warehouses per workload</h4><p>Isolate ETL, BI, and data science onto distinct warehouses so a heavy job doesn't force-scale a shared cluster.</p></div>
+    <div class="card card-accent"><h4>Use the result cache</h4><p>Identical repeated queries (24hr window) return free, instantly, from Cloud Services — no warehouse spin-up.</p></div>
+    <div class="card card-accent"><h4>Prune Time Travel retention</h4><p>Set <code>DATA_RETENTION_TIME_IN_DAYS</code> to the minimum needed per table, especially on high-churn staging tables.</p></div>
+  </div>
+
+  <h3>Resource Monitor</h3>
+<pre><code>CREATE RESOURCE MONITOR monthly_cap
+  WITH CREDIT_QUOTA = 5000
+  FREQUENCY = MONTHLY
+  START_TIMESTAMP = IMMEDIATELY
+  TRIGGERS
+    ON 75 PERCENT DO NOTIFY
+    ON 90 PERCENT DO NOTIFY
+    ON 100 PERCENT DO SUSPEND        -- stops new queries, lets running ones finish
+    ON 110 PERCENT DO SUSPEND_IMMEDIATE;
+
+ALTER WAREHOUSE etl_wh SET RESOURCE_MONITOR = monthly_cap;</code></pre>
+
+  <h3>Diagnosing an Expensive Query</h3>
+<pre><code>-- Query History + credits consumed
+SELECT query_text, warehouse_name, total_elapsed_time,
+       credits_used_cloud_services, bytes_scanned, partitions_scanned, partitions_total
+FROM SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY
+WHERE start_time > DATEADD(day, -7, CURRENT_TIMESTAMP())
+ORDER BY total_elapsed_time DESC
+LIMIT 20;
+
+-- Low partitions_scanned/partitions_total ratio = good pruning
+-- High "bytes spilled to local/remote storage" in query profile = undersized warehouse</code></pre>
+
+  <div class="callout callout-rose">
+    <strong>The "always-on" mistake</strong>
+    A BI warehouse serving a dashboard with <code>AUTO_SUSPEND = 3600</code> (1 hour) that only gets queried a few times an hour will burn 55+ minutes of pure idle credits per query. This single misconfiguration is the most common source of surprise Snowflake bills.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 9 ══════════════════════════ -->
+<div class="section page-break" id="s9">
+  <div class="section-num">Section 09</div>
+  <h2 class="section-title">Interview Questions</h2>
+  <p class="lead">Frequently asked Snowflake interview questions, with the reasoning an interviewer is actually listening for.</p>
+
+  <h3>"Explain Snowflake's architecture and why it matters."</h3>
+  <p>Three independently-scaling layers: storage (compressed micro-partitions on cloud object storage), compute (elastic virtual warehouses that read that shared storage), and cloud services (metadata, optimization, security, result cache). Because compute and storage are decoupled, you can scale either independently and run many isolated warehouses against the same physical data with zero contention — the core advantage over shared-nothing MPP systems like a traditional on-prem Teradata/Vertica cluster.</p>
+
+  <h3>"How does Snowflake achieve fast query performance without indexes?"</h3>
+  <p>Instead of user-managed indexes, Snowflake relies on automatic micro-partitioning: every table is split into 50–500MB immutable columnar blocks, each with stored min/max metadata per column. The optimizer prunes partitions that can't match the query's filter before scanning any data — for well-ordered data this eliminates most of the table from consideration without any DBA index tuning.</p>
+
+  <h3>"When would you use a clustering key?"</h3>
+  <p>Only on large tables (rule of thumb: 100GB+) where query filters consistently hit a column whose natural (load-order) clustering has degraded — commonly from frequent updates or out-of-order backfills. Check <code>SYSTEM$CLUSTERING_INFORMATION</code> first; adding a clustering key has an ongoing background re-clustering cost, so it's not a default choice.</p>
+
+  <h3>"What's the difference between scaling up and scaling out a warehouse?"</h3>
+  <p>Scaling up (bigger warehouse size) adds more compute nodes to a single cluster, speeding up individual heavy queries. Scaling out (multi-cluster warehouses) adds more clusters of the same size to handle more concurrent queries, reducing queuing. Confusing the two is a classic mistake — a queuing problem under high concurrency isn't fixed by making the warehouse bigger, it's fixed by allowing more clusters.</p>
+
+  <h3>"How would you build a near-real-time pipeline entirely in Snowflake?"</h3>
+  <p>Snowpipe auto-ingests files from a cloud stage as they land (serverless, no warehouse needed). A Stream on the raw table tracks row-level changes since last consumed offset. A Task on a schedule (or chained to another task) runs a MERGE using the stream, guarded by <code>SYSTEM$STREAM_HAS_DATA</code> so it's a no-op when nothing changed. This gets you CDC-driven ELT without an external orchestrator.</p>
+
+  <h3>"How is Secure Data Sharing different from replicating/exporting data to a partner?"</h3>
+  <p>Data Sharing grants live, read-only access to the provider's actual storage via metadata pointers — no file is copied, no ETL job runs, and the consumer always sees current data. Traditional export (S3 drop, SFTP, API pull) duplicates storage, goes stale between syncs, and requires a pipeline to maintain. The tradeoff is that both parties must be on Snowflake (or use cross-cloud auto-fulfillment).</p>
+
+  <h3>Quick-fire Comparison Table</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>Micro-partition size</td><td>50–500 MB uncompressed</td></tr>
+      <tr><td>Default Time Travel retention</td><td>1 day (Standard edition), up to 90 days (Enterprise+)</td></tr>
+      <tr><td>Billing granularity for compute</td><td>Per-second, 60-second minimum per warehouse resume</td></tr>
+      <tr><td>Does resizing a warehouse move data?</td><td>No — storage is fully decoupled, resize is instant</td></tr>
+      <tr><td>Zero-copy clone storage cost</td><td>$0 until the clone's data diverges (copy-on-write)</td></tr>
+      <tr><td>Native semi-structured type</td><td>VARIANT (also OBJECT, ARRAY)</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-purple">
+    <strong>Follow-up trap: "Is Snowflake a database or a data warehouse?"</strong>
+    Snowflake markets itself as a "Data Cloud" — beyond classic warehousing it also supports semi-structured/unstructured data, data sharing, data engineering (Streams/Tasks), and even application workloads (Snowpark, Native Apps). Framing it as only an OLAP warehouse undersells the platform and is a common interviewer gotcha.
+  </div>
+
+  <h3>Further Reading</h3>
+  <ul class="clean">
+    <li><a href="https://docs.snowflake.com/en/user-guide/intro-key-concepts" target="_blank">Snowflake Key Concepts &amp; Architecture</a></li>
+    <li><a href="https://docs.snowflake.com/en/user-guide/warehouses" target="_blank">Virtual Warehouses Guide</a></li>
+    <li><a href="https://docs.snowflake.com/en/user-guide/tables-clustering-micropartitions" target="_blank">Micro-partitions &amp; Clustering</a></li>
+    <li><a href="https://docs.snowflake.com/en/user-guide/data-time-travel" target="_blank">Time Travel &amp; Fail-safe</a></li>
+    <li><a href="https://docs.snowflake.com/en/user-guide/streams-intro" target="_blank">Streams &amp; Tasks</a></li>
+    <li><a href="https://docs.snowflake.com/en/user-guide/data-sharing-intro" target="_blank">Secure Data Sharing</a></li>
+  </ul>
+</div>
+
+<div class="footer">Synapse · Snowflake Data Cloud · July 2026</div>
+</div><!-- /container -->
+  </div><!-- /main-scroll -->
+</div><!-- /topic-page -->
+<footer class="guide-footer">Synapse &middot; AI &amp; LLM Engineering</footer>
+<script src="../assets/scroll-top.js"></script>
+</body>
+</html>

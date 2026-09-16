@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C# Language Features — Synapse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e; --ink2: #3d3d5c; --ink3: #6b6b8a;
+  --bg: #ffffff; --bg2: #f4f3f0; --bg3: #eae8e4;
+  --accent: #2563eb; --accent2: #1d4ed8; --accent-bg: #eff6ff;
+  --green: #059669; --green-bg: #ecfdf5;
+  --amber: #d97706; --amber-bg: #fffbeb;
+  --rose: #e11d48; --rose-bg: #fff1f2;
+  --purple: #7c3aed; --purple-bg: #f5f3ff;
+  --teal: #0d9488; --teal-bg: #f0fdfa;
+  --coral: #ea580c; --coral-bg: #fff7ed;
+  --border: #e2e0dc; --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+@media print {
+  body { font-size: 10pt; } .no-print { display: none !important; }
+  .page-break { page-break-before: always; } .card { break-inside: avoid; }
+  pre { font-size: 8pt; } h1 { font-size: 22pt; } h2 { font-size: 14pt; }
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+.cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%); color: white; padding: 4rem 2rem; position: relative; overflow: hidden; }
+.cover::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 50%, rgba(37,99,235,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(124,58,237,0.1) 0%, transparent 50%); }
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+.diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; margin: 1rem 0; font-family: var(--mono); font-size: 0.75rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink2); }
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+/* ── CSS Flow Diagrams ── */
+.fd { display: flex; flex-direction: column; align-items: center; margin: 1.25rem 0; }
+.fd-row { display: flex; align-items: center; justify-content: center; }
+.fd-col { display: flex; flex-direction: column; align-items: center; }
+.fd-node { border-radius: 8px; padding: 0.45rem 1rem; font-size: 0.78rem; font-family: var(--mono); font-weight: 500; border: 1.5px solid; text-align: center; line-height: 1.45; }
+.fd-node sub { font-size: 0.65rem; opacity: 0.75; display: block; font-weight: 400; }
+.fd-node-blue   { background: var(--accent-bg);  border-color: var(--accent);  color: var(--accent2); }
+.fd-node-green  { background: var(--green-bg);   border-color: var(--green);   color: var(--green); }
+.fd-node-purple { background: var(--purple-bg);  border-color: var(--purple);  color: var(--purple); }
+.fd-node-amber  { background: var(--amber-bg);   border-color: var(--amber);   color: var(--amber); }
+.fd-node-teal   { background: var(--teal-bg);    border-color: var(--teal);    color: var(--teal); }
+.fd-node-coral  { background: var(--coral-bg);   border-color: var(--coral);   color: var(--coral); }
+.fd-node-rose   { background: var(--rose-bg);    border-color: var(--rose);    color: var(--rose); }
+.fd-node-dark   { background: var(--ink);        border-color: var(--ink);     color: #fff; }
+.fd-node-gray   { background: var(--bg2);        border-color: var(--border);  color: var(--ink2); }
+.fd-arr-d { width: 2px; height: 28px; background: var(--ink3); margin: 0 auto; position: relative; }
+.fd-arr-d::after { content:''; position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); border-left:5px solid transparent; border-right:5px solid transparent; border-top:7px solid var(--ink3); }
+.fd-arr-u { width: 2px; height: 28px; background: var(--ink3); margin: 0 auto; position: relative; }
+.fd-arr-u::before { content:''; position:absolute; top:-6px; left:50%; transform:translateX(-50%); border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:7px solid var(--ink3); }
+.fd-arr-r { width: 32px; height: 2px; background: var(--ink3); position: relative; flex-shrink: 0; }
+.fd-arr-r::after { content:''; position:absolute; right:-6px; top:50%; transform:translateY(-50%); border-top:5px solid transparent; border-bottom:5px solid transparent; border-left:7px solid var(--ink3); }
+.fd-arr-l { width: 32px; height: 2px; background: var(--ink3); position: relative; flex-shrink: 0; }
+.fd-arr-l::before { content:''; position:absolute; left:-6px; top:50%; transform:translateY(-50%); border-top:5px solid transparent; border-bottom:5px solid transparent; border-right:7px solid var(--ink3); }
+.fd-group { border: 2px dashed var(--border); border-radius: 12px; padding: 1rem 1.2rem; background: var(--bg2); }
+.fd-group-title { font-size: 0.65rem; font-family: var(--mono); color: var(--ink3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.6rem; text-align: center; }
+.fd-note { font-size: 0.68rem; font-family: var(--sans); color: var(--ink3); text-align: center; max-width: 200px; line-height: 1.35; margin-top: 0.2rem; }
+.fd-gap { width: 1.5rem; flex-shrink: 0; }
+.fd-gap-v { height: 0.75rem; }
+.fd-diamond { min-width: 100px; padding: 0.5rem 0.75rem; background: var(--amber-bg); border: 1.5px solid var(--amber); color: var(--amber); font-size: 0.72rem; font-family: var(--mono); display: flex; align-items: center; justify-content: center; clip-path: polygon(50% 0%,100% 50%,50% 100%,0% 50%); text-align: center; font-weight: 600; }
+.fd-mini-label { font-size: 0.62rem; font-family: var(--mono); color: var(--ink3); text-align: center; margin-top: 0.15rem; }
+.fd-start-end { font-family: var(--mono); font-size: 0.72rem; background: var(--ink); color: #fff; border-radius: 20px; padding: 0.25rem 0.9rem; font-weight: 600; }
+@media (max-width: 600px) { .fd-row { flex-wrap: wrap; gap: 0.5rem; } .fd-arr-r, .fd-arr-l { display: none; } }
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar nav ul ul { margin: 0; padding: 0; }
+.sidebar nav ul ul li a { padding: 0.3rem 1.25rem 0.3rem 2.2rem; font-size: 0.74rem; color: #a0aec0; }
+.sidebar nav ul ul li a:hover { background: #3d4d63; color: #e2e8f0; }
+.sidebar .toc-num { font-size: 0.65rem; color: #90cdf4; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+</style>
+<link rel="stylesheet" href="../assets/mobile.css">
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← Synapse</a>
+  <h1>C# Language Features</h1>
+</header>
+
+<div class="topic-page">
+  <aside class="sidebar">
+    <p class="sidebar-title">C# Language Features</p>
+    <nav><ul>
+      <li><a href="#s1"><span class="toc-num">01</span>Classes, Objects &amp; Constructors</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>Interfaces &amp; Abstract Classes</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>Generics</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>Properties, Indexers &amp; Operators</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>Delegates, Events &amp; Lambdas</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>Pattern Matching, Tuples &amp; Control Flow</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>Structs, Enums &amp; Records</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>Exceptions &amp; Nullable Types</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>Iterators, yield &amp; Custom Collections</a></li>
+      <li><a href="#s10"><span class="toc-num">10</span>Async/Await Language Mechanics</a></li>
+      <li><a href="#s11"><span class="toc-num">11</span>Modern C# Syntax (C# 8 → 13)</a></li>
+      <li><a href="#s12"><span class="toc-num">12</span>Tricky Interview Questions</a></li>
+    </ul></nav>
+  </aside>
+
+  <div class="main-scroll">
+    <div class="cover">
+      <div class="cover-label">Complete Language Reference — July 2026</div>
+      <h1>C# Language <span>Features</span></h1>
+      <p class="cover-sub">
+        Every core C# language construct end to end — classes and constructors, interfaces and
+        abstract classes, generics, delegates and events, pattern matching, structs and records,
+        iterators, and the async/await state machine — plus the syntax added across C# 8 through 13.
+      </p>
+      <div class="cover-tags">
+        <span class="cover-tag">Interfaces</span>
+        <span class="cover-tag">Generics</span>
+        <span class="cover-tag">Abstract Classes</span>
+        <span class="cover-tag">Static Constructors</span>
+        <span class="cover-tag">Delegates &amp; Events</span>
+        <span class="cover-tag">Pattern Matching</span>
+        <span class="cover-tag">Async/Await</span>
+        <span class="cover-tag">C# 8 – 13</span>
+      </div>
+      <div class="cover-date">v1.0 — July 2026</div>
+    </div>
+
+    <div class="container">
+      <div class="callout callout-blue" style="margin-top:2rem">
+        <strong>Companion guide</strong>
+        This page is a pure C# <em>language</em> reference. For the CLR, .NET Framework vs .NET
+        Core/modern .NET, LINQ, the Task Parallel Library, Orleans, SignalR, and OOP/SOLID, see
+        the <a href="csharp-dotnet.html">C# &amp; .NET Deep Dive</a>.
+      </div>
+
+      <div class="toc page-break">
+        <h2>Contents</h2>
+        <div class="toc-grid">
+          <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">Classes, Objects &amp; Constructors</span></a>
+          <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">Interfaces &amp; Abstract Classes</span></a>
+          <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">Generics</span></a>
+          <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">Properties, Indexers &amp; Operators</span></a>
+          <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">Delegates, Events &amp; Lambdas</span></a>
+          <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Pattern Matching, Tuples &amp; Control Flow</span></a>
+          <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Structs, Enums &amp; Records</span></a>
+          <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">Exceptions &amp; Nullable Types</span></a>
+          <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">Iterators, yield &amp; Custom Collections</span></a>
+          <a class="toc-item" href="#s10"><span class="toc-num">10</span><span class="toc-label">Async/Await Language Mechanics</span></a>
+          <a class="toc-item" href="#s11"><span class="toc-num">11</span><span class="toc-label">Modern C# Syntax (C# 8 → 13)</span></a>
+          <a class="toc-item" href="#s12"><span class="toc-num">12</span><span class="toc-label">Tricky Interview Questions</span></a>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+      <div class="section page-break" id="s1">
+        <div class="section-num">Section 01</div>
+        <h2 class="section-title">Classes, Objects &amp; Constructors</h2>
+        <p class="lead">
+          Every class has at least one instance constructor, may have exactly one static
+          constructor, and the order those run in is a favorite whiteboard question.
+        </p>
+
+        <h3>Static constructor lifecycle</h3>
+        <div class="fd">
+          <div class="fd-node fd-node-dark" style="min-width:260px">Type first referenced<sub>first instance created, or first static member accessed</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-blue" style="min-width:260px">CLR runs the static constructor<sub>guaranteed exactly once, thread-safe, no params/modifiers</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-teal" style="min-width:260px">Static fields fully initialized</div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-amber" style="min-width:260px">Instance constructor runs (if this reference was a `new`)</div>
+        </div>
+        <pre><code>public class ConfigCache
+{
+    private static readonly Dictionary&lt;string, string&gt; _values;
+
+    static ConfigCache()                 // static constructor — no access modifier, no parameters
+    {
+        _values = LoadFromDisk();        // runs exactly once, before ANY static/instance member is touched
+        Console.WriteLine("ConfigCache initialized");
+    }
+
+    public ConfigCache() { }             // ordinary instance constructor — runs every `new ConfigCache()`
+
+    public static string Get(string key) => _values[key];
+}</code></pre>
+        <div class="callout callout-blue">
+          <strong>Why the CLR guarantees this</strong>
+          You never need a manual double-checked-locking singleton pattern for one-time setup —
+          the runtime itself serializes and deduplicates static constructor execution across
+          threads, even under concurrent first access.
+        </div>
+
+        <h3>Constructor chaining</h3>
+        <pre><code>public class Employee
+{
+    public string Name { get; }
+    public decimal Salary { get; }
+
+    public Employee(string name) : this(name, 50_000m) { }     // chains to the constructor below
+
+    public Employee(string name, decimal salary)
+    {
+        Name = name;
+        Salary = salary;
+    }
+}
+
+public class Manager : Employee
+{
+    public int TeamSize { get; }
+    public Manager(string name, decimal salary, int teamSize)
+        : base(name, salary)          // must run before the Manager constructor body
+    {
+        TeamSize = teamSize;
+    }
+}</code></pre>
+        <div class="callout callout-amber">
+          <strong>Execution order for <code>new Manager(...)</code></strong>
+          Static constructors of both <code>Employee</code> and <code>Manager</code> (if not
+          already run) → field initializers → <code>base(...)</code> constructor body
+          (<code>Employee</code>) → <code>Manager</code> constructor body. Base always finishes
+          before derived — you can rely on base state being ready in the derived constructor body.
+        </div>
+
+        <h3><code>const</code> vs <code>static readonly</code> vs instance <code>readonly</code></h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th><code>const</code></th><th><code>static readonly</code></th><th><code>readonly</code> (instance)</th></tr></thead>
+            <tbody>
+              <tr><td>Evaluated</td><td>Compile time</td><td>Runtime, once (in the static constructor)</td><td>Runtime, per instance (in any constructor)</td></tr>
+              <tr><td>Can hold</td><td>Primitives &amp; strings only</td><td>Any type, including computed values</td><td>Any type</td></tr>
+              <tr><td>Versioning trap</td><td>Inlined into every <em>caller's</em> IL — a new value needs all consumers recompiled</td><td>Read live from the defining assembly — no recompile needed downstream</td><td>N/A</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Static classes</h3>
+        <pre><code>public static class MathUtils           // cannot be instantiated, cannot be inherited from
+{
+    public static double Square(double x) => x * x;
+}</code></pre>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+      <div class="section page-break" id="s2">
+        <div class="section-num">Section 02</div>
+        <h2 class="section-title">Interfaces &amp; Abstract Classes</h2>
+        <p class="lead">
+          Two different abstraction tools with overlapping surface area — knowing precisely where
+          they diverge (state, multiple inheritance, member accessibility) is what interviewers probe.
+        </p>
+
+        <h3>Combined hierarchy</h3>
+        <div class="fd">
+          <div class="fd-node fd-node-dark" style="min-width:220px">IRefundable<sub>Task Refund(decimal amount);</sub></div>
+          <div class="fd-gap-v"></div>
+          <div class="fd-node fd-node-purple" style="min-width:220px">abstract class PaymentMethod<sub>abstract Pay(); virtual Validate();</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-blue" style="min-width:220px">CreditCard : PaymentMethod, IRefundable</div>
+        </div>
+
+        <pre><code>public interface IRefundable
+{
+    Task RefundAsync(decimal amount);
+}
+
+public abstract class PaymentMethod
+{
+    protected PaymentMethod(string ownerName) => OwnerName = ownerName; // abstract classes CAN have constructors —
+    public string OwnerName { get; }                                   // just never invoked via `new PaymentMethod(...)`
+
+    public abstract Task PayAsync(decimal amount);   // no body — every concrete subclass MUST implement it
+    public virtual bool Validate() => !string.IsNullOrEmpty(OwnerName); // has a body — subclasses MAY override it
+}
+
+public sealed class CreditCard : PaymentMethod, IRefundable
+{
+    public CreditCard(string owner) : base(owner) { }
+
+    public override Task PayAsync(decimal amount) => ChargeAsync(amount);
+    public sealed override bool Validate() => base.Validate() && CardNumber.Length == 16; // "sealed override": stop the override chain here
+    public Task RefundAsync(decimal amount) => IssueCreditAsync(amount);
+
+    public string CardNumber { get; init; } = "";
+}</code></pre>
+
+        <h3>Explicit interface implementation</h3>
+        <p>
+          Used when a class implements two interfaces with a colliding member name, or when you
+          want a member accessible only through the interface, not the concrete type.
+        </p>
+        <pre><code>public interface IEnglishGreeter { string Greet(); }
+public interface IFrenchGreeter { string Greet(); }
+
+public class Bilingual : IEnglishGreeter, IFrenchGreeter
+{
+    string IEnglishGreeter.Greet() => "Hello";   // explicit — only reachable via an IEnglishGreeter reference
+    string IFrenchGreeter.Greet() => "Bonjour";
+}
+
+var b = new Bilingual();
+// b.Greet();                          // COMPILE ERROR — ambiguous / not a public member of Bilingual
+Console.WriteLine(((IEnglishGreeter)b).Greet());  // "Hello"
+Console.WriteLine(((IFrenchGreeter)b).Greet());   // "Bonjour"</code></pre>
+
+        <h3>virtual / override / abstract / sealed — the full dispatch table</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Modifier</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>virtual</code></td><td>Has a default body; subclasses may (but don't have to) override it</td></tr>
+              <tr><td><code>abstract</code></td><td>No body at all; every non-abstract subclass is <strong>required</strong> to override it</td></tr>
+              <tr><td><code>override</code></td><td>Replaces a base <code>virtual</code>/<code>abstract</code> member — participates in runtime dispatch</td></tr>
+              <tr><td><code>sealed override</code></td><td>Overrides, but forbids any further overriding down the hierarchy — locks the implementation from this point on</td></tr>
+              <tr><td><code>new</code> (member hiding)</td><td>Declares an unrelated member that just happens to share a name — breaks polymorphism; almost always the wrong tool versus <code>override</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Interface vs abstract class — the decision</h3>
+        <div class="card-grid">
+          <div class="card card-accent"><h4>Choose an interface</h4><p>When unrelated types need to prove one capability (<code>IDisposable</code>, <code>IComparable&lt;T&gt;</code>) and you need multiple such contracts on one type.</p></div>
+          <div class="card card-accent"><h4>Choose an abstract class</h4><p>When you have real shared state and behavior across a true is-a family, and single inheritance is an acceptable constraint.</p></div>
+          <div class="card card-accent"><h4>Default interface methods</h4><p>Since C# 8, interfaces can carry a default body — used to version a public interface without breaking existing implementers.</p></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+      <div class="section page-break" id="s3">
+        <div class="section-num">Section 03</div>
+        <h2 class="section-title">Generics</h2>
+        <p class="lead">
+          Generics let a type or method be parameterized over a type without boxing (§ of the
+          companion guide) and without duplicating code per concrete type — the JIT specializes
+          the generic for each value-type argument and shares one specialization across all
+          reference-type arguments.
+        </p>
+
+        <h3>Generic class &amp; method</h3>
+        <pre><code>public class Repository&lt;TEntity&gt; where TEntity : class, IEntity, new()
+{
+    private readonly List&lt;TEntity&gt; _items = new();
+
+    public void Add(TEntity item) => _items.Add(item);
+    public TEntity? Find(int id) => _items.FirstOrDefault(i => i.Id == id);
+    public TEntity CreateDefault() => new TEntity();   // only legal because of the `new()` constraint
+}
+
+public static T Max&lt;T&gt;(T a, T b) where T : IComparable&lt;T&gt;   // generic method, independent of any generic class
+    => a.CompareTo(b) >= 0 ? a : b;
+
+int bigger = Max(3, 7);              // type argument <int> inferred — no need to write Max&lt;int&gt;</code></pre>
+
+        <h3>Constraints, in full</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Constraint</th><th>Restricts <code>T</code> to</th></tr></thead>
+            <tbody>
+              <tr><td><code>where T : class</code></td><td>Any reference type</td></tr>
+              <tr><td><code>where T : struct</code></td><td>Any non-nullable value type</td></tr>
+              <tr><td><code>where T : new()</code></td><td>A type with an accessible public parameterless constructor — enables <code>new T()</code> inside the generic</td></tr>
+              <tr><td><code>where T : BaseType</code></td><td>Must derive from (or be) <code>BaseType</code></td></tr>
+              <tr><td><code>where T : ISomeInterface</code></td><td>Must implement the interface — lets you call interface members on <code>T</code></td></tr>
+              <tr><td><code>where T : notnull</code></td><td>Excludes a nullable value or reference type (NRT-aware)</td></tr>
+              <tr><td><code>where T : unmanaged</code></td><td>A value type with no reference-type fields anywhere in its layout — required for pointer/<code>Span</code>-heavy low-level code</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Variance: <code>in</code> and <code>out</code></h3>
+        <div class="fd">
+          <div class="fd-row" style="gap:2rem;flex-wrap:wrap;justify-content:center">
+            <div class="fd-col">
+              <div class="fd-node fd-node-green" style="min-width:190px">out T (covariant)<sub>T only ever appears as a return type</sub></div>
+              <div class="fd-mini-label">IProducer&lt;string&gt; → IProducer&lt;object&gt;</div>
+            </div>
+            <div class="fd-col">
+              <div class="fd-node fd-node-blue" style="min-width:190px">in T (contravariant)<sub>T only ever appears as a parameter type</sub></div>
+              <div class="fd-mini-label">IConsumer&lt;object&gt; → IConsumer&lt;string&gt;</div>
+            </div>
+          </div>
+        </div>
+        <pre><code>public interface IProducer&lt;out T&gt; { T Produce(); }
+public interface IConsumer&lt;in T&gt;  { void Consume(T item); }
+
+IProducer&lt;object&gt; p = GetProducer&lt;string&gt;();     // covariant widening — safe, T only comes OUT
+IConsumer&lt;string&gt; c = GetConsumer&lt;object&gt;();     // contravariant widening — safe, T only goes IN</code></pre>
+        <div class="callout callout-rose">
+          <strong>Why <code>List&lt;T&gt;</code> can't be variant</strong>
+          <code>List&lt;T&gt;</code> both takes <code>T</code> in (<code>Add</code>) and returns it
+          out (indexer getter), so it can be neither <code>in</code> nor <code>out</code> — the
+          compiler enforces that a variant type parameter is only ever used in the safe position
+          throughout the entire interface.
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+      <div class="section page-break" id="s4">
+        <div class="section-num">Section 04</div>
+        <h2 class="section-title">Properties, Indexers &amp; Operator Overloading</h2>
+        <p class="lead">Syntax that lets a custom type read like a built-in one.</p>
+
+        <h3>Indexers</h3>
+        <pre><code>public class Matrix
+{
+    private readonly double[,] _data;
+    public Matrix(int rows, int cols) => _data = new double[rows, cols];
+
+    public double this[int row, int col]        // indexer — the type itself becomes "array-like"
+    {
+        get => _data[row, col];
+        set => _data[row, col] = value;
+    }
+}
+
+var m = new Matrix(3, 3);
+m[0, 0] = 1.0;
+Console.WriteLine(m[0, 0]);</code></pre>
+
+        <h3>Operator overloading</h3>
+        <pre><code>public readonly struct Money : IEquatable&lt;Money&gt;
+{
+    public decimal Amount { get; }
+    public string Currency { get; }
+    public Money(decimal amount, string currency) { Amount = amount; Currency = currency; }
+
+    public static Money operator +(Money a, Money b)
+    {
+        if (a.Currency != b.Currency) throw new InvalidOperationException("Currency mismatch");
+        return new Money(a.Amount + b.Amount, a.Currency);
+    }
+
+    public static bool operator ==(Money a, Money b) => a.Equals(b);
+    public static bool operator !=(Money a, Money b) => !a.Equals(b);
+    public bool Equals(Money other) => Amount == other.Amount && Currency == other.Currency;
+    public override bool Equals(object? obj) => obj is Money m && Equals(m);
+    public override int GetHashCode() => HashCode.Combine(Amount, Currency);
+
+    public static implicit operator decimal(Money m) => m.Amount;        // implicit — always safe, no data loss
+    public static explicit operator Money(decimal d) => new(d, "USD");   // explicit — requires an explicit cast
+}
+
+Money total = new Money(10, "USD") + new Money(5, "USD"); // uses operator+
+decimal raw = total;                    // implicit conversion
+Money back = (Money)25.0m;              // explicit conversion — must write the cast</code></pre>
+        <div class="callout callout-amber">
+          <strong>Overload <code>==</code>? Overload <code>GetHashCode</code> too</strong>
+          Whenever you override value equality (operator or <code>Equals</code>), you must also
+          override <code>GetHashCode</code> consistently, or the type silently breaks inside
+          <code>Dictionary</code>/<code>HashSet</code> lookups.
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+      <div class="section page-break" id="s5">
+        <div class="section-num">Section 05</div>
+        <h2 class="section-title">Delegates, Events &amp; Lambdas</h2>
+        <p class="lead">
+          A delegate is a type-safe function reference; an event is a delegate with publisher/
+          subscriber discipline built on top of it.
+        </p>
+
+        <h3>Multicast delegates</h3>
+        <div class="fd">
+          <div class="fd-node fd-node-amber" style="min-width:220px">Multicast delegate<sub>invocation list — an ordered array of method targets</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-row" style="gap:0.6rem">
+            <div class="fd-node fd-node-green">Handler A</div>
+            <div class="fd-node fd-node-teal">Handler B</div>
+            <div class="fd-node fd-node-purple">Handler C</div>
+          </div>
+          <div class="fd-note" style="max-width:400px;margin-top:0.5rem">
+            <code>+=</code> appends to the invocation list; <code>-=</code> removes. Invoking the
+            delegate calls every target in order — if one throws, the rest never run and the
+            exception propagates to the caller.
+          </div>
+        </div>
+        <pre><code>Action&lt;string&gt; log = Console.WriteLine;
+log += msg => File.AppendAllText("log.txt", msg);   // now a 2-target multicast delegate
+log("hello");                                       // both targets run, in order</code></pre>
+
+        <h3>The <code>event</code> keyword</h3>
+        <pre><code>public class OrderProcessor
+{
+    public event EventHandler&lt;OrderShippedEventArgs&gt;? OrderShipped;   // publisher-only add/remove surface
+
+    public void Ship(Order order)
+    {
+        // ship logic...
+        OnOrderShipped(new OrderShippedEventArgs(order));
+    }
+
+    protected virtual void OnOrderShipped(OrderShippedEventArgs e) =>
+        OrderShipped?.Invoke(this, e);      // null-conditional — safe when nobody has subscribed
+}
+
+public class OrderShippedEventArgs : EventArgs
+{
+    public Order Order { get; }
+    public OrderShippedEventArgs(Order order) => Order = order;
+}
+
+// Subscriber:
+processor.OrderShipped += (sender, e) => Console.WriteLine($"Shipped order {e.Order.Id}");</code></pre>
+        <div class="callout callout-blue">
+          <strong><code>event</code> vs a plain public delegate field</strong>
+          A plain <code>public Action OnDone;</code> field lets any outside code overwrite the
+          entire invocation list with <code>=</code>, or invoke it directly. <code>event</code>
+          restricts outside code to only <code>+=</code>/<code>-=</code> — invocation and
+          reassignment stay private to the declaring class. Always prefer <code>event</code> for a public API.
+        </div>
+
+        <h3>Lambda closures — the loop-capture trap</h3>
+        <pre><code>var actions = new List&lt;Action&gt;();
+for (int i = 0; i &lt; 3; i++)
+{
+    actions.Add(() => Console.WriteLine(i));   // captures the VARIABLE i, not its value at this iteration
+}
+foreach (var a in actions) a();
+// Since C# 5, `for`/`foreach` loop variables are scoped PER ITERATION, so this correctly prints 0,1,2.
+// Pre-C#5 `for` loops (and any manually shared captured variable) print 3,3,3 — the same captured reference.</code></pre>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+      <div class="section page-break" id="s6">
+        <div class="section-num">Section 06</div>
+        <h2 class="section-title">Pattern Matching, Tuples &amp; Control Flow</h2>
+        <p class="lead">Modern C# control flow leans heavily on pattern matching and tuples instead of chains of <code>if</code>/<code>is</code>/<code>as</code>.</p>
+
+        <h3>Switch expressions &amp; property patterns</h3>
+        <pre><code>decimal GetShippingCost(Order order) => order switch
+{
+    { Total: > 500 }                 => 0m,
+    { IsExpress: true, Total: > 100} => 15m,
+    { IsExpress: true }               => 25m,
+    null                              => throw new ArgumentNullException(nameof(order)),
+    _                                 => 5m
+};</code></pre>
+
+        <h3>Tuples &amp; deconstruction</h3>
+        <pre><code>(string Name, int Age) person = ("Alice", 30);         // named tuple literal
+Console.WriteLine(person.Name);
+
+var (name, age) = person;                              // deconstruction into separate variables
+
+public readonly struct Point
+{
+    public double X { get; init; }
+    public double Y { get; init; }
+    public void Deconstruct(out double x, out double y) { x = X; y = Y; }  // enables custom-type deconstruction
+}
+var (x, y) = new Point { X = 1, Y = 2 };</code></pre>
+
+        <h3><code>ref</code> / <code>out</code> / <code>in</code> parameters</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Modifier</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>ref</code></td><td>Passed by reference; must be initialized before the call; callee can read and reassign it</td></tr>
+              <tr><td><code>out</code></td><td>Passed by reference; need NOT be initialized before the call; callee is required to assign it before returning</td></tr>
+              <tr><td><code>in</code></td><td>Passed by reference but read-only inside the callee — avoids copying a large struct while preventing mutation</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <pre><code>bool TryParseOrder(string raw, out Order? order) { ... }   // classic Try-pattern using `out`
+
+void Scale(in Matrix4x4 m) { /* m is read-only here, but wasn't copied to pass it */ }</code></pre>
+
+        <h3>Local functions vs lambdas</h3>
+        <pre><code>public int Fibonacci(int n)
+{
+    return Fib(n);
+
+    int Fib(int k) => k &lt;= 1 ? k : Fib(k - 1) + Fib(k - 2);  // local function — named, supports recursion cleanly,
+}                                                              // zero delegate allocation unless it captures state</code></pre>
+        <div class="callout callout-purple">
+          <strong>Local function vs lambda assigned to <code>Func</code></strong>
+          A local function compiles to a plain private method when it doesn't capture anything —
+          no delegate allocation at all. A lambda stored in a <code>Func</code>/<code>Action</code>
+          always allocates a delegate object (and a compiler-generated closure class if it
+          captures variables). Prefer local functions for private recursive/helper logic; reserve
+          lambdas for when you need to actually pass the behavior around as data.
+        </div>
+
+        <h3><code>params</code> arrays</h3>
+        <pre><code>public static int Sum(params int[] numbers) => numbers.Sum();
+Sum(1, 2, 3);            // caller doesn't need to build an array explicitly
+Sum(new[] { 1, 2, 3 });  // also legal</code></pre>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+      <div class="section page-break" id="s7">
+        <div class="section-num">Section 07</div>
+        <h2 class="section-title">Structs, Enums &amp; Records</h2>
+        <p class="lead">The value-type and lightweight-data-shape tools, plus the immutable-DTO idiom records exist for.</p>
+
+        <h3>Structs — value semantics recap</h3>
+        <pre><code>public readonly struct Vector2
+{
+    public double X { get; }
+    public double Y { get; }
+    public Vector2(double x, double y) { X = x; Y = y; }  // readonly struct — every field is immutable after construction
+}</code></pre>
+
+        <h3>Enums &amp; <code>[Flags]</code></h3>
+        <pre><code>public enum OrderStatus { Pending, Shipped, Delivered, Cancelled }  // backed by int by default
+
+[Flags]
+public enum Permissions
+{
+    None = 0,
+    Read = 1 << 0,
+    Write = 1 << 1,
+    Execute = 1 << 2,
+    All = Read | Write | Execute
+}
+
+var p = Permissions.Read | Permissions.Write;   // bitwise-combinable because of [Flags]
+bool canWrite = p.HasFlag(Permissions.Write);   // true
+Console.WriteLine(p);                           // prints "Read, Write" thanks to [Flags]</code></pre>
+
+        <h3>Records &amp; record structs</h3>
+        <pre><code>public record Money(decimal Amount, string Currency);        // reference type, value equality, `with` support
+public readonly record struct Point(double X, double Y);      // value type + record's equality/ToString/with
+
+var a = new Money(10, "USD");
+var b = a with { Amount = 20 };     // non-destructive mutation — a new instance, Currency copied over
+Console.WriteLine(a == new Money(10, "USD"));   // True — member-wise value equality, generated for you</code></pre>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>class</th><th>struct</th><th>record</th><th>record struct</th></tr></thead>
+            <tbody>
+              <tr><td>Storage</td><td>Heap</td><td>Stack/inline</td><td>Heap</td><td>Stack/inline</td></tr>
+              <tr><td>Default equality</td><td>Reference</td><td>Value (reflection-based, slow unless overridden)</td><td>Value (compiler-generated, fast)</td><td>Value (compiler-generated, fast)</td></tr>
+              <tr><td><code>with</code> expressions</td><td>No</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+      <div class="section page-break" id="s8">
+        <div class="section-num">Section 08</div>
+        <h2 class="section-title">Exceptions &amp; Nullable Types</h2>
+        <p class="lead">Two different "absence"/"failure" mechanisms that are easy to conflate: exceptions for exceptional failure, nullable types for expected absence.</p>
+
+        <h3>Custom exception hierarchy</h3>
+        <pre><code>public class DomainException : Exception
+{
+    public DomainException(string message) : base(message) { }
+    public DomainException(string message, Exception inner) : base(message, inner) { }
+}
+
+public class InsufficientFundsException : DomainException
+{
+    public decimal Shortfall { get; }
+    public InsufficientFundsException(decimal shortfall)
+        : base($"Short by {shortfall:C}") => Shortfall = shortfall;
+}</code></pre>
+
+        <h3>Nullable value types</h3>
+        <pre><code>int? maybeAge = null;
+int age = maybeAge ?? 0;             // null-coalescing — default if null
+maybeAge ??= 18;                     // null-coalescing assignment — only assigns if currently null
+if (maybeAge is int a) { /* pattern-matched, non-null 'a' in scope */ }
+int forced = maybeAge!.Value;        // '!' null-forgiving operator — "trust me, compiler", throws if actually null</code></pre>
+
+        <h3>Nullable reference types (NRT)</h3>
+        <pre><code>#nullable enable
+public class Customer
+{
+    public string Name { get; set; } = "";   // non-nullable — compiler warns if not initialized
+    public string? Notes { get; set; }       // explicitly nullable
+}
+
+string Greet(Customer? c) => c?.Name is { Length: > 0 } n ? $"Hi {n}" : "Hi stranger";</code></pre>
+        <div class="callout callout-blue">
+          <strong>Compile-time only</strong>
+          NRT annotations are purely static analysis — <code>string</code> is still nullable at
+          the IL/runtime level. A deserialized payload or an unchecked cast can still hand you a
+          null a non-nullable-annotated variable "promised" not to have.
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 9 ══════════════════════════ -->
+      <div class="section page-break" id="s9">
+        <div class="section-num">Section 09</div>
+        <h2 class="section-title">Iterators, <code>yield</code> &amp; Custom Collections</h2>
+        <p class="lead"><code>yield</code> lets you write a lazily-evaluated sequence as straight-line imperative code — the compiler builds the state machine for you.</p>
+
+        <div class="fd">
+          <div class="fd-node fd-node-blue" style="min-width:220px">foreach (var x in Range(1, 3))</div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-amber" style="min-width:260px">MoveNext() called once per iteration<sub>method body resumes right after the last `yield return`</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-teal" style="min-width:220px">Only ONE item exists in memory at a time</div>
+        </div>
+        <pre><code>public static IEnumerable&lt;int&gt; Range(int start, int count)
+{
+    for (int i = 0; i &lt; count; i++)
+    {
+        yield return start + i;    // suspend here; resume on the next MoveNext() call
+    }
+}
+
+public static IEnumerable&lt;int&gt; Naturals()   // an INFINITE sequence — safe only because it's lazy
+{
+    int n = 0;
+    while (true) yield return n++;
+}
+
+foreach (var n in Naturals().Take(5)) Console.WriteLine(n);  // 0,1,2,3,4 — never hangs</code></pre>
+        <div class="callout callout-green">
+          <strong>Same deferred-execution idea as LINQ</strong>
+          Every LINQ operator in the companion guide's §4 is itself implemented with iterator
+          blocks like this — that's the actual mechanism behind "a LINQ query doesn't run until
+          you enumerate it."
+        </div>
+
+        <h3>Implementing a custom collection</h3>
+        <pre><code>public class Playlist : IEnumerable&lt;string&gt;
+{
+    private readonly List&lt;string&gt; _tracks = new();
+    public void Add(string track) => _tracks.Add(track);
+
+    public IEnumerator&lt;string&gt; GetEnumerator()
+    {
+        foreach (var t in _tracks) yield return t;
+    }
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();  // non-generic version, explicit implementation
+}</code></pre>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 10 ══════════════════════════ -->
+      <div class="section page-break" id="s10">
+        <div class="section-num">Section 10</div>
+        <h2 class="section-title">Async/Await Language Mechanics</h2>
+        <p class="lead">
+          Runtime scheduling behavior (thread pool, deadlocks, <code>ConfigureAwait</code>) is
+          covered in the companion .NET guide's §5 — this section is about what the C# compiler
+          itself generates for an <code>async</code> method.
+        </p>
+
+        <h3>What <code>async</code> desugars to</h3>
+        <div class="fd">
+          <div class="fd-node fd-node-dark" style="min-width:260px">async Task&lt;Order&gt; GetOrderAsync(int id)</div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-blue" style="min-width:280px">Compiler-generated struct implementing<sub>IAsyncStateMachine</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-amber" style="min-width:280px">MoveNext() — one state per `await`<sub>a switch over an int `_state` field</sub></div>
+          <div class="fd-arr-d"></div>
+          <div class="fd-node fd-node-teal" style="min-width:280px">AsyncTaskMethodBuilder<sub>wires up the returned Task and its continuations</sub></div>
+        </div>
+        <p>
+          Each <code>await</code> becomes a branch in that state machine: the method captures its
+          locals into the struct's fields, registers a continuation with the awaited task, and
+          returns. When the awaited operation completes, <code>MoveNext()</code> is called again
+          and execution resumes exactly where it left off — locals intact.
+        </p>
+
+        <h3>Async streams — <code>IAsyncEnumerable&lt;T&gt;</code></h3>
+        <pre><code>public async IAsyncEnumerable&lt;Order&gt; StreamOrdersAsync(
+    [EnumeratorCancellation] CancellationToken ct = default)
+{
+    await foreach (var row in _db.QueryStreamAsync(ct))   // await foreach — the producer side is also async
+    {
+        yield return MapToOrder(row);                     // combines yield (lazy) with await (async I/O)
+    }
+}
+
+await foreach (var order in StreamOrdersAsync(ct))         // consumer pulls one at a time, awaiting each fetch
+{
+    Process(order);
+}</code></pre>
+        <div class="callout callout-purple">
+          <strong>Why this exists</strong>
+          Before C# 8, you had to choose between <code>IEnumerable&lt;T&gt;</code> (lazy but
+          synchronous — blocks a thread on I/O) or <code>Task&lt;List&lt;T&gt;&gt;</code>
+          (async but must buffer the entire result set in memory first). <code>IAsyncEnumerable&lt;T&gt;</code>
+          gives you both: lazy, streamed, AND non-blocking.
+        </div>
+
+        <h3><code>Task</code> vs <code>ValueTask</code> at the language level</h3>
+        <pre><code>public ValueTask&lt;int&gt; GetCachedAsync(string key)
+{
+    if (_cache.TryGetValue(key, out var value))
+        return new ValueTask&lt;int&gt;(value);      // synchronous path — no Task allocation at all
+    return new ValueTask&lt;int&gt;(FetchAndCacheAsync(key)); // async path — wraps a real Task
+}</code></pre>
+        <div class="callout callout-rose">
+          <strong>The one rule that trips people up</strong>
+          A <code>ValueTask</code> may only be awaited once, and never awaited after it has
+          already completed and been consumed — unlike <code>Task</code>, which is safe to await
+          repeatedly or store and check later. Treat a <code>ValueTask</code> as single-use.
+        </div>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 11 ══════════════════════════ -->
+      <div class="section page-break" id="s11">
+        <div class="section-num">Section 11</div>
+        <h2 class="section-title">Modern C# Syntax (C# 8 → 13)</h2>
+        <p class="lead">The language has shipped a new version every year alongside .NET since C# 8 — here's what actually changed the way code looks.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Version</th><th>Headline features</th></tr></thead>
+            <tbody>
+              <tr><td>C# 8 (2019)</td><td>Nullable reference types, default interface methods, switch expressions, ranges/indices (<code>arr[1..^1]</code>), <code>await foreach</code>/<code>IAsyncEnumerable</code></td></tr>
+              <tr><td>C# 9 (2020)</td><td>Records, <code>init</code>-only setters, top-level statements, pattern matching enhancements (<code>and</code>/<code>or</code>/<code>not</code>), target-typed <code>new()</code></td></tr>
+              <tr><td>C# 10 (2021)</td><td>File-scoped namespaces, global <code>using</code> directives, record structs, required constant string interpolation improvements</td></tr>
+              <tr><td>C# 11 (2022)</td><td>Raw string literals (<code>"""…"""</code>), required members, generic math (static abstract interface members), list patterns</td></tr>
+              <tr><td>C# 12 (2023)</td><td>Primary constructors on classes/structs, collection expressions (<code>[1, 2, 3]</code>), default lambda parameters, alias any type with <code>using</code></td></tr>
+              <tr><td>C# 13 (2024)</td><td><code>params</code> collections (not just arrays), new lock type (<code>System.Threading.Lock</code>), partial properties/indexers</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>A few of these, side by side</h3>
+        <pre><code>// Primary constructor (C# 12) — parameters are directly usable as members, no boilerplate ctor body
+public class OrderService(IRepository repo, ILogger logger)
+{
+    public Order Get(int id) => repo.Find(id) ?? throw new NotFoundException(logger);
+}
+
+// Collection expressions (C# 12)
+int[] numbers = [1, 2, 3, 4];
+List&lt;string&gt; names = ["Alice", "Bob"];
+
+// Required members (C# 11) — the compiler enforces these are set at construction, via any means
+public class Product
+{
+    public required string Name { get; init; }
+    public required decimal Price { get; init; }
+}
+var p = new Product { Name = "Widget", Price = 9.99m };  // omitting either is a compile error
+
+// Raw string literal (C# 11) — no escaping needed for quotes/backslashes
+string json = """
+{ "name": "Widget", "path": "C:\Data\file.json" }
+""";
+
+// File-scoped namespace (C# 10) — one line instead of a wrapping brace block for the whole file
+namespace MyApp.Services;
+
+public class Foo { }</code></pre>
+      </div>
+
+      <!-- ══════════════════════════ SECTION 12 ══════════════════════════ -->
+      <div class="section page-break" id="s12">
+        <div class="section-num">Section 12</div>
+        <h2 class="section-title">Tricky Interview Questions</h2>
+        <p class="lead">Language-feature-specific questions — see the companion guide's §11 for runtime/ecosystem interview questions (GC, EF Core, Orleans, SignalR).</p>
+
+        <h3>Q1. Why can't a static constructor take parameters, and how would you make static initialization configurable?</h3>
+        <p>
+          The CLR invokes a static constructor automatically on first type access — there's no
+          call site to pass arguments from. To make one-time static setup configurable, read from
+          environment/config inside the static constructor body itself, or move to a static
+          factory method plus a lazily-assigned <code>static readonly</code> field so the "constructor"
+          logic can accept explicit input.
+        </p>
+
+        <h3>Q2. A NuGet package bumps a <code>public const int MaxRetries = 3;</code> to <code>5</code>. Consumers don't see the new value until they recompile — why?</h3>
+        <p>
+          <code>const</code> values are burned directly into the IL of every <em>consuming</em>
+          assembly at compile time — the constant is inlined, not read from the defining assembly
+          at runtime. Changing it in the library and shipping a new DLL does nothing for already-
+          compiled consumers until they rebuild against the new version. This is exactly why
+          public library constants that might change should be <code>static readonly</code> instead.
+        </p>
+
+        <h3>Q3. When would you reach for explicit interface implementation instead of a normal public method?</h3>
+        <p>
+          Two colliding member names across implemented interfaces (Q shown in §2), or you want a
+          member to be part of the type's contract but not clutter its public "natural" API — for
+          example, implementing <code>IDisposable.Dispose()</code> explicitly on a type that also
+          exposes a more discoverable <code>Close()</code> method for typical callers.
+        </p>
+
+        <h3>Q4. What's actually different between <code>where T : class</code> and <code>where T : struct</code> at the IL/JIT level?</h3>
+        <p>
+          <code>where T : struct</code> lets the JIT generate a fully specialized native
+          implementation per value type (no boxing, direct field layout). <code>where T : class</code>
+          lets all reference-type instantiations share a single compiled implementation, since
+          they're all just pointer-sized references under the hood — that's why generic code with
+          reference type arguments doesn't bloat the assembly the way many different value-type
+          instantiations can.
+        </p>
+
+        <h3>Q5. Why did looping variable capture behavior change between old-style <code>for</code> loops and C# 5+?</h3>
+        <p>
+          Prior to C# 5, a <code>for</code> loop's iteration variable was a single variable shared
+          across every closure created in the loop body, so all captured lambdas saw its final
+          value after the loop ended. From C# 5 onward, <code>foreach</code> (and later
+          <code>for</code>-loop-adjacent patterns) scope a fresh variable per iteration, so each
+          closure captures its own snapshot — the fix eliminated a very common accidental-bug class.
+        </p>
+
+        <h3>Q6. What's the memory/laziness difference between a <code>yield return</code>-based iterator and a method that returns a fully built <code>List&lt;T&gt;</code>?</h3>
+        <p>
+          The iterator holds only one element's worth of state in memory at a time and only
+          computes the next value when <code>MoveNext()</code> is actually called — it can
+          represent an infinite or expensive-to-fully-compute sequence safely. A method returning
+          <code>List&lt;T&gt;</code> must materialize and hold every element before returning,
+          which is simpler to reason about but forces full computation and full memory cost up front.
+        </p>
+
+        <h3>Q7. Why does <code>IAsyncEnumerable&lt;T&gt;</code> need its own <code>await foreach</code> syntax instead of reusing regular <code>foreach</code>?</h3>
+        <p>
+          Regular <code>foreach</code> calls a synchronous <code>MoveNext(): bool</code>. An async
+          sequence needs to <em>await</em> the next element becoming available (e.g. the next
+          network page hasn't arrived yet) without blocking the calling thread — so the compiler
+          needs distinct syntax to know it should <code>await</code> each
+          <code>MoveNextAsync(): ValueTask&lt;bool&gt;</code> call instead of calling it synchronously.
+        </p>
+
+        <h3>Q8. Why can't a <code>Span&lt;T&gt;</code> be stored as a field on a regular class, or captured in an async method's state machine?</h3>
+        <p>
+          <code>Span&lt;T&gt;</code> is a <code>ref struct</code> — a type the runtime guarantees
+          lives only on the stack, so it can safely wrap stack-allocated memory (e.g.
+          <code>stackalloc</code>) without the GC needing to track or relocate it. A class field
+          lives on the heap, and an <code>async</code> method's locals get hoisted into a
+          heap-allocated state machine object across <code>await</code> boundaries — both would
+          require a <code>ref struct</code> to potentially outlive its stack frame, which the
+          compiler forbids outright.
+        </p>
+
+        <h3>Q9. Give a real reason to mark an <code>override</code> as <code>sealed</code> rather than just leaving it open.</h3>
+        <p>
+          When a specific override enforces an invariant the class's correctness depends on (e.g.
+          a validation override that must always run the exact base check plus one extra rule),
+          sealing it prevents a future subclass from silently reintroducing a bug by overriding it
+          again and forgetting to call <code>base.Method()</code>. It documents "this behavior is
+          final" directly in the type system instead of in a comment.
+        </p>
+
+        <h3>Q10. An abstract class can declare a constructor — if it can never be instantiated directly, what's it for?</h3>
+        <p>
+          The constructor still runs — just only ever as part of a concrete subclass's
+          <code>base(...)</code> chain. It's how an abstract class enforces that every subclass
+          must supply certain required state (e.g. <code>protected PaymentMethod(string owner)</code>
+          in §2) at construction time, the same way any base class constructor guarantees
+          invariants for its subclasses.
+        </p>
+      </div>
+
+      <div class="section" style="border-top:1px solid var(--border)">
+        <h3>Further Reading</h3>
+        <ul class="clean">
+          <li><a href="https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/" target="_blank" rel="noopener">C# Programming Guide — Microsoft Learn</a></li>
+          <li><a href="https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/" target="_blank" rel="noopener">What's New in C# — version-by-version</a></li>
+          <li><a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/generics" target="_blank" rel="noopener">Generics — C# Language Reference</a></li>
+          <li><a href="csharp-dotnet.html">C# &amp; .NET Deep Dive — CLR, LINQ, TPL/async runtime, Orleans, SignalR, OOP/SOLID</a></li>
+        </ul>
+      </div>
+    </div>
+    <!-- /container -->
+  </div>
+  <!-- /main-scroll -->
+</div>
+<!-- /topic-page -->
+<footer class="guide-footer">
+  Synapse &middot; AI &amp; LLM Engineering
+</footer>
+<script src="../assets/scroll-top.js"></script>
+</body>
+</html>

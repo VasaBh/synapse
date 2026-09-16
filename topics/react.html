@@ -382,6 +382,123 @@ const handleClick = useCallback(
 }
 
 const [state, dispatch] = useReducer(reducer, { count: 0, loading: false });</pre>
+  <p>Prefer <code>useReducer</code> over several related <code>useState</code> calls when the next state depends on multiple pieces of the previous state together, or when the update logic itself is worth unit-testing in isolation from any component.</p>
+
+  <h3>useLayoutEffect &#8212; Synchronous DOM Reads</h3>
+  <p>Identical signature to <code>useEffect</code>, but it fires <strong>synchronously after DOM mutations, before the browser paints</strong>. Use it only when you need to measure the DOM and apply a change before the user sees a flicker.</p>
+  <pre>function Tooltip({ text }) {
+  const ref = useRef(null);
+  const [top, setTop] = useState(0);
+
+  useLayoutEffect(() =&gt; {
+    const { height } = ref.current.getBoundingClientRect();
+    setTop(-height - 8);   // position above the trigger, computed before paint
+  }, [text]);
+
+  return &lt;div ref={ref} style={{ top }}&gt;{text}&lt;/div&gt;;
+}</pre>
+  <div class="callout callout-amber">
+    <strong>Cost of useLayoutEffect</strong>
+    Because it blocks paint, overusing it makes the UI feel slower. Default to <code>useEffect</code>; reach for <code>useLayoutEffect</code> only for measurement-driven layout (tooltips, auto-sizing, scroll restoration).
+  </div>
+
+  <h3>useImperativeHandle</h3>
+  <p>Customises the instance value exposed when a parent attaches a <code>ref</code> to a component wrapped in <code>forwardRef</code> &#8212; used to expose an imperative API (focus, scrollTo) while hiding internal DOM structure.</p>
+  <pre>const FancyInput = React.forwardRef(function FancyInput(props, ref) {
+  const inputRef = useRef(null);
+  useImperativeHandle(ref, () =&gt; ({
+    focus: () =&gt; inputRef.current.focus(),
+    clear: () =&gt; { inputRef.current.value = ''; },
+  }));
+  return &lt;input ref={inputRef} {...props} /&gt;;
+});
+
+// Parent only sees { focus, clear } &#8212; not the raw DOM node
+formRef.current.focus();</pre>
+
+  <h3>useId</h3>
+  <p>Generates a stable, unique ID string per component instance &#8212; safe across server and client renders (unlike <code>Math.random()</code> or a module-level counter, which desync during SSR hydration).</p>
+  <pre>function LabeledInput({ label }) {
+  const id = useId();
+  return (
+    &lt;&gt;
+      &lt;label htmlFor={id}&gt;{label}&lt;/label&gt;
+      &lt;input id={id} /&gt;
+    &lt;/&gt;
+  );
+}</pre>
+
+  <h3>useSyncExternalStore</h3>
+  <p>The correct way to subscribe a component to a mutable store that lives outside React (browser APIs, Zustand, Redux). It guarantees the component doesn't tear &#8212; showing an inconsistent value &#8212; during concurrent rendering.</p>
+  <pre>function useOnlineStatus() {
+  return useSyncExternalStore(
+    (callback) =&gt; {
+      window.addEventListener('online', callback);
+      window.addEventListener('offline', callback);
+      return () =&gt; {
+        window.removeEventListener('online', callback);
+        window.removeEventListener('offline', callback);
+      };
+    },
+    () =&gt; navigator.onLine,   // getSnapshot: read current value
+  );
+}</pre>
+  <p>State libraries like Zustand and Redux use <code>useSyncExternalStore</code> internally &#8212; it's why their subscriptions are safe under React 18 concurrent rendering while a hand-rolled <code>useEffect</code> + <code>useState</code> subscription can occasionally show stale data.</p>
+
+  <h3>How Hooks Work Internally</h3>
+  <p>Each Fiber node holds a <strong>linked list</strong> of hook records in <code>memoizedState</code>, one per hook call, in call order. <code>useState</code> is a thin wrapper over the same mechanism <code>useReducer</code> uses; each hook object stores its current value and a pointer to the next hook.</p>
+  <pre>// Simplified shape of a Fiber's hook list
+fiber.memoizedState = {
+  memoizedState: 0,          // e.g. count from useState(0)
+  queue: { pending: null },  // pending updates
+  next: {                    // the NEXT hook called in this component
+    memoizedState: null,     // e.g. a useRef() value
+    next: null,
+  },
+};</pre>
+
+  <div class="diagram-svg">
+    <svg viewBox="0 0 760 130" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hooks stored as a linked list on a Fiber node">
+      <defs>
+        <marker id="hookArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" style="fill:var(--accent)"/></marker>
+      </defs>
+      <rect x="10" y="35" width="115" height="60" rx="8" style="fill:var(--bg2);stroke:var(--ink3);stroke-width:1.5"/>
+      <text x="67" y="60" text-anchor="middle" style="font-family:var(--sans);font-size:12px;font-weight:600;fill:var(--ink)">Fiber</text>
+      <text x="67" y="78" text-anchor="middle" style="font-family:var(--mono);font-size:10px;fill:var(--ink3)">component</text>
+
+      <line x1="125" y1="65" x2="158" y2="65" style="stroke:var(--accent);stroke-width:2" marker-end="url(#hookArrow)"/>
+
+      <rect x="160" y="25" width="150" height="80" rx="8" style="fill:var(--accent-bg);stroke:var(--accent);stroke-width:1.5"/>
+      <text x="235" y="52" text-anchor="middle" style="font-family:var(--sans);font-size:12px;font-weight:600;fill:var(--ink)">Hook 1</text>
+      <text x="235" y="70" text-anchor="middle" style="font-family:var(--mono);font-size:10px;fill:var(--ink2)">useState(0)</text>
+      <text x="235" y="86" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink3)">memoizedState: 0</text>
+
+      <line x1="310" y1="65" x2="348" y2="65" style="stroke:var(--accent);stroke-width:2" marker-end="url(#hookArrow)"/>
+      <text x="329" y="55" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink3)">next</text>
+
+      <rect x="350" y="25" width="150" height="80" rx="8" style="fill:var(--accent-bg);stroke:var(--accent);stroke-width:1.5"/>
+      <text x="425" y="52" text-anchor="middle" style="font-family:var(--sans);font-size:12px;font-weight:600;fill:var(--ink)">Hook 2</text>
+      <text x="425" y="70" text-anchor="middle" style="font-family:var(--mono);font-size:10px;fill:var(--ink2)">useRef(null)</text>
+      <text x="425" y="86" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink3)">memoizedState: {current}</text>
+
+      <line x1="500" y1="65" x2="538" y2="65" style="stroke:var(--accent);stroke-width:2" marker-end="url(#hookArrow)"/>
+      <text x="519" y="55" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink3)">next</text>
+
+      <rect x="540" y="25" width="160" height="80" rx="8" style="fill:var(--accent-bg);stroke:var(--accent);stroke-width:1.5"/>
+      <text x="620" y="52" text-anchor="middle" style="font-family:var(--sans);font-size:12px;font-weight:600;fill:var(--ink)">Hook 3</text>
+      <text x="620" y="70" text-anchor="middle" style="font-family:var(--mono);font-size:10px;fill:var(--ink2)">useEffect(fn, deps)</text>
+      <text x="620" y="86" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink3)">memoizedState: {deps}</text>
+
+      <line x1="700" y1="65" x2="735" y2="65" style="stroke:var(--ink3);stroke-width:2" marker-end="url(#hookArrow)"/>
+      <text x="745" y="70" text-anchor="middle" style="font-family:var(--mono);font-size:11px;fill:var(--ink3)">null</text>
+    </svg>
+  </div>
+  <p style="font-size:0.82rem;color:var(--ink3);margin-top:-0.5rem">Hooks attach to a Fiber as a singly linked list, in the exact order they were called &#8212; there is no name or key, only position.</p>
+
+  <div class="callout callout-amber">
+    <strong>Why the Rules of Hooks exist</strong>
+    React matches hooks to their state purely by <em>position</em> in this list, not by name. Calling a hook conditionally shifts every subsequent hook onto the wrong slot on the next render &#8212; state silently attaches to the wrong hook. This is a mechanical constraint of the linked-list design, not an arbitrary style rule.
+  </div>
 
   <h3>Custom Hooks</h3>
   <pre>function useWindowSize() {
@@ -419,12 +536,160 @@ const { width, height } = useWindowSize();</pre>
   alternate: Fiber             // double-buffering: current vs work-in-progress
 }</pre>
 
+  <div class="diagram-svg">
+    <svg viewBox="0 0 620 260" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Fiber tree connected by child, sibling and return pointers">
+      <defs>
+        <marker id="fiberChild" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" style="fill:var(--accent)"/></marker>
+        <marker id="fiberSibling" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" style="fill:var(--teal)"/></marker>
+        <marker id="fiberReturn" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" style="fill:var(--amber)"/></marker>
+      </defs>
+
+      <rect x="255" y="15" width="110" height="44" rx="8" style="fill:var(--bg2);stroke:var(--ink);stroke-width:1.5"/>
+      <text x="310" y="42" text-anchor="middle" style="font-family:var(--sans);font-size:13px;font-weight:600;fill:var(--ink)">App</text>
+
+      <rect x="110" y="105" width="110" height="44" rx="8" style="fill:var(--bg2);stroke:var(--ink3);stroke-width:1.5"/>
+      <text x="165" y="132" text-anchor="middle" style="font-family:var(--sans);font-size:13px;font-weight:600;fill:var(--ink)">Header</text>
+
+      <rect x="255" y="105" width="110" height="44" rx="8" style="fill:var(--bg2);stroke:var(--ink3);stroke-width:1.5"/>
+      <text x="310" y="132" text-anchor="middle" style="font-family:var(--sans);font-size:13px;font-weight:600;fill:var(--ink)">Main</text>
+
+      <rect x="255" y="195" width="110" height="44" rx="8" style="fill:var(--bg2);stroke:var(--ink3);stroke-width:1.5"/>
+      <text x="310" y="222" text-anchor="middle" style="font-family:var(--sans);font-size:13px;font-weight:600;fill:var(--ink)">Sidebar</text>
+
+      <rect x="410" y="195" width="120" height="44" rx="8" style="fill:var(--bg2);stroke:var(--ink3);stroke-width:1.5"/>
+      <text x="470" y="222" text-anchor="middle" style="font-family:var(--sans);font-size:13px;font-weight:600;fill:var(--ink)">Content</text>
+
+      <path d="M280,59 L180,103" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#fiberChild)"/>
+      <text x="205" y="90" style="font-family:var(--mono);font-size:10px;fill:var(--accent2)">child</text>
+
+      <path d="M220,127 L253,127" style="stroke:var(--teal);stroke-width:2;fill:none" marker-end="url(#fiberSibling)"/>
+      <text x="222" y="118" style="font-family:var(--mono);font-size:10px;fill:var(--teal)">sibling</text>
+
+      <path d="M310,149 L310,193" style="stroke:var(--accent);stroke-width:2;fill:none" marker-end="url(#fiberChild)"/>
+      <text x="315" y="175" style="font-family:var(--mono);font-size:10px;fill:var(--accent2)">child</text>
+
+      <path d="M365,217 L408,217" style="stroke:var(--teal);stroke-width:2;fill:none" marker-end="url(#fiberSibling)"/>
+      <text x="368" y="208" style="font-family:var(--mono);font-size:10px;fill:var(--teal)">sibling</text>
+
+      <path d="M470,193 C 470,160 380,140 330,127" style="stroke:var(--amber);stroke-width:1.5;stroke-dasharray:4,3;fill:none" marker-end="url(#fiberReturn)"/>
+      <text x="440" y="150" style="font-family:var(--mono);font-size:10px;fill:var(--amber)">return</text>
+    </svg>
+  </div>
+  <p style="font-size:0.82rem;color:var(--ink3);margin-top:-0.5rem">React never recurses with the call stack &#8212; it walks this pointer structure (child / sibling / return) as an explicit loop, which is what makes work interruptible and resumable.</p>
+
+  <h3>The Render Pipeline, Step by Step</h3>
+  <p>Every update &#8212; from a click handler to a WebSocket message &#8212; flows through the same three stages: <strong>trigger &#8594; render &#8594; commit</strong>. Understanding this pipeline explains why some code runs twice, why DOM reads must happen in specific hooks, and why React can "skip" renders.</p>
+
+  <div class="diagram-svg">
+    <svg viewBox="0 0 720 150" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Trigger, render, commit, paint pipeline">
+      <defs>
+        <marker id="pipeArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" style="fill:var(--accent)"/></marker>
+      </defs>
+
+      <rect x="10" y="40" width="130" height="60" rx="8" style="fill:var(--bg2);stroke:var(--ink3);stroke-width:1.5"/>
+      <text x="75" y="66" text-anchor="middle" style="font-family:var(--sans);font-size:13px;font-weight:600;fill:var(--ink)">Trigger</text>
+      <text x="75" y="83" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink3)">setState / context</text>
+
+      <line x1="140" y1="70" x2="178" y2="70" style="stroke:var(--accent);stroke-width:2" marker-end="url(#pipeArrow)"/>
+
+      <rect x="180" y="25" width="200" height="90" rx="8" style="fill:var(--accent-bg);stroke:var(--accent);stroke-width:1.5;stroke-dasharray:5,3"/>
+      <text x="280" y="52" text-anchor="middle" style="font-family:var(--sans);font-size:13px;font-weight:600;fill:var(--ink)">Render Phase</text>
+      <text x="280" y="70" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink2)">call components, diff tree</text>
+      <text x="280" y="86" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--accent2);font-weight:600">interruptible</text>
+
+      <line x1="380" y1="70" x2="418" y2="70" style="stroke:var(--accent);stroke-width:2" marker-end="url(#pipeArrow)"/>
+
+      <rect x="420" y="40" width="150" height="60" rx="8" style="fill:var(--green-bg);stroke:var(--green);stroke-width:1.5"/>
+      <text x="495" y="63" text-anchor="middle" style="font-family:var(--sans);font-size:13px;font-weight:600;fill:var(--ink)">Commit Phase</text>
+      <text x="495" y="80" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink2)">DOM mutations, sync</text>
+
+      <line x1="570" y1="70" x2="608" y2="70" style="stroke:var(--accent);stroke-width:2" marker-end="url(#pipeArrow)"/>
+
+      <rect x="610" y="40" width="100" height="60" rx="8" style="fill:var(--bg2);stroke:var(--ink3);stroke-width:1.5"/>
+      <text x="660" y="66" text-anchor="middle" style="font-family:var(--sans);font-size:13px;font-weight:600;fill:var(--ink)">Paint</text>
+      <text x="660" y="83" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink3)">browser</text>
+
+      <text x="495" y="120" text-anchor="middle" style="font-family:var(--mono);font-size:9.5px;fill:var(--amber)">useLayoutEffect runs here, before this paint</text>
+      <text x="660" y="135" text-anchor="middle" style="font-family:var(--mono);font-size:9.5px;fill:var(--rose)">useEffect after</text>
+    </svg>
+  </div>
+
+  <div class="diagram">
+    <pre>
+  1. TRIGGER                2. RENDER (phase)                  3. COMMIT (phase)
+  ────────────              ─────────────────────              ──────────────────────
+  setState() called         React calls component              React applies the fiber's
+  Parent re-renders          functions top-down, starting       effect list to the real DOM:
+  Context value changes      from the root of the update:       - insert / update / remove nodes
+  useSyncExternalStore                                          - attach DOM refs
+  fires an update              child = Component(props)         - run useLayoutEffect (sync)
+                                returns a NEW element tree     Browser paints the screen
+  Schedules work on the         (plain JS objects, not DOM)    Run useEffect (async, after paint)
+  Fiber root                 Diffs new tree vs current
+                              Fiber tree ("reconciliation")
+                              Tags fibers: Placement /
+                              Update / Deletion
+                              INTERRUPTIBLE &#8212; React can
+                              pause, abandon, or restart
+                              this phase for higher-priority
+                              work (e.g. a keystroke)
+    </pre>
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>"Rendering" &#8800; "updating the DOM"</strong>
+    Calling a component function (render phase) only computes what the UI <em>should</em> look like &#8212; it produces element objects, touches no DOM, and can be thrown away and redone. Only the commit phase actually mutates the browser DOM. This is why component bodies must be pure: React may call them multiple times per update (e.g. under Strict Mode, or when a render is interrupted and restarted) before anything commits.
+  </div>
+
   <h3>Reconciliation &#8212; The Diffing Algorithm</h3>
-  <p>React's diffing algorithm runs in O(n) via two assumptions:</p>
+  <p>Diffing two arbitrary trees is O(n&#179;) in the general case. React's reconciler gets this down to O(n) with two heuristics that hold true for the vast majority of UI trees:</p>
   <ul class="clean">
-    <li><strong>Different element types produce different trees:</strong> if a div changes to span, React unmounts the entire subtree</li>
-    <li><strong>Keys identify stable elements:</strong> matching keys reuse the existing Fiber node and DOM element</li>
+    <li><strong>Different element types produce different trees:</strong> if a &lt;div&gt; changes to &lt;span&gt; (or a class/function component changes), React does not attempt to diff their contents &#8212; it unmounts the old subtree (running cleanup effects) and mounts a brand new one</li>
+    <li><strong>Keys identify stable elements across renders:</strong> for a list of siblings, matching <code>key</code> values tell React which old Fiber/DOM node corresponds to which new element, so it can reorder/reuse instead of destroying and recreating</li>
   </ul>
+
+  <p>What happens per node when types match:</p>
+  <ul class="clean">
+    <li><strong>Same host element type</strong> (div &#8594; div): the Fiber node is reused, only changed attributes/styles are patched, then children are diffed recursively</li>
+    <li><strong>Same component type</strong> (props change, type stays the same): the existing instance is kept &#8212; state (hooks) is preserved &#8212; and the component function re-runs with new props</li>
+    <li><strong>List diffing without keys:</strong> React compares children position-by-position; inserting at the front makes every subsequent item look "changed"</li>
+    <li><strong>List diffing with stable keys:</strong> React builds a key &#8594; Fiber map for the old children, then walks the new children moving/reusing matched Fibers and only creating/deleting for actual adds/removes</li>
+  </ul>
+
+  <pre>// Without a stable key, prepending an item re-patches every row
+&lt;li&gt;Apple&lt;/li&gt;&lt;li&gt;Banana&lt;/li&gt;   // before
+&lt;li&gt;Cherry&lt;/li&gt;&lt;li&gt;Apple&lt;/li&gt;&lt;li&gt;Banana&lt;/li&gt;   // after: index 0 and 1 both "changed" content
+
+// With key={fruit.id}, React sees one new node (Cherry) and reuses Apple/Banana's
+// Fiber + DOM node untouched &#8212; their internal state/focus/scroll position survives</pre>
+
+  <div class="diagram-svg">
+    <svg viewBox="0 0 520 210" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Keyed list reconciliation matching old nodes to new nodes">
+      <text x="105" y="18" text-anchor="middle" style="font-family:var(--sans);font-size:11px;font-weight:600;fill:var(--ink3)">OLD TREE</text>
+      <text x="415" y="18" text-anchor="middle" style="font-family:var(--sans);font-size:11px;font-weight:600;fill:var(--ink3)">NEW TREE</text>
+
+      <rect x="35" y="35" width="140" height="40" rx="6" style="fill:var(--bg2);stroke:var(--ink3);stroke-width:1.5"/>
+      <text x="105" y="59" text-anchor="middle" style="font-family:var(--mono);font-size:11px;fill:var(--ink)">Apple (key=1)</text>
+
+      <rect x="35" y="95" width="140" height="40" rx="6" style="fill:var(--bg2);stroke:var(--ink3);stroke-width:1.5"/>
+      <text x="105" y="119" text-anchor="middle" style="font-family:var(--mono);font-size:11px;fill:var(--ink)">Banana (key=2)</text>
+
+      <rect x="345" y="30" width="140" height="38" rx="6" style="fill:var(--amber-bg);stroke:var(--amber);stroke-width:1.5;stroke-dasharray:4,3"/>
+      <text x="415" y="53" text-anchor="middle" style="font-family:var(--mono);font-size:11px;fill:var(--ink)">Cherry (key=3)</text>
+
+      <rect x="345" y="88" width="140" height="38" rx="6" style="fill:var(--green-bg);stroke:var(--green);stroke-width:1.5"/>
+      <text x="415" y="111" text-anchor="middle" style="font-family:var(--mono);font-size:11px;fill:var(--ink)">Apple (key=1)</text>
+
+      <rect x="345" y="146" width="140" height="38" rx="6" style="fill:var(--green-bg);stroke:var(--green);stroke-width:1.5"/>
+      <text x="415" y="169" text-anchor="middle" style="font-family:var(--mono);font-size:11px;fill:var(--ink)">Banana (key=2)</text>
+
+      <path d="M175,55 C 260,55 260,107 343,107" style="stroke:var(--green);stroke-width:1.5;fill:none"/>
+      <path d="M175,115 C 260,115 260,165 343,165" style="stroke:var(--green);stroke-width:1.5;fill:none"/>
+
+      <text x="260" y="185" text-anchor="middle" style="font-family:var(--mono);font-size:9.5px;fill:var(--green)">same key &#8594; Fiber + DOM node reused</text>
+      <text x="415" y="204" text-anchor="middle" style="font-family:var(--mono);font-size:9.5px;fill:var(--amber)">no match &#8594; new Fiber created</text>
+    </svg>
+  </div>
 
   <div class="diagram">
     <pre>
@@ -746,6 +1011,47 @@ const ProtectedDashboard = withAuth(Dashboard);</pre>
     </pre>
   </div>
 
+  <h3>useState / useReducer + Context — Local &amp; Subtree State</h3>
+  <p>Context is a <strong>dependency-injection mechanism</strong>, not a state manager &#8212; the state itself still lives in <code>useState</code>/<code>useReducer</code> in a provider component. Its one hard rule: <strong>every consumer re-renders whenever the Provider's <code>value</code> changes</strong>, regardless of which field the consumer actually reads.</p>
+  <pre>// Anti-pattern: one context mixing fast-changing and rarely-changing data
+const AppContext = createContext();
+&lt;AppContext.Provider value={{ user, theme, cursorPos, setCursorPos }}&gt;
+  {/* every consumer re-renders on every mouse move */}
+&lt;/AppContext.Provider&gt;</pre>
+  <pre>// Fix: split by change-frequency into separate contexts
+const UserContext = createContext(user);          // rarely changes
+const CursorContext = createContext(cursorPos);    // changes often
+
+// Consumers of UserContext are untouched by cursor updates</pre>
+  <p>A second common fix is splitting <strong>state</strong> and <strong>dispatch</strong> into two contexts &#8212; components that only need to trigger updates (via the dispatch context) never re-render when the state value changes.</p>
+
+  <div class="diagram-svg">
+    <svg viewBox="0 0 560 190" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Context Provider broadcasting a value change to every consumer">
+      <defs>
+        <marker id="ctxArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" style="fill:var(--accent)"/></marker>
+      </defs>
+
+      <rect x="205" y="15" width="150" height="50" rx="8" style="fill:var(--accent-bg);stroke:var(--accent);stroke-width:1.5"/>
+      <text x="280" y="38" text-anchor="middle" style="font-family:var(--sans);font-size:12px;font-weight:600;fill:var(--ink)">Context.Provider</text>
+      <text x="280" y="55" text-anchor="middle" style="font-family:var(--mono);font-size:9.5px;fill:var(--ink2)">value={ user, theme, ... }</text>
+
+      <rect x="30" y="120" width="140" height="46" rx="8" style="fill:var(--bg2);stroke:var(--ink3);stroke-width:1.5"/>
+      <text x="100" y="147" text-anchor="middle" style="font-family:var(--mono);font-size:11px;fill:var(--ink)">Sidebar</text>
+
+      <rect x="210" y="120" width="140" height="46" rx="8" style="fill:var(--bg2);stroke:var(--ink3);stroke-width:1.5"/>
+      <text x="280" y="147" text-anchor="middle" style="font-family:var(--mono);font-size:11px;fill:var(--ink)">Header</text>
+
+      <rect x="390" y="120" width="140" height="46" rx="8" style="fill:var(--bg2);stroke:var(--ink3);stroke-width:1.5"/>
+      <text x="460" y="147" text-anchor="middle" style="font-family:var(--mono);font-size:11px;fill:var(--ink)">FooterLink</text>
+
+      <path d="M240,65 L110,118" style="stroke:var(--rose);stroke-width:1.5;fill:none" marker-end="url(#ctxArrow)"/>
+      <path d="M280,65 L280,118" style="stroke:var(--rose);stroke-width:1.5;fill:none" marker-end="url(#ctxArrow)"/>
+      <path d="M320,65 L450,118" style="stroke:var(--rose);stroke-width:1.5;fill:none" marker-end="url(#ctxArrow)"/>
+
+      <text x="280" y="185" text-anchor="middle" style="font-family:var(--mono);font-size:10px;fill:var(--rose)">any value change re-renders every consumer, even ones reading a different field</text>
+    </svg>
+  </div>
+
   <h3>Zustand</h3>
   <pre>import { create } from 'zustand';
 
@@ -773,6 +1079,117 @@ const mutation = useMutation({
   mutationFn: (product) =&gt; api.createProduct(product),
   onSuccess: () =&gt; queryClient.invalidateQueries({ queryKey: ['products'] }),
 });</pre>
+
+  <div class="diagram-svg">
+    <svg viewBox="0 0 620 230" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TanStack Query cache flow between component, cache and server">
+      <defs>
+        <marker id="tqArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" style="fill:var(--teal)"/></marker>
+        <marker id="tqArrowAmber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" style="fill:var(--amber)"/></marker>
+      </defs>
+
+      <rect x="15" y="95" width="140" height="50" rx="8" style="fill:var(--bg2);stroke:var(--ink3);stroke-width:1.5"/>
+      <text x="85" y="116" text-anchor="middle" style="font-family:var(--sans);font-size:12px;font-weight:600;fill:var(--ink)">Component</text>
+      <text x="85" y="132" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink3)">useQuery(key)</text>
+
+      <rect x="235" y="95" width="160" height="50" rx="8" style="fill:var(--teal-bg);stroke:var(--teal);stroke-width:1.5"/>
+      <text x="315" y="116" text-anchor="middle" style="font-family:var(--sans);font-size:12px;font-weight:600;fill:var(--ink)">Query Cache</text>
+      <text x="315" y="132" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink2)">keyed by queryKey</text>
+
+      <rect x="470" y="20" width="140" height="50" rx="8" style="fill:var(--amber-bg);stroke:var(--amber);stroke-width:1.5"/>
+      <text x="540" y="41" text-anchor="middle" style="font-family:var(--sans);font-size:12px;font-weight:600;fill:var(--ink)">Server / API</text>
+      <text x="540" y="57" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink2)">queryFn()</text>
+
+      <path d="M155,110 L233,110" style="stroke:var(--ink3);stroke-width:1.5;fill:none" marker-end="url(#tqArrow)"/>
+      <text x="195" y="100" text-anchor="middle" style="font-family:var(--mono);font-size:8.5px;fill:var(--ink3)">read</text>
+
+      <path d="M235,140 C 170,180 130,180 88,147" style="stroke:var(--teal);stroke-width:1.5;fill:none" marker-end="url(#tqArrow)"/>
+      <text x="160" y="190" text-anchor="middle" style="font-family:var(--mono);font-size:8.5px;fill:var(--teal)">fresh &#8594; serve cached data instantly</text>
+
+      <path d="M375,97 L495,72" style="stroke:var(--amber);stroke-width:1.5;fill:none" marker-end="url(#tqArrowAmber)"/>
+      <text x="470" y="88" text-anchor="middle" style="font-family:var(--mono);font-size:8.5px;fill:var(--amber)">stale &#8594; refetch</text>
+
+      <path d="M500,70 C 440,95 390,100 355,102" style="stroke:var(--amber);stroke-width:1.5;fill:none" marker-end="url(#tqArrowAmber)"/>
+      <text x="470" y="130" text-anchor="middle" style="font-family:var(--mono);font-size:8.5px;fill:var(--amber)">response updates cache</text>
+
+      <text x="315" y="215" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink3)">cache update &#8594; every mounted useQuery(key) re-renders with fresh data</text>
+    </svg>
+  </div>
+
+  <h3>Redux Toolkit</h3>
+  <p>Still common in large teams for its predictable single-store model, time-travel debugging, and enforced immutability &#8212; Redux Toolkit removes the old boilerplate (action types/creators, hand-written immutable updates) via <code>createSlice</code>, which uses Immer under the hood so reducers can "mutate" a draft safely.</p>
+  <pre>import { createSlice, configureStore } from '@reduxjs/toolkit';
+
+const cartSlice = createSlice({
+  name: 'cart',
+  initialState: { items: [] },
+  reducers: {
+    addItem: (state, action) =&gt; { state.items.push(action.payload); }, // Immer draft — looks mutable, isn't
+    removeItem: (state, action) =&gt; {
+      state.items = state.items.filter(i =&gt; i.id !== action.payload);
+    },
+  },
+});
+
+export const { addItem, removeItem } = cartSlice.actions;
+const store = configureStore({ reducer: { cart: cartSlice.reducer } });
+
+// In a component
+const items = useSelector((state) =&gt; state.cart.items);   // re-renders only if this slice changes
+const dispatch = useDispatch();
+dispatch(addItem({ id: 1, name: 'Keyboard' }));</pre>
+
+  <div class="diagram-svg">
+    <svg viewBox="0 0 520 260" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Redux unidirectional data flow: view dispatches an action, reducer produces new state, store notifies view">
+      <defs>
+        <marker id="reduxArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" style="fill:var(--purple)"/></marker>
+      </defs>
+
+      <rect x="30" y="15" width="150" height="50" rx="8" style="fill:var(--purple-bg);stroke:var(--purple);stroke-width:1.5"/>
+      <text x="105" y="36" text-anchor="middle" style="font-family:var(--sans);font-size:12px;font-weight:600;fill:var(--ink)">Action</text>
+      <text x="105" y="53" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink2)">{ type, payload }</text>
+
+      <rect x="335" y="15" width="150" height="50" rx="8" style="fill:var(--purple-bg);stroke:var(--purple);stroke-width:1.5"/>
+      <text x="410" y="36" text-anchor="middle" style="font-family:var(--sans);font-size:12px;font-weight:600;fill:var(--ink)">Reducer</text>
+      <text x="410" y="53" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink2)">pure function</text>
+
+      <rect x="335" y="185" width="150" height="50" rx="8" style="fill:var(--purple-bg);stroke:var(--purple);stroke-width:1.5"/>
+      <text x="410" y="206" text-anchor="middle" style="font-family:var(--sans);font-size:12px;font-weight:600;fill:var(--ink)">Store</text>
+      <text x="410" y="223" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink2)">new state tree</text>
+
+      <rect x="30" y="185" width="150" height="50" rx="8" style="fill:var(--bg2);stroke:var(--ink3);stroke-width:1.5"/>
+      <text x="105" y="206" text-anchor="middle" style="font-family:var(--sans);font-size:12px;font-weight:600;fill:var(--ink)">View</text>
+      <text x="105" y="223" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink2)">useSelector</text>
+
+      <path d="M180,40 L333,40" style="stroke:var(--purple);stroke-width:2;fill:none" marker-end="url(#reduxArrow)"/>
+      <path d="M410,65 L410,183" style="stroke:var(--purple);stroke-width:2;fill:none" marker-end="url(#reduxArrow)"/>
+      <path d="M335,210 L182,210" style="stroke:var(--purple);stroke-width:2;fill:none" marker-end="url(#reduxArrow)"/>
+      <path d="M105,185 L105,67" style="stroke:var(--purple);stroke-width:2;fill:none" marker-end="url(#reduxArrow)"/>
+
+      <text x="258" y="30" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink3)">action + current state in</text>
+      <text x="460" y="125" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink3)">returns new state</text>
+      <text x="258" y="200" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink3)">subscribed slice changed &#8594; re-render</text>
+      <text x="60" y="125" text-anchor="middle" style="font-family:var(--mono);font-size:9px;fill:var(--ink3)">dispatch(action)</text>
+    </svg>
+  </div>
+
+  <h3>Comparing the Options</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>useState/useReducer</th><th>Context</th><th>Zustand</th><th>Redux Toolkit</th><th>TanStack Query</th></tr></thead>
+      <tbody>
+        <tr><td>Scope</td><td>Single component</td><td>Subtree</td><td>Whole app</td><td>Whole app</td><td>Server cache</td></tr>
+        <tr><td>Boilerplate</td><td>None</td><td>Low</td><td>Very low</td><td>Moderate</td><td>Low</td></tr>
+        <tr><td>Re-render granularity</td><td>N/A</td><td>Coarse (all consumers)</td><td>Fine (per selector)</td><td>Fine (per selector)</td><td>Fine (per query key)</td></tr>
+        <tr><td>DevTools / time-travel</td><td>No</td><td>No</td><td>Basic</td><td>Best-in-class</td><td>Query inspector</td></tr>
+        <tr><td>Best for</td><td>Local UI state</td><td>Theme, auth, i18n</td><td>Client global state, simple</td><td>Large teams, complex flows</td><td>Any data from a server</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-rose">
+    <strong>Don't use client state libraries for server data</strong>
+    Redux/Zustand have no concept of staleness, background refetch, or request deduplication. Fetched data belongs in TanStack Query (or SWR); reserve client stores for state that has no "source of truth" on a server &#8212; UI state, form drafts, auth tokens.
+  </div>
 </div>
 
 <!-- SECTION 9 -->

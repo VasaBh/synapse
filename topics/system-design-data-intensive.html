@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Design for Data-Intensive Applications — Synapse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e; --ink2: #3d3d5c; --ink3: #6b6b8a;
+  --bg: #ffffff; --bg2: #f4f3f0; --bg3: #eae8e4;
+  --accent: #4f46e5; --accent2: #4338ca; --accent-bg: #eef2ff;
+  --green: #059669; --green-bg: #ecfdf5;
+  --amber: #d97706; --amber-bg: #fffbeb;
+  --rose: #e11d48; --rose-bg: #fff1f2;
+  --purple: #7c3aed; --purple-bg: #f5f3ff;
+  --teal: #0d9488; --teal-bg: #f0fdfa;
+  --coral: #ea580c; --coral-bg: #fff7ed;
+  --border: #e2e0dc; --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+@media print {
+  body { font-size: 10pt; } .no-print { display: none !important; }
+  .page-break { page-break-before: always; } .card { break-inside: avoid; }
+  pre { font-size: 8pt; } h1 { font-size: 22pt; } h2 { font-size: 14pt; }
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+.cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%); color: white; padding: 4rem 2rem; position: relative; overflow: hidden; }
+.cover::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 50%, rgba(79,70,229,0.20) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(129,140,248,0.12) 0%, transparent 50%); }
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #818cf8, #c7d2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 640px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+.diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; margin: 1rem 0; font-family: var(--mono); font-size: 0.75rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink2); }
+.svg-diagram { margin: 1rem 0 0.25rem; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; overflow-x: auto; }
+.svg-diagram svg { width: 100%; height: auto; display: block; min-width: 620px; }
+.svg-diagram .dt { font-family: var(--sans); font-size: 13px; font-weight: 600; fill: var(--ink); }
+.svg-diagram .ds { font-family: var(--sans); font-size: 11px; fill: var(--ink3); }
+.svg-diagram .dm { font-family: var(--mono); font-size: 10.5px; fill: var(--accent2); }
+.svg-diagram .dw { font-family: var(--sans); font-size: 13px; font-weight: 600; fill: #fff; }
+.svg-diagram .dws { font-family: var(--mono); font-size: 10.5px; fill: #c7d2fe; }
+.svg-diagram .cap { font-family: var(--mono); font-size: 10px; fill: var(--ink3); letter-spacing: 1.5px; }
+.svg-diagram .ln { stroke: #8b8ba3; stroke-width: 1.5; fill: none; }
+.svg-diagram .lnd { stroke: #8b8ba3; stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; }
+.svg-diagram .bx { stroke: var(--border); stroke-width: 1; }
+.diagram-cap { font-size: 0.78rem; color: var(--ink3); text-align: center; margin: 0 0 1rem; }
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #a5b4fc; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+</style>
+<link rel="stylesheet" href="../assets/mobile.css">
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← Synapse</a>
+  <h1>System Design for Data-Intensive Applications</h1>
+</header>
+
+<div class="topic-page">
+  <aside class="sidebar">
+    <p class="sidebar-title">Data-Intensive Systems</p>
+    <nav><ul>
+      <li><a href="#s1"><span class="toc-num">01</span>Core Concepts &amp; Trade-offs</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>Case Study: Commodities Market Data</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>Source Adapter Layer</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>ETL: EOD Batch vs Intraday Streaming</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>Messaging &amp; Storage Choices</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>Data Validation Engine</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>Golden Source &amp; Reconciliation</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>Access APIs &amp; Caching</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>Scalability &amp; Reliability</a></li>
+      <li><a href="#s10"><span class="toc-num">10</span>Interview Questions</a></li>
+    </ul></nav>
+  </aside>
+
+  <div class="main-scroll">
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference — September 2026</div>
+  <h1>System Design for <span>Data-Intensive Applications</span></h1>
+  <p class="cover-sub">Batch vs. streaming trade-offs, and a full worked case study: a commodities market data platform ingesting Bloomberg, Refinitiv, ZEMA and exchange feeds — EOD &amp; intraday ETL, messaging/storage choices, a pluggable validation engine with a sample rule catalog, golden-source reconciliation, capacity sizing for 100 RICs/curves, and a cached access API layer.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">Lambda/Kappa Architecture</span>
+    <span class="cover-tag">Kafka</span>
+    <span class="cover-tag">kdb+ / Time-Series DB</span>
+    <span class="cover-tag">Bloomberg · Refinitiv · ZEMA</span>
+    <span class="cover-tag">Data Validation Engine</span>
+    <span class="cover-tag">Golden Source</span>
+    <span class="cover-tag">Redis Caching</span>
+    <span class="cover-tag">EOD &amp; Intraday</span>
+  </div>
+  <div class="cover-date">v1.0 — Last updated September 2026</div>
+</div>
+
+<div class="container">
+<div class="toc page-break">
+  <h2>Contents</h2>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">Core Concepts &amp; Trade-offs</span></a>
+    <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">Case Study: Commodities Market Data</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">Source Adapter Layer</span></a>
+    <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">ETL: EOD Batch vs Intraday Streaming</span></a>
+    <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">Messaging &amp; Storage Choices</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Data Validation Engine</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Golden Source &amp; Reconciliation</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">Access APIs &amp; Caching</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">Scalability &amp; Reliability</span></a>
+    <a class="toc-item" href="#s10"><span class="toc-num">10</span><span class="toc-label">Interview Questions</span></a>
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+<div class="section page-break" id="s1">
+  <div class="section-num">Section 01</div>
+  <h2 class="section-title">Core Concepts &amp; Trade-offs</h2>
+  <p class="lead">A system is <strong>data-intensive</strong> (rather than compute-intensive) when the hard problems are volume, velocity, variety, and correctness of data — not raw CPU cycles. Market data platforms are a canonical example: millions of price updates per second, decades of history to retain, dozens of source formats, and consumers (risk, trading, settlement) who cannot tolerate a wrong number.</p>
+
+  <div class="diagram">Four axes every data-intensive design decision sits on:
+
+  Throughput  ◄──────────────────────────────►  Latency
+  (batch, EOD close-of-day pricing)        (intraday ticks, sub-second)
+
+  Consistency ◄──────────────────────────────►  Availability
+  (golden settlement price — must be right) (best-effort live quote feed)
+
+  Durability  ◄──────────────────────────────►  Cost
+  (regulatory retention, replay for audit)  (hot storage is expensive)
+
+  Schema rigidity ◄──────────────────────────►  Source variety
+  (one canonical model)                     (Bloomberg ≠ Refinitiv ≠ ZEMA)</div>
+
+  <h3>Batch, Streaming, and the Hybrid Middle Ground</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Architecture</th><th>Model</th><th>Where it fits in market data</th></tr></thead>
+    <tbody>
+      <tr><td>Batch (classic ETL)</td><td>Extract → Transform → Load on a schedule</td><td>EOD settlement prices, reference/static data, regulatory reporting extracts</td></tr>
+      <tr><td>Streaming (event-driven)</td><td>Continuous processing of an unbounded event log</td><td>Intraday ticks/quotes, real-time curve rebuilds, alerting</td></tr>
+      <tr><td>Lambda architecture</td><td>Separate batch layer (accuracy) + speed layer (freshness), merged at query time</td><td>Intraday "live" price backed by a nightly-reconciled EOD layer that is the audit source of truth</td></tr>
+      <tr><td>Kappa architecture</td><td>Single streaming pipeline; batch is just "replay the log from offset 0"</td><td>Simpler ops when EOD can be derived as a snapshot of the same event stream (e.g., last tick before market close)</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-blue">
+    <strong>Design principle used throughout this guide</strong>
+    Treat every incoming price as an immutable, timestamped <strong>event</strong> appended to a log (Kafka). EOD is a materialized view of that log ("last valid tick per instrument before the close snapshot time"); intraday is the log consumed live. This is a Kappa-leaning design — it avoids maintaining two divergent codepaths for "the same number computed two ways," which is the single most common source of EOD-vs-intraday discrepancies in real trading desks.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+<div class="section page-break" id="s2">
+  <div class="section-num">Section 02</div>
+  <h2 class="section-title">Case Study: Commodities Market Data Platform</h2>
+  <p class="lead">The requirement: build a platform that ingests commodity prices (crude oil, natural gas, power, metals, agriculturals) from multiple vendors, produces both an <strong>intraday live view</strong> and an <strong>EOD settlement/curve view</strong>, validates every number before anyone can query it, and stays adaptable as sources are added or swapped.</p>
+
+  <h3>Data Shapes in Commodities Market Data</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Data type</th><th>Frequency</th><th>Example</th><th>Consumer</th></tr></thead>
+    <tbody>
+      <tr><td>Intraday tick/quote</td><td>Sub-second → per second</td><td>CL futures last trade 78.42 @ 14:32:01.114</td><td>Trading desks, real-time risk</td></tr>
+      <tr><td>Intraday bar (OHLC)</td><td>1s/1m/5m aggregates</td><td>1-minute bar for NG front month</td><td>Charting, algo signals</td></tr>
+      <tr><td>EOD settlement price</td><td>Once per trading day</td><td>CME WTI settle for 2026-09-14</td><td>P&amp;L, margining, official valuation</td></tr>
+      <tr><td>Forward curve</td><td>Daily (or intraday for liquid curves)</td><td>Full Brent forward curve, 36 contract months</td><td>Curve building, mark-to-market</td></tr>
+      <tr><td>Reference/static data</td><td>On change (low frequency)</td><td>Contract specs, tick size, exchange calendar, holiday schedule</td><td>Everything downstream — normalization depends on it</td></tr>
+      <tr><td>Corporate/contract actions</td><td>Event-driven</td><td>Contract expiry, roll date, delivery month change</td><td>Curve construction, position rollover</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Reference Architecture</h3>
+  <div class="svg-diagram"><svg viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="End-to-end reference architecture: vendor sources feed a source adapter layer, then a Kafka ingestion bus, a validation engine with a quarantine branch, stream processing and an EOD snapshot job, tiered storage, and a cached access API layer serving desks, risk, settlement and reporting">
+    <defs><marker id="arrA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8b8ba3"/></marker></defs>
+    <rect x="40" y="16" width="200" height="58" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="140" y="40" text-anchor="middle" class="dt">Bloomberg</text>
+    <text x="140" y="58" text-anchor="middle" class="ds">B-PIPE stream · DL bulk files</text>
+    <rect x="280" y="16" width="200" height="58" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="380" y="40" text-anchor="middle" class="dt">Refinitiv (Reuters)</text>
+    <text x="380" y="58" text-anchor="middle" class="ds">Elektron stream · RDP REST</text>
+    <rect x="520" y="16" width="200" height="58" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="620" y="40" text-anchor="middle" class="dt">ZEMA</text>
+    <text x="620" y="58" text-anchor="middle" class="ds">curve &amp; fundamentals API (pull)</text>
+    <rect x="760" y="16" width="200" height="58" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="860" y="40" text-anchor="middle" class="dt">Exchange direct</text>
+    <text x="860" y="58" text-anchor="middle" class="ds">CME MDP 3.0 · ICE multicast</text>
+    <path d="M140 74 L140 108" class="ln" marker-end="url(#arrA)"/>
+    <path d="M380 74 L380 108" class="ln" marker-end="url(#arrA)"/>
+    <path d="M620 74 L620 108" class="ln" marker-end="url(#arrA)"/>
+    <path d="M860 74 L860 108" class="ln" marker-end="url(#arrA)"/>
+    <rect x="40" y="110" width="920" height="60" rx="8" fill="#eef2ff" stroke="#4f46e5"/>
+    <text x="500" y="135" text-anchor="middle" class="dt">Source Adapter Layer  ·  one plugin per vendor</text>
+    <text x="500" y="155" text-anchor="middle" class="ds">feed handler → symbology map (instrument master) → unit / currency normalize → canonical event</text>
+    <text x="945" y="130" text-anchor="end" class="dm">§03</text>
+    <path d="M500 170 L500 204" class="ln" marker-end="url(#arrA)"/>
+    <rect x="40" y="206" width="920" height="52" rx="8" fill="#1a1a2e"/>
+    <text x="500" y="228" text-anchor="middle" class="dw">Kafka ingestion bus</text>
+    <text x="500" y="247" text-anchor="middle" class="dws">topics md.raw.&lt;commodity&gt; · key = instrument_id (per-instrument ordering) · Avro + schema registry</text>
+    <path d="M500 258 L500 298" class="ln" marker-end="url(#arrA)"/>
+    <rect x="40" y="300" width="200" height="64" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="140" y="326" text-anchor="middle" class="dt">Reference data</text>
+    <text x="140" y="344" text-anchor="middle" class="ds">Postgres: instrument master,</text>
+    <text x="140" y="357" text-anchor="middle" class="ds">calendars, price bounds</text>
+    <path d="M240 332 L298 332" class="lnd" marker-end="url(#arrA)"/>
+    <rect x="300" y="300" width="400" height="64" rx="8" fill="#4f46e5"/>
+    <text x="500" y="326" text-anchor="middle" class="dw">Validation Engine  ·  §06</text>
+    <text x="500" y="346" text-anchor="middle" class="dws">schema · range · spike · timestamp/dup · ref-integrity · cross-source</text>
+    <path d="M700 332 L758 332" class="ln" marker-end="url(#arrA)"/>
+    <text x="729" y="324" text-anchor="middle" class="ds">fails</text>
+    <rect x="760" y="300" width="200" height="64" rx="8" fill="#fffbeb" stroke="#d97706"/>
+    <text x="860" y="324" text-anchor="middle" class="dt">Quarantine / dead-letter</text>
+    <text x="860" y="342" text-anchor="middle" class="ds">steward review UI → approve /</text>
+    <text x="860" y="355" text-anchor="middle" class="ds">correct → re-inject · retained</text>
+    <path d="M500 364 L500 406" class="ln" marker-end="url(#arrA)"/>
+    <text x="508" y="390" class="dm">VALIDATED</text>
+    <rect x="40" y="408" width="200" height="64" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="140" y="434" text-anchor="middle" class="dt">EOD snapshot job</text>
+    <text x="140" y="452" text-anchor="middle" class="ds">Airflow · T+30m post-close · §04</text>
+    <path d="M300 440 L242 440" class="lnd" marker-end="url(#arrA)"/>
+    <rect x="300" y="408" width="400" height="64" rx="8" fill="#f5f3ff" stroke="#7c3aed"/>
+    <text x="500" y="434" text-anchor="middle" class="dt">Stream processing  ·  Flink / Kafka Streams</text>
+    <text x="500" y="453" text-anchor="middle" class="ds">enrich · OHLC bars · curve build · golden-source merge (§07)</text>
+    <path d="M140 472 L140 518" class="ln" marker-end="url(#arrA)"/>
+    <path d="M420 472 L420 496 L220 496 L220 518" class="ln" marker-end="url(#arrA)"/>
+    <path d="M500 472 L500 518" class="ln" marker-end="url(#arrA)"/>
+    <rect x="40" y="520" width="260" height="64" rx="8" fill="#eef2ff" stroke="#4f46e5"/>
+    <text x="170" y="545" text-anchor="middle" class="dt">Warm · Parquet on S3 / Snowflake</text>
+    <text x="170" y="563" text-anchor="middle" class="ds">EOD facts, curves, bars · 7 d – 2 yrs</text>
+    <rect x="340" y="520" width="300" height="64" rx="8" fill="#f0fdfa" stroke="#0d9488"/>
+    <text x="490" y="545" text-anchor="middle" class="dt">Hot · Redis + kdb+ / ClickHouse</text>
+    <text x="490" y="563" text-anchor="middle" class="ds">latest price, today's ticks · ms reads</text>
+    <rect x="680" y="520" width="280" height="64" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="820" y="545" text-anchor="middle" class="dt">Cold · S3 Glacier</text>
+    <text x="820" y="563" text-anchor="middle" class="ds">aged out from warm · 7–10 yr retention</text>
+    <path d="M170 584 L170 648" class="ln" marker-end="url(#arrA)"/>
+    <path d="M490 584 L490 648" class="ln" marker-end="url(#arrA)"/>
+    <path d="M820 584 L820 648" class="lnd" marker-end="url(#arrA)"/>
+    <text x="828" y="620" class="ds">bulk export</text>
+    <rect x="40" y="650" width="920" height="58" rx="8" fill="#ecfdf5" stroke="#059669"/>
+    <text x="500" y="675" text-anchor="middle" class="dt">Access API layer + cache  ·  §08</text>
+    <text x="500" y="694" text-anchor="middle" class="ds">REST (latest / EOD / curves / history) · WebSocket &amp; gRPC (live stream) · bulk export · entitlements</text>
+    <path d="M124 708 L124 738" class="ln" marker-end="url(#arrA)"/>
+    <path d="M312 708 L312 738" class="ln" marker-end="url(#arrA)"/>
+    <path d="M500 708 L500 738" class="ln" marker-end="url(#arrA)"/>
+    <path d="M688 708 L688 738" class="ln" marker-end="url(#arrA)"/>
+    <path d="M876 708 L876 738" class="ln" marker-end="url(#arrA)"/>
+    <rect x="40" y="740" width="168" height="44" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="124" y="767" text-anchor="middle" class="dt">Trading desks</text>
+    <rect x="228" y="740" width="168" height="44" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="312" y="767" text-anchor="middle" class="dt">Risk &amp; P&amp;L</text>
+    <rect x="416" y="740" width="168" height="44" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="500" y="767" text-anchor="middle" class="dt">Settlement / margin</text>
+    <rect x="604" y="740" width="168" height="44" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="688" y="767" text-anchor="middle" class="dt">Regulatory reporting</text>
+    <rect x="792" y="740" width="168" height="44" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="876" y="767" text-anchor="middle" class="dt">Quant research</text>
+  </svg></div>
+  <p class="diagram-cap">Figure 1 — Every vendor is one adapter, every consumer is one API client; nothing in between knows which vendor a price came from.</p>
+
+  <div class="callout callout-purple">
+    <strong>Why this shape, not a point-to-point integration per consumer</strong>
+    Every new vendor is one adapter; every new consumer is one API client — neither touches the other. Without the ingestion bus and canonical schema in the middle, N sources × M consumers becomes N×M bespoke integrations, and a single bad Bloomberg tick has no single place to be caught before it reaches a trader's screen.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+<div class="section page-break" id="s3">
+  <div class="section-num">Section 03</div>
+  <h2 class="section-title">Source Adapter Layer</h2>
+  <p class="lead">The single most important adaptability decision: no downstream component should know which vendor a price came from. Every adapter's job is to translate a vendor-specific wire format into one <strong>canonical event schema</strong>.</p>
+
+  <h3>Source Characteristics</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Source</th><th>Delivery</th><th>Strength</th><th>Integration notes</th></tr></thead>
+    <tbody>
+      <tr><td>Bloomberg (B-PIPE / Data License)</td><td>Streaming (B-PIPE) + bulk file (DL)</td><td>Deep cross-asset coverage, high reliability</td><td>Session/subscription based (blpapi); entitlements are per-field, model field permissions in the adapter</td></tr>
+      <tr><td>Refinitiv (Elektron/RDP, ex-Reuters)</td><td>Streaming (Elektron/RSSL) + REST (RDP)</td><td>Strong OTC and energy/commodities coverage</td><td>RIC-based instrument identifiers — needs a symbology mapping step, not a 1:1 field match with Bloomberg</td></tr>
+      <tr><td>ZEMA</td><td>Scheduled pulls + API</td><td>Purpose-built for energy/commodity curves, fundamentals, exchange settlement aggregation</td><td>Often the fastest path to a normalized forward curve — but pull-based, so it drives the EOD batch schedule, not the intraday stream</td></tr>
+      <tr><td>Exchange direct (CME MDP 3.0, ICE)</td><td>Multicast binary feed</td><td>Lowest latency, authoritative settlement price</td><td>Needs a dedicated low-level feed handler (FIX/FAST or proprietary binary) — heavier build, but this is the source of truth for settlement</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Canonical Event Schema</h3>
+<pre><code>{
+  "event_id": "01J8-uuid",
+  "instrument_id": "CME.CL.2026Z",          // internal symbology, not vendor's
+  "instrument_type": "FUTURE",
+  "commodity": "CRUDE_OIL",
+  "source": "BLOOMBERG",                     // BLOOMBERG | REFINITIV | ZEMA | CME_DIRECT
+  "source_native_id": "CLZ26 Comdty",
+  "event_type": "TRADE",                     // TRADE | QUOTE | SETTLE | CURVE_POINT
+  "price": 78.42,
+  "currency": "USD",
+  "unit": "USD_PER_BBL",
+  "quantity": 1000,
+  "exchange_ts": "2026-09-14T14:32:01.114Z", // exchange-reported time
+  "ingest_ts":   "2026-09-14T14:32:01.240Z", // when the adapter received it
+  "is_eod_snapshot": false,
+  "quality": "UNVALIDATED"                   // set by the validation engine downstream
+}</code></pre>
+
+  <h3>Adapter Interface (Plugin Pattern)</h3>
+<pre><code>class MarketDataAdapter(ABC):
+    """One implementation per vendor. Adding ZEMA v2 later = one new class,
+    zero changes to ingestion, validation, storage, or API layers."""
+
+    @abstractmethod
+    def connect(self, config: SourceConfig) -> None: ...
+
+    @abstractmethod
+    def subscribe(self, instruments: list[str]) -> None: ...
+
+    @abstractmethod
+    def normalize(self, raw_message: bytes) -> CanonicalEvent:
+        """Vendor wire format -> canonical schema. All symbology mapping,
+        unit conversion, and field-entitlement checks happen here."""
+
+    def publish(self, event: CanonicalEvent, producer: KafkaProducer) -> None:
+        topic = f"md.raw.{event.commodity.lower()}"
+        producer.send(topic, key=event.instrument_id, value=event.to_json())
+
+
+class BloombergAdapter(MarketDataAdapter):
+    def normalize(self, raw_message: bytes) -> CanonicalEvent:
+        msg = blpapi.parse(raw_message)
+        return CanonicalEvent(
+            instrument_id=symbology.to_internal("BLOOMBERG", msg.security),
+            price=msg.get("LAST_PRICE"),
+            unit=unit_map.resolve(msg.security),
+            exchange_ts=msg.get("TRADE_UPDATE_STAMP_RT"),
+            source="BLOOMBERG",
+        )
+
+class ZemaAdapter(MarketDataAdapter):
+    def normalize(self, raw_message: bytes) -> CanonicalEvent:
+        row = json.loads(raw_message)
+        return CanonicalEvent(
+            instrument_id=symbology.to_internal("ZEMA", row["curveId"]),
+            price=row["value"],
+            unit=row["uom"],
+            exchange_ts=row["asOfDate"] + "T00:00:00Z",
+            event_type="CURVE_POINT",
+            source="ZEMA",
+        )</code></pre>
+
+  <div class="callout callout-amber">
+    <strong>Symbology is the hidden project inside this project</strong>
+    Bloomberg tickers, Refinitiv RICs, ZEMA curve IDs, and exchange product codes never agree. Build a dedicated <strong>symbology/instrument master</strong> service (internal ID ↔ every vendor ID) as its own component with its own reference-data lifecycle — do not let mapping logic leak into individual adapters, or every adapter re-solves the same problem differently.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+<div class="section page-break" id="s4">
+  <div class="section-num">Section 04</div>
+  <h2 class="section-title">ETL: EOD Batch vs. Intraday Streaming</h2>
+  <p class="lead">EOD and intraday are not two products — they're two consumption modes of the same canonical event log, with different SLAs, volumes, and correctness bars.</p>
+
+  <div class="svg-diagram"><svg viewBox="0 0 1000 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One validated event log feeds two paths: an intraday speed path through a stream processor, hot cache and live API, and an EOD accuracy path through a close-snapshot job, EOD fact table and history API">
+    <defs><marker id="arrB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8b8ba3"/></marker></defs>
+    <rect x="30" y="95" width="210" height="140" rx="8" fill="#1a1a2e"/>
+    <text x="135" y="150" text-anchor="middle" class="dw">Validated event log</text>
+    <text x="135" y="170" text-anchor="middle" class="dws">Kafka md.validated.*</text>
+    <text x="135" y="188" text-anchor="middle" class="dws">append-only · replayable by offset</text>
+    <text x="300" y="30" class="cap">INTRADAY · SPEED PATH</text>
+    <path d="M240 130 L270 130 L270 70 L298 70" class="ln" marker-end="url(#arrB)"/>
+    <text x="276" y="112" class="ds">every tick</text>
+    <rect x="300" y="42" width="190" height="58" rx="8" fill="#f5f3ff" stroke="#7c3aed"/>
+    <text x="395" y="66" text-anchor="middle" class="dt">Stream processor</text>
+    <text x="395" y="84" text-anchor="middle" class="ds">enrich · 1-min bars · live curve</text>
+    <path d="M490 71 L528 71" class="ln" marker-end="url(#arrB)"/>
+    <rect x="530" y="42" width="190" height="58" rx="8" fill="#f0fdfa" stroke="#0d9488"/>
+    <text x="625" y="66" text-anchor="middle" class="dt">Hot cache + tick store</text>
+    <text x="625" y="84" text-anchor="middle" class="ds">Redis (latest) · kdb+ (today)</text>
+    <path d="M720 71 L758 71" class="ln" marker-end="url(#arrB)"/>
+    <rect x="760" y="42" width="210" height="58" rx="8" fill="#ecfdf5" stroke="#059669"/>
+    <text x="865" y="66" text-anchor="middle" class="dt">Live API</text>
+    <text x="865" y="84" text-anchor="middle" class="ds">WebSocket · gRPC · REST /latest</text>
+    <text x="865" y="118" text-anchor="middle" class="dm">p99 &lt; 250 ms source → screen</text>
+    <rect x="300" y="128" width="670" height="70" rx="8" fill="#eef2ff" stroke="#c7d2fe"/>
+    <text x="635" y="155" text-anchor="middle" class="dt">Same events · same validation engine · same canonical schema</text>
+    <text x="635" y="176" text-anchor="middle" class="ds">EOD and intraday can differ only in which snapshot in time is shown — never in what the raw price was</text>
+    <path d="M240 200 L270 200 L270 270 L298 270" class="ln" marker-end="url(#arrB)"/>
+    <text x="276" y="226" class="ds">once / day</text>
+    <rect x="300" y="242" width="190" height="58" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="395" y="266" text-anchor="middle" class="dt">Close-snapshot job</text>
+    <text x="395" y="284" text-anchor="middle" class="ds">SETTLE events + last valid tick</text>
+    <path d="M490 271 L528 271" class="ln" marker-end="url(#arrB)"/>
+    <rect x="530" y="242" width="190" height="58" rx="8" fill="#eef2ff" stroke="#4f46e5"/>
+    <text x="625" y="266" text-anchor="middle" class="dt">EOD facts + curves</text>
+    <text x="625" y="284" text-anchor="middle" class="ds">Parquet / Snowflake · immutable</text>
+    <path d="M720 271 L758 271" class="ln" marker-end="url(#arrB)"/>
+    <rect x="760" y="242" width="210" height="58" rx="8" fill="#ecfdf5" stroke="#059669"/>
+    <text x="865" y="266" text-anchor="middle" class="dt">History API</text>
+    <text x="865" y="284" text-anchor="middle" class="ds">REST /eod · /curves · bulk export</text>
+    <text x="865" y="322" text-anchor="middle" class="dm">available T+30 min after close</text>
+    <text x="300" y="322" class="cap">EOD · ACCURACY PATH</text>
+  </svg></div>
+  <p class="diagram-cap">Figure 2 — Kappa-style: EOD is a materialized snapshot of the same validated log the intraday path consumes.</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>Intraday</th><th>EOD</th></tr></thead>
+    <tbody>
+      <tr><td>Latency target</td><td>&lt; 250ms source-to-screen</td><td>Available within minutes of close; correctness &gt; speed</td></tr>
+      <tr><td>Volume</td><td>Very high (every tick), bursty at open/close</td><td>Low — one settlement record per instrument per day</td></tr>
+      <tr><td>Ordering</td><td>Per-instrument order matters; global order usually doesn't</td><td>Must reflect the single official close-of-day snapshot</td></tr>
+      <tr><td>Replay need</td><td>Short window (minutes) for recovery/reconnect</td><td>Full history replay for audit, backtesting, restatement</td></tr>
+      <tr><td>Failure tolerance</td><td>Can drop/skip stale ticks and self-heal on next update</td><td>Cannot silently miss a value — must alert and backfill</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>EOD Batch Pipeline</h3>
+  <div class="diagram">02:00 UTC job window (after all major exchanges have closed)
+
+  Extract          Stage             Transform              Load
+┌──────────┐   ┌──────────┐   ┌─────────────────────┐   ┌──────────────┐
+│ Pull ZEMA │   │ Land raw  │   │ • currency convert   │   │ Write EOD     │
+│ curve API,│──►│ files to  │──►│ • unit normalize      │──►│ fact table    │
+│ Bloomberg │   │ S3 landing│   │ • roll/expiry logic   │   │ (Parquet /    │
+│ DL bulk   │   │ zone      │   │ • VALIDATION ENGINE   │   │ warehouse)    │
+│ file, CME │   │ (immutable│   │   (Section 06)        │   │ + publish     │
+│ settle    │   │ raw copy) │   │ • golden-source merge │   │ "EOD ready"   │
+│ file      │   │           │   │   across sources      │   │ event         │
+└──────────┘   └──────────┘   └─────────────────────┘   └──────────────┘
+
+  Orchestrated by Airflow/Dagster: dependency-aware (don't run "curve build"
+  before all source extracts for that day report SUCCESS or a monitored SLA breach)</div>
+
+  <h3>Intraday Streaming Pipeline</h3>
+<pre><code># Kafka Streams / Flink-style job — conceptually identical in either engine
+def build_intraday_pipeline():
+    raw = source_topics("md.raw.*")                  # from adapters, Section 03
+
+    validated, quarantined = raw.branch(
+        predicate=lambda e: validation_engine.check(e).passed
+    )
+
+    quarantined.to_topic("md.quarantine")             # Section 06 exception flow
+
+    enriched = (validated
+        .map(enrich_with_reference_data)               # contract specs, FX rate
+        .map(compute_derived_fields))                   # spreads, rolling VWAP
+
+    # Windowed aggregation for OHLC bars, keyed per instrument
+    bars = enriched.group_by_key().window(TumblingWindow.minutes(1)).aggregate(ohlc)
+
+    enriched.to_topic("md.intraday.ticks")             # low-latency live consumers
+    bars.to_topic("md.intraday.bars")                  # charting/algos
+    enriched.to_store("hot_cache")                      # Section 08 — latest-price cache</code></pre>
+
+  <div class="callout callout-green">
+    <strong>One pipeline, two views — the Kappa payoff</strong>
+    The EOD "settle" record is produced by the <em>same</em> validation engine and canonical schema as the intraday tick — it's just the event where <code>event_type == "SETTLE"</code> or the last validated tick before the exchange's official close-snapshot time. That guarantees EOD and intraday can never silently disagree about what a raw price <em>was</em> — only about which snapshot in time is being shown.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+<div class="section page-break" id="s5">
+  <div class="section-num">Section 05</div>
+  <h2 class="section-title">Messaging &amp; Storage Technology Choices</h2>
+  <p class="lead">Pick technology per data class, not one tool for everything — tick data, EOD facts, and reference data have incompatible access patterns.</p>
+
+  <h3>Messaging Layer</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Option</th><th>Strengths</th><th>Watch out for</th><th>Fit here</th></tr></thead>
+    <tbody>
+      <tr><td>Apache Kafka</td><td>Ordered log per partition, long retention, replay by offset, huge ecosystem (Kafka Streams, ksqlDB, Connect)</td><td>Ops overhead if self-managed; partition key design determines ordering guarantees</td><td><strong>Chosen backbone</strong> — partition by <code>instrument_id</code> so per-instrument order is preserved</td></tr>
+      <tr><td>Solace / IBM MQ</td><td>Battle-tested in banks, strong topic-based entitlements, low-latency binary transport</td><td>Less natural log-replay model than Kafka; licensing cost</td><td>Common where it's already the firm's standard market-data bus — fine as the transport under the same canonical-schema design</td></tr>
+      <tr><td>Cloud-native (Kinesis / Pub/Sub)</td><td>Zero ops, elastic scaling</td><td>Shorter retention windows, per-vendor semantics differ from Kafka</td><td>Good fit if already all-in on one cloud and volumes are moderate</td></tr>
+      <tr><td>Pulsar</td><td>Tiered storage built in (hot BookKeeper + cold object storage), multi-tenancy</td><td>Smaller talent pool / ecosystem than Kafka</td><td>Worth it specifically for the hot/cold tiering story if operating at very large tick volumes</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Storage Layer (Tiered by Access Pattern)</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tier</th><th>Data</th><th>Technology</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Hot (ms access)</td><td>Latest price per instrument, live curve</td><td>Redis / in-memory grid</td><td>Sub-millisecond reads for the "what's the price right now" API — Section 08</td></tr>
+      <tr><td>Hot analytical</td><td>Intraday tick history (today + few days)</td><td>kdb+/Kx, or ClickHouse/TimescaleDB if avoiding a q/kdb skillset</td><td>Purpose-built for time-ordered numeric series; sub-second range/asof queries over billions of rows</td></tr>
+      <tr><td>Warm</td><td>EOD facts, curves, recent months</td><td>Parquet on S3 + a query engine (Athena/Trino), or Snowflake/BigQuery</td><td>Columnar, cheap, fast for the "give me 6 months of settles" analytical queries risk/quant teams run</td></tr>
+      <tr><td>Cold</td><td>Multi-year regulatory retention</td><td>S3 Glacier / object storage archive tier</td><td>Rarely read, must be retained (Dodd-Frank/EMIR-style rules), optimize purely for cost</td></tr>
+      <tr><td>Reference/metadata</td><td>Instrument master, symbology, calendars</td><td>PostgreSQL</td><td>Low volume, high integrity, relational joins (contract → exchange → calendar) are natural here</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-blue">
+    <strong>Decision rule of thumb</strong>
+    If a query asks "what is it right now" → hot key-value cache. If it asks "give me every tick between two timestamps" → time-series engine. If it asks "give me the settle for every day last quarter" → columnar warehouse. Using one general-purpose database for all three is the most common over-engineering-by-simplification mistake in market data platforms.
+  </div>
+
+  <h3>Storage Lifecycle</h3>
+  <div class="svg-diagram"><svg viewBox="0 0 1000 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Storage lifecycle for 100 instruments: hot tier for 0 to 7 days, warm tier for 7 days to 2 years, cold tier for 2 to 10 plus years, with access patterns above and sizing below">
+    <text x="40" y="24" class="cap">DATA LIFECYCLE · 100 RICs / CURVES · TICK DATA DOMINATES, EOD IS NEGLIGIBLE</text>
+    <text x="170" y="60" text-anchor="middle" class="ds">point lookups, asof joins · sub-ms → ms</text>
+    <text x="490" y="60" text-anchor="middle" class="ds">range scans, curve history, backtests · 100 ms → s</text>
+    <text x="820" y="60" text-anchor="middle" class="ds">audit, restatement, discovery · minutes (restore)</text>
+    <path d="M170 68 L170 88" class="ln"/>
+    <path d="M490 68 L490 88" class="ln"/>
+    <path d="M820 68 L820 88" class="ln"/>
+    <rect x="40" y="90" width="260" height="60" rx="8" fill="#f0fdfa" stroke="#0d9488"/>
+    <text x="170" y="114" text-anchor="middle" class="dt">HOT · 0 – 7 days</text>
+    <text x="170" y="134" text-anchor="middle" class="ds">Redis (latest) · kdb+ / ClickHouse (ticks)</text>
+    <rect x="300" y="90" width="380" height="60" rx="8" fill="#eef2ff" stroke="#4f46e5"/>
+    <text x="490" y="114" text-anchor="middle" class="dt">WARM · 7 days – 2 years</text>
+    <text x="490" y="134" text-anchor="middle" class="ds">Parquet on S3, partitioned by date · Snowflake / Trino</text>
+    <rect x="680" y="90" width="280" height="60" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="820" y="114" text-anchor="middle" class="dt">COLD · 2 – 10+ years</text>
+    <text x="820" y="134" text-anchor="middle" class="ds">S3 Glacier via lifecycle policy</text>
+    <text x="300" y="170" text-anchor="middle" class="dm">age-out ▶</text>
+    <text x="680" y="170" text-anchor="middle" class="dm">age-out ▶</text>
+    <text x="170" y="200" text-anchor="middle" class="dt">≈ 5–6 GB</text>
+    <text x="170" y="218" text-anchor="middle" class="ds">7 days of compressed ticks + &lt; 1 MB in Redis</text>
+    <text x="490" y="200" text-anchor="middle" class="dt">≈ 200 GB / year</text>
+    <text x="490" y="218" text-anchor="middle" class="ds">ticks · EOD + curves add &lt; 1 GB / year</text>
+    <text x="820" y="200" text-anchor="middle" class="dt">≈ 2 TB</text>
+    <text x="820" y="218" text-anchor="middle" class="ds">10 years of tick history, archive-tier pricing</text>
+  </svg></div>
+  <p class="diagram-cap">Figure 3 — Tiers are defined by access pattern and age; sizing shown for the 100-RIC scenario below.</p>
+
+  <h3>Capacity Planning — Sizing for 100 RICs / Curves</h3>
+  <p>Architecture reviews and interviews both ask "how big is this really?" Work it from a small, explicit set of assumptions. The numbers below are for <strong>100 instruments</strong> (RICs) — say 60 liquid exchange-listed futures and 40 illiquid/OTC curve points — each also carrying a <strong>36-tenor forward curve</strong>.</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Assumption</th><th>Value</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td>Active session</td><td>20 h / day (Globex-style) · 252 trading days / yr</td><td>Off-hours volume is small but non-zero</td></tr>
+      <tr><td>Liquid instruments</td><td>60 × avg 5 updates/s · bursts to 50/s at open, close, settlement</td><td>Front-month CL / NG / Brent behave like this</td></tr>
+      <tr><td>Illiquid / OTC points</td><td>40 × avg 0.1 updates/s</td><td>Many print only a handful of times an hour</td></tr>
+      <tr><td>Canonical event size</td><td>≈ 350 B JSON · ≈ 90 B Avro/Protobuf · ≈ 35 B at rest (columnar, compressed)</td><td>Tick data compresses ~10× in kdb+/Parquet — repetitive ids, delta-friendly prices and timestamps</td></tr>
+      <tr><td>Sources per instrument</td><td>2–3 vendors report the same RIC</td><td>Raw ingest is multiplied; the golden copy is 1×</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>What 100 RICs Actually Produce</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Data class</th><th>Events / day</th><th>Daily size</th><th>Per year</th><th>Where it lands</th></tr></thead>
+    <tbody>
+      <tr><td>Intraday ticks (one vendor)</td><td>60 × 5 × 72,000 s + 40 × 0.1 × 72,000 s ≈ <strong>22 M</strong></td><td>≈ 7.7 GB JSON · ≈ 2 GB Avro · ≈ 0.8 GB at rest</td><td>≈ 200 GB compressed</td><td>Kafka (transient) → kdb+/ClickHouse → Parquet</td></tr>
+      <tr><td>Intraday ticks (3 vendors, raw)</td><td>≈ 66 M</td><td>≈ 6 GB Avro on the bus</td><td>—</td><td>Kafka raw topics only; golden merge collapses to 1×</td></tr>
+      <tr><td>1-minute OHLC bars</td><td>100 × 1,200 = 120 K</td><td>≈ 7 MB</td><td>≈ 1.8 GB</td><td>Time-series store + Parquet</td></tr>
+      <tr><td>EOD settlements</td><td>100 (× 3 sources + 1 golden = 400 rows)</td><td>≈ 40 KB</td><td>≈ 10 MB</td><td>Warehouse fact table</td></tr>
+      <tr><td>Forward curves (36 tenors)</td><td>100 × 36 = 3,600 points (× 4 with sources)</td><td>≈ 1.5 MB</td><td>≈ 350 MB</td><td>Warehouse; today's curves also in Redis</td></tr>
+      <tr><td>Validation outcomes / audit</td><td>22 M (one per event if logged in full)</td><td>≈ 1.1 GB if every PASS is logged</td><td>≈ 280 GB</td><td>Log failures + hourly checkpoints, not every pass</td></tr>
+      <tr><td>Quarantined events (0.1 %)</td><td>≈ 22 K</td><td>≈ 8 MB</td><td>≈ 2 GB</td><td>Kafka md.quarantine + Postgres case table</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Component</th><th>Sized for 100 RICs</th><th>Sizing driver</th></tr></thead>
+    <tbody>
+      <tr><td>Kafka</td><td>Peak ≈ 3–5 K msg/s per vendor (≈ 10–15 K with 3 vendors). 7-day retention, RF = 3: ≈ 42 GB (Avro) / ≈ 160 GB (JSON). 12 partitions per raw topic.</td><td>Peak msg/s and retention × replication — not the average</td></tr>
+      <tr><td>Redis hot cache</td><td>100 latest prices × 1 KB + today's curves ≈ 1 MB + reference data ≈ 10 MB. A single small node is over-provisioned.</td><td>Write ops/s (≈ 5 K/s peak) and pub/sub fan-out — never memory at this scale</td></tr>
+      <tr><td>Tick store (kdb+ / ClickHouse)</td><td>≈ 5–6 GB hot (7 d) · ≈ 200 GB / yr · ≈ 2 TB for 10 yrs. Query RAM for one full day in memory ≈ 1–2 GB.</td><td>Years of history retained, compression ratio</td></tr>
+      <tr><td>Warehouse (EOD + curves)</td><td>&lt; 1 GB per year all-in — negligible next to ticks</td><td>Curves × tenors × sources, not time</td></tr>
+      <tr><td>Postgres (reference)</td><td>Tens of MB — instrument master, symbology, calendars, rule config</td><td>Instrument count only</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>How It Scales</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>100 RICs</th><th>1,000 RICs</th><th>10,000 RICs</th></tr></thead>
+    <tbody>
+      <tr><td>Events / day (one vendor)</td><td>≈ 22 M</td><td>≈ 220 M</td><td>≈ 2.2 B</td></tr>
+      <tr><td>Peak msg/s (one vendor)</td><td>3–5 K</td><td>30–50 K</td><td>300–500 K</td></tr>
+      <tr><td>Kafka, 7 d × RF 3 (Avro)</td><td>≈ 42 GB</td><td>≈ 420 GB</td><td>≈ 4.2 TB</td></tr>
+      <tr><td>Tick store per year</td><td>≈ 200 GB</td><td>≈ 2 TB</td><td>≈ 20 TB</td></tr>
+      <tr><td>Redis latest-price set</td><td>≈ 100 KB</td><td>≈ 1 MB</td><td>≈ 10 MB</td></tr>
+      <tr><td>Kafka partitions / raw topic</td><td>12</td><td>48</td><td>100–200</td></tr>
+      <tr><td>Feed handlers per vendor</td><td>1 active-active pair</td><td>2–4 pairs, sharded by instrument</td><td>Dedicated handler tier, multicast-line aware</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-amber">
+    <strong>The two numbers people get wrong</strong>
+    (1) EOD is not the storage problem — 100 curves for 10 years fits on a laptop; tick data is 99 %+ of the bytes. (2) The Kafka cluster is sized by <em>peak</em> message rate and <em>retention × replication</em>, not by average throughput — a 10-minute settlement-window burst at 10× average is what dictates partition count and broker I/O.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+<div class="section page-break" id="s6">
+  <div class="section-num">Section 06</div>
+  <h2 class="section-title">Data Validation Engine</h2>
+  <p class="lead">No price reaches a consumer, a curve build, or the golden-source merge without passing through a rules engine. Design it as a pluggable, configurable pipeline of independent checks — not a monolithic <code>if</code> ladder — so new rules (a new commodity, a new source's quirks) can be added without redeploying the whole pipeline.</p>
+
+  <h3>Validation Categories</h3>
+  <div class="card-grid">
+    <div class="card card-accent"><h4>Schema &amp; type</h4><p>Required fields present, correct types, enum values (currency, unit) are in the known set.</p></div>
+    <div class="card card-accent"><h4>Range / sanity</h4><p>Price within a configurable band vs. last known good value or a static bound (e.g., crude oil futures &gt; -$100 and &lt; $500/bbl).</p></div>
+    <div class="card card-accent"><h4>Spike / outlier detection</h4><p>Move exceeds N standard deviations or N% in one tick — flag, don't necessarily reject (real market gaps happen).</p></div>
+    <div class="card card-accent"><h4>Staleness / timeliness</h4><p>No update received within expected interval for a liquid instrument during market hours → feed-health alert, not a per-tick rejection.</p></div>
+    <div class="card card-accent"><h4>Referential integrity</h4><p>Instrument ID exists in the instrument master; contract hasn't already expired; currency/unit pair is valid for that commodity.</p></div>
+    <div class="card card-accent"><h4>Cross-source reconciliation</h4><p>If two sources report the same instrument, do they agree within tolerance? Disagreement routes to Section 07's golden-source logic.</p></div>
+  </div>
+
+  <h3>Validation &amp; Exception Flow</h3>
+  <div class="svg-diagram"><svg viewBox="0 0 1000 450" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Validation engine flow: an unvalidated canonical event passes through an ordered chain of rule groups, a staleness side-car runs per instrument, and the worst severity routes the event to PASSED, QUARANTINED or REJECTED destinations">
+    <defs><marker id="arrC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8b8ba3"/></marker></defs>
+    <rect x="20" y="110" width="125" height="64" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="82" y="136" text-anchor="middle" class="dt">Canonical event</text>
+    <text x="82" y="156" text-anchor="middle" class="dm">UNVALIDATED</text>
+    <path d="M145 142 L163 142" class="ln" marker-end="url(#arrC)"/>
+    <rect x="165" y="110" width="118" height="64" rx="8" fill="#fff1f2" stroke="#e11d48"/>
+    <text x="224" y="134" text-anchor="middle" class="dt">1 Schema</text>
+    <text x="224" y="150" text-anchor="middle" class="ds">fields, types, enums</text>
+    <text x="224" y="163" text-anchor="middle" class="ds">fail → REJECT</text>
+    <path d="M283 142 L296 142" class="ln" marker-end="url(#arrC)"/>
+    <rect x="298" y="110" width="118" height="64" rx="8" fill="#fff1f2" stroke="#e11d48"/>
+    <text x="357" y="134" text-anchor="middle" class="dt">2 Ref integrity</text>
+    <text x="357" y="150" text-anchor="middle" class="ds">id &amp; unit vs master</text>
+    <text x="357" y="163" text-anchor="middle" class="ds">fail → REJECT</text>
+    <path d="M416 142 L429 142" class="ln" marker-end="url(#arrC)"/>
+    <rect x="431" y="110" width="118" height="64" rx="8" fill="#fffbeb" stroke="#d97706"/>
+    <text x="490" y="134" text-anchor="middle" class="dt">3 Range</text>
+    <text x="490" y="150" text-anchor="middle" class="ds">instrument bounds</text>
+    <text x="490" y="163" text-anchor="middle" class="ds">fail → QUARANTINE</text>
+    <path d="M549 142 L562 142" class="ln" marker-end="url(#arrC)"/>
+    <rect x="564" y="110" width="118" height="64" rx="8" fill="#eef2ff" stroke="#4f46e5"/>
+    <text x="623" y="134" text-anchor="middle" class="dt">4 Spike/outlier</text>
+    <text x="623" y="150" text-anchor="middle" class="ds">tick %, z-score, d/d</text>
+    <text x="623" y="163" text-anchor="middle" class="ds">→ WARN / QUARANTINE</text>
+    <path d="M682 142 L695 142" class="ln" marker-end="url(#arrC)"/>
+    <rect x="697" y="110" width="118" height="64" rx="8" fill="#fff1f2" stroke="#e11d48"/>
+    <text x="756" y="134" text-anchor="middle" class="dt">5 Time &amp; dedupe</text>
+    <text x="756" y="150" text-anchor="middle" class="ds">bad ts → REJECT</text>
+    <text x="756" y="163" text-anchor="middle" class="ds">duplicate → DROP</text>
+    <path d="M815 142 L828 142" class="ln" marker-end="url(#arrC)"/>
+    <rect x="830" y="110" width="118" height="64" rx="8" fill="#fffbeb" stroke="#d97706"/>
+    <text x="889" y="134" text-anchor="middle" class="dt">6 Cross-source</text>
+    <text x="889" y="150" text-anchor="middle" class="ds">agree within tol.?</text>
+    <text x="889" y="163" text-anchor="middle" class="ds">no → QUARANTINE</text>
+    <text x="556" y="200" text-anchor="middle" class="ds">rules run in configured order per commodity class · all results recorded · worst severity decides routing</text>
+    <rect x="165" y="222" width="380" height="46" rx="8" fill="#f0fdfa" stroke="#0d9488" stroke-dasharray="5 4"/>
+    <text x="355" y="242" text-anchor="middle" class="dt">Staleness monitor (side-car timer, per instrument)</text>
+    <text x="355" y="259" text-anchor="middle" class="ds">3× expected gap without update → feed alert, not a rejection</text>
+    <path d="M889 174 L889 312 L642 312" class="ln" marker-end="url(#arrC)"/>
+    <rect x="440" y="290" width="200" height="44" rx="8" fill="#1a1a2e"/>
+    <text x="540" y="317" text-anchor="middle" class="dw">Outcome router</text>
+    <path d="M490 334 L185 372" class="ln" marker-end="url(#arrC)"/>
+    <path d="M540 334 L500 372" class="ln" marker-end="url(#arrC)"/>
+    <path d="M590 334 L815 372" class="ln" marker-end="url(#arrC)"/>
+    <rect x="40" y="374" width="290" height="64" rx="8" fill="#ecfdf5" stroke="#059669"/>
+    <text x="185" y="398" text-anchor="middle" class="dt">PASSED → quality = VALIDATED</text>
+    <text x="185" y="416" text-anchor="middle" class="ds">md.validated → stream processing,</text>
+    <text x="185" y="429" text-anchor="middle" class="ds">write-through to hot cache</text>
+    <rect x="355" y="374" width="290" height="64" rx="8" fill="#fffbeb" stroke="#d97706"/>
+    <text x="500" y="398" text-anchor="middle" class="dt">QUARANTINED</text>
+    <text x="500" y="416" text-anchor="middle" class="ds">md.quarantine → steward UI → approve /</text>
+    <text x="500" y="429" text-anchor="middle" class="ds">correct → re-inject (manually_reviewed=true)</text>
+    <rect x="670" y="374" width="290" height="64" rx="8" fill="#fff1f2" stroke="#e11d48"/>
+    <text x="815" y="398" text-anchor="middle" class="dt">REJECTED</text>
+    <text x="815" y="416" text-anchor="middle" class="ds">dead-letter topic, retained for audit ·</text>
+    <text x="815" y="429" text-anchor="middle" class="ds">rate spike alerts engineering (source change?)</text>
+  </svg></div>
+  <p class="diagram-cap">Figure 4 — Every event is scored by the whole chain; the worst severity decides where it goes, and nothing is ever silently discarded.</p>
+
+  <h3>Rule Engine Design</h3>
+<pre><code>class ValidationRule(ABC):
+    severity: Literal["REJECT", "QUARANTINE", "WARN"]
+
+    @abstractmethod
+    def check(self, event: CanonicalEvent, context: ValidationContext) -> RuleResult: ...
+
+
+class PriceRangeRule(ValidationRule):
+    severity = "QUARANTINE"
+    def check(self, event, context):
+        bounds = context.static_data.price_bounds(event.instrument_id)
+        if not (bounds.min <= event.price <= bounds.max):
+            return RuleResult(passed=False, reason=f"price {event.price} outside [{bounds.min},{bounds.max}]")
+        return RuleResult(passed=True)
+
+
+class SpikeDetectionRule(ValidationRule):
+    severity = "WARN"
+    def check(self, event, context):
+        last = context.last_good_price(event.instrument_id)
+        if last and abs(event.price - last.price) / last.price > context.config.spike_threshold_pct:
+            return RuleResult(passed=False, reason="move exceeds spike threshold", auto_action="FLAG_FOR_REVIEW")
+        return RuleResult(passed=True)
+
+
+class ValidationEngine:
+    def __init__(self, rules: list[ValidationRule]):
+        self.rules = rules                      # order/config-driven, per commodity class
+
+    def validate(self, event: CanonicalEvent, context: ValidationContext) -> ValidationOutcome:
+        results = [rule.check(event, context) for rule in self.rules]
+        failures = [r for r in results if not r.passed]
+        if any(r.severity == "REJECT" for r in failures):
+            return ValidationOutcome(status="REJECTED", event=event, failures=failures)
+        if any(r.severity == "QUARANTINE" for r in failures):
+            return ValidationOutcome(status="QUARANTINED", event=event, failures=failures)
+        return ValidationOutcome(status="PASSED", event=event.with_quality("VALIDATED"), failures=failures)</code></pre>
+
+  <h3>Example Rules Tuned for Commodities</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Rule</th><th>Example</th><th>Why commodities need it specifically</th></tr></thead>
+    <tbody>
+      <tr><td>Negative price allowed (per contract)</td><td>WTI front-month, April 2020: settled at −$37.63</td><td>A naive "price &gt; 0" rule would have rejected a real, critical settlement — bounds must be configurable per instrument, not hardcoded positive</td></tr>
+      <tr><td>Roll/expiry awareness</td><td>Front-month contract expiring tomorrow shows abnormal volume/price behavior</td><td>Prevents a natural roll-driven price jump from being misread as a bad tick</td></tr>
+      <tr><td>Missing EOD after close</td><td>No settlement received 30 minutes after exchange's official close time</td><td>Must alert operations immediately — desks need the settle for margining that night</td></tr>
+      <tr><td>Unit/currency mismatch</td><td>Natural gas reported in USD/MMBtu from one source, USD/therm from another</td><td>Commodities have more unit variety (bbl, MMBtu, MWh, troy oz, bushel) than equities — unit normalization is a first-class validation step, not an afterthought</td></tr>
+      <tr><td>Holiday/calendar check</td><td>Price received for an exchange holiday</td><td>Confirms it's a legitimate off-hours print (e.g., OTC) vs. a stale/erroneous feed replay</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Sample Rule Catalog (config-driven)</h3>
+  <p>Rules live in versioned config, not code. Each has an id, a scope (<code>applies_to</code>), a severity, and parameters — so tightening the crude-oil spike threshold before an OPEC meeting is a config change with an audit trail, not a deployment.</p>
+<pre><code># validation_rules.yaml  (excerpt — engine loads the set matching event.commodity / event_type)
+rules:
+  # ── Schema &amp; structure ─────────────────────────────────────────────
+  - id: SCHEMA_001   name: required-fields        severity: REJECT      applies_to: ALL
+    params: { required: [instrument_id, price, currency, unit, exchange_ts, source] }
+  - id: SCHEMA_002   name: enum-values            severity: REJECT      applies_to: ALL
+    params: { currency: [USD, EUR, GBP], event_type: [TRADE, QUOTE, SETTLE, CURVE_POINT] }
+  - id: UNIT_001     name: unit-matches-master    severity: REJECT      applies_to: ALL
+    params: { compare_to: instrument_master.unit }     # adapter bug if this fires — page engineering
+
+  # ── Referential integrity ──────────────────────────────────────────
+  - id: REF_001      name: instrument-known       severity: REJECT      applies_to: ALL
+  - id: REF_002      name: contract-not-expired   severity: QUARANTINE  applies_to: FUTURE
+    params: { grace_days_after_expiry: 1 }
+  - id: CAL_001      name: exchange-holiday-print severity: WARN        applies_to: [TRADE, SETTLE]
+
+  # ── Range / sanity (per commodity — negative prices are real) ──────
+  - id: RANGE_CL     name: static-bounds          severity: QUARANTINE  applies_to: CRUDE_OIL
+    params: { min: -100.0, max: 500.0 }                # WTI settled at -37.63 on 2020-04-20
+  - id: RANGE_NG     name: static-bounds          severity: QUARANTINE  applies_to: NATURAL_GAS
+    params: { min: -15.0,  max: 100.0 }                # Waha hub prints negative regularly
+  - id: RANGE_PWR    name: static-bounds          severity: QUARANTINE  applies_to: POWER
+    params: { min: -500.0, max: 10000.0 }              # ERCOT Feb-2021 hit the $9,000 cap
+
+  # ── Spike / outlier ────────────────────────────────────────────────
+  - id: SPIKE_001    name: tick-to-tick-move      severity: WARN        applies_to: [TRADE, QUOTE]
+    params: { threshold_pct: 2.0, baseline: last_good_price }
+  - id: SPIKE_002    name: day-over-day-settle    severity: QUARANTINE  applies_to: SETTLE
+    params: { threshold_pct: 15.0, baseline: previous_settle }
+  - id: SPIKE_003    name: rolling-zscore         severity: WARN        applies_to: TRADE
+    params: { lookback: 20d, z: 4.0, skip_if: contract_rolls_within_days(2) }
+
+  # ── Time &amp; duplicates ──────────────────────────────────────────────
+  - id: TIME_001     name: timestamp-sanity       severity: REJECT      applies_to: ALL
+    params: { max_future_skew_s: 5, max_age_h_intraday: 24 }
+  - id: TIME_002     name: out-of-order           severity: WARN        applies_to: [TRADE, QUOTE]
+    params: { action: mark_late_do_not_overwrite_latest }
+  - id: DUP_001      name: duplicate-event        severity: DROP        applies_to: ALL
+    params: { key: [source, source_native_id, exchange_ts, price], window: 10m }
+
+  # ── Timeliness (side-car, per instrument — not per event) ──────────
+  - id: STALE_001    name: feed-heartbeat         severity: ALERT_FEED  applies_to: tier=LIQUID
+    params: { max_gap_multiple: 3, market_hours_only: true }
+  - id: STALE_002    name: eod-missing            severity: ALERT_OPS   applies_to: SETTLE
+    params: { deadline: exchange_close + 30m }
+
+  # ── Cross-source &amp; curves ──────────────────────────────────────────
+  - id: XSRC_001     name: cross-source-tolerance severity: QUARANTINE  applies_to: SETTLE
+    params: { tolerance_pct: 0.05, min_sources: 2 }
+  - id: CURVE_001    name: curve-completeness     severity: QUARANTINE  applies_to: CURVE_POINT
+    params: { scope: whole_curve, require_all_tenors_in: contract_calendar }
+  - id: CURVE_002    name: adjacent-tenor-spread  severity: WARN        applies_to: CURVE_POINT
+    params: { max_spread_pct: 25.0 }                   # calendar-spread sanity, not a hard limit</code></pre>
+
+  <h3>Worked Examples — What Each Rule Catches</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Incoming event</th><th>Rule(s) fired</th><th>Outcome</th><th>What actually happened</th></tr></thead>
+    <tbody>
+      <tr><td>CL Dec-26 trade 78.42 → next tick 78.45</td><td>none</td><td><span class="pill pill-green">PASSED</span></td><td>Normal tick; written through to the hot cache in the same step</td></tr>
+      <tr><td>ZEMA CL settle = <strong>7.84</strong>; CME 78.42, Bloomberg 78.40</td><td>SPIKE_002 (−90 % d/d) · XSRC_001 (sources disagree)</td><td><span class="pill pill-amber">QUARANTINED</span></td><td>Decimal shift in the vendor file; steward rejects the ZEMA row, golden copy uses CME. Bounds alone (RANGE_CL) would <em>not</em> have caught it — 7.84 is "valid"</td></tr>
+      <tr><td>WTI May-20 settle <strong>−37.63</strong> (2020-04-20)</td><td>SPIKE_002 (−306 % d/d)</td><td><span class="pill pill-amber">QUARANTINED → approved</span></td><td>Legitimate. RANGE_CL min −100 passes; steward approves; re-injected with <code>manually_reviewed=true</code>. A hard-coded <code>price &gt; 0</code> rule would have rejected the most important settle of the decade</td></tr>
+      <tr><td>NG tick from Refinitiv in <code>USD_PER_THERM</code>; master says <code>USD_PER_MMBTU</code></td><td>UNIT_001</td><td><span class="pill pill-coral">REJECTED</span></td><td>Adapter normalization bug — a factor-of-10 error would otherwise reach risk. Rejection-rate spike pages engineering</td></tr>
+      <tr><td>Brent tick with <code>exchange_ts</code> 2 min ahead of <code>ingest_ts</code></td><td>TIME_001</td><td><span class="pill pill-coral">REJECTED</span></td><td>Clock skew on a feed handler; dead-lettered, retained, host alerted</td></tr>
+      <tr><td>Same B-PIPE tick replayed after a session reconnect</td><td>DUP_001</td><td><span class="pill pill-blue">DROPPED</span></td><td>Counted, not stored twice — the dedupe key deliberately excludes <code>ingest_ts</code></td></tr>
+      <tr><td>Front-month CL: no update for 45 s at 10:15 ET</td><td>STALE_001</td><td><span class="pill pill-purple">FEED ALERT</span></td><td>Not an event rejection — a feed-health page. Ticks that later arrive are validated normally</td></tr>
+      <tr><td>Brent curve missing the Dec-27 tenor</td><td>CURVE_001</td><td><span class="pill pill-amber">QUARANTINED (whole curve)</span></td><td>A partial curve would silently break interpolation downstream; the entire as-of curve is held, yesterday's stays published</td></tr>
+      <tr><td>CL trade printed on an exchange holiday</td><td>CAL_001</td><td><span class="pill pill-blue">WARN (passed)</span></td><td>Legit OTC print or stale replay? Flagged for the daily quality report, still served</td></tr>
+      <tr><td>Henry Hub settle 2.90 → 3.42 (+18 %) after a hurricane</td><td>SPIKE_002</td><td><span class="pill pill-amber">QUARANTINED → approved in 4 min</span></td><td>Real market move. The 15 % threshold is deliberately tight for settles because a wrong settle is far costlier than a 4-minute review</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- exception workflow is shown in Figure 4 above -->
+
+  <div class="callout callout-rose">
+    <strong>Never silently drop a quarantined price</strong>
+    Every quarantined or rejected event is retained (dead-letter topic + audit log) even if it never reaches consumers. In a regulated market data pipeline, "we discarded a bad tick" must always be reconstructable after the fact — silent drops are an audit failure waiting to happen.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+<div class="section page-break" id="s7">
+  <div class="section-num">Section 07</div>
+  <h2 class="section-title">Golden Source &amp; Multi-Source Reconciliation</h2>
+  <p class="lead">When Bloomberg, Refinitiv, and the exchange all report a price for the same instrument and they disagree — even slightly — something has to decide which one is "the" price. That decision must be config-driven, auditable, and source-agnostic so a new vendor slots in without code changes.</p>
+
+  <h3>Source Priority (Waterfall) Configuration</h3>
+<pre><code># golden_source_config.yaml — adding a new vendor = adding a block here, no code change
+CRUDE_OIL:
+  settlement:
+    priority: [CME_DIRECT, BLOOMBERG, REFINITIV, ZEMA]
+    tolerance_pct: 0.05          # sources within 0.05% are considered "agreeing"
+    on_disagreement: QUARANTINE_FOR_REVIEW
+  intraday:
+    priority: [BLOOMBERG, REFINITIV]
+    tolerance_pct: 0.15
+    on_disagreement: USE_HIGHEST_PRIORITY_AND_FLAG
+
+NATURAL_GAS:
+  settlement:
+    priority: [CME_DIRECT, ZEMA, BLOOMBERG]
+    tolerance_pct: 0.10
+    on_disagreement: QUARANTINE_FOR_REVIEW</code></pre>
+
+  <h3>Conflict Resolution Strategies</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Strategy</th><th>Behavior</th><th>Use when</th></tr></thead>
+    <tbody>
+      <tr><td>Priority waterfall</td><td>Take the highest-priority source present; others are recorded but unused</td><td>One source is authoritative by construction (exchange direct for settlement)</td></tr>
+      <tr><td>Tolerance-gated waterfall</td><td>Use top priority only if within tolerance of the next; else quarantine for human review</td><td>Default for settlement prices — cheap sanity check before trusting the "official" feed blindly</td></tr>
+      <tr><td>Consensus / median</td><td>Take median across all reporting sources</td><td>OTC or illiquid instruments with no single authoritative exchange print</td></tr>
+      <tr><td>Weighted blend</td><td>Volume- or confidence-weighted average</td><td>Rarely needed for exchange-listed futures; more common for benchmark/index construction</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-purple">
+    <strong>Adaptability payoff</strong>
+    Because sources are ranked in config, not code, onboarding a new provider (say, a regional exchange feed for a new commodity) is: (1) write an adapter implementing <code>MarketDataAdapter</code>, Section 03; (2) add symbology mappings; (3) add one YAML block here. The validation engine, storage, and API layers need zero changes — this is the concrete test of "adaptable to integrate different data sources."
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+<div class="section page-break" id="s8">
+  <div class="section-num">Section 08</div>
+  <h2 class="section-title">Data Access APIs &amp; Caching</h2>
+  <p class="lead">Consumers should never query storage tiers directly — a single API layer fronts everything, choosing the right backing store and cache per request shape.</p>
+
+  <h3>API Surface</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>API</th><th>Protocol</th><th>Backs onto</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>Latest price</td><td>REST (low-latency) or gRPC</td><td>Redis hot cache</td><td><code>GET /v1/prices/latest?instrument=CME.CL.2026Z</code></td></tr>
+      <tr><td>Live stream</td><td>WebSocket / gRPC streaming</td><td>Kafka consumer group fanning out to subscribers</td><td><code>SUBSCRIBE md.intraday.ticks?commodity=CRUDE_OIL</code></td></tr>
+      <tr><td>EOD history</td><td>REST</td><td>Warm columnar store (Parquet/warehouse)</td><td><code>GET /v1/eod?instrument=...&amp;from=2026-01-01&amp;to=2026-09-14</code></td></tr>
+      <tr><td>Forward curve</td><td>REST</td><td>Curve materialized view (hot or warm depending on recency)</td><td><code>GET /v1/curves/brent?as_of=2026-09-14</code></td></tr>
+      <tr><td>Bulk export</td><td>Batch file / signed URL</td><td>Cold archive tier</td><td>Nightly regulatory extract, backtesting dataset pull</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Caching Strategy by Endpoint</h3>
+  <div class="svg-diagram"><svg viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cache read and write paths: clients call the API gateway, which reads Redis; a miss falls through to the tick store; the validation engine writes through to Redis and persists to backing stores; EOD and reference reads go to the warehouse and Postgres with long-lived caching">
+    <defs><marker id="arrD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8b8ba3"/></marker></defs>
+    <rect x="400" y="16" width="240" height="54" rx="8" fill="#4f46e5"/>
+    <text x="520" y="39" text-anchor="middle" class="dw">Validation engine (§06)</text>
+    <text x="520" y="57" text-anchor="middle" class="dws">on every VALIDATED event</text>
+    <path d="M510 70 L510 188" class="ln" marker-end="url(#arrD)"/>
+    <text x="518" y="120" class="dm">write-through:</text>
+    <text x="518" y="134" class="dm">SET price:latest:{id}</text>
+    <text x="518" y="148" class="dm">PUBLISH price:stream:{id}</text>
+    <path d="M640 43 L835 43 L835 108" class="ln" marker-end="url(#arrD)"/>
+    <text x="700" y="35" class="ds">persist</text>
+    <rect x="30" y="190" width="130" height="60" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="95" y="215" text-anchor="middle" class="dt">Client</text>
+    <text x="95" y="233" text-anchor="middle" class="ds">desk app · risk svc</text>
+    <path d="M160 220 L208 220" class="ln" marker-end="url(#arrD)"/>
+    <text x="184" y="182" text-anchor="middle" class="dm">GET /v1/prices/latest</text>
+    <rect x="210" y="190" width="150" height="60" rx="8" fill="#ecfdf5" stroke="#059669"/>
+    <text x="285" y="215" text-anchor="middle" class="dt">API gateway</text>
+    <text x="285" y="233" text-anchor="middle" class="ds">authn · entitlements · limits</text>
+    <path d="M360 208 L418 208" class="ln" marker-end="url(#arrD)"/>
+    <path d="M420 232 L362 232" class="ln" marker-end="url(#arrD)"/>
+    <text x="300" y="268" text-anchor="middle" class="ds">hit ≈ 1 ms</text>
+    <rect x="420" y="190" width="180" height="60" rx="8" fill="#fff1f2" stroke="#e11d48"/>
+    <text x="510" y="215" text-anchor="middle" class="dt">Redis hot cache</text>
+    <text x="510" y="233" text-anchor="middle" class="ds">price:latest:{id} · TTL 5 s net</text>
+    <path d="M600 208 L650 208 L650 134 L698 134" class="ln" marker-end="url(#arrD)"/>
+    <text x="656" y="165" class="ds">miss →</text>
+    <text x="656" y="178" class="ds">cache-aside</text>
+    <rect x="700" y="110" width="270" height="48" rx="8" fill="#f0fdfa" stroke="#0d9488"/>
+    <text x="835" y="130" text-anchor="middle" class="dt">kdb+ / ClickHouse</text>
+    <text x="835" y="147" text-anchor="middle" class="ds">ticks &amp; intraday history</text>
+    <rect x="700" y="190" width="270" height="48" rx="8" fill="#eef2ff" stroke="#4f46e5"/>
+    <text x="835" y="210" text-anchor="middle" class="dt">Parquet / Snowflake</text>
+    <text x="835" y="227" text-anchor="middle" class="ds">EOD facts &amp; curves — immutable</text>
+    <rect x="700" y="270" width="270" height="48" rx="8" fill="#f4f3f0" class="bx"/>
+    <text x="835" y="290" text-anchor="middle" class="dt">Postgres</text>
+    <text x="835" y="307" text-anchor="middle" class="ds">reference / instrument master</text>
+    <path d="M360 244 L390 244 L390 330 L660 330 L660 214 L698 214" class="lnd" marker-end="url(#arrD)"/>
+    <text x="500" y="348" text-anchor="middle" class="ds">GET /v1/eod … → warehouse · cached 24 h+ at gateway / CDN (immutable once published)</text>
+    <path d="M700 294 L510 294 L510 252" class="lnd" marker-end="url(#arrD)"/>
+    <text x="590" y="286" text-anchor="middle" class="ds">ref data: long TTL, event-invalidated</text>
+    <text x="500" y="384" text-anchor="middle" class="ds">Hit path ≈ 1–2 ms · miss path adds a tick-store read ≈ 5–20 ms · writes never pass through the API layer</text>
+  </svg></div>
+  <p class="diagram-cap">Figure 5 — Reads go through one gateway and one cache; the validation engine is the only writer, so the cache can never hold an unvalidated price.</p>
+
+<pre><code>def get_latest_price(instrument_id: str) -> Price:
+    cached = redis.get(f"price:latest:{instrument_id}")
+    if cached:
+        return Price.from_json(cached)
+
+    price = timeseries_db.query_latest(instrument_id)   # cache-aside fallback
+    redis.set(f"price:latest:{instrument_id}", price.to_json(), ex=5)  # short TTL safety net
+    return price
+
+# Validation engine writes straight into the cache on every VALIDATED event —
+# this is the primary update path; the 5s TTL above only guards against a
+# missed write, it is not the main freshness mechanism.
+def on_validated_event(event: CanonicalEvent):
+    redis.set(f"price:latest:{event.instrument_id}", event.to_json())
+    redis.publish(f"price:stream:{event.instrument_id}", event.to_json())</code></pre>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Data</th><th>TTL / invalidation</th><th>Reasoning</th></tr></thead>
+    <tbody>
+      <tr><td>Latest intraday price</td><td>Write-through on every tick, short TTL (~5s) as a safety net</td><td>Must never serve a price staler than the last validated tick</td></tr>
+      <tr><td>EOD settlement (published day)</td><td>Immutable once published — cache indefinitely, invalidate only on a rare restatement</td><td>An EOD value for a closed trading day never changes under normal operation</td></tr>
+      <tr><td>Forward curve (today)</td><td>Medium TTL (seconds–minutes) or event-driven invalidation on curve rebuild</td><td>Rebuilding a full curve is more expensive than a single price lookup — worth caching briefly even intraday</td></tr>
+      <tr><td>Reference/static data</td><td>Long TTL, explicit invalidation on instrument-master change events</td><td>Changes rarely, read extremely often — best cache ROI in the whole system</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-green">
+    <strong>Restatement handling</strong>
+    "Immutable" EOD caching still needs an escape hatch: exchanges occasionally restate a settlement. Model this as a new event with a <code>restated_from</code> pointer rather than mutating history in place, and push an explicit cache-invalidation message — this keeps the audit trail (Section 06) intact while still fixing what's served going forward.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 9 ══════════════════════════ -->
+<div class="section page-break" id="s9">
+  <div class="section-num">Section 09</div>
+  <h2 class="section-title">Scalability &amp; Reliability</h2>
+  <p class="lead">Market data platforms fail loudly and expensively when they fail quietly — a missed price is worse than a slow one. Design for horizontal scale on the ingestion side and for observability everywhere.</p>
+
+  <h3>Scaling the Ingestion Layer</h3>
+  <ul class="clean">
+    <li>Run redundant feed handlers per source in active-active pairs — dedupe downstream by <code>(source, source_native_id, exchange_ts)</code>, don't rely on a single handler instance</li>
+    <li>Partition Kafka topics by <code>instrument_id</code> so a hot instrument doesn't starve others, and consumer parallelism scales with partition count</li>
+    <li>Isolate the validation engine as its own scaled consumer group — it's the one component every event must pass through, so it's the natural bottleneck to watch first</li>
+    <li>Separate the EOD batch cluster from the intraday streaming cluster — a slow nightly backfill job should never compete for resources with live tick processing</li>
+  </ul>
+
+  <h3>Operational SLAs (Illustrative)</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Metric</th><th>Target</th><th>Alert condition</th></tr></thead>
+    <tbody>
+      <tr><td>Intraday tick end-to-end latency (source → cache)</td><td>p99 &lt; 250ms</td><td>p99 &gt; 500ms for 2 consecutive minutes</td></tr>
+      <tr><td>Feed heartbeat</td><td>Update within expected interval per instrument during market hours</td><td>No update for 3× expected interval → feed-health page</td></tr>
+      <tr><td>EOD availability</td><td>Settlement published within 30 min of official close</td><td>Missing settle 30 min post-close → operations paged</td></tr>
+      <tr><td>Validation engine rejection rate</td><td>Baseline ±3σ per source</td><td>Sudden spike → likely a source-side schema or feed change, not a market event</td></tr>
+      <tr><td>Golden-source disagreement rate</td><td>&lt; 0.1% of settlement instruments/day</td><td>Sustained rise → investigate a specific vendor's data quality</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-amber">
+    <strong>Disaster recovery for feed connections</strong>
+    Vendor sessions (Bloomberg B-PIPE, Refinitiv Elektron) are stateful and can drop. Design feed handlers to reconnect and resubscribe automatically, and use Kafka's retained log to backfill the gap on reconnect (replay from last committed offset) rather than treating a reconnect as "start fresh" — otherwise a 30-second network blip becomes a silent data gap.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 10 ══════════════════════════ -->
+<div class="section page-break" id="s10">
+  <div class="section-num">Section 10</div>
+  <h2 class="section-title">Interview Questions</h2>
+  <p class="lead">Common system design interview questions for a market data / data-intensive platform role, with the reasoning an interviewer is listening for.</p>
+
+  <h3>"Design a market data system that ingests from multiple vendors and serves both real-time and historical queries."</h3>
+  <p>Lead with the shape, not the tools: a vendor-agnostic adapter layer normalizing to one canonical schema, an append-only event log (Kafka) as the backbone, a validation stage every event passes through before being trusted, and storage tiered by access pattern (hot cache, time-series store, columnar warehouse, cold archive) fronted by a single API layer. Naming Kafka/kdb+/Redis is good, but the interviewer is really testing whether you decouple sources from consumers and whether you have one source of truth for "what actually happened," not two divergent EOD/intraday codepaths.</p>
+
+  <h3>"How do you handle two vendors reporting different prices for the same instrument?"</h3>
+  <p>Config-driven priority waterfall per instrument class, with a tolerance check before blindly trusting the top-priority source, and human-in-the-loop review (data steward queue) when sources disagree beyond tolerance — never silently pick one and discard the disagreement without recording it. Mention the WTI negative-price case if asked why hardcoded bounds are dangerous.</p>
+
+  <h3>"Batch or streaming for end-of-day pricing?"</h3>
+  <p>The strong answer is "neither exclusively" — model EOD as a query over the same streamed, validated event log used intraday (a Kappa-style design), rather than a separate batch pipeline that re-implements validation and normalization. This avoids the classic failure mode where EOD and intraday numbers for the same instrument quietly diverge because they were computed by two different code paths.</p>
+
+  <h3>"How would you add a new data source without disrupting the running system?"</h3>
+  <p>Because sources are isolated behind an adapter interface and referenced only by symbolic priority in config (Section 07), onboarding is: implement the adapter's <code>normalize()</code> method, register symbology mappings, add a priority-config entry. No change to validation, storage, or the API layer — this is the concrete proof point for "the design is adaptable to new sources," which is usually exactly what the interviewer wants to hear you demonstrate, not just claim.</p>
+
+  <h3>"Where would you put caching, and what would you never cache?"</h3>
+  <p>Cache the latest-price lookup (write-through from the validation engine, short TTL as a safety net) and reference/static data (long TTL, event-invalidated) — these dominate read volume. Never cache in a way that could serve a value the validation engine hasn't yet approved, and treat "immutable" EOD caching carefully — build in an explicit invalidation path for the rare settlement restatement rather than assuming history never changes.</p>
+
+  <h3>"Roughly how much data would 100 instruments generate, and what dominates?"</h3>
+  <p>Show your assumptions out loud: ~60 liquid futures at ~5 updates/s over a 20-hour session plus ~40 slow curve points gives ≈ 22 million events/day per vendor — ≈ 2 GB/day on the bus in Avro, &lt; 1 GB/day at rest compressed, ≈ 200 GB/year in the tick store. EOD settlements and 36-tenor curves for the same 100 instruments are under 1 GB per year all-in. Then make the two key points: tick data is &gt; 99 % of the bytes, and Kafka is sized by the settlement-window burst (3–5 K msg/s per vendor) × retention × replication, not by the daily average.</p>
+
+  <h3>Quick-fire Comparison Table</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>Why Kafka over point-to-point feeds?</td><td>Decouples N sources from M consumers; replay/backfill; ordered per-partition log matches "per-instrument order matters" requirement</td></tr>
+      <tr><td>Why not one database for everything?</td><td>Hot lookups, time-range tick queries, and multi-month analytical scans have incompatible optimal storage engines</td></tr>
+      <tr><td>Where does validation run — producer or consumer side?</td><td>As its own consumer stage right after ingestion, before anything else consumes the topic — a single enforcement point</td></tr>
+      <tr><td>How is a new vendor onboarded?</td><td>New adapter class + symbology mapping + config priority entry — no core pipeline changes</td></tr>
+      <tr><td>What guarantees EOD and intraday agree?</td><td>Both are views over the same validated event log, not independently computed values</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-purple">
+    <strong>Follow-up trap: "So intraday and EOD are basically the same pipeline?"</strong>
+    Yes for correctness (same events, same validation, same canonical schema) — no for operations (different SLAs, different scaling profile, different failure tolerance, often different consuming clusters). A strong answer distinguishes "same data model" from "same runtime deployment," which interviewers often use to check you're not oversimplifying.
+  </div>
+
+  <h3>Further Reading</h3>
+  <ul class="clean">
+    <li><a href="https://kafka.apache.org/documentation/" target="_blank">Apache Kafka Documentation</a></li>
+    <li><a href="https://code.kx.com/q/" target="_blank">kdb+/q Documentation (Kx Systems)</a></li>
+    <li><a href="https://www.cmegroup.com/education/market-data.html" target="_blank">CME Group — Market Data Fundamentals</a></li>
+    <li><a href="https://redis.io/docs/latest/develop/use/patterns/" target="_blank">Redis Caching Patterns</a></li>
+  </ul>
+</div>
+
+<div class="footer">Synapse · System Design for Data-Intensive Applications · September 2026</div>
+</div><!-- /container -->
+  </div><!-- /main-scroll -->
+</div><!-- /topic-page -->
+<footer class="guide-footer">Synapse &middot; AI &amp; LLM Engineering</footer>
+<script src="../assets/scroll-top.js"></script>
+</body>
+</html>

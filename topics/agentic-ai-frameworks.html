@@ -246,9 +246,10 @@ body { display: flex; flex-direction: column; }
         <li><a href="#s5"><span class="toc-num">05</span>AutoGen</a></li>
         <li><a href="#s6"><span class="toc-num">06</span>OpenAI Agents SDK</a></li>
         <li><a href="#s7"><span class="toc-num">07</span>Pydantic AI</a></li>
-        <li><a href="#s8"><span class="toc-num">08</span>Agent Memory</a></li>
-        <li><a href="#s9"><span class="toc-num">09</span>Multi-Agent Patterns</a></li>
-        <li><a href="#s10"><span class="toc-num">10</span>Production Agents</a></li>
+        <li><a href="#s8"><span class="toc-num">08</span>Google ADK</a></li>
+        <li><a href="#s9"><span class="toc-num">09</span>Agent Memory</a></li>
+        <li><a href="#s10"><span class="toc-num">10</span>Multi-Agent Patterns</a></li>
+        <li><a href="#s11"><span class="toc-num">11</span>Production Agents</a></li>
       </ul>
     </nav>
   </aside>
@@ -258,7 +259,7 @@ body { display: flex; flex-direction: column; }
 <div class="cover">
   <div class="cover-label">Complete Technical Reference &#8212; May 2026</div>
   <h1>Agentic AI &amp; <span>Frameworks</span></h1>
-  <p class="cover-sub">LangChain, LangGraph, LangSmith, CrewAI, AutoGen, OpenAI Agents SDK, Pydantic AI, ReAct loops, multi-agent orchestration, memory architectures, and production patterns &#8212; the complete agentic AI playbook.</p>
+  <p class="cover-sub">LangChain, LangGraph, LangSmith, CrewAI, AutoGen, OpenAI Agents SDK, Pydantic AI, Google ADK, ReAct loops, multi-agent orchestration, memory architectures, and production patterns &#8212; the complete agentic AI playbook.</p>
   <div class="cover-tags">
     <span class="cover-tag">LangChain</span>
     <span class="cover-tag">LangGraph</span>
@@ -267,6 +268,7 @@ body { display: flex; flex-direction: column; }
     <span class="cover-tag">AutoGen</span>
     <span class="cover-tag">OpenAI Agents SDK</span>
     <span class="cover-tag">Pydantic AI</span>
+    <span class="cover-tag">Google ADK</span>
     <span class="cover-tag">ReAct</span>
     <span class="cover-tag">Multi-Agent</span>
     <span class="cover-tag">Memory</span>
@@ -287,9 +289,10 @@ body { display: flex; flex-direction: column; }
     <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">AutoGen</span></a>
     <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">OpenAI Agents SDK</span></a>
     <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Pydantic AI</span></a>
-    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">Agent Memory</span></a>
-    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">Multi-Agent Patterns</span></a>
-    <a class="toc-item" href="#s10"><span class="toc-num">10</span><span class="toc-label">Production Agents</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">Google ADK</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">Agent Memory</span></a>
+    <a class="toc-item" href="#s10"><span class="toc-num">10</span><span class="toc-label">Multi-Agent Patterns</span></a>
+    <a class="toc-item" href="#s11"><span class="toc-num">11</span><span class="toc-label">Production Agents</span></a>
   </div>
 </div>
 
@@ -1513,6 +1516,176 @@ async def test_company_agent_returns_profile():
 <!-- ════ SECTION 8 ════ -->
 <div class="section page-break" id="s8">
   <div class="section-num">Section 08</div>
+  <h2 class="section-title">Google ADK</h2>
+  <p class="lead">Google's Agent Development Kit (ADK) is an open-source, code-first Python and Java framework for building, evaluating, and deploying multi-agent systems. It is model-agnostic and deployment-agnostic, but is optimised end-to-end for Gemini and the Google Cloud / Vertex AI ecosystem, with native support for the Agent2Agent (A2A) protocol for cross-vendor agent interoperability.</p>
+
+  <h3>ADK Architecture</h3>
+  <div class="fd">
+    <div class="fd-node fd-node-dark" style="min-width:200px">User Input</div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-amber" style="min-width:220px">Runner<sub>drives the agent loop · manages sessions</sub></div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-group" style="width:100%;max-width:560px">
+      <div class="fd-group-title">LlmAgent (name · model · instruction · tools)</div>
+      <div class="fd-row" style="gap:1rem;justify-content:center;flex-wrap:wrap">
+        <div class="fd-col">
+          <div class="fd-node fd-node-green" style="min-width:130px">FunctionTool<sub>typed Python functions</sub></div>
+        </div>
+        <div class="fd-col">
+          <div class="fd-node fd-node-blue" style="min-width:130px">Built-in tools<sub>google_search · code_exec</sub></div>
+        </div>
+        <div class="fd-col">
+          <div class="fd-node fd-node-purple" style="min-width:150px">sub_agents<sub>LLM-driven delegation</sub></div>
+        </div>
+      </div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-row" style="gap:1rem;justify-content:center">
+      <div class="fd-col">
+        <div class="fd-node fd-node-teal" style="min-width:150px">SessionService<sub>state · conversation history</sub></div>
+      </div>
+      <div class="fd-col">
+        <div class="fd-node fd-node-gray" style="min-width:150px">A2A Protocol<sub>cross-framework agent calls</sub></div>
+      </div>
+    </div>
+    <div class="fd-arr-d"></div>
+    <div class="fd-node fd-node-dark" style="min-width:180px">Vertex AI Agent Engine<sub>or Cloud Run / GKE</sub></div>
+  </div>
+
+  <h3>Workflow Agents &#8212; Deterministic Orchestration</h3>
+  <p>Alongside LLM-driven <code>sub_agents</code> delegation, ADK ships three workflow agent types that compose sub-agents with explicit, code-defined control flow rather than leaving routing to the model.</p>
+  <div class="card-grid">
+    <div class="card card-accent">
+      <h4>SequentialAgent</h4>
+      <p>Runs its sub-agents one after another in a fixed order, threading shared session state between steps &#8212; equivalent to a linear pipeline.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>ParallelAgent</h4>
+      <p>Runs its sub-agents concurrently and merges their outputs &#8212; used for fan-out research or independent multi-source lookups.</p>
+    </div>
+    <div class="card card-accent">
+      <h4>LoopAgent</h4>
+      <p>Re-runs its sub-agents repeatedly until a max iteration count or an explicit exit condition is signalled &#8212; used for iterative refinement.</p>
+    </div>
+  </div>
+
+  <h3>Example: LlmAgent with Tools and Sub-Agent Delegation</h3>
+<pre><code>from google.adk.agents import Agent
+from google.adk.tools import google_search
+
+def get_stock_price(ticker: str) -> dict:
+    """Get the current stock price for a given ticker symbol."""
+    # In production: call a financial data API
+    return {"ticker": ticker.upper(), "price": 185.42, "currency": "USD"}
+
+researcher = Agent(
+    name="researcher",
+    model="gemini-2.0-flash",
+    instruction="Research topics thoroughly using google_search and return cited findings.",
+    tools=[google_search],
+)
+
+finance_agent = Agent(
+    name="finance_agent",
+    model="gemini-2.0-flash",
+    instruction="Answer questions about stock prices using get_stock_price.",
+    tools=[get_stock_price],
+)
+
+# Root agent delegates to sub_agents based on the LLM's own routing decision
+root_agent = Agent(
+    name="triage_agent",
+    model="gemini-2.0-flash",
+    instruction=(
+        "Route requests to the right specialist: use researcher for general "
+        "research questions and finance_agent for stock price questions."
+    ),
+    sub_agents=[researcher, finance_agent],
+)</code></pre>
+
+  <h3>Example: SequentialAgent Pipeline</h3>
+<pre><code>from google.adk.agents import Agent, SequentialAgent
+
+outliner = Agent(
+    name="outliner",
+    model="gemini-2.0-flash",
+    instruction="Produce a structured outline for the requested article topic.",
+    output_key="outline",     # written to shared session state
+)
+
+drafter = Agent(
+    name="drafter",
+    model="gemini-2.0-flash",
+    instruction="Write a full draft from the outline in state['outline'].",
+    output_key="draft",
+)
+
+editor = Agent(
+    name="editor",
+    model="gemini-2.0-flash",
+    instruction="Copy-edit the draft in state['draft'] for clarity and tone.",
+    output_key="final_article",
+)
+
+# Runs outliner -> drafter -> editor in strict order, state flows between them
+root_agent = SequentialAgent(
+    name="article_pipeline",
+    sub_agents=[outliner, drafter, editor],
+)</code></pre>
+
+  <h3>Example: Running Locally with the ADK CLI</h3>
+<pre><code># Install
+pip install google-adk
+
+# Scaffold a new agent project
+adk create my_agent_app
+
+# Launch the built-in dev UI (chat + trace inspector) at localhost:8000
+adk web
+
+# Or run headless from the terminal
+adk run my_agent_app
+
+# Evaluate against a golden test-case set
+adk eval my_agent_app my_agent_app/evalset.json
+
+# Deploy to Vertex AI Agent Engine
+adk deploy agent_engine my_agent_app --project=my-gcp-project --region=us-central1</code></pre>
+
+  <h3>Google ADK vs Other Frameworks</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Feature</th><th>Google ADK</th><th>OpenAI Agents SDK</th><th>LangGraph</th><th>CrewAI</th></tr></thead>
+      <tbody>
+        <tr><td>Mental model</td><td>LlmAgent + code-first workflow agents (Sequential/Parallel/Loop)</td><td>Agent + Runner + Handoffs</td><td>Explicit state machine graph</td><td>Role-based crew with tasks</td></tr>
+        <tr><td>Multi-agent</td><td><code>sub_agents</code> for LLM routing, or deterministic workflow agents</td><td>First-class handoffs</td><td>Subgraph nodes + Send() API</td><td>Sequential / hierarchical processes</td></tr>
+        <tr><td>Model support</td><td>Gemini native; any model via LiteLLM wrapper</td><td>OpenAI + OpenAI-compatible endpoints</td><td>Any LangChain-supported model</td><td>Any via LiteLLM</td></tr>
+        <tr><td>Interoperability</td><td>Native Agent2Agent (A2A) protocol &#8212; calls agents built on other frameworks/vendors</td><td>Not built-in</td><td>Not built-in</td><td>Not built-in</td></tr>
+        <tr><td>Tooling</td><td><code>adk web</code> trace/eval UI, <code>adk eval</code> built-in evaluation framework</td><td>Built-in tracing span tree</td><td>Studio (local) via LangSmith</td><td>CrewAI+ dashboard (paid)</td></tr>
+        <tr><td>Deployment</td><td>Vertex AI Agent Engine, Cloud Run, GKE, or self-hosted</td><td>Self-hosted / any Python runtime</td><td>LangGraph Platform or self-hosted</td><td>Self-hosted</td></tr>
+        <tr><td>Best for</td><td>Google Cloud / Gemini-native stacks, cross-framework agent interoperability via A2A</td><td>GPT-4o / o3 backends, fast prototyping</td><td>Complex stateful production workflows</td><td>Content pipelines, team-oriented tasks</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-blue">
+    <strong>A2A Is Transport, ADK Is a Framework &#8212; They Are Complementary</strong>
+    The Agent2Agent (A2A) protocol standardises how agents built on <em>different</em> frameworks discover and call each other over HTTP, independent of any single vendor's SDK. ADK agents can expose themselves as A2A-compliant endpoints and call remote A2A agents as if they were local <code>sub_agents</code>. Use ADK to build an individual agent's internal logic; use A2A when that agent must interoperate with agents built on LangGraph, CrewAI, or a different company's stack entirely.
+  </div>
+
+  <div class="pills">
+    <span class="pill pill-blue">google-adk</span>
+    <span class="pill pill-green">LlmAgent</span>
+    <span class="pill pill-purple">SequentialAgent</span>
+    <span class="pill pill-amber">ParallelAgent</span>
+    <span class="pill pill-teal">LoopAgent</span>
+    <span class="pill pill-coral">Agent2Agent (A2A)</span>
+  </div>
+</div>
+
+<!-- ════ SECTION 9 ════ -->
+<div class="section page-break" id="s9">
+  <div class="section-num">Section 09</div>
   <h2 class="section-title">Agent Memory</h2>
   <p class="lead">Memory is the mechanism by which an agent accumulates, stores, and retrieves information across turns, sessions, and time. Getting memory right is often the difference between a demo that works once and a production system users trust.</p>
 
@@ -1620,9 +1793,9 @@ app = graph.compile(checkpointer=checkpointer)</code></pre>
   </div>
 </div>
 
-<!-- ════ SECTION 9 ════ -->
-<div class="section page-break" id="s9">
-  <div class="section-num">Section 09</div>
+<!-- ════ SECTION 10 ════ -->
+<div class="section page-break" id="s10">
+  <div class="section-num">Section 10</div>
   <h2 class="section-title">Multi-Agent Patterns</h2>
   <p class="lead">Multi-agent systems decompose complex problems across specialised agents. Choosing the right topology before building determines whether your system is maintainable, debuggable, and cost-efficient in production.</p>
 
@@ -1765,9 +1938,9 @@ result = app.invoke({"messages": [HumanMessage(content="Build a web scraper and 
   </div>
 </div>
 
-<!-- ════ SECTION 10 ════ -->
-<div class="section page-break" id="s10">
-  <div class="section-num">Section 10</div>
+<!-- ════ SECTION 11 ════ -->
+<div class="section page-break" id="s11">
+  <div class="section-num">Section 11</div>
   <h2 class="section-title">Production Agents</h2>
   <p class="lead">Running agents in production requires infrastructure that goes far beyond the happy path. Observability, cost controls, retry logic, and graceful degradation are not optional extras &#8212; they are the core of the product.</p>
 
@@ -1887,6 +2060,7 @@ with trace("tool_execution", inputs={"tool": "web_search", "query": "AI agents 2
     <li><a href="https://microsoft.github.io/autogen/" target="_blank" rel="noopener">AutoGen Documentation &#8212; microsoft.github.io/autogen</a></li>
     <li><a href="https://openai.github.io/openai-agents-python/" target="_blank" rel="noopener">OpenAI Agents SDK Documentation &#8212; openai.github.io/openai-agents-python</a></li>
     <li><a href="https://ai.pydantic.dev/" target="_blank" rel="noopener">Pydantic AI Documentation &#8212; ai.pydantic.dev</a></li>
+    <li><a href="https://google.github.io/adk-docs/" target="_blank" rel="noopener">Google ADK Documentation &#8212; google.github.io/adk-docs</a></li>
     <li><a href="https://smith.langchain.com/" target="_blank" rel="noopener">LangSmith &#8212; smith.langchain.com</a></li>
   </ul>
 </div>

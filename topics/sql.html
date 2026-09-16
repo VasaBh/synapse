@@ -725,17 +725,22 @@
             </li>
             <li>
               <a href="#s9"
-                ><span class="toc-num">09</span>Tricky Interview Questions I</a
+                ><span class="toc-num">09</span>Functions, Stored Procedures, Triggers &amp; Views</a
               >
             </li>
             <li>
               <a href="#s10"
-                ><span class="toc-num">10</span>Tricky Interview Questions II</a
+                ><span class="toc-num">10</span>Tricky Interview Questions I</a
               >
             </li>
             <li>
               <a href="#s11"
-                ><span class="toc-num">11</span>Tricky Interview Questions III</a
+                ><span class="toc-num">11</span>Tricky Interview Questions II</a
+              >
+            </li>
+            <li>
+              <a href="#s12"
+                ><span class="toc-num">12</span>Tricky Interview Questions III</a
               >
             </li>
           </ul>
@@ -802,14 +807,18 @@
               >
               <a class="toc-item" href="#s9"
                 ><span class="toc-num">09</span
-                ><span class="toc-label">Tricky Interview Questions I</span></a
+                ><span class="toc-label">Functions, Stored Procedures, Triggers &amp; Views</span></a
               >
               <a class="toc-item" href="#s10"
                 ><span class="toc-num">10</span
-                ><span class="toc-label">Tricky Interview Questions II</span></a
+                ><span class="toc-label">Tricky Interview Questions I</span></a
               >
               <a class="toc-item" href="#s11"
                 ><span class="toc-num">11</span
+                ><span class="toc-label">Tricky Interview Questions II</span></a
+              >
+              <a class="toc-item" href="#s12"
+                ><span class="toc-num">12</span
                 ><span class="toc-label">Tricky Interview Questions III</span></a
               >
             </div>
@@ -1251,9 +1260,65 @@ SELECT * FROM orders WHERE customer_id = 42;
                     <td>Partial index</td>
                     <td>Indexes only rows matching a condition (e.g. <code>WHERE active = true</code>) — smaller, faster for skewed data</td>
                   </tr>
+                  <tr>
+                    <td>Expression / functional index</td>
+                    <td>Indexes the <em>result</em> of an expression (e.g. <code>LOWER(email)</code>) so a query filtering on that expression can still seek</td>
+                  </tr>
+                  <tr>
+                    <td>Hash index</td>
+                    <td>O(1) equality lookups only — no range scans, no <code>ORDER BY</code> support; rarely the default choice</td>
+                  </tr>
+                  <tr>
+                    <td>GIN / GiST (Postgres)</td>
+                    <td>Full-text search, JSONB containment (<code>@&gt;</code>), array membership, geometric/range types — not plain B-tree data</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
+
+            <h3>Clustered vs. non-clustered</h3>
+            <div class="two-col">
+              <div class="card card-accent">
+                <h4>Clustered index</h4>
+                <p>The table's rows are physically stored in index-key order — there can be only one per table (it <em>is</em> the table). SQL Server/MySQL InnoDB build one automatically on the primary key. Range scans on the clustering key are extremely fast since matching rows sit next to each other on disk.</p>
+              </div>
+              <div class="card card-accent">
+                <h4>Non-clustered (secondary) index</h4>
+                <p>A separate structure mapping key values to a row locator (a pointer, or the clustering key itself in InnoDB). A table can have many. Postgres has no clustered storage concept — every index, including the primary key's, is a secondary structure pointing at heap rows.</p>
+              </div>
+            </div>
+
+            <h3>How the B-tree is actually walked</h3>
+            <div class="fd">
+              <div class="fd-node fd-node-dark" style="min-width: 240px">
+                Root page — pick the child range containing the search key
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-blue" style="min-width: 240px">
+                Branch page(s) — narrow the range, one comparison per level
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-green" style="min-width: 240px">
+                Leaf page — holds the key + row pointer (or the row itself, if covering)
+              </div>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--ink3); margin-top: -0.4rem">
+              A B-tree stays balanced and shallow (typically 3–4 levels even
+              for millions of rows), so a seek costs a handful of page reads
+              regardless of table size — the reason an indexed lookup doesn't
+              slow down as a table grows the way a full scan does.
+            </p>
+
+            <h3>Indexes speed up joins too</h3>
+            <p>An index isn't only for <code>WHERE</code> filters — the engine also uses one to satisfy a join's <code>ON</code> condition. Missing an index on a foreign key column is one of the most common causes of a slow join.</p>
+            <pre><code>-- Without an index on orders.customer_id, this join forces a
+-- full scan of orders for every customer (or a hash join that
+-- must first read the entire orders table into memory)
+SELECT c.name, o.order_date
+FROM customers c
+JOIN orders o ON o.customer_id = c.customer_id;
+
+CREATE INDEX idx_orders_customer_id ON orders(customer_id);</code></pre>
 
             <div class="callout callout-amber">
               <strong>Indexes aren't free</strong>
@@ -1361,6 +1426,252 @@ COMMIT;                       -- both updates persist together, or...
           <!-- ══════════════════════════ SECTION 9 ══════════════════════════ -->
           <div class="section page-break" id="s9">
             <div class="section-num">Section 09</div>
+            <h2 class="section-title">Functions, Stored Procedures, Triggers &amp; Views</h2>
+            <p class="lead">
+              Beyond queries, most engines let you push logic <em>into</em> the
+              database — as reusable functions, precompiled procedures, code
+              that reacts to data changes, and named queries that behave like
+              tables. Each trades application-layer flexibility for
+              proximity to the data.
+            </p>
+
+            <h3>Built-in scalar functions</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Examples</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>String</td>
+                    <td><code>CONCAT(a, b)</code>, <code>SUBSTRING(s, 1, 3)</code>, <code>TRIM(s)</code>, <code>UPPER</code>/<code>LOWER</code>, <code>REPLACE(s, 'a', 'b')</code>, <code>LENGTH(s)</code></td>
+                  </tr>
+                  <tr>
+                    <td>Numeric</td>
+                    <td><code>ROUND(x, 2)</code>, <code>CEIL</code>/<code>FLOOR</code>, <code>ABS(x)</code>, <code>MOD(a, b)</code>, <code>POWER(x, y)</code></td>
+                  </tr>
+                  <tr>
+                    <td>Date/time</td>
+                    <td><code>NOW()</code>/<code>CURRENT_DATE</code>, <code>DATE_TRUNC('month', d)</code>, <code>DATEDIFF(d1, d2)</code>, <code>EXTRACT(YEAR FROM d)</code></td>
+                  </tr>
+                  <tr>
+                    <td>Conversion / NULL</td>
+                    <td><code>CAST(x AS INT)</code>, <code>COALESCE(a, b)</code>, <code>NULLIF(a, b)</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>User-Defined Functions (UDFs)</h3>
+            <p>A UDF wraps an expression or query behind a name so it can be reused inside <code>SELECT</code>, <code>WHERE</code>, or a computed column — exactly like a built-in function. Two shapes matter most: <strong>scalar</strong> (returns one value) and <strong>table-valued</strong> (returns a result set you can <code>FROM</code>/<code>JOIN</code>).</p>
+            <pre><code>-- Postgres — scalar function
+CREATE FUNCTION full_name(first TEXT, last TEXT)
+RETURNS TEXT
+LANGUAGE SQL
+IMMUTABLE
+AS $$
+  SELECT first || ' ' || last;
+$$;
+
+SELECT full_name(first_name, last_name) FROM employees;
+
+-- Postgres — table-valued function, usable like a table
+CREATE FUNCTION top_earners(dept INT, n INT)
+RETURNS TABLE(name TEXT, salary NUMERIC)
+LANGUAGE SQL
+AS $$
+  SELECT name, salary FROM employees
+  WHERE dept_id = dept
+  ORDER BY salary DESC
+  LIMIT n;
+$$;
+
+SELECT * FROM top_earners(3, 5);       -- top 5 earners in department 3</code></pre>
+            <div class="callout callout-blue">
+              <strong>IMMUTABLE / STABLE / VOLATILE (Postgres)</strong>
+              Marking a function <code>IMMUTABLE</code> (same input always gives same output, e.g. pure math) lets the planner cache or inline calls and even build an index on the function's result. <code>VOLATILE</code> (default) — e.g. anything reading <code>NOW()</code> or a table — is re-evaluated per row and can't be indexed.
+            </div>
+
+            <h3>Stored Procedures</h3>
+            <p>Unlike a function, a procedure isn't called from inside a query — it's executed directly (<code>CALL</code>), can run multiple statements, control its own transaction (<code>COMMIT</code>/<code>ROLLBACK</code>), and return results via <code>OUT</code> parameters or multiple result sets rather than a single expression value.</p>
+            <pre><code>-- Postgres procedure with IN / OUT parameters and explicit transaction control
+CREATE PROCEDURE transfer_funds(sender INT, receiver INT, amount NUMERIC)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  UPDATE accounts SET balance = balance - amount WHERE id = sender;
+  UPDATE accounts SET balance = balance + amount WHERE id = receiver;
+
+  IF (SELECT balance FROM accounts WHERE id = sender) < 0 THEN
+    RAISE EXCEPTION 'Insufficient funds';
+  END IF;
+
+  COMMIT;
+END;
+$$;
+
+CALL transfer_funds(1, 2, 100);
+
+-- MySQL equivalent shape
+DELIMITER //
+CREATE PROCEDURE GetHeadcount(IN dept_id INT, OUT total INT)
+BEGIN
+  SELECT COUNT(*) INTO total FROM employees WHERE department_id = dept_id;
+END //
+DELIMITER ;
+
+CALL GetHeadcount(3, @count);
+SELECT @count;</code></pre>
+
+            <h3>Functions vs Stored Procedures</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Function (UDF)</th>
+                    <th>Stored Procedure</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Called from</td>
+                    <td>Inside a query (<code>SELECT</code>, <code>WHERE</code>)</td>
+                    <td>Directly (<code>CALL</code> / <code>EXEC</code>), not inside a query</td>
+                  </tr>
+                  <tr>
+                    <td>Returns</td>
+                    <td>A single value or a table</td>
+                    <td><code>OUT</code> params, multiple result sets, or nothing</td>
+                  </tr>
+                  <tr>
+                    <td>Transaction control</td>
+                    <td>No — runs inside the caller's transaction</td>
+                    <td>Yes — can <code>COMMIT</code>/<code>ROLLBACK</code> internally</td>
+                  </tr>
+                  <tr>
+                    <td>Typical use</td>
+                    <td>Reusable computed value or derived table</td>
+                    <td>Multi-step business logic (transfers, batch jobs, ETL steps)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="callout callout-amber">
+              <strong>Push-down logic is a trade-off, not a free win</strong>
+              Stored procedures cut network round-trips and centralize logic close to the data, but they're harder to unit test, version alongside application code, and profile — and they lock you to one engine's procedural dialect (PL/pgSQL, T-SQL, PL/SQL are not portable). Prefer them for logic that must be atomic and fast (fund transfers, bulk recalculation), not as a default home for business rules.
+            </div>
+
+            <h3>Triggers</h3>
+            <p>A trigger is a function that the engine invokes automatically <code>BEFORE</code> or <code>AFTER</code> an <code>INSERT</code>/<code>UPDATE</code>/<code>DELETE</code>, at either <strong>row level</strong> (once per affected row) or <strong>statement level</strong> (once per statement, regardless of row count).</p>
+            <pre><code>-- Postgres: auto-maintain an updated_at column
+CREATE FUNCTION set_updated_at() RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_employees_updated_at
+BEFORE UPDATE ON employees
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
+-- Audit log trigger — AFTER DELETE
+CREATE FUNCTION log_deletion() RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO employees_audit(emp_id, name, deleted_at)
+  VALUES (OLD.emp_id, OLD.name, NOW());
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_employees_audit
+AFTER DELETE ON employees
+FOR EACH ROW
+EXECUTE FUNCTION log_deletion();</code></pre>
+            <div class="fd">
+              <div class="fd-node fd-node-blue" style="min-width: 220px">
+                Statement runs: UPDATE employees ...
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-amber" style="min-width: 220px">
+                BEFORE UPDATE trigger fires<sub>can modify NEW.* before write</sub>
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-dark" style="min-width: 220px">
+                Row is written to the table
+              </div>
+              <div class="fd-arr-d"></div>
+              <div class="fd-node fd-node-green" style="min-width: 220px">
+                AFTER UPDATE trigger fires<sub>e.g. write an audit row — cannot change NEW.*</sub>
+              </div>
+            </div>
+            <div class="callout callout-rose">
+              <strong>Triggers hide control flow</strong>
+              A trigger runs implicitly on every matching write from anywhere — the application, a migration script, an ad-hoc admin query. That makes behavior easy to miss during debugging and can silently cascade (a trigger on table A firing a write on table B that itself has a trigger). Keep trigger logic small, side-effect-obvious (auditing, denormalized-column maintenance), and avoid chaining them for core business rules.
+            </div>
+
+            <h3>Views &amp; Materialized Views</h3>
+            <p>A view is a saved query with a name — it has no storage of its own and always reflects live data. A materialized view stores its result physically and must be refreshed, trading freshness for read speed.</p>
+            <pre><code>-- Regular view — always up to date, adds no storage, re-runs the query every time
+CREATE VIEW active_high_earners AS
+SELECT name, department, salary
+FROM employees
+WHERE salary > 100000 AND status = 'active';
+
+SELECT * FROM active_high_earners WHERE department = 'Engineering';
+
+-- Materialized view — precomputed and stored; fast reads, stale until refreshed
+CREATE MATERIALIZED VIEW dept_avg_salary AS
+SELECT dept_id, AVG(salary) AS avg_salary
+FROM employees
+GROUP BY dept_id;
+
+REFRESH MATERIALIZED VIEW dept_avg_salary;           -- blocks reads during refresh
+REFRESH MATERIALIZED VIEW CONCURRENTLY dept_avg_salary; -- Postgres: no read lock, needs a unique index</code></pre>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>View</th>
+                    <th>Materialized View</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Storage</td>
+                    <td>None — just a stored query</td>
+                    <td>Physical, on disk</td>
+                  </tr>
+                  <tr>
+                    <td>Freshness</td>
+                    <td>Always current</td>
+                    <td>As of last <code>REFRESH</code></td>
+                  </tr>
+                  <tr>
+                    <td>Read speed</td>
+                    <td>Same as running the underlying query</td>
+                    <td>Fast — no recomputation at read time</td>
+                  </tr>
+                  <tr>
+                    <td>Best for</td>
+                    <td>Simplifying/hiding complex joins, access control</td>
+                    <td>Expensive aggregates queried often, dashboards, reports</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ══════════════════════════ SECTION 10 ══════════════════════════ -->
+          <div class="section page-break" id="s10">
+            <div class="section-num">Section 10</div>
             <h2 class="section-title">Tricky Interview Questions I — Ranking &amp; Duplicates</h2>
             <p class="lead">
               Assume a table
@@ -1433,9 +1744,9 @@ JOIN employees mgr ON emp.manager_id = mgr.emp_id
 WHERE emp.salary > mgr.salary;</code></pre>
           </div>
 
-          <!-- ══════════════════════════ SECTION 10 ══════════════════════════ -->
-          <div class="section page-break" id="s10">
-            <div class="section-num">Section 10</div>
+          <!-- ══════════════════════════ SECTION 11 ══════════════════════════ -->
+          <div class="section page-break" id="s11">
+            <div class="section-num">Section 11</div>
             <h2 class="section-title">Tricky Interview Questions II — Sequences &amp; Time</h2>
 
             <h3>Q5. Rising temperature — compare each row to the previous day</h3>
@@ -1510,9 +1821,9 @@ FROM daily_sales
 ORDER BY order_date;</code></pre>
           </div>
 
-          <!-- ══════════════════════════ SECTION 11 ══════════════════════════ -->
-          <div class="section page-break" id="s11">
-            <div class="section-num">Section 11</div>
+          <!-- ══════════════════════════ SECTION 12 ══════════════════════════ -->
+          <div class="section page-break" id="s12">
+            <div class="section-num">Section 12</div>
             <h2 class="section-title">Tricky Interview Questions III — Pivoting &amp; Medians</h2>
 
             <h3>Q9. Pivot rows into columns without a PIVOT operator</h3>

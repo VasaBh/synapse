@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MongoDB — Synapse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e; --ink2: #3d3d5c; --ink3: #6b6b8a;
+  --bg: #ffffff; --bg2: #f4f3f0; --bg3: #eae8e4;
+  --accent: #059669; --accent2: #047857; --accent-bg: #ecfdf5;
+  --green: #059669; --green-bg: #ecfdf5;
+  --amber: #d97706; --amber-bg: #fffbeb;
+  --rose: #e11d48; --rose-bg: #fff1f2;
+  --purple: #7c3aed; --purple-bg: #f5f3ff;
+  --teal: #0d9488; --teal-bg: #f0fdfa;
+  --coral: #ea580c; --coral-bg: #fff7ed;
+  --border: #e2e0dc; --code-bg: #f8f7f5;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body { font-family: var(--sans); color: var(--ink); background: var(--bg); line-height: 1.65; }
+@media print {
+  body { font-size: 10pt; } .no-print { display: none !important; }
+  .page-break { page-break-before: always; } .card { break-inside: avoid; }
+  pre { font-size: 8pt; } h1 { font-size: 22pt; } h2 { font-size: 14pt; }
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+.cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #1a1a2e 100%); color: white; padding: 4rem 2rem; position: relative; overflow: hidden; }
+.cover::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 50%, rgba(5,150,105,0.18) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(16,185,129,0.1) 0%, transparent 50%); }
+.cover * { position: relative; }
+.cover-label { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+.cover h1 { font-family: var(--serif); font-size: 3.5rem; font-weight: 700; line-height: 1.15; margin-bottom: 1rem; max-width: 700px; }
+.cover h1 span { background: linear-gradient(135deg, #34d399, #6ee7b7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.65); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+.cover-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 650px; }
+.cover-tag { font-family: var(--mono); font-size: 0.7rem; padding: 0.35rem 0.75rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.6); }
+.cover-date { margin-top: 3rem; font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+.toc { padding: 3rem 0; }
+.toc h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--ink); }
+.toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.5rem; }
+.toc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1rem; border-radius: 8px; text-decoration: none; color: var(--ink); transition: background 0.15s; }
+.toc-item:hover { background: var(--bg2); }
+.toc-num { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); font-weight: 600; min-width: 28px; }
+.toc-label { font-size: 0.9rem; }
+.section { padding: 2.5rem 0 1.5rem; border-top: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem; }
+h2.section-title { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); margin-bottom: 0.75rem; line-height: 1.3; }
+h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: var(--ink); margin: 1.5rem 0 0.5rem; }
+h4 { font-size: 0.95rem; font-weight: 600; color: var(--ink2); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.75rem; color: var(--ink2); }
+p.lead { font-size: 1.05rem; color: var(--ink); line-height: 1.7; }
+strong { color: var(--ink); font-weight: 600; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.card-accent { border-left: 3px solid var(--accent); }
+.card h4 { margin: 0 0 0.4rem; font-size: 0.9rem; color: var(--ink); }
+.card p { font-size: 0.82rem; margin: 0; color: var(--ink3); line-height: 1.5; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: var(--ink); color: white; }
+th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; font-size: 0.78rem; letter-spacing: 0.3px; }
+td { padding: 0.6rem 1rem; border-top: 1px solid var(--border); color: var(--ink2); }
+tr:nth-child(even) { background: var(--bg2); }
+td:first-child { font-weight: 500; color: var(--ink); }
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; overflow-x: auto; margin: 0.75rem 0; font-family: var(--mono); font-size: 0.78rem; line-height: 1.6; color: var(--ink2); }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--bg2); padding: 0.15em 0.4em; border-radius: 4px; color: var(--ink); }
+pre code { background: none; padding: 0; }
+.diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem; margin: 1rem 0; font-family: var(--mono); font-size: 0.75rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink2); }
+.callout { border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0; font-size: 0.88rem; }
+.callout-blue { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.callout-green { background: var(--green-bg); border-left: 3px solid var(--green); }
+.callout-amber { background: var(--amber-bg); border-left: 3px solid var(--amber); }
+.callout-rose { background: var(--rose-bg); border-left: 3px solid var(--rose); }
+.callout-purple { background: var(--purple-bg); border-left: 3px solid var(--purple); }
+.callout strong { display: block; margin-bottom: 0.3rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.pill { font-family: var(--mono); font-size: 0.68rem; padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 500; }
+.pill-blue { background: var(--accent-bg); color: var(--accent2); }
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-purple { background: var(--purple-bg); color: var(--purple); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-teal { background: var(--teal-bg); color: var(--teal); }
+.pill-coral { background: var(--coral-bg); color: var(--coral); }
+ul.clean { list-style: none; padding: 0; }
+ul.clean li { padding: 0.3rem 0 0.3rem 1.5rem; position: relative; font-size: 0.9rem; color: var(--ink2); }
+ul.clean li::before { content: ''; position: absolute; left: 0; top: 0.7rem; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1rem 0; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+.sep { height: 1px; background: var(--border); margin: 2rem 0; }
+.footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+.guide-header { background: #1a202c; color: #fff; padding: 0.9rem 1.5rem; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; }
+.guide-header .back-home { color: #a0aec0; text-decoration: none; font-size: 0.82rem; white-space: nowrap; transition: color 0.15s; }
+.guide-header .back-home:hover { color: #fff; }
+.guide-header h1 { font-family: var(--sans); font-size: 1.1rem; font-weight: 600; color: #fff; }
+.topic-page { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 260px; background: #2d3748; color: #e2e8f0; padding: 1.25rem 0 2rem; flex-shrink: 0; overflow-y: auto; }
+.sidebar-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aec0; padding: 0 1.25rem 0.6rem; font-family: var(--sans); }
+.sidebar nav ul { list-style: none; }
+.sidebar nav ul li a { display: block; padding: 0.45rem 1.25rem; color: #cbd5e0; text-decoration: none; font-size: 0.8rem; font-family: var(--sans); line-height: 1.45; transition: background 0.1s, color 0.1s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: #4a5568; color: #fff; }
+.sidebar .toc-num { font-size: 0.65rem; color: #6ee7b7; margin-right: 0.35rem; font-family: var(--mono); }
+.main-scroll { flex: 1; overflow-y: auto; }
+.guide-footer { text-align: center; padding: 0.75rem; color: #718096; font-size: 0.78rem; background: #1a202c; flex-shrink: 0; }
+</style>
+<link rel="stylesheet" href="../assets/mobile.css">
+</head>
+<body>
+
+<header class="guide-header">
+  <a href="../index.html" class="back-home">← Synapse</a>
+  <h1>MongoDB</h1>
+</header>
+
+<div class="topic-page">
+  <aside class="sidebar">
+    <p class="sidebar-title">MongoDB</p>
+    <nav><ul>
+      <li><a href="#s1"><span class="toc-num">01</span>Document Model &amp; BSON</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>CRUD Operations</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>Indexing</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>Aggregation Framework</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>Schema Design Patterns</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>Replication</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>Sharding</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>Transactions &amp; Consistency</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>Interview Questions</a></li>
+    </ul></nav>
+  </aside>
+
+  <div class="main-scroll">
+<div class="cover">
+  <div class="cover-label">Complete Technical Reference — July 2026</div>
+  <h1>Mongo<span>DB</span></h1>
+  <p class="cover-sub">Document modeling, indexing, the aggregation pipeline, schema design patterns, replica sets, sharding, and transactions — with worked queries and interview questions.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">BSON</span>
+    <span class="cover-tag">Aggregation Pipeline</span>
+    <span class="cover-tag">Indexes</span>
+    <span class="cover-tag">Replica Sets</span>
+    <span class="cover-tag">Sharding</span>
+    <span class="cover-tag">Change Streams</span>
+    <span class="cover-tag">ACID Transactions</span>
+    <span class="cover-tag">Atlas</span>
+  </div>
+  <div class="cover-date">v1.0 — Last updated July 2026</div>
+</div>
+
+<div class="container">
+<div class="toc page-break">
+  <h2>Contents</h2>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-label">Document Model &amp; BSON</span></a>
+    <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-label">CRUD Operations</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-label">Indexing</span></a>
+    <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-label">Aggregation Framework</span></a>
+    <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-label">Schema Design Patterns</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-label">Replication</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-label">Sharding</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-label">Transactions &amp; Consistency</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-label">Interview Questions</span></a>
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 1 ══════════════════════════ -->
+<div class="section page-break" id="s1">
+  <div class="section-num">Section 01</div>
+  <h2 class="section-title">Document Model &amp; BSON</h2>
+  <p class="lead">MongoDB stores data as flexible, JSON-like documents encoded in <strong>BSON</strong> (Binary JSON) — a binary-encoded superset of JSON that adds types like dates, binary data, and 64-bit integers, and supports fast traversal and encoding.</p>
+
+  <div class="diagram">┌─────────────────────────────────────────────────────────────┐
+│  MongoDB          →   RDBMS equivalent                       │
+│  Database          →   Database                              │
+│  Collection         →   Table                                 │
+│  Document           →   Row                                   │
+│  Field              →   Column                                │
+│  Embedded document  →   Join (denormalised inline)             │
+│  _id (ObjectId)     →   Primary key                            │
+└─────────────────────────────────────────────────────────────┘</div>
+
+  <h3>A Document</h3>
+<pre><code>{
+  "_id": ObjectId("64f1a2b3c4d5e6f7a8b9c0d1"),
+  "name": "Priya Sharma",
+  "email": "priya@example.com",
+  "age": 29,
+  "tags": ["engineer", "backend"],
+  "address": {
+    "city": "Bengaluru",
+    "zip": "560001"
+  },
+  "createdAt": ISODate("2026-01-15T10:00:00Z")
+}</code></pre>
+
+  <h3>BSON Type Comparison</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Type</th><th>Example</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>ObjectId</td><td><code>ObjectId("64f1...")</code></td><td>12 bytes: 4-byte timestamp + 5-byte random + 3-byte counter. Sortable by creation time.</td></tr>
+      <tr><td>Date</td><td><code>ISODate("2026-...")</code></td><td>Stored as int64 ms since Unix epoch, UTC.</td></tr>
+      <tr><td>Decimal128</td><td><code>NumberDecimal("19.99")</code></td><td>Exact decimal for currency — avoids float rounding errors.</td></tr>
+      <tr><td>Binary</td><td><code>BinData(0, "...")</code></td><td>Raw bytes — files, hashes, encrypted fields.</td></tr>
+      <tr><td>Array</td><td><code>[1, 2, 3]</code></td><td>Ordered list, can hold mixed types, indexable per-element (multikey index).</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-blue">
+    <strong>Schema-flexible, not schemaless</strong>
+    Documents in a collection don't need identical fields, but production systems almost always enforce structure via <strong>JSON Schema validation</strong> (<code>db.createCollection</code> with <code>$jsonSchema</code>) or an ODM like Mongoose. "Flexible schema" means evolving structure without migrations, not "no structure."
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 2 ══════════════════════════ -->
+<div class="section page-break" id="s2">
+  <div class="section-num">Section 02</div>
+  <h2 class="section-title">CRUD Operations</h2>
+  <p class="lead">MongoDB's query API is document-shaped: filters are documents describing conditions, and updates use operators like <code>$set</code> and <code>$inc</code> rather than full-document overwrites.</p>
+
+  <h3>Create &amp; Read</h3>
+<pre><code>// Insert
+db.users.insertOne({ name: "Priya", age: 29, city: "Bengaluru" })
+db.users.insertMany([{ name: "Arjun", age: 34 }, { name: "Mei", age: 27 }])
+
+// Find
+db.users.find({ age: { $gte: 25, $lt: 35 } })
+db.users.find({ city: "Bengaluru" }).sort({ age: -1 }).limit(10).skip(20)
+db.users.findOne({ email: "priya@example.com" })
+
+// Projection — only return name and age
+db.users.find({ age: { $gt: 25 } }, { name: 1, age: 1, _id: 0 })</code></pre>
+
+  <h3>Update &amp; Delete</h3>
+<pre><code>// Update operators
+db.users.updateOne(
+  { _id: ObjectId("64f1...") },
+  { $set: { city: "Mumbai" }, $inc: { loginCount: 1 } }
+)
+db.users.updateMany({ status: "inactive" }, { $set: { archived: true } })
+
+// Array updates
+db.users.updateOne({ _id: id }, { $push: { tags: "senior" } })
+db.users.updateOne({ _id: id }, { $addToSet: { tags: "backend" } }) // no duplicates
+db.users.updateOne({ _id: id }, { $pull: { tags: "junior" } })
+
+// Upsert — insert if no match
+db.users.updateOne({ email: "new@x.com" }, { $set: { visits: 1 } }, { upsert: true })
+
+// Delete
+db.users.deleteOne({ _id: id })
+db.users.deleteMany({ status: "archived" })</code></pre>
+
+  <h3>Common Query Operators</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Operator</th><th>Meaning</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><code>$eq / $ne</code></td><td>equals / not equals</td><td><code>{ status: { $ne: "closed" } }</code></td></tr>
+      <tr><td><code>$gt / $gte / $lt / $lte</code></td><td>range comparisons</td><td><code>{ age: { $gte: 18 } }</code></td></tr>
+      <tr><td><code>$in / $nin</code></td><td>value in / not in list</td><td><code>{ role: { $in: ["admin", "editor"] } }</code></td></tr>
+      <tr><td><code>$and / $or / $nor</code></td><td>logical combinators</td><td><code>{ $or: [{ a: 1 }, { b: 2 }] }</code></td></tr>
+      <tr><td><code>$exists</code></td><td>field presence</td><td><code>{ deletedAt: { $exists: false } }</code></td></tr>
+      <tr><td><code>$elemMatch</code></td><td>array element matches multiple conditions</td><td><code>{ scores: { $elemMatch: { $gt: 80, $lt: 90 } } }</code></td></tr>
+      <tr><td><code>$regex</code></td><td>pattern match (uses index only if anchored)</td><td><code>{ name: { $regex: "^Pri" } }</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-amber">
+    <strong>updateOne vs save vs replaceOne</strong>
+    <code>updateOne</code> with operators patches specific fields — the standard choice. <code>replaceOne</code> overwrites the whole document (loses unlisted fields). Never load-modify-save a full document in high-concurrency code — use atomic operators to avoid lost updates.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 3 ══════════════════════════ -->
+<div class="section page-break" id="s3">
+  <div class="section-num">Section 03</div>
+  <h2 class="section-title">Indexing</h2>
+  <p class="lead">MongoDB indexes are B-trees (like most RDBMSs). Without a supporting index, a query performs a <strong>COLLSCAN</strong> — a full collection scan. Index design is the single highest-leverage performance lever in MongoDB.</p>
+
+  <h3>Index Types</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Type</th><th>Use Case</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>Single field</td><td>Equality/range on one field</td><td><code>db.users.createIndex({ email: 1 })</code></td></tr>
+      <tr><td>Compound</td><td>Queries filtering/sorting on multiple fields</td><td><code>{ city: 1, age: -1 }</code></td></tr>
+      <tr><td>Multikey</td><td>Auto-created when indexing an array field</td><td><code>db.posts.createIndex({ tags: 1 })</code></td></tr>
+      <tr><td>Text</td><td>Full-text search with stemming</td><td><code>db.posts.createIndex({ body: "text" })</code></td></tr>
+      <tr><td>Geospatial (2dsphere)</td><td>Location queries, $near, $geoWithin</td><td><code>db.places.createIndex({ loc: "2dsphere" })</code></td></tr>
+      <tr><td>Wildcard</td><td>Unknown/dynamic field names</td><td><code>db.logs.createIndex({ "metadata.$**": 1 })</code></td></tr>
+      <tr><td>TTL</td><td>Auto-expire documents (sessions, logs)</td><td><code>createIndex({ createdAt: 1 }, { expireAfterSeconds: 3600 })</code></td></tr>
+      <tr><td>Unique</td><td>Enforce uniqueness constraint</td><td><code>createIndex({ email: 1 }, { unique: true })</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>The ESR Rule for Compound Indexes</h3>
+  <div class="diagram">Compound index field order:  Equality → Sort → Range
+
+  Query: find({ status: "active", age: { $gt: 25 } }).sort({ createdAt: -1 })
+
+  Index: { status: 1, createdAt: -1, age: 1 }
+           ↑Equality    ↑Sort         ↑Range
+
+  Equality fields first (narrows most), then sort fields (avoids in-memory
+  sort), then range fields last (range scans can't use fields after them).</div>
+
+  <h3>Explain &amp; Query Diagnostics</h3>
+<pre><code>db.users.find({ city: "Bengaluru", age: { $gt: 25 } })
+  .explain("executionStats")
+
+// Key fields to check:
+// stage: "IXSCAN"  → good, used an index
+// stage: "COLLSCAN" → bad, full scan — add an index
+// totalDocsExamined vs nReturned → close to 1:1 is ideal
+// executionTimeMillis → wall-clock cost</code></pre>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Anti-pattern</th><th>Problem</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td>Index every field</td><td>Slows writes (each index updates on write), wastes RAM</td><td>Index only fields used in filters/sorts on hot queries</td></tr>
+      <tr><td>Leading low-selectivity field</td><td><code>{ isActive: 1, email: 1 }</code> — boolean first is nearly useless</td><td>Put high-cardinality/equality fields first (ESR)</td></tr>
+      <tr><td>Unbounded regex</td><td><code>{ $regex: "sharma" }</code> can't use an index</td><td>Anchor with <code>^</code> or use a text index</td></tr>
+      <tr><td>Ignoring covered queries</td><td>Fetches full document when only indexed fields are needed</td><td>Project only indexed fields → index-only scan, no doc fetch</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-green">
+    <strong>Covered queries</strong>
+    If every field in the query filter and projection is in the index (including <code>_id: 0</code> to exclude it), MongoDB never touches the actual documents — it answers entirely from the index. This is the fastest possible read path.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 4 ══════════════════════════ -->
+<div class="section page-break" id="s4">
+  <div class="section-num">Section 04</div>
+  <h2 class="section-title">Aggregation Framework</h2>
+  <p class="lead">The aggregation pipeline processes documents through a sequence of stages — each stage transforms the stream and passes it to the next, similar to Unix pipes or SQL's <code>GROUP BY</code>/<code>JOIN</code> combined.</p>
+
+  <div class="diagram">Collection
+   │
+   ├─► $match   (filter — push early, uses indexes)
+   ├─► $group   (aggregate — sum, avg, count per key)
+   ├─► $sort    (order results)
+   ├─► $project (reshape output fields)
+   └─► $limit   (cap result size)
+        │
+        ▼
+   Result cursor</div>
+
+  <h3>Worked Example — Orders by Customer</h3>
+<pre><code>db.orders.aggregate([
+  { $match: { status: "completed", orderDate: { $gte: ISODate("2026-01-01") } } },
+  { $group: {
+      _id: "$customerId",
+      totalSpent: { $sum: "$amount" },
+      orderCount: { $sum: 1 },
+      avgOrder:   { $avg: "$amount" }
+  }},
+  { $match: { totalSpent: { $gt: 1000 } } },     // filter on aggregated result
+  { $sort: { totalSpent: -1 } },
+  { $limit: 10 },
+  { $lookup: {                                     // join to another collection
+      from: "customers",
+      localField: "_id",
+      foreignField: "_id",
+      as: "customer"
+  }},
+  { $unwind: "$customer" },
+  { $project: { _id: 0, name: "$customer.name", totalSpent: 1, orderCount: 1 } }
+])</code></pre>
+
+  <h3>Key Stages</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Stage</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>$match</code></td><td>Filters documents — SQL <code>WHERE</code>. Place as early as possible to use indexes.</td></tr>
+      <tr><td><code>$group</code></td><td>Groups by <code>_id</code> expression, computes accumulators (<code>$sum</code>, <code>$avg</code>, <code>$max</code>, <code>$push</code>).</td></tr>
+      <tr><td><code>$lookup</code></td><td>Left outer join to another collection — MongoDB's equivalent of SQL <code>JOIN</code>.</td></tr>
+      <tr><td><code>$unwind</code></td><td>Flattens an array field into one document per element.</td></tr>
+      <tr><td><code>$project</code></td><td>Reshapes documents — include/exclude/compute fields.</td></tr>
+      <tr><td><code>$facet</code></td><td>Runs multiple sub-pipelines in parallel (e.g., results + total count in one round trip).</td></tr>
+      <tr><td><code>$bucket</code></td><td>Groups documents into ranges (histograms).</td></tr>
+      <tr><td><code>$merge / $out</code></td><td>Writes pipeline output to a collection (materialised views).</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-blue">
+    <strong>Pipeline optimisation</strong>
+    The query planner auto-reorders some stages, but you should still hand-place <code>$match</code> and <code>$sort</code> as early as possible and <code>$project</code>/<code>$unwind</code> late — every stage processes the full document stream unless it reduces it first.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 5 ══════════════════════════ -->
+<div class="section page-break" id="s5">
+  <div class="section-num">Section 05</div>
+  <h2 class="section-title">Schema Design Patterns</h2>
+  <p class="lead">MongoDB schema design is driven by <strong>query patterns</strong>, not normalisation rules. The central decision is embed vs. reference — get it wrong and you either bloat documents past the 16MB limit or pay N+1 query costs.</p>
+
+  <h3>Embed vs Reference</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>Embed (nest inside document)</th><th>Reference (separate collection + <code>$lookup</code>)</th></tr></thead>
+    <tbody>
+      <tr><td>Best for</td><td>1:few, data always read together, bounded growth</td><td>1:many/many:many, independently queried, unbounded growth</td></tr>
+      <tr><td>Reads</td><td>Single document fetch — fastest</td><td>Requires <code>$lookup</code> or a second round trip</td></tr>
+      <tr><td>Writes</td><td>Atomic within one document</td><td>Multi-document — needs a transaction for atomicity</td></tr>
+      <tr><td>Risk</td><td>16MB document limit, unbounded array growth</td><td>Extra query cost, data can go stale if denormalised</td></tr>
+      <tr><td>Example</td><td>Blog post + comments (few, always shown together)</td><td>Customer + orders (unbounded, queried independently)</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Common Patterns</h3>
+  <div class="card-grid">
+    <div class="card card-accent"><h4>Subset Pattern</h4><p>Embed only the most recent/relevant N sub-documents (e.g., last 10 reviews) inline; keep the full set in a separate collection.</p></div>
+    <div class="card card-accent"><h4>Bucket Pattern</h4><p>Group time-series readings into fixed-size buckets (e.g., one document per sensor per hour) instead of one document per reading — fewer, larger documents reduce index overhead.</p></div>
+    <div class="card card-accent"><h4>Extended Reference</h4><p>Duplicate a few frequently-read fields (e.g., customer name) into the referencing document to avoid a <code>$lookup</code> on hot paths — accept eventual staleness.</p></div>
+    <div class="card card-accent"><h4>Polymorphic Pattern</h4><p>Store different "shapes" of related entities (e.g., payment types) in one collection with a <code>type</code> discriminator field.</p></div>
+    <div class="card card-accent"><h4>Computed Pattern</h4><p>Pre-compute and store expensive aggregates (e.g., <code>totalViews</code>) instead of recalculating on every read; update via app logic or triggers.</p></div>
+    <div class="card card-accent"><h4>Outlier Pattern</h4><p>Handle rare documents that would break the subset/bucket pattern (a celebrity with 10M followers) with a flag and fallback query path.</p></div>
+  </div>
+
+  <div class="callout callout-rose">
+    <strong>The 16MB document limit</strong>
+    A single BSON document cannot exceed 16MB. Unbounded embedding (e.g., pushing every order into a <code>customer.orders</code> array forever) will eventually hit this wall. Use the Subset or Bucket pattern, or move to references, before that happens.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 6 ══════════════════════════ -->
+<div class="section page-break" id="s6">
+  <div class="section-num">Section 06</div>
+  <h2 class="section-title">Replication</h2>
+  <p class="lead">A MongoDB <strong>replica set</strong> is a group of <code>mongod</code> processes maintaining the same data set, providing high availability and read scaling through automatic failover.</p>
+
+  <div class="diagram">           ┌─────────────┐
+           │   PRIMARY    │  ← accepts all writes
+           │ (mongod #1)  │  ← writes recorded to oplog
+           └──────┬───────┘
+         replicate │ (oplog tailing)
+        ┌──────────┼──────────┐
+        ▼                     ▼
+ ┌─────────────┐      ┌─────────────┐
+ │  SECONDARY   │      │  SECONDARY   │  ← replicate async by default
+ │ (mongod #2)  │      │ (mongod #3)  │  ← can serve reads (readPref)
+ └─────────────┘      └─────────────┘
+
+If PRIMARY fails → remaining members hold an election →
+majority vote elects new PRIMARY (typically <12s failover)</div>
+
+  <h3>Write &amp; Read Concerns</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Write Concern</th><th>Meaning</th><th>Trade-off</th></tr></thead>
+    <tbody>
+      <tr><td><code>{ w: 1 }</code></td><td>Acknowledged by primary only</td><td>Fastest, can lose data on primary crash before replication</td></tr>
+      <tr><td><code>{ w: "majority" }</code></td><td>Acknowledged by majority of voting members</td><td>Default in modern drivers — durable across failover</td></tr>
+      <tr><td><code>{ w: 0 }</code></td><td>Fire-and-forget, no acknowledgment</td><td>Fastest, no durability guarantee at all</td></tr>
+      <tr><td><code>readConcern: "majority"</code></td><td>Reads only see majority-committed data</td><td>Pairs with <code>w: majority</code> for read-your-writes consistency</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Read Preferences</h3>
+  <ul class="clean">
+    <li><code>primary</code> (default) — always read from primary, strongest consistency</li>
+    <li><code>primaryPreferred</code> — primary if available, else a secondary</li>
+    <li><code>secondary</code> — always read from a secondary, scales read throughput, may be stale</li>
+    <li><code>nearest</code> — lowest network latency member, regardless of role</li>
+  </ul>
+
+  <div class="callout callout-amber">
+    <strong>Replication lag is real</strong>
+    Secondaries apply the primary's oplog asynchronously by default. Reading from secondaries under <code>secondary</code> preference can return stale data — never use it for read-your-own-write flows (e.g., "show the order I just placed") unless you also use <code>readConcern: majority</code> with causal consistency sessions.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 7 ══════════════════════════ -->
+<div class="section page-break" id="s7">
+  <div class="section-num">Section 07</div>
+  <h2 class="section-title">Sharding</h2>
+  <p class="lead">Sharding horizontally partitions data across multiple replica sets (shards) so the dataset and write throughput can scale beyond a single machine's capacity.</p>
+
+  <div class="diagram">                     ┌───────────┐
+     App  ─────────► │  mongos    │  (query router — stateless, scale-out)
+                     └─────┬─────┘
+                           │ consults
+                     ┌─────▼─────┐
+                     │ Config     │  (stores chunk → shard mapping)
+                     │ Server RS  │
+                     └───────────┘
+        ┌──────────────────┼──────────────────┐
+        ▼                  ▼                  ▼
+  ┌───────────┐      ┌───────────┐      ┌───────────┐
+  │  Shard 1   │      │  Shard 2   │      │  Shard 3   │  ← each is its own
+  │ (replica   │      │ (replica   │      │ (replica   │     replica set
+  │   set)     │      │   set)     │      │   set)     │
+  └───────────┘      └───────────┘      └───────────┘</div>
+
+  <h3>Shard Key Selection</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Shard Key Property</th><th>Why It Matters</th></tr></thead>
+    <tbody>
+      <tr><td>High cardinality</td><td>Too few distinct values → chunks can't split finely → hot shards</td></tr>
+      <tr><td>Low frequency (even distribution)</td><td>Avoid keys where one value dominates the dataset (e.g., <code>country: "US"</code> for a US-only app)</td></tr>
+      <tr><td>Non-monotonic (or hashed)</td><td>Monotonically increasing keys (timestamps, auto-increment) concentrate all writes on one shard — the "hot shard" problem</td></tr>
+      <tr><td>Matches query pattern</td><td>Queries without the shard key must broadcast (scatter-gather) to every shard — slow</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Hashed vs Ranged Sharding</h3>
+<pre><code>// Ranged — good for range queries, risk of hot shard on monotonic keys
+sh.shardCollection("app.orders", { customerId: 1 })
+
+// Hashed — even write distribution, but loses range-query locality
+sh.shardCollection("app.events", { deviceId: "hashed" })
+
+// Compound — combine a low-cardinality field with a high-cardinality one
+sh.shardCollection("app.orders", { region: 1, orderId: 1 })</code></pre>
+
+  <div class="callout callout-rose">
+    <strong>The classic hot-shard mistake</strong>
+    Sharding a time-series collection on <code>{ timestamp: 1 }</code> sends every new write to whichever shard owns the latest chunk — the other shards sit idle. Use a hashed shard key, or compound with a high-cardinality prefix like <code>deviceId</code>, so writes spread evenly.
+  </div>
+</div>
+
+<!-- ══════════════════════════ SECTION 8 ══════════════════════════ -->
+<div class="section page-break" id="s8">
+  <div class="section-num">Section 08</div>
+  <h2 class="section-title">Transactions &amp; Consistency</h2>
+  <p class="lead">Single-document writes in MongoDB are always ACID-atomic. Multi-document ACID transactions (since v4.0 for replica sets, v4.2 for sharded clusters) exist for the cases where an operation must span more than one document or collection.</p>
+
+  <h3>Multi-document Transaction</h3>
+<pre><code>const session = client.startSession();
+try {
+  session.startTransaction({
+    readConcern: { level: "snapshot" },
+    writeConcern: { w: "majority" }
+  });
+
+  await accounts.updateOne(
+    { _id: "A" }, { $inc: { balance: -100 } }, { session }
+  );
+  await accounts.updateOne(
+    { _id: "B" }, { $inc: { balance: 100 } }, { session }
+  );
+
+  await session.commitTransaction();
+} catch (err) {
+  await session.abortTransaction();
+  throw err;
+} finally {
+  session.endSession();
+}</code></pre>
+
+  <div class="callout callout-green">
+    <strong>Prefer schema design over transactions</strong>
+    Because a single document's write is already atomic, the idiomatic MongoDB fix for "I need atomicity across two things" is usually to embed those two things in one document (Section 05), not to reach for a multi-document transaction. Transactions have real overhead (locking, snapshot retention) — use them for genuinely cross-entity invariants like the ledger transfer above.
+  </div>
+
+  <h3>Change Streams</h3>
+<pre><code>// Real-time, resumable feed of data changes — powers CDC / event-driven apps
+const changeStream = db.collection("orders").watch([
+  { $match: { operationType: { $in: ["insert", "update"] } } }
+]);
+
+changeStream.on("change", (event) => {
+  console.log(event.operationType, event.fullDocument);
+});</code></pre>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Concept</th><th>Guarantee</th></tr></thead>
+    <tbody>
+      <tr><td>Single-document write</td><td>Always atomic, even across nested fields/arrays</td></tr>
+      <tr><td>Multi-document transaction</td><td>ACID — snapshot isolation, all-or-nothing commit</td></tr>
+      <tr><td>Change streams</td><td>At-least-once delivery, resumable via <code>resumeToken</code>, ordered per shard</td></tr>
+      <tr><td>Causal consistency</td><td>Session-scoped — guarantees read-your-own-writes across a session</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- ══════════════════════════ SECTION 9 ══════════════════════════ -->
+<div class="section page-break" id="s9">
+  <div class="section-num">Section 09</div>
+  <h2 class="section-title">Interview Questions</h2>
+  <p class="lead">Frequently asked MongoDB interview questions, with the reasoning an interviewer is actually listening for.</p>
+
+  <h3>"When would you choose MongoDB over a relational database?"</h3>
+  <p>When the data is naturally document-shaped (nested, variable structure), when you need horizontal write scaling via sharding, when schema evolves rapidly (early-stage products), or when read patterns consistently need the same nested data together (avoiding joins). Avoid it when you need complex multi-table joins/reporting, strict cross-entity ACID everywhere, or heavy ad-hoc analytical querying — an RDBMS or warehouse fits better there.</p>
+
+  <h3>"How does MongoDB achieve high availability?"</h3>
+  <p>Replica sets: one primary accepts writes, secondaries replicate via the oplog, and if the primary becomes unreachable the set holds a majority-vote election to promote a new primary — typically under 12 seconds. Combine with <code>w: "majority"</code> write concern so acknowledged writes survive failover.</p>
+
+  <h3>"What's the difference between <code>$lookup</code> and embedding — when do you pick which?"</h3>
+  <p>Embedding is denormalisation for read speed and atomicity within one document, ideal for bounded 1:few relationships read together. <code>$lookup</code> is a runtime join for unbounded or independently-queried relationships. The decision hinges on <strong>access pattern</strong>, not "correctness" — MongoDB has no normal-form obligation.</p>
+
+  <h3>"Explain the ESR rule."</h3>
+  <p>Order compound index fields as Equality → Sort → Range: equality fields narrow the index range first, sort fields let Mongo return results already ordered (avoiding an in-memory sort), and range fields go last because a range scan can't use any indexed field that comes after it.</p>
+
+  <h3>"How would you design a shard key for a multi-tenant SaaS app?"</h3>
+  <p>Prefer a compound key like <code>{ tenantId: 1, _id: 1 }</code> — <code>tenantId</code> gives natural query isolation (queries always filter by tenant, avoiding scatter-gather) and, combined with a high-cardinality suffix, avoids both hot shards and unbounded jumbo chunks from a single huge tenant.</p>
+
+  <h3>Quick-fire Comparison Table</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>Default consistency model</td><td>Strong on primary reads; eventual on secondary reads without majority read concern</td></tr>
+      <tr><td>Max document size</td><td>16 MB</td></tr>
+      <tr><td>Max nesting depth</td><td>100 levels</td></tr>
+      <tr><td>Default write concern (modern drivers)</td><td><code>{ w: "majority" }</code></td></tr>
+      <tr><td>Does MongoDB support joins?</td><td>Yes, via <code>$lookup</code> in aggregation — left outer join semantics only</td></tr>
+      <tr><td>ACID scope</td><td>Single document always; multi-document via explicit transactions since 4.0</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-purple">
+    <strong>Follow-up trap: "Is MongoDB schemaless?"</strong>
+    The honest answer is no — it's <em>schema-flexible</em>. Production systems enforce structure through <code>$jsonSchema</code> validators, an ODM (Mongoose), or application-layer contracts. "Schemaless" as a selling point is a common misconception interviewers like to probe.
+  </div>
+
+  <h3>Further Reading</h3>
+  <ul class="clean">
+    <li><a href="https://www.mongodb.com/docs/manual/core/data-modeling-introduction/" target="_blank">MongoDB Data Modeling Guide</a></li>
+    <li><a href="https://www.mongodb.com/docs/manual/core/aggregation-pipeline/" target="_blank">Aggregation Pipeline Docs</a></li>
+    <li><a href="https://www.mongodb.com/docs/manual/applications/replication/" target="_blank">Replication Docs</a></li>
+    <li><a href="https://www.mongodb.com/docs/manual/sharding/" target="_blank">Sharding Docs</a></li>
+    <li><a href="https://www.mongodb.com/docs/manual/core/transactions/" target="_blank">Multi-document Transactions</a></li>
+  </ul>
+</div>
+
+<div class="footer">Synapse · MongoDB · July 2026</div>
+</div><!-- /container -->
+  </div><!-- /main-scroll -->
+</div><!-- /topic-page -->
+<footer class="guide-footer">Synapse &middot; AI &amp; LLM Engineering</footer>
+<script src="../assets/scroll-top.js"></script>
+</body>
+</html>
